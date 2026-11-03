@@ -21,6 +21,11 @@ eredetihez képest.
   - A jeleket az emulált gép billentyűkombinációjával üti le, az AltGr-eseket
     is (`# & @ [ ] { } < >`...), amelyik a gépen megvan; amihez a gépnek
     nincs billentyűje, azt figyelmen kívül hagyja.
+  - A Spectrum kiterjesztett módú jeleit (`[ ] { } \ | ~` és `©`) időzített
+    billentyűsorozattal üti le (E mód, majd SYMBOL SHIFT + billentyű), a 48K
+    és a 128K szerkesztőjében egyaránt; a közben leütött billentyűk
+    kivárnak, így a gépelés sorrendje megmarad.
+  - A `×` és a `÷` (AltGr a magyar kiosztáson) `*`-ként és `/`-ként megy át.
   - Az ékezetes betűk ékezet nélkül mennek át.
   - A bal Alt és egy számbillentyű SHIFT + azt a számot adja (EDIT, AND,
     THEN, kurzorok, GRAPHICS, RUBOUT...).

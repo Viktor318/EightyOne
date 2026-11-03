@@ -912,6 +912,8 @@ static const struct kbchar CharsZX81[]=
         { '<', 'N', KEYMOD_SHIFT },  { '>', 'M', KEYMOD_SHIFT },
         { ',', KEY_PERIOD, KEYMOD_SHIFT }, { '.', KEY_PERIOD, KEYMOD_NONE },
         { 0x00a3, ' ', KEYMOD_SHIFT },     // pound sign
+        { 0x00d7, 'B', KEYMOD_SHIFT },    // multiplication sign
+        { 0x00f7, 'V', KEYMOD_SHIFT },    // division sign
         { 0, 0, 0 }
 };
 
@@ -926,6 +928,8 @@ static const struct kbchar CharsZX80[]=
         { '<', 'N', KEYMOD_SHIFT },  { '>', 'M', KEYMOD_SHIFT },
         { ',', KEY_PERIOD, KEYMOD_SHIFT }, { '.', KEY_PERIOD, KEYMOD_NONE },
         { 0x00a3, ' ', KEYMOD_SHIFT },     // pound sign
+        { 0x00d7, 'P', KEYMOD_SHIFT },    // multiplication sign
+        { 0x00f7, 'V', KEYMOD_SHIFT },    // division sign
         { 0, 0, 0 }
 };
 
@@ -938,6 +942,8 @@ static const struct kbchar CharsLambda[]=
         { '>', 'P', KEYMOD_SHIFT },  { '/', 'H', KEYMOD_SHIFT },
         { '*', 'J', KEYMOD_SHIFT },  { '-', 'K', KEYMOD_SHIFT },
         { '+', 'L', KEYMOD_SHIFT },  { '.', KEY_PERIOD, KEYMOD_NONE },
+        { 0x00d7, 'J', KEYMOD_SHIFT },    // multiplication sign
+        { 0x00f7, 'H', KEYMOD_SHIFT },    // division sign
         { 0, 0, 0 }
 };
 
@@ -956,6 +962,8 @@ static const struct kbchar CharsSpectrum[]=
         { '?', 'C', KEYMOD_SYMBOL }, { '/', 'V', KEYMOD_SYMBOL },
         { '*', 'B', KEYMOD_SYMBOL }, { ',', 'N', KEYMOD_SYMBOL },
         { '.', 'M', KEYMOD_SYMBOL },
+        { 0x00d7, 'B', KEYMOD_SYMBOL },    // multiplication sign
+        { 0x00f7, 'V', KEYMOD_SYMBOL },    // division sign
         { 0, 0, 0 }
 };
 
@@ -979,6 +987,21 @@ static const struct kbchar CharsAce[]=
         { '?', 'C', KEYMOD_SYMBOL }, { '/', 'V', KEYMOD_SYMBOL },
         { '*', 'B', KEYMOD_SYMBOL }, { ',', 'N', KEYMOD_SYMBOL },
         { '.', 'M', KEYMOD_SYMBOL },
+        { 0x00d7, 'B', KEYMOD_SYMBOL },    // multiplication sign
+        { 0x00f7, 'V', KEYMOD_SYMBOL },    // division sign
+        { 0, 0, 0 }
+};
+
+// Spectrum symbols of the extended mode: typed as a timed sequence of
+// CAPS SHIFT + SYMBOL SHIFT (E mode), then SYMBOL SHIFT + key. It works in
+// the 48K and the 128K editors alike
+static const struct kbchar CharsSpectrumExtended[]=
+{
+        { '[', 'Y', KEYMOD_SYMBOL }, { ']', 'U', KEYMOD_SYMBOL },
+        { '{', 'F', KEYMOD_SYMBOL }, { '}', 'G', KEYMOD_SYMBOL },
+        { '\\', 'D', KEYMOD_SYMBOL }, { '|', 'S', KEYMOD_SYMBOL },
+        { '~', 'A', KEYMOD_SYMBOL },
+        { 0x00a9, 'P', KEYMOD_SYMBOL },    // copyright sign
         { 0, 0, 0 }
 };
 
@@ -998,20 +1021,44 @@ static const struct
         { 0, 0 }
 };
 
-// Keys held down that were typed as characters, by their Windows key
+// Keys held down that were typed as characters, by their Windows key.
+// Addr1 is NO_KEY if nothing is held for it on the emulated machine (a
+// character it has no key for, or one waiting in the sequence queue)
 struct charkey
 {
         WORD WinKey;
         BYTE Addr1, Data1, Addr2, Data2;
 };
 
+#define NO_KEY 255
+
 #define MAX_CHAR_KEYS 16
 static struct charkey CharKeys[MAX_CHAR_KEYS];
 static int CharKeyCount = 0;
 
+// The timed sequences: characters typed while one runs wait in the queue
+// too, to keep the order of typing
+struct queuedchar
+{
+        struct charkey Keys;
+        bool Extended;
+};
+
+#define QUEUE_SIZE 32
+#define STEP_FRAMES 3   // frames each step of a sequence lasts
+
+static struct queuedchar Queue[QUEUE_SIZE];
+static int QueueStart = 0, QueueCount = 0;
+
+// The step of the sequence at the head of the queue: 0: press CAPS SHIFT +
+// SYMBOL SHIFT (E mode), 1: release them, 2: press the key, 3: release it
+static int QueueStep = 0, QueueStepFrames = 0;
+
 static void ForgetCharKeys()
 {
         CharKeyCount = 0;
+        QueueStart = QueueCount = 0;
+        QueueStep = QueueStepFrames = 0;
 }
 
 static int FindCharKey(WORD winKey)
@@ -1026,14 +1073,16 @@ static int FindCharKey(WORD winKey)
 
 static void ReleaseBits(const struct charkey &k)
 {
+        if (k.Addr1 == NO_KEY) return;
         ZXKeyboard[k.Addr1] &= (BYTE)(~k.Data1);
-        if (k.Addr2 != 255) ZXKeyboard[k.Addr2] &= (BYTE)(~k.Data2);
+        if (k.Addr2 != NO_KEY) ZXKeyboard[k.Addr2] &= (BYTE)(~k.Data2);
 }
 
 static void PressBits(const struct charkey &k)
 {
+        if (k.Addr1 == NO_KEY) return;
         ZXKeyboard[k.Addr1] |= k.Data1;
-        if (k.Addr2 != 255) ZXKeyboard[k.Addr2] |= k.Data2;
+        if (k.Addr2 != NO_KEY) ZXKeyboard[k.Addr2] |= k.Data2;
 }
 
 // Keys still held keep their bits, if another key shared them
@@ -1041,7 +1090,35 @@ static void PressCharKeys()
 {
         int i;
 
+        if (QueueCount) return;         // the sequence owns the keyboard
+
         for (i=0; i<CharKeyCount; i++) PressBits(CharKeys[i]);
+}
+
+// Remember a Windows key as held, with what it holds on the machine
+static void HoldCharKey(const struct charkey &k)
+{
+        int i = FindCharKey(k.WinKey);
+
+        if (i != -1)
+        {
+                // A key repeating may give another character now
+                ReleaseBits(CharKeys[i]);
+                CharKeys[i] = k;
+        }
+        else if (CharKeyCount < MAX_CHAR_KEYS)
+        {
+                CharKeys[CharKeyCount++] = k;
+        }
+}
+
+static void HoldNothing(WORD winKey)
+{
+        struct charkey k;
+
+        k.WinKey = winKey;
+        k.Addr1 = k.Data1 = k.Addr2 = k.Data2 = NO_KEY;
+        HoldCharKey(k);
 }
 
 static bool IsZX81Family()
@@ -1067,7 +1144,7 @@ static bool FindKeyPosition(char key, BYTE &addr, BYTE &data)
 
         for (i=0; BaseMap[i].WinKey; i++)
         {
-                if (BaseMap[i].Shift == 0 && BaseMap[i].WinKey == (WORD)key
+                if (BaseMap[i].Shift == 0 && BaseMap[i].WinKey == (WORD)(BYTE)key
                         && BaseMap[i].Addr2 == 255)
                 {
                         addr = BaseMap[i].Addr1;
@@ -1079,18 +1156,14 @@ static bool FindKeyPosition(char key, BYTE &addr, BYTE &data)
         return false;
 }
 
-// Press the key of the emulated machine for a Windows key, with the
-// modifier given; the shift of the machine is taken off otherwise
-static void PressCharKey(WORD winKey, char key, BYTE mod)
+// The bits of a key of the emulated machine with a modifier
+static bool MakeCharKey(WORD winKey, char key, BYTE mod, struct charkey &k)
 {
-        struct charkey k;
-        int i;
-
-        if (!FindKeyPosition(key, k.Addr1, k.Data1)) return;
+        if (!FindKeyPosition(key, k.Addr1, k.Data1)) return false;
 
         k.WinKey = winKey;
-        k.Addr2 = 255;
-        k.Data2 = 255;
+        k.Addr2 = NO_KEY;
+        k.Data2 = NO_KEY;
 
         if (mod == KEYMOD_SHIFT)
         {
@@ -1109,24 +1182,56 @@ static void PressCharKey(WORD winKey, char key, BYTE mod)
                         k.Addr2 = kbA8;
                         k.Data2 = kbD1;
                 }
-                else return;
+                else return false;
         }
 
-        // A key repeating may give another character now
-        i = FindCharKey(winKey);
-        if (i != -1)
+        return true;
+}
+
+// Press the key of the emulated machine for a Windows key, with the
+// modifier given; the shift of the machine is taken off otherwise
+static void PressCharKey(WORD winKey, char key, BYTE mod)
+{
+        struct charkey k;
+
+        if (!MakeCharKey(winKey, key, mod, k))
         {
-                ReleaseBits(CharKeys[i]);
-                CharKeys[i] = k;
+                HoldNothing(winKey);
+                return;
         }
-        else if (CharKeyCount < MAX_CHAR_KEYS)
-        {
-                CharKeys[CharKeyCount++] = k;
-        }
+
+        HoldCharKey(k);
 
         // The SHIFT key is on the same place on every machine
         ZXKeyboard[kbA8] &= (BYTE)(~kbD0);
         PressBits(k);
+}
+
+static void QueueCharKey(const struct charkey &k, bool extended)
+{
+        int i;
+
+        if (QueueCount >= QUEUE_SIZE) return;
+
+        Queue[(QueueStart + QueueCount) % QUEUE_SIZE].Keys = k;
+        Queue[(QueueStart + QueueCount) % QUEUE_SIZE].Extended = extended;
+
+        if (QueueCount == 0)
+        {
+                // A sequence starts: the keys typed as characters stop
+                // holding their keys on the machine (they are still held
+                // on the PC)
+                for (i=0; i<CharKeyCount; i++)
+                {
+                        ReleaseBits(CharKeys[i]);
+                        CharKeys[i].Addr1 = NO_KEY;
+                }
+
+                QueueStep = extended ? 0 : 2;
+                QueueStepFrames = 0;
+        }
+
+        QueueCount++;
 }
 
 static const struct kbchar *CharMap()
@@ -1141,12 +1246,32 @@ static const struct kbchar *CharMap()
         }
 }
 
-// Type a character with the key combination of the emulated machine.
-// Returns false if it has none
-static bool TypeChar(WORD winKey, unsigned short c)
+static bool FindChar(const struct kbchar *map, unsigned short c,
+                     char &key, BYTE &mod)
 {
-        const struct kbchar *map;
         int i;
+
+        for (i=0; map[i].Char; i++)
+        {
+                if (map[i].Char == c)
+                {
+                        key = map[i].Key;
+                        mod = map[i].Mod;
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+// The key combination of the emulated machine for a character. Returns
+// false if it has none
+static bool MapChar(unsigned short c, char &key, BYTE &mod, bool &extended)
+{
+        int i;
+
+        extended = false;
+        mod = KEYMOD_NONE;
 
         for (i=0; AccentedLetters[i].Char; i++)
         {
@@ -1157,39 +1282,116 @@ static bool TypeChar(WORD winKey, unsigned short c)
                 }
         }
 
-        if (c >= '0' && c <= '9')
+        if ((c >= '0' && c <= '9') || c == ' ' || c == '\r')
         {
-                PressCharKey(winKey, (char)c, KEYMOD_NONE);
+                key = (char)c;          // VK_SPACE and VK_RETURN too
                 return true;
         }
 
-        // A letter that came from another key than its own (like an
-        // accented one): capitals with SHIFT on the machines that have
-        // lower case letters
+        // Capitals with SHIFT on the machines that have lower case letters
         if (c >= 'a' && c <= 'z')
         {
-                PressCharKey(winKey, (char)(c - 'a' + 'A'), KEYMOD_NONE);
+                key = (char)(c - 'a' + 'A');
                 return true;
         }
 
         if (c >= 'A' && c <= 'Z')
         {
-                PressCharKey(winKey, (char)c,
-                             IsZX81Family() ? KEYMOD_NONE : KEYMOD_SHIFT);
+                key = (char)c;
+                if (!IsZX81Family()) mod = KEYMOD_SHIFT;
                 return true;
         }
 
-        map = CharMap();
-        for (i=0; map[i].Char; i++)
+        if (FindChar(CharMap(), c, key, mod)) return true;
+
+        if (emulator.machine == MACHINESPECTRUM
+                && FindChar(CharsSpectrumExtended, c, key, mod))
         {
-                if (map[i].Char == c)
-                {
-                        PressCharKey(winKey, map[i].Key, map[i].Mod);
-                        return true;
-                }
+                extended = true;
+                return true;
         }
 
         return false;
+}
+
+// Type a character with the key combination of the emulated machine
+static void TypeChar(WORD winKey, unsigned short c)
+{
+        struct charkey k;
+        char key;
+        BYTE mod;
+        bool extended;
+
+        if (!MapChar(c, key, mod, extended)
+                || !MakeCharKey(winKey, key, mod, k))
+        {
+                HoldNothing(winKey);    // ignored
+                return;
+        }
+
+        // Extended mode symbols, and anything typed while a sequence runs,
+        // go through the queue
+        if (extended || QueueCount)
+        {
+                QueueCharKey(k, extended);
+                HoldNothing(winKey);
+                return;
+        }
+
+        PressCharKey(winKey, key, mod);
+}
+
+// Called every frame: the steps of the timed sequences
+void PCKeyFrame()
+{
+        struct queuedchar *q;
+
+        if (!QueueCount) return;
+
+        q = &Queue[QueueStart];
+
+        // The state of the step, every frame in case something else
+        // changed the shifts meanwhile
+        switch (QueueStep)
+        {
+        case 0:
+                ZXKeyboard[kbA8] |= kbD0;
+                ZXKeyboard[kbA15] |= kbD1;
+                break;
+
+        case 2:
+                ZXKeyboard[kbA8] &= (BYTE)(~kbD0);
+                if (emulator.machine == MACHINESPECTRUM)
+                        ZXKeyboard[kbA15] &= (BYTE)(~kbD1);
+                PressBits(q->Keys);
+                break;
+
+        default:
+                if (QueueStep == 3 && QueueStepFrames == 0)
+                        ReleaseBits(q->Keys);
+                ZXKeyboard[kbA8] &= (BYTE)(~kbD0);
+                if (emulator.machine == MACHINESPECTRUM)
+                        ZXKeyboard[kbA15] &= (BYTE)(~kbD1);
+                break;
+        }
+
+        if (++QueueStepFrames < STEP_FRAMES) return;
+
+        QueueStepFrames = 0;
+        if (++QueueStep <= 3) return;
+
+        // This character is done
+        QueueStart = (QueueStart + 1) % QUEUE_SIZE;
+        QueueCount--;
+
+        if (QueueCount)
+        {
+                QueueStep = Queue[QueueStart].Extended ? 0 : 2;
+        }
+        else if (PCShift == 2)
+        {
+                ZXKeyboard[kbA8] |= kbD0;
+        }
 }
 
 // The character of this key press. TranslateMessage() has already posted
@@ -1254,7 +1456,7 @@ static int NumberKeyDigit(WORD key)
 void PCKeyDownWin(WORD key)
 {
         unsigned short c;
-        int digit;
+        int digit, i;
 
         if (!WindowsLayout || (key >= VK_NUMPAD0 && key <= VK_DIVIDE)
                 || key == VK_SHIFT || key == VK_MENU)
@@ -1286,6 +1488,22 @@ void PCKeyDownWin(WORD key)
 
         c = PeekChar();
 
+        // Repeats of a key that holds nothing (queued or ignored)
+        i = FindCharKey(key);
+        if (c && i != -1 && CharKeys[i].Addr1 == NO_KEY)
+        {
+                TakeChar();
+                return;
+        }
+
+        // While a sequence runs, everything typed waits for it
+        if (QueueCount && (c >= 0x20 || c == '\r') && c != 0x7f)
+        {
+                TakeChar();
+                TypeChar(key, c);
+                return;
+        }
+
         // Keys without a character, control characters, space and the
         // letters of their own keys go as before
         if (c < 0x20 || c == ' ' || c == 0x7f
@@ -1311,7 +1529,8 @@ void PCKeyUpWin(WORD key)
                 {
                         ReleaseBits(CharKeys[i]);
                         CharKeys[i] = CharKeys[--CharKeyCount];
-                        if (PCShift == 2) ZXKeyboard[kbA8] |= kbD0;
+                        if (!QueueCount && PCShift == 2)
+                                ZXKeyboard[kbA8] |= kbD0;
                         PressCharKeys();
                         return;
                 }

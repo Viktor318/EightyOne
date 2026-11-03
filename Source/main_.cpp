@@ -2403,6 +2403,7 @@ void __fastcall TForm1::RunFrame()
                 return;
         }
         if (AutoLoadCount) DoAutoLoad();
+        PCKeyFrame();
 
         if (machine.drivebusy != Drive)
         {

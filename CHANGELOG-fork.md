@@ -20,6 +20,11 @@ The changes of the `hungarian-windows` branch, compared with
   - Symbols are typed with the key combination of the emulated machine,
     also the AltGr ones (`# & @ [ ] { } < >`...), where the machine has
     them; characters it has no key for are ignored.
+  - The Spectrum symbols of the extended mode (`[ ] { } \ | ~` and `©`)
+    are typed with a timed key sequence (E mode, then SYMBOL SHIFT + key),
+    in the 48K and the 128K editors alike; keys typed meanwhile wait, so
+    the order of typing is kept.
+  - `×` and `÷` (AltGr on the Hungarian layout) are typed as `*` and `/`.
   - Accented letters are typed without the accent.
   - The left Alt and a number key give SHIFT + that number (EDIT, AND, THEN,
     cursors, GRAPHICS, RUBOUT...).
