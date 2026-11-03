@@ -23,6 +23,7 @@
 
 #include "About_.h"
 #include "zx81config.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -180,24 +181,22 @@ __fastcall TAbout::TAbout(TComponent* Owner)
         bool versionFound = GetVersionNumber(versionNumberMajor, versionNumberMinor, versionNumberPart3, versionNumberPart4);
         if (versionFound)
         {
-                Version->Caption="Version ";
-                Version->Caption = Version->Caption + versionNumberMajor;
-                Version->Caption = Version->Caption + ".";
-                Version->Caption = Version->Caption + versionNumberMinor;
+                AnsiString version;
+
+                version = AnsiString(versionNumberMajor) + "." + AnsiString(versionNumberMinor);
                 if (versionNumberPart3 != 0)
                 {
-                        Version->Caption = Version->Caption + ".";
-                        Version->Caption = Version->Caption + versionNumberPart3;
+                        version = version + "." + AnsiString(versionNumberPart3);
                         if (versionNumberPart4 != 0)
                         {
-                                Version->Caption = Version->Caption + ".";
-                                Version->Caption = Version->Caption + versionNumberPart4;
+                                version = version + "." + AnsiString(versionNumberPart4);
                         }
                 }
+                Version->Caption = TrF("Version {0}", version);
         }
         else
         {
-                Version->Caption = "Unknown";
+                Version->Caption = Tr("Unknown");
         }
 
         MaxWidth(Label1,w); MaxWidth(Label9,w);

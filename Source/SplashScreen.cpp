@@ -20,6 +20,7 @@
 #pragma hdrstop
 
 #include "SplashScreen.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -37,12 +38,12 @@ __fastcall TSplash::TSplash(TComponent* Owner)
 void TSplash::SetProgress(int Max, AnsiString text)
 {
         Progress->Max=Max;
-        Action->Caption="Initialising "+text;
+        Action->Caption=TrF("Initialising {0}...", Tr(text));
 }
 
 void TSplash::IncProgress(AnsiString text)
 {
-        Action->Caption="Initialising "+text+"...";
+        Action->Caption=TrF("Initialising {0}...", Tr(text));
         Progress->Position ++;
         Application->ProcessMessages();
 }

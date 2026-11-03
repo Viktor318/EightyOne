@@ -18,6 +18,7 @@
 
 #include "BasicLoader/IBasicLoader.h"
 #include "BasicLoaderOptions_.h"
+#include "Language.h"
 #include <fstream>
 #include <sstream>
 #include <cctype>
@@ -46,7 +47,7 @@ void IBasicLoader::LoadBasicFile(AnsiString filename, bool tokeniseRemContents, 
                         msg << mLines[index].line.substr(0, displayLen);
                         if (truncateLine) msg << "...";
                 }
-                Application->MessageBox(msg.str().c_str(), "Load BASIC Listing", MB_OK | MB_ICONERROR);
+                Application->MessageBox(msg.str().c_str(), Tr("Load BASIC Listing").c_str(), MB_OK | MB_ICONERROR);
                 return;
         }
 
@@ -66,13 +67,13 @@ void IBasicLoader::LoadBasicFile(AnsiString filename, bool tokeniseRemContents, 
                 catch (exception& ex)
                 {
                         stringstream msg;
-                        msg << "Unable to parse line " << mLines[i].sourceLine << " - " << ex.what() << endl;
+                        msg << TrF("Unable to parse line {0} - {1}", AnsiString(mLines[i].sourceLine), ex.what()).c_str() << endl;
                         msg << endl;
                         bool truncateLine = (mLines[i].line.length() > 256);
                         int displayLen = truncateLine ? 256: mLines[i].line.length();
                         msg << mLines[i].line.substr(0, displayLen);
                         if (truncateLine) msg << "...";
-                        Application->MessageBox(msg.str().c_str(), "Load BASIC Listing", MB_OK | MB_ICONERROR);
+                        Application->MessageBox(msg.str().c_str(), Tr("Load BASIC Listing").c_str(), MB_OK | MB_ICONERROR);
                         return;
                 }
         }
@@ -87,7 +88,7 @@ void IBasicLoader::ReadBasicListingFile(AnsiString filename)
         if (!FileExists(filename))
         {
                 stringstream msg;
-                msg << "File not found:" << endl << endl;
+                msg << Tr("File not found:").c_str() << endl << endl;
                 msg << filename.c_str() << endl;
 
                 throw runtime_error(msg.str());
@@ -97,7 +98,7 @@ void IBasicLoader::ReadBasicListingFile(AnsiString filename)
         if (basicFile.fail())
         {
                 stringstream msg;
-                msg << "Failed to load file:" << endl << endl;
+                msg << Tr("Failed to load file:").c_str() << endl << endl;
                 msg << filename.c_str() << endl;
 
                 throw runtime_error(msg.str());
@@ -159,7 +160,7 @@ void IBasicLoader::ReadBasicListingFile(AnsiString filename)
                 mLines.push_back(entry);
 
                 stringstream msg;
-                msg << "Error reading line " << mLines[mLines.size()-1].sourceLine << " - " << ex.what();
+                msg << TrF("Error reading line {0} - {1}", AnsiString(mLines[mLines.size()-1].sourceLine), ex.what()).c_str();
                 throw runtime_error(msg.str().c_str());
         }
 }
@@ -647,7 +648,7 @@ void IBasicLoader::ExtractZxTokenFormatExtensionByteEncoding(bool zxTokenSupport
                                 ostringstream code;
                                 code << chr1;
                                 code << chr2;
-                                string msg = "Invalid character Code: " + code.str();
+                                string msg = TrF("Invalid character Code: {0}", code.str().c_str()).c_str();
                                 throw invalid_argument(msg.c_str());
                         }
                         
@@ -848,7 +849,7 @@ unsigned char IBasicLoader::ConvertFromHexChars(unsigned char chr1, unsigned cha
                 ostringstream code;
                 code << chr1;
                 code << chr2;
-                string msg = "Invalid character Code: " + code.str();
+                string msg = TrF("Invalid character Code: {0}", code.str().c_str()).c_str();
                 throw invalid_argument(msg.c_str());
         }
         

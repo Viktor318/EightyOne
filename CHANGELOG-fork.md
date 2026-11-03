@@ -7,6 +7,20 @@ The changes of the `hungarian-windows` branch, compared with
 
 ## Unreleased
 
+### Hungarian user interface
+
+- The menus, windows and messages are in **Hungarian** or English:
+  *Options > Language* (Automatic, English, Magyar; Automatic follows the
+  language of Windows). The language can be changed while running.
+- The forms are not changed: their texts are replaced while running from
+  `Translations/hu.tsv` (made into `Source/LanguageHu.cpp` by
+  `Translations/make_table.py`), so the English version stays the same.
+- Snapshots and the settings file keep the English texts of the hardware
+  choices, so they work with either language and with the original
+  EightyOne.
+- Machine and product names and abbreviations (ROM, RAM, NMI, AY...) stay
+  in English.
+
 ### Keyboard
 
 - **Use the Windows keyboard layout** (Options > Keyboard, on by default):

@@ -55,6 +55,7 @@
 #include "spectrum\spec128BasicLister.h"
 #include "zx97config.h"
 #include "SoundForm.h"
+#include "Language.h"
 
 #include <set>
 extern std::set<int> dirtyBird;
@@ -132,8 +133,8 @@ __fastcall THW::THW(TComponent* Owner)
         RamPackHeight         = RamPackBox->Height;
         Machine->ActivePage   = Sinclair;
         Advanced->ActivePage  = Interfaces;
-        DriveAType->ItemIndex = SelectEntry(DriveAType, "3\" Single-Sided (180K)");
-        DriveBType->ItemIndex = SelectEntry(DriveBType, "None");
+        DriveAType->ItemIndex = SelectEntry(DriveAType, Tr("3\" Single-Sided (180K)"));
+        DriveBType->ItemIndex = SelectEntry(DriveBType, Tr("None"));
         ZXCFRAM->ItemIndex    = SelectEntry(ZXCFRAM,    "1024K");
         ZX81BtnClick(NULL);
 
@@ -613,20 +614,20 @@ void THW::ConfigurePrinterCentronicsPort()
         {
                 Form1->PrinterPort->Enabled = true;
                 if (machine.floppytype == FLOPPYOPUSD)
-                        Form1->PrinterPort->Caption = "Opus Printer Port";
+                        Form1->PrinterPort->Caption = Tr("Opus Printer Port");
                 if (machine.floppytype == FLOPPYDISCIPLE)
-                        Form1->PrinterPort->Caption = "DISCiPLE Printer Port";
+                        Form1->PrinterPort->Caption = Tr("DISCiPLE Printer Port");
                 if (machine.floppytype == FLOPPYPLUSD)
-                        Form1->PrinterPort->Caption = "Plus D Printer Port";
+                        Form1->PrinterPort->Caption = Tr("Plus D Printer Port");
                 if (spectrum.model == SPECCYPLUS2A)
-                        Form1->PrinterPort->Caption = "+2A/+3 Printer Port";
+                        Form1->PrinterPort->Caption = Tr("+2A/+3 Printer Port");
                 if (spectrum.model == SPECCYPLUS3)
-                        Form1->PrinterPort->Caption = "+2A/+3 Printer Port";
+                        Form1->PrinterPort->Caption = Tr("+2A/+3 Printer Port");
         }
         else
         {
                 Form1->PrinterPort->Enabled = false;
-                Form1->PrinterPort->Caption = "Centronics Printer Port";
+                Form1->PrinterPort->Caption = Tr("Centronics Printer Port");
         }
 }
 
@@ -690,7 +691,7 @@ void THW::ConfigureRamTop()
 
 void THW::InitialiseSound(bool machineChanged)
 {
-        if (Sound.ReInitialise(NULL, machine.fps, 0, 0, 0)) MessageBox(NULL, "", "Sound Error", 0);
+        if (Sound.ReInitialise(NULL, machine.fps, 0, 0, 0)) MessageBox(NULL, "", Tr("Sound Error").c_str(), 0);
 
         if (machineChanged)
         {
@@ -1134,9 +1135,8 @@ void THW::ConfigureRomCartridge()
                 if (!loadSuccessful)
                 {
                         AnsiString msg;
-                        msg = "Failed to load cartridge file:\n\n";
-                        msg += romCartridgeFilePath;
-                        Application->MessageBox(msg.c_str(), "Error", MB_OK | MB_ICONERROR);
+                        msg = TrF("Failed to load cartridge file:\n\n{0}", romCartridgeFilePath);
+                        Application->MessageBox(msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
 
                         LoadDock((char *)"");
                 }
@@ -1167,7 +1167,7 @@ int THW::DetermineRomCartridgeType(AnsiString cartridgeText, int machine, int sp
         {
                 cartridgeType = ROMCARTRIDGEZXC4;
         }
-        else if (cartridgeText == "Standard 16K")
+        else if (LanguageSame(cartridgeText, "Standard 16K"))
         {
                 cartridgeType = ROMCARTRIDGE16K;
         }
@@ -1589,7 +1589,7 @@ void THW::ConfigureJoystick()
                 InitialiseJoysticks();
         }
 
-        if (JoystickBox->Text != Hwform.JoystickBoxText)
+        if (!LanguageSame(JoystickBox->Text, Hwform.JoystickBoxText))
         {
                 CFGBYTE defaultController = 0;
 
@@ -1907,19 +1907,19 @@ AnsiString THW::DirectSoundError(unsigned int errorCode)
         switch (errorCode)
         {
         case 0x8878000A:
-                errorText = "DSERR_ALLOCATED:\n\nThe request failed because resources, such as a priority level, were already in use by another caller.";
+                errorText = Tr("DSERR_ALLOCATED:\n\nThe request failed because resources, such as a priority level, were already in use by another caller.");
                 break;
         case 0x80070057:
-                errorText = "DSERR_INVALIDPARAM:\n\nAn invalid parameter was passed to the returning function.";
+                errorText = Tr("DSERR_INVALIDPARAM:\n\nAn invalid parameter was passed to the returning function.");
                 break;
         case 0x80040110:
-                errorText = "DSERR_NOAGGREGATION:\n\nThe object does not support aggregation.";
+                errorText = Tr("DSERR_NOAGGREGATION:\n\nThe object does not support aggregation.");
                 break;
         case 0x88780078:
-                errorText = "DSERR_NODRIVER:\n\nNo sound driver is available for use, or the given GUID is not a valid DirectSound device ID.";
+                errorText = Tr("DSERR_NODRIVER:\n\nNo sound driver is available for use, or the given GUID is not a valid DirectSound device ID.");
                 break;
         case 0x00000007:
-                errorText = "DSERR_OUTOFMEMORY:\n\nThe DirectSound subsystem could not allocate sufficient memory to complete the caller's request.";
+                errorText = Tr("DSERR_OUTOFMEMORY:\n\nThe DirectSound subsystem could not allocate sufficient memory to complete the caller's request.");
                 break;
         default:
                 errorText = "0x" + AnsiString::IntToHex(errorCode, 8);
@@ -2073,7 +2073,7 @@ void THW::SetupForZX81(void)
 
         OldFloppy = FDCBox->Items->Strings[FDCBox->ItemIndex];
         while(FDCBox->Items->Count > 1) FDCBox->Items->Delete(FDCBox->Items->Count - 1);
-        FDCBox->Items->Strings[0] = "None";
+        FDCBox->Items->Strings[0] = Tr("None");
         FDCBox->Items->Add("ZX1541");
         FDCBox->Items->Add("Larken");
         FDCBox->ItemIndex = 0;
@@ -2107,19 +2107,19 @@ void THW::SetupForZX81(void)
 
         if ((!HiResBox->Enabled) || (HiResBox->ItemIndex == -1))
         {
-                HiResBox->Items->Strings[0] = "None";
+                HiResBox->Items->Strings[0] = Tr("None");
                 HiResBox->ItemIndex = 0;
         }
         HiResLbl->Enabled = true; HiResBox->Enabled = true;
 
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("Lambda");
         ColourBox->Items->Add("Chroma");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;
         ColourLabel->Enabled = true;
-        ColourLabel->Caption = "Colour:";
+        ColourLabel->Caption = Tr("Colour:");
 
         ProtectROM->Enabled = true;
         NTSC->Enabled = true;
@@ -2145,7 +2145,7 @@ void THW::SetupForZX81(void)
 
         OldIDE = IDEBox->Items->Strings[IDEBox->ItemIndex];
         while(IDEBox->Items->Count) IDEBox->Items->Delete(0);
-        IDEBox->Items->Add("None");
+        IDEBox->Items->Add(Tr("None"));
         IDEBox->Items->Add("MWCFIde");
         IDEBox->ItemIndex = 0;
         IDEBox->Enabled = true;
@@ -2158,7 +2158,7 @@ void THW::SetupForZX81(void)
         }
 
         SoundCardBox->Items->Clear();
-        SoundCardBox->Items->Add("None");
+        SoundCardBox->Items->Add(Tr("None"));
         SoundCardBox->Items->Add("ZON X");
         SoundCardBox->Items->Add("Quicksilva");
         SoundCardBox->ItemIndex = 0;
@@ -2166,7 +2166,7 @@ void THW::SetupForZX81(void)
         SoundCardLbl->Enabled = true;
 
         SpeechBox->Items->Clear();
-        SpeechBox->Items->Add("None");
+        SpeechBox->Items->Add(Tr("None"));
         SpeechBox->Items->Add("The Parrot");
         SpeechBox->Items->Add("Sweet Talker");
         SpeechBox->Items->Add("Mageco");
@@ -2180,7 +2180,7 @@ void THW::SetupForZX81(void)
         SpeechBoxLbl->Enabled = true;
 
         JoystickBox->Items->Clear();
-        JoystickBox->Items->Add("None");
+        JoystickBox->Items->Add(Tr("None"));
         if (NewMachine != MACHINEZX80)
         {
                 JoystickBox->Items->Add("Cursor");
@@ -2222,11 +2222,11 @@ void THW::SetupForZX81(void)
 //        Memotext->Enabled     = Memotext->Checked || (!Z80Assembler->Checked && !Memocalc->Checked);
 
         RomCartridgeBox->Items->Clear();
-        RomCartridgeBox->Items->Add("None");
+        RomCartridgeBox->Items->Add(Tr("None"));
 
         if (NewMachine != MACHINETS1500)
         {
-                RomCartridgeBox->Items->Add("Standard 16K");
+                RomCartridgeBox->Items->Add(Tr("Standard 16K"));
                 RomCartridgeBox->Items->Add("ZXC1");
                 RomCartridgeBox->Items->Add("ZXC2");
                 RomCartridgeBox->Items->Add("ZXC3");
@@ -2245,7 +2245,7 @@ void THW::SetupForZX81(void)
         SetZX80Icon();
         SetSpectrum128Icon();
 
-        Form1->Sound1->Caption = "Video So&und";
+        Form1->Sound1->Caption = Tr("Video So&und");
         const bool zx81 = true;
         MidiForm->SetComputer(zx81);
 }
@@ -2334,7 +2334,7 @@ void THW::SetupForSpectrum(void)
         OldFDC = FDCBox->Items->Strings[FDCBox->ItemIndex];
         while(FDCBox->Items->Count > 1) FDCBox->Items->Delete(FDCBox->Items->Count - 1);
         
-        FDCBox->Items->Strings[0] = "None";
+        FDCBox->Items->Strings[0] = Tr("None");
         FDCBox->Items->Add("ZX Interface 1");
         if (NewSpec != SPECCYTC2068 && NewSpec != SPECCYTS2068)
         {
@@ -2361,7 +2361,7 @@ void THW::SetupForSpectrum(void)
         FDCBoxChange(NULL);
 
         SoundCardBox->Items->Clear();
-        SoundCardBox->Items->Add("None");
+        SoundCardBox->Items->Add(Tr("None"));
         SoundCardBox->ItemIndex = 0;
         SoundCardBox->Enabled = false;
         SoundCardLbl->Enabled = false;
@@ -2380,7 +2380,7 @@ void THW::SetupForSpectrum(void)
         }
 
         SpeechBox->Items->Clear();
-        SpeechBox->Items->Add("None");
+        SpeechBox->Items->Add(Tr("None"));
         SpeechBox->Items->Add("Sweet Talker");
         SpeechBox->Items->Add("dk'tronics");
         SpeechBox->Items->Add("Fuller Orator");
@@ -2390,7 +2390,7 @@ void THW::SetupForSpectrum(void)
         SpeechBoxLbl->Enabled = true;
 
         JoystickBox->Items->Clear();
-        JoystickBox->Items->Add("None");
+        JoystickBox->Items->Add(Tr("None"));
         if (NewSpec != SPECCYTS2068 && NewSpec != SPECCYTC2068)
         {
                 JoystickBox->Items->Add("Cursor (Protek)");
@@ -2450,7 +2450,7 @@ void THW::SetupForSpectrum(void)
         HiResBox->ItemIndex = 0;
         HiResLbl->Enabled = false; HiResBox->Enabled = false;
 
-        ColourLabel->Caption = "Colour:";
+        ColourLabel->Caption = Tr("Colour:");
 
         bool spectraAlreadyAvailable = (ColourBox->Items->Strings[1] == "Spectra");
         if (!spectraAlreadyAvailable)
@@ -2489,7 +2489,7 @@ void THW::SetupForSpectrum(void)
 
         OldIDE = IDEBox->Items->Strings[IDEBox->ItemIndex];
         while(IDEBox->Items->Count) IDEBox->Items->Delete(0);
-        IDEBox->Items->Add("None");
+        IDEBox->Items->Add(Tr("None"));
         IDEBox->Items->Add("Simple +3e 8-Bit");
         IDEBox->Items->Add("divIDE 57 (R Gal)");
         IDEBox->Items->Add("divIDE 57 (R\" Gal)");
@@ -2508,7 +2508,7 @@ void THW::SetupForSpectrum(void)
         uSource->Enabled = true;
 
         RomCartridgeBox->Items->Clear();
-        RomCartridgeBox->Items->Add("None");
+        RomCartridgeBox->Items->Add(Tr("None"));
 
         if (NewSpec != SPECCYTS2068 && NewSpec != SPECCYTC2068)
         {
@@ -2530,7 +2530,7 @@ void THW::SetupForSpectrum(void)
         SetZX80Icon();
         SetSpectrum128Icon();
 
-        Form1->Sound1->Caption = "Beeper So&und";
+        Form1->Sound1->Caption = Tr("Beeper So&und");
         const bool zx81 = false;
         MidiForm->SetComputer(zx81);
 }
@@ -2604,7 +2604,7 @@ void THW::DisplayTotalRam()
                 totalRam = ramPackSupplementsInternalRam ? totalRam + ramPack : ramPack;
         }
         AnsiString ramSize = totalRam;
-        LabelTotalRAM->Caption = "Total RAM: " + ramSize + "K";
+        LabelTotalRAM->Caption = TrF("Total RAM: {0}K", ramSize);
 }
 //---------------------------------------------------------------------------
 
@@ -2709,12 +2709,12 @@ void THW::LoadIdeRomBox()
 
         if (plus3eSupported)
         {
-                if (IDEBox->Items->Strings[IDEBox->ItemIndex] != "None")
+                if (IDEBox->Items->Strings[IDEBox->ItemIndex] != Tr("None"))
                 {
-                        AnsiString required = (IDEBox->Items->Strings[IDEBox->ItemIndex] == "Simple +3e 8-Bit") ? "required" : "supported";
-                        AnsiString disableJumper = (IDEBox->Items->Strings[IDEBox->ItemIndex] == "Simple +3e 8-Bit") ? "" : " Disable the on-board ROM using the jumper.";
-
-                        Plus3eNoticeLabel->Caption = "The +3e ROM is " + required + " by this IDE device. Select an appropriate ROM from the Advanced Settings tab." + disableJumper;
+                        if (IDEBox->Items->Strings[IDEBox->ItemIndex] == "Simple +3e 8-Bit")
+                                Plus3eNoticeLabel->Caption = Tr("The +3e ROM is required by this IDE device. Select an appropriate ROM from the Advanced Settings tab.");
+                        else
+                                Plus3eNoticeLabel->Caption = Tr("The +3e ROM is supported by this IDE device. Select an appropriate ROM from the Advanced Settings tab. Disable the on-board ROM using the jumper.");
                         Plus3eNoticeLabel->Visible = true;
                 }
                 else
@@ -3162,7 +3162,7 @@ void __fastcall THW::TS1000BtnClick(TObject *Sender)
         NewMachineName = TS1000Btn->Caption;
         FloatingPointHardwareFix->Checked = false;
         LoadRomBox();
-        ColourLabel->Caption = "Color:";
+        ColourLabel->Caption = Tr("Color:");
         NTSC->Checked = true;
         IDEBoxChange(NULL);
 
@@ -3184,7 +3184,7 @@ void __fastcall THW::TS1500BtnClick(TObject *Sender)
         NewMachineName = TS1500Btn->Caption;
         FloatingPointHardwareFix->Checked = false;
         LoadRomBox();
-        ColourLabel->Caption = "Color:";
+        ColourLabel->Caption = Tr("Color:");
         NTSC->Checked = true;
 
         IDEBoxChange(NULL);
@@ -3210,7 +3210,7 @@ void __fastcall THW::LambdaBtnClick(TObject *Sender)
         ChrGenBox->Enabled = false;
         ChrGenLbl->Enabled = false;
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("Lambda");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;
@@ -3255,7 +3255,7 @@ void __fastcall THW::R470BtnClick(TObject *Sender)
         EnableLowRAM->Checked = false;
         EnableLowRAM->Enabled = false;
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("Lambda");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;
@@ -3288,7 +3288,7 @@ void __fastcall THW::TK85BtnClick(TObject *Sender)
         LoadRomBox();
         NTSC->Checked = true;
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("Lambda");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;
@@ -3338,24 +3338,24 @@ void __fastcall THW::AceBtnClick(TObject *Sender)
         ChrGenBox->Enabled = false;
         ChrGenLbl->Enabled = false;
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("ETI");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;   
         SpeechBox->Items->Clear();
-        SpeechBox->Items->Add("None");
+        SpeechBox->Items->Add(Tr("None"));
         SpeechBox->ItemIndex = 0;
         SpeechBox->Enabled = false;
         SpeechBoxLbl->Enabled = false;
         SoundCardBox->Items->Clear();
-        SoundCardBox->Items->Add("None");
+        SoundCardBox->Items->Add(Tr("None"));
         SoundCardBox->Items->Add("Ace User");
         SoundCardBox->Items->Add("Boldfield");
         SoundCardBox->ItemIndex = 0;
         SoundCardBox->Enabled = true;
         SoundCardLbl->Enabled = true;
         JoystickBox->Items->Clear();
-        JoystickBox->Items->Add("None");
+        JoystickBox->Items->Add(Tr("None"));
         JoystickBox->Items->Add("Boldfield");
         JoystickBox->Items->Add("Programmable");
         JoystickBox->ItemIndex = 0;
@@ -3377,12 +3377,12 @@ void __fastcall THW::AceBtnClick(TObject *Sender)
         JoystickRightBoxLabel->Enabled = false;
         JoystickFireBoxLabel->Enabled  = false;
         FDCBox->Items->Clear();
-        FDCBox->Items->Add("None");
+        FDCBox->Items->Add(Tr("None"));
         FDCBox->ItemIndex = 0;
         FDCBox->Enabled = false;
         LabelFDC->Enabled = false;
         IDEBox->Items->Clear();
-        IDEBox->Items->Add("None");
+        IDEBox->Items->Add(Tr("None"));
         IDEBox->ItemIndex = 0;
         IDEBox->Enabled = false;
         LabelIDE->Enabled = false;
@@ -3448,7 +3448,7 @@ void __fastcall THW::TC2048BtnClick(TObject *Sender)
         ColourBox->Items->Strings[0] = "Timex";
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = false;
-        ColourLabel->Caption = "Color:";
+        ColourLabel->Caption = Tr("Color:");
         ColourLabel->Enabled = false;
         JoystickBox->ItemIndex = SelectEntry(JoystickBox, "Kempston");
 
@@ -3497,7 +3497,7 @@ void __fastcall THW::TC2068BtnClick(TObject *Sender)
         ColourBox->Items->Strings[0] = "Timex";
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = false;
-        ColourLabel->Caption = "Color:";
+        ColourLabel->Caption = Tr("Color:");
         ColourLabel->Enabled = false;
 
         int index = FindEntry(IDEBox, "Simple +3e 8-Bit");
@@ -3547,7 +3547,7 @@ void __fastcall THW::TS2068BtnClick(TObject *Sender)
         ColourBox->Items->Strings[0] = "Timex";
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = false;
-        ColourLabel->Caption = "Color:";
+        ColourLabel->Caption = Tr("Color:");
         ColourLabel->Enabled = false;
 
         int index = FindEntry(IDEBox, "Simple +3e 8-Bit");
@@ -3584,7 +3584,7 @@ void __fastcall THW::ZX97LEBtnClick(TObject *Sender)
         FloatingPointHardwareFix->Checked = false;
         RamPackBox->Enabled = false;
         ColourBox->Items->Clear();
-        ColourBox->Items->Add("None");
+        ColourBox->Items->Add(Tr("None"));
         ColourBox->Items->Add("Lambda");
         ColourBox->ItemIndex = 0;
         ColourBox->Enabled = true;
@@ -3656,6 +3656,27 @@ void THW::LoadSettings(TIniFile* ini)
 
 void THW::AccessIniFile(TIniFile* ini, IniFileAccessType accessType)
 {
+        // The settings file keeps the English texts of the combo boxes,
+        // whatever the language shown
+        HWFormValues shown = Hwform;
+
+        if (accessType == Write)
+        {
+                Hwform.RamPackBoxText           = LanguageEnglish(Hwform.RamPackBoxText);
+                Hwform.SoundCardBoxText         = LanguageEnglish(Hwform.SoundCardBoxText);
+                Hwform.ChrGenBoxText            = LanguageEnglish(Hwform.ChrGenBoxText);
+                Hwform.HiResBoxText             = LanguageEnglish(Hwform.HiResBoxText);
+                Hwform.ColourBoxText            = LanguageEnglish(Hwform.ColourBoxText);
+                Hwform.SpeechBoxText            = LanguageEnglish(Hwform.SpeechBoxText);
+                Hwform.JoystickBoxText          = LanguageEnglish(Hwform.JoystickBoxText);
+                Hwform.RomCartridgeBoxText      = LanguageEnglish(Hwform.RomCartridgeBoxText);
+                Hwform.ZXC1ConfigurationBoxText = LanguageEnglish(Hwform.ZXC1ConfigurationBoxText);
+                Hwform.FDCBoxText               = LanguageEnglish(Hwform.FDCBoxText);
+                Hwform.DriveATypeText           = LanguageEnglish(Hwform.DriveATypeText);
+                Hwform.DriveBTypeText           = LanguageEnglish(Hwform.DriveBTypeText);
+                Hwform.IDEBoxText               = LanguageEnglish(Hwform.IDEBoxText);
+        }
+
         //---- MACHINE ----
 
         int temp=Top;
@@ -3758,6 +3779,7 @@ void THW::AccessIniFile(TIniFile* ini, IniFileAccessType accessType)
         AccessIniFileInteger(ini, accessType, "ZX97", "b115",       Hwform.ZX97Form.protectb115);
         AccessIniFileInteger(ini, accessType, "ZX97", "SwapRAMROM", Hwform.ZX97Form.bankswitch);
 
+        if (accessType == Write) Hwform = shown;
 }
 
 void THW::WriteNVMemory(BYTE* memory, int size, int count, const char* fileName)
@@ -3811,8 +3833,8 @@ bool THW::BrowseROMFile(AnsiString folder, TComboBox* romBox)
         Path = emulator.cwd;
         Path += folder;
 
-        RomSelect->Title = "Select ROM File";
-        RomSelect->Filter = "ROM Files (*.rom;*.bin)|*.rom;*.bin";
+        RomSelect->Title = Tr("Select ROM File");
+        RomSelect->Filter = Tr("ROM Files (*.rom;*.bin)") + "|*.rom;*.bin";
         RomSelect->InitialDir = Path;
         RomSelect->FileName = romBox->Text;
         if (RomSelect->FileName.Length() == 0 || *(RomSelect->FileName.AnsiLastChar()) == '\\')
@@ -4035,7 +4057,7 @@ void __fastcall THW::ZXpandClick(TObject *Sender)
 
                         if (!allFacilitiesSelected)
                         {
-                                int ret = Application->MessageBox("Automatically select the following ZXpand+ facilities?\n\n32K RAM Pack, RAM in 8K-16K Region, WRX High Resolution,\nZON X Sound, ZXpand Joystick", "ZXpand+ Configuration", MB_YESNO | MB_ICONQUESTION);
+                                int ret = Application->MessageBox(Tr("Automatically select the following ZXpand+ facilities?\n\n32K RAM Pack, RAM in 8K-16K Region, WRX High Resolution,\nZON X Sound, ZXpand Joystick").c_str(), Tr("ZXpand+ Configuration").c_str(), MB_YESNO | MB_ICONQUESTION);
 
                                 if (ret == IDYES)
                                 {
@@ -4078,7 +4100,7 @@ int THW::FindEntry(TComboBox* comboBox, AnsiString text)
 {
         for (int i = 0; i < comboBox->Items->Count; i++)
         {
-                if (comboBox->Items->Strings[i] == text)
+                if (LanguageSame(comboBox->Items->Strings[i], text))
                 {
                         return i;
                 }
@@ -4117,8 +4139,8 @@ void __fastcall THW::BrowseRomCartridgeClick(TObject *Sender)
                 Path += romCartridgeFolder;
         }
 
-        RomSelect->Title = "Select ROM Cartridge File";
-        RomSelect->Filter = "ROM Cartridge Files (*.rom;*.bin;*.dck)|*.rom;*.bin;*.dck";
+        RomSelect->Title = Tr("Select ROM Cartridge File");
+        RomSelect->Filter = Tr("ROM Cartridge Files (*.rom;*.bin;*.dck)") + "|*.rom;*.bin;*.dck";
         RomSelect->InitialDir = Path;
         RomSelect->FileName = RomCartridgeFileBox->Text;
         if (RomSelect->FileName.Length() == 0 || *(RomSelect->FileName.AnsiLastChar()) == '\\')
@@ -4603,8 +4625,8 @@ void __fastcall THW::DefaultsButtonClick(TObject *Sender)
         IDEBox->ItemIndex          = 0;
         RomBox->ItemIndex          = 0;
 
-        DriveAType->ItemIndex = SelectEntry(DriveAType, "3\" Single-Sided (180K)");
-        DriveBType->ItemIndex = SelectEntry(DriveBType, "None");
+        DriveAType->ItemIndex = SelectEntry(DriveAType, Tr("3\" Single-Sided (180K)"));
+        DriveBType->ItemIndex = SelectEntry(DriveBType, Tr("None"));
         ZXCFRAM->ItemIndex    = SelectEntry(ZXCFRAM,    "1024K");
         
         uSource->Checked                  = false;
@@ -4752,9 +4774,9 @@ void __fastcall THW::DefaultsButtonClick(TObject *Sender)
                 RamPackBox->ItemIndex = 0;
                 RamPackBoxChange(NULL);
 
-                AnsiString defaultRam = (AceBtn->Down) ? "19K" : "16K";
+                AnsiString defaultRam = (AceBtn->Down) ? "19" : "16";
 
-                while (LabelTotalRAM->Caption != ("Total RAM: " + defaultRam))
+                while (LabelTotalRAM->Caption != TrF("Total RAM: {0}K", defaultRam))
                 {
                         RamPackBox->ItemIndex = RamPackBox->ItemIndex + 1;
                         DisplayTotalRam();
@@ -5052,30 +5074,30 @@ void THW::UpdateApplyButton()
 {
         bool settingsChanged = (NewMachineName != Hwform.MachineName);
 
-        settingsChanged |= (RomBox->Text                           != Hwform.RomBoxText);
-        settingsChanged |= (RamPackBox->Text                       != Hwform.RamPackBoxText);
-        settingsChanged |= (SoundCardBox->Text                     != Hwform.SoundCardBoxText);
-        settingsChanged |= (ChrGenBox->Text                        != Hwform.ChrGenBoxText);
-        settingsChanged |= (HiResBox->Text                         != Hwform.HiResBoxText);
-        settingsChanged |= (ColourBox->Text                        != Hwform.ColourBoxText);
-        settingsChanged |= (SpeechBox->Text                        != Hwform.SpeechBoxText);
-        settingsChanged |= (RomCartridgeBox->Text                  != Hwform.RomCartridgeBoxText);
-        settingsChanged |= (ZXC1ConfigurationBox->Text             != Hwform.ZXC1ConfigurationBoxText);
-        settingsChanged |= (JoystickBox->Text                      != Hwform.JoystickBoxText);
-        settingsChanged |= (DriveAType->Text                       != Hwform.DriveATypeText);
-        settingsChanged |= (DriveBType->Text                       != Hwform.DriveBTypeText);
-        settingsChanged |= (ZXCFRAM->Text                          != Hwform.ZXCFRAMText);
-        settingsChanged |= (IDEBox->Text                           != Hwform.IDEBoxText);
-        settingsChanged |= (FDCBox->Text                           != Hwform.FDCBoxText);
-        settingsChanged |= (IDERomBox->Text                        != Hwform.IDERomBoxText);
-        settingsChanged |= (FDCRomBox->Text                        != Hwform.FDCRomBoxText);
-        settingsChanged |= (NoMicrodrivesComboBox->Text            != Hwform.NoMicrodrivesComboBoxText);
+        settingsChanged |= !LanguageSame(RomBox->Text,                           Hwform.RomBoxText);
+        settingsChanged |= !LanguageSame(RamPackBox->Text,                       Hwform.RamPackBoxText);
+        settingsChanged |= !LanguageSame(SoundCardBox->Text,                     Hwform.SoundCardBoxText);
+        settingsChanged |= !LanguageSame(ChrGenBox->Text,                        Hwform.ChrGenBoxText);
+        settingsChanged |= !LanguageSame(HiResBox->Text,                         Hwform.HiResBoxText);
+        settingsChanged |= !LanguageSame(ColourBox->Text,                        Hwform.ColourBoxText);
+        settingsChanged |= !LanguageSame(SpeechBox->Text,                        Hwform.SpeechBoxText);
+        settingsChanged |= !LanguageSame(RomCartridgeBox->Text,                  Hwform.RomCartridgeBoxText);
+        settingsChanged |= !LanguageSame(ZXC1ConfigurationBox->Text,             Hwform.ZXC1ConfigurationBoxText);
+        settingsChanged |= !LanguageSame(JoystickBox->Text,                      Hwform.JoystickBoxText);
+        settingsChanged |= !LanguageSame(DriveAType->Text,                       Hwform.DriveATypeText);
+        settingsChanged |= !LanguageSame(DriveBType->Text,                       Hwform.DriveBTypeText);
+        settingsChanged |= !LanguageSame(ZXCFRAM->Text,                          Hwform.ZXCFRAMText);
+        settingsChanged |= !LanguageSame(IDEBox->Text,                           Hwform.IDEBoxText);
+        settingsChanged |= !LanguageSame(FDCBox->Text,                           Hwform.FDCBoxText);
+        settingsChanged |= !LanguageSame(IDERomBox->Text,                        Hwform.IDERomBoxText);
+        settingsChanged |= !LanguageSame(FDCRomBox->Text,                        Hwform.FDCRomBoxText);
+        settingsChanged |= !LanguageSame(NoMicrodrivesComboBox->Text,            Hwform.NoMicrodrivesComboBoxText);
 
-        settingsChanged |= (RomCartridgeFileBox->Text              != Hwform.RomCartridgeFileBoxText);
-        settingsChanged |= (SinclairRomCartridgeFileBox->Text      != Hwform.SinclairRomCartridgeFileBoxText);
-        settingsChanged |= (TS1510RomCartridgeFileBox->Text        != Hwform.TS1510RomCartridgeFileBoxText);
-        settingsChanged |= (TC2068RomCartridgeFileBox->Text        != Hwform.TC2068RomCartridgeFileBoxText);
-        settingsChanged |= (TS2068RomCartridgeFileBox->Text        != Hwform.TS2068RomCartridgeFileBoxText);
+        settingsChanged |= !LanguageSame(RomCartridgeFileBox->Text,              Hwform.RomCartridgeFileBoxText);
+        settingsChanged |= !LanguageSame(SinclairRomCartridgeFileBox->Text,      Hwform.SinclairRomCartridgeFileBoxText);
+        settingsChanged |= !LanguageSame(TS1510RomCartridgeFileBox->Text,        Hwform.TS1510RomCartridgeFileBoxText);
+        settingsChanged |= !LanguageSame(TC2068RomCartridgeFileBox->Text,        Hwform.TC2068RomCartridgeFileBoxText);
+        settingsChanged |= !LanguageSame(TS2068RomCartridgeFileBox->Text,        Hwform.TS2068RomCartridgeFileBoxText);
 
         settingsChanged |= (programmableJoystickLeft               != Hwform.ProgrammableJoystickLeft);
         settingsChanged |= (programmableJoystickRight              != Hwform.ProgrammableJoystickRight);

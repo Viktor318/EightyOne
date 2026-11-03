@@ -36,6 +36,7 @@
 #include "spectrum\specBasicLoader.h"
 #include "BasicLoaderOptions_.h"
 #include "BasicLister\BasicLister_.h"
+#include "Language.h"
 
 #ifndef edt1
 #define edt1 0x480
@@ -193,7 +194,7 @@ __fastcall TTZX::TTZX(TComponent* Owner)
         delete ini;
 
         DragAcceptFiles(Handle, true);
-        Table->Rows[0]->CommaText="Description,Size";
+        Table->Rows[0]->CommaText = "\"" + Tr("Description") + "\",\"" + Tr("Size") + "\"";
         FormResize(NULL);
 }
 //---------------------------------------------------------------------------
@@ -284,7 +285,7 @@ void TTZX::LoadFile(AnsiString Filename, bool Insert)
                 TZXFile.AutoStart=AutoStartBtn->Down;
                 if (AutoLoadBtn->Down) AutoLoadCount=2;
 
-                Caption = FileNameGetFname(Filename)+FileNameGetExt(Filename)+" - Tape";
+                Caption = TrF("{0} - Tape", FileNameGetFname(Filename)+FileNameGetExt(Filename));
                 Form1->InTZXManagerClick(NULL);
                 Form1->OutTZXManagerClick(NULL);
         }
@@ -430,7 +431,7 @@ void __fastcall TTZX::NewTZXClick(TObject *Sender)
         TZXFile.AutoStart=AutoStartBtn->Down;
         UpdateTable(false);
         Table->Row=2;
-        Caption="Untitled - Tape";
+        Caption=Tr("Untitled - Tape");
 }
 //---------------------------------------------------------------------------
 
@@ -457,7 +458,7 @@ void __fastcall TTZX::SaveAs1Click(TObject *Sender)
         if (canP) Filter += "|P File (*.p)|*.p|O File (*.o)|*.o";
         if (canP81) Filter += "|P81 File (*.p81)|*.p81";
 
-        SaveDialog->Filter=Filter;
+        SaveDialog->Filter=LanguageFilter(Filter);
 
         FileName=TZXFile.FileName;
 
@@ -701,7 +702,7 @@ void __fastcall TTZX::Data1Click(TObject *Sender)
         int row;
 
         TZXFile.Stop(false);
-        OpenDialog->Title="Insert";
+        OpenDialog->Title=Tr("Insert");
 
         if (OpenDialog->Execute())
                 for(i=0;i < OpenDialog->Files->Count; i++)
@@ -710,7 +711,7 @@ void __fastcall TTZX::Data1Click(TObject *Sender)
                         if (TZXFile.CurBlock<(TZXFile.CurBlock+1))
                                 TZXFile.CurBlock++;
                 }
-        OpenDialog->Title="Open";
+        OpenDialog->Title=Tr("Open");
         TZXFile.Stop(false);
         row=TZXFile.CurBlock;
         UpdateTable(false);

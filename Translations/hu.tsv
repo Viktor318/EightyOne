@@ -1,0 +1,790 @@
+# EightyOne Hungarian translation: kind, where, English, Hungarian
+# Texts are C string contents (\n newline, \\ backslash); {0} {1} {2}: values put in by the code
+# Make Source/LanguageHu.cpp from it: python3 Translations/make_table.py
+form	About_.dfm	About	Névjegy
+form	About_.dfm	This program is released under the GNU GPL. Please see the	Ez a program a GNU GPL licenc alatt jelent meg. Részletek a
+form	About_.dfm	attached readme.txt file that should be included with this distribution.	csomaghoz mellékelt readme.txt fájlban.
+form	About_.dfm	Z80 core and DirectSound code taken from fuse, the free UNIX	A Z80 mag és a DirectSound kód a fuse-ból, a szabad UNIX-os
+form	About_.dfm	Unknown Version	Ismeretlen verzió
+form	About_.dfm	Spectrum emulator © 2003 Philip Kendall.	Spectrum emulátorból származik © 2003 Philip Kendall.
+form	About_.dfm	Many thanks to Wilf Rigter for providing essential technical	Köszönet Wilf Rigternek a nélkülözhetetlen műszaki
+form	About_.dfm	AY8910 Code taken from Z81 © 1995-2001 Russell Marks.	Az AY8910 kód a Z81-ből származik © 1995-2001 Russell Marks.
+form	About_.dfm	information on the internal workings of the ZX81 itself and also 	információkért a ZX81 belső működéséről, valamint
+form	About_.dfm	various add-ons including the Memotech and G007 Hi-res cards.	számos bővítőről, köztük a Memotech és a G007 nagyfelbontású kártyáról.
+form	About_.dfm	dk'tronics graphics ROM dump and several bug reports provided	A dk'tronics grafikus ROM tartalmát és számos hibajelentést
+form	About_.dfm	by Simon Holdsworth.  	Simon Holdsworth küldte.  
+form	About_.dfm	Click to visit the EightyOne home page	Kattintson az EightyOne honlapjának megnyitásához
+form	About_.dfm	G007 information also provided by Kryton.	G007-információk: Kryton.
+form	About_.dfm	Icon designed by Paul E Collins.	Az ikont Paul E Collins tervezte.
+form	About_.dfm	Dedicated to Abbey (1998-2008)	Abbey emlékére (1998-2008)
+form	About_.dfm	Releases up to 1.0a were created by Michael D Wynne, with all	Az 1.0a-ig terjedő kiadásokat Michael D Wynne készítette, az összes
+form	About_.dfm	subsequent releases created by Charlie Robson and Paul Farrow.	későbbit Charlie Robson és Paul Farrow.
+form	About_.dfm	Michael's daughter	Michael lánya
+form	About_.dfm	Speech synthesis code from SP0256_CTS256A-AL2.	A beszédszintézis kódja az SP0256_CTS256A-AL2-ből származik.
+form	Artifacts_.dfm	TV Emulation	TV-emuláció
+form	Artifacts_.dfm	Colour	Szín
+form	Artifacts_.dfm	Brightness	Fényerő
+form	Artifacts_.dfm	Contrast	Kontraszt
+form	Artifacts_.dfm	Horizontal Hold	Vízszintes szinkron
+form	Artifacts_.dfm	Vertical Hold	Függőleges szinkron
+form	Artifacts_.dfm	Noise	Zaj
+form	Artifacts_.dfm	Ghosting	Szellemkép
+form	Artifacts_.dfm	Artefacts Enabled	Képhibák bekapcsolva
+form	Artifacts_.dfm	Scanlines	Pásztázó sorok
+form	Artifacts_.dfm	Simple Ghosting	Egyszerű szellemkép
+form	Artifacts_.dfm	Dot Crawl	Pontvándorlás
+form	Artifacts_.dfm	Advanced Effects	Speciális effektusok
+form	Artifacts_.dfm	Interlaced Display	Váltottsoros megjelenítés
+form	Artifacts_.dfm	Vibrant Colour	Élénk színek
+form	BasicListerOptions_.dfm	BASIC Listing Settings	BASIC lista beállításai
+form	BasicListerOptions_.dfm	Save Options	Mentési beállítások
+form	BasicListerOptions_.dfm	Output line numbers above 9999 using 5 digits	9999 feletti sorszámok 5 számjeggyel
+form	BasicListerOptions_.dfm	Output tokens in REMs as character codes	REM-ekben a kulcsszavak karakterkódként
+form	BasicListerOptions_.dfm	Output non-ASCII symbols as character codes	Nem ASCII jelek karakterkódként
+form	BasicListerOptions_.dfm	Output tokens in strings as character codes	Szövegekben a kulcsszavak karakterkódként
+form	BasicListerOptions_.dfm	Output continuation markers to split long lines	Hosszú sorok tördelése folytatásjelekkel
+form	BasicListerOptions_.dfm	Output the names of variables in lowercase	Változónevek kisbetűvel
+form	BasicListerOptions_.dfm	Display Options	Megjelenítési beállítások
+form	BasicListerOptions_.dfm	BASIC text scaling	BASIC szöveg nagyítása
+form	BasicLister_.dfm	BASIC Listing	BASIC lista
+form	BasicLister_.dfm	 Refresh 	 Frissítés 
+form	BasicLister_.dfm	Settings	Beállítások
+form	BasicLister_.dfm zxprinter.dfm	Save	Mentés
+form	BasicLister_.dfm	Line Ends	Sorvégek
+form	BasicLister_.dfm	Info	Infó
+form	BasicListingFormatInfo_.dfm	Saving a BASIC Listing as Text	BASIC lista mentése szövegként
+form	BasicListingFormatInfo_.dfm	ZX80 and ZX81 inverse characters and ZX80, ZX81 and Spectrum block graphic symbols are encoded in accordance with the scheme. Non-displayable character codes are output as \\nn where nn is the character code expressed	A ZX80 és ZX81 inverz karaktereit, valamint a ZX80, ZX81 és Spectrum blokkgrafikus jeleit a séma szerint kódolja. A nem megjeleníthető karakterkódok \\nn alakban kerülnek ki, ahol nn a karakterkód
+form	BasicListingFormatInfo_.dfm	The BASIC listing format is based upon that used by the ZXText2P utility, with extensions to handle a wider range of scenarios.	A BASIC lista formátuma a ZXText2P segédprogramén alapul, több esetet kezelő bővítésekkel.
+form	BasicListingFormatInfo_.dfm	as a 2 digit hexadecimal number. On the Spectrum UDGs are encoded as \\_n where n is the UDG letter, and a standard \\ character is encoded as \\\\.	kétjegyű hexadecimális számként. A Spectrumon az UDG-k \\_n alakúak, ahol n az UDG betűje, a \\ karakter pedig \\\\ lesz.
+form	BasicListingFormatInfo_.dfm	Space suppression between consecutive keywords is replicated in the text output, and additional spaces within a line are retained if present.	Az egymást követő kulcsszavak közti szóközök elhagyását a szöveg is követi, a soron belüli további szóközök megmaradnak.
+form	BasicListingFormatInfo_.dfm	The content of a REM statement is by default output as text if all characters are displayable, and as \\nn character codes if any non-displayable characters exist (on the assumption that the REM holds machine code). A configuration	A REM utasítás tartalma alapból szövegként kerül ki, ha minden karaktere megjeleníthető, különben \\nn karakterkódokként (feltételezve, hogy a REM gépi kódot tartalmaz). Egy beállítással
+form	BasicListingFormatInfo_.dfm	option allows the contents to always be output in \\nn character code format irrespective of whether all characters are displayable.	a tartalom mindig \\nn karakterkódokként kerülhet ki, attól függetlenül, hogy minden karakter megjeleníthető-e.
+form	BasicListingFormatInfo_.dfm	The pound symbol is by default output as £, but this is not part of the ASCII character set (it has code $A3). A configuration option allows it to be output in \\nn character code format instead. 	A fontjel alapból jelként kerül ki, de ez nem része az ASCII karakterkészletnek (kódja $A3). Egy beállítással helyette \\nn karakterkódként is kiírható. 
+form	BasicListingFormatInfo_.dfm	A configuration option allows variable names to be output in lowercase to ensure there is no ambiguity with BASIC keywords.	Egy beállítással a változónevek kisbetűvel írhatók ki, hogy ne legyenek összetéveszthetők a BASIC kulcsszavakkal.
+form	BasicListingFormatInfo_.dfm	BASIC listing files are saved with extension B80 for the ZX80, B81 for the ZX81 and B82 for the Spectrum.	A BASIC listafájlok kiterjesztése ZX80-nál B80, ZX81-nél B81, Spectrumnál B82.
+form	BasicListingFormatInfo_.dfm	Details of the ZXText2P encoding format can be found here:	A ZXText2P kódolási formátum leírása itt található:
+form	BasicListingFormatInfo_.dfm	On the Spectrum the copyright symbol is by default output as ©, but this is not part of the ASCII character set (it has code $A9). A configuration option allows it to be output in \\nn character code format instead.	A Spectrumon a szerzői jog jele alapból © alakban kerül ki, de ez nem része az ASCII karakterkészletnek (kódja $A9). Egy beállítással helyette \\nn karakterkódként is kiírható.
+form	BasicLoaderOptions_.dfm	Load BASIC Listing Options	BASIC lista betöltésének beállításai
+form	BasicLoaderOptions_.dfm	Configure how a BASIC listing file is interpreted:	A BASIC listafájl értelmezésének beállításai:
+form	BasicLoaderOptions_.dfm	Automatic line numbering increment	Automatikus sorszámozás lépésköze
+form	BasicLoaderOptions_.dfm	Attempt to tokenise REM contents	REM tartalmának átalakítása kulcsszavakká
+form	BasicLoaderOptions_.dfm	Attempt to tokenise string contents	Szövegek tartalmának átalakítása kulcsszavakká
+form	BasicLoaderOptions_.dfm	Discard surplus spaces	Felesleges szóközök elhagyása
+form	BasicLoaderOptions_.dfm	Accept alternate keyword spellings	Kulcsszavak más írásmódjának elfogadása
+form	BasicLoaderOptions_.dfm	Accept ZxToken format extensions	ZxToken formátumbővítések elfogadása
+form	Debug.dfm	Debug Window	Hibakereső ablak
+form	Debug.dfm	Interrupts:	Megszakítások:
+form	Debug.dfm	Disabled	Kikapcsolva
+form	Debug.dfm	Halt:	HALT:
+form	Debug.dfm SetBreakpoint_.dfm	Yes	Igen
+form	Debug.dfm	Program	Program
+form	Debug.dfm	Label       Addr   Code      Mnemonic	Címke       Cím    Kód       Mnemonik
+form	Debug.dfm	Display Generation	Képgenerálás
+form	Debug.dfm	NMI Generator:	NMI generátor:
+form	Debug.dfm	Sync Output:	Szinkronkimenet:
+form	Debug.dfm	Scanline:	Sor:
+form	Debug.dfm	Line Counter:	Sorszámláló:
+form	Debug.dfm	Shift Register:	Léptetőregiszter:
+form	Debug.dfm	OFF	KI
+form	Debug.dfm	White	Fehér
+form	Debug.dfm	T-Cycles:	T-ciklusok:
+form	Debug.dfm	Breakpoints	Töréspontok
+form	Debug.dfm	T-Cycles Count:	T-ciklusszám:
+form	Debug.dfm	Add	Hozzáadás
+form	Debug.dfm Profiler.dfm TZXMan.dfm	Delete	Törlés
+form	Debug.dfm Profiler.dfm	Edit	Szerkesztés
+form	Debug.dfm Profiler.dfm	Reset	Alaphelyzet
+form	Debug.dfm	Stack	Verem
+form	Debug.dfm	Jupiter Ace Forth Stack	Jupiter Ace Forth-verem
+form	Debug.dfm main_.dfm	Control	Vezérlés
+form	Debug.dfm	Step	Lépés
+form	Debug.dfm	Over	Átlépés
+form	Debug.dfm TZXMan.dfm wavload_.dfm	Stop	Megállítás
+form	Debug.dfm	Continuous	Folyamatos
+form	Debug.dfm	Skip NMI	NMI átugrása
+form	Debug.dfm	Skip INT	INT átugrása
+form	Debug.dfm	Out	Kilépés
+form	Debug.dfm main_.dfm	View	Nézet
+form	Debug.dfm	Indicates whether ROM symbols are loaded	Jelzi, hogy a ROM szimbólumai be vannak-e töltve
+form	Debug.dfm	Indicates whether application symbols are loaded	Jelzi, hogy a program szimbólumai be vannak-e töltve
+form	Debug.dfm	Enable history capture	Előzmények rögzítésének bekapcsolása
+form	Debug.dfm	Enable	Bekapcsolás
+form	Debug.dfm	History	Előzmények
+form	Debug.dfm SetBreakpoint_.dfm memoryWindow.dfm tzxEditHWInfo.dfm	Memory	Memória
+form	Debug.dfm	Symbols	Szimbólumok
+form	Debug.dfm Profiler.dfm	Profiler	Profilozó
+form	Debug.dfm	Enable Memory window refreshing	A memóriaablak frissítésének bekapcsolása
+form	Debug.dfm Profiler.dfm	Refresh	Frissítés
+form	Debug.dfm	Chroma Colour	Chroma szín
+form	Debug.dfm	Mode:	Mód:
+form	Debug.dfm	ZXC Cartridge	ZXC kártya
+form	Debug.dfm	Spectra Colour	Spectra szín
+form	Debug.dfm	Show Memory	Memória megjelenítése
+form	Debug.dfm	Break On Execute	Megállás végrehajtáskor
+form	Debug.dfm	Break On Read	Megállás olvasáskor
+form	Debug.dfm	Break On Write	Megállás íráskor
+form	Debug.dfm	Break on Input A15-0	Megállás bemenetnél (A15-0)
+form	Debug.dfm	Break on Input A15-8	Megállás bemenetnél (A15-8)
+form	Debug.dfm	Break on Input A7-0	Megállás bemenetnél (A7-0)
+form	Debug.dfm	Break on Output A15-0	Megállás kimenetnél (A15-0)
+form	Debug.dfm	Break on Output A15-8	Megállás kimenetnél (A15-8)
+form	Debug.dfm	Break on Output A7-0	Megállás kimenetnél (A7-0)
+form	Debug.dfm	Disable	Kikapcsolás
+form	Debug.dfm	Reset Hit Count	Találatszám nullázása
+form	Debug.dfm	Hit Count = x	Találatok száma = x
+form	EditFlags.dfm EditValue_.dfm SearchSequence_.dfm SetBreakpoint_.dfm	Cancel	Mégse
+form	EditValue_.dfm	Edit Value	Érték szerkesztése
+form	EditValue_.dfm SetBreakpoint_.dfm	Value:	Érték:
+form	Hist.dfm	CPU History	CPU-előzmények
+form	Hist.dfm	Reload	Újratöltés
+form	Hist.dfm zxprinter.dfm	Clear	Törlés
+form	Hist.dfm	Reverse	Fordított sorrend
+form	ProfSampEdit.dfm	Profile Entry	Profilbejegyzés
+form	ProfSampEdit.dfm Profiler.dfm	Tag	Címke
+form	ProfSampEdit.dfm	Start Address	Kezdőcím
+form	ProfSampEdit.dfm	End Address	Végcím
+form	ProfSampEdit.dfm	Specify the addresses of the start and end instructions.	Adja meg a kezdő és a záró utasítás címét.
+form	ProfilePlot_.dfm	Profile Plot	Profilgrafikon
+form	ProfilePlot_.dfm	Min: ---- Max: ----	Min: ---- Max: ----
+form	ProfilePlot_.dfm	Sample: ----	Minta: ----
+form	ProfilePlot_.dfm	Current: ----	Aktuális: ----
+form	Profiler.dfm Plus3Drives.dfm	New	Új
+form	Profiler.dfm	Start Addr	Kezdőcím
+form	Profiler.dfm	End Addr	Végcím
+form	Profiler.dfm	Min T	Min T
+form	Profiler.dfm	Max T	Max T
+form	Profiler.dfm	Samples	Minták
+form	Profiler.dfm	Plot	Grafikon
+form	Profiler.dfm	Auto Refresh	Automatikus frissítés
+form	SearchSequence_.dfm	Find	Keresés
+form	SearchSequence_.dfm	Sequence:	Sorozat:
+form	SetBreakpoint_.dfm	Configure Breakpoint	Töréspont beállítása
+form	SetBreakpoint_.dfm Interface1.dfm MemSave_.dfm Parallel.dfm	Address:	Cím:
+form	SetBreakpoint_.dfm	Condition:	Feltétel:
+form	SetBreakpoint_.dfm HW_.dfm tzxEditArchive.dfm	Type:	Típus:
+form	SetBreakpoint_.dfm	Enabled:	Bekapcsolva:
+form	SetBreakpoint_.dfm	Hits:	Találatok:
+form	SetBreakpoint_.dfm	Execute	Végrehajtás
+form	SetBreakpoint_.dfm	Read	Olvasás
+form	SetBreakpoint_.dfm	Write	Írás
+form	SetBreakpoint_.dfm	Out A15-0	Kimenet A15-0
+form	SetBreakpoint_.dfm	Out A15-8	Kimenet A15-8
+form	SetBreakpoint_.dfm	Out A7-0	Kimenet A7-0
+form	SetBreakpoint_.dfm	In A15-0	Bemenet A15-0
+form	SetBreakpoint_.dfm	In A15-8	Bemenet A15-8
+form	SetBreakpoint_.dfm	In A7-0	Bemenet A7-0
+form	SetBreakpoint_.dfm	T-Cycles	T-ciklusok
+form	SetBreakpoint_.dfm	Register	Regiszter
+form	SetBreakpoint_.dfm	Flag	Jelzőbit
+form	SetBreakpoint_.dfm	No	Nem
+form	FullScreen.dfm	Display Settings	Megjelenítési beállítások
+form	FullScreen.dfm	Renderer:	Megjelenítő:
+form	FullScreen.dfm	Full Screen Settings	Teljes képernyő beállításai
+form	FullScreen.dfm	Resolution:	Felbontás:
+form	FullScreen.dfm	Letterbox	Fekete sávokkal
+form	FullScreen.dfm	Stretch Image	Kép nyújtása
+form	FullScreen.dfm	White Letterbox	Fehér sávokkal
+form	HW_.dfm	Hardware	Hardver
+form	HW_.dfm	RAM Pack:	RAM-bővítő:
+form	HW_.dfm	Total RAM: 1K	Teljes RAM: 1K
+form	HW_.dfm	Others	Egyéb
+form	HW_.dfm	Homebrew	Saját építésű
+form	HW_.dfm Interface1.dfm Parallel.dfm	None	Nincs
+form	HW_.dfm	Interfaces	Interfészek
+form	HW_.dfm	Sound:	Hang:
+form	HW_.dfm	Chr$ Generator:	Karaktergenerátor:
+form	HW_.dfm	High Resolution:	Nagy felbontás:
+form	HW_.dfm	Colour:	Szín:
+form	HW_.dfm	ROM Cartridge:	ROM-kártya:
+form	HW_.dfm	Speech:	Beszéd:
+form	HW_.dfm	Joystick:	Joystick:
+form	HW_.dfm	Kempston Mouse	Kempston egér
+form	HW_.dfm	TS2050 Modem	TS2050 modem
+form	HW_.dfm	Configure...	Beállítás...
+form	HW_.dfm	SD Card...	SD-kártya...
+form	HW_.dfm Plus3Drives.dfm	Drives	Meghajtók
+form	HW_.dfm Plus3Drives.dfm	Floppy Drives	Hajlékonylemez-meghajtók
+form	HW_.dfm	Microdrives:	Microdrive-ok:
+form	HW_.dfm	3" Single-Sided (180K)	3" egyoldalas (180K)
+form	HW_.dfm	3" Double-Sided (360K)	3" kétoldalas (360K)
+form	HW_.dfm	3.5" Double-Sided (720K)	3,5" kétoldalas (720K)
+form	HW_.dfm	5.25" Double-Sided (720K)	5,25" kétoldalas (720K)
+form	HW_.dfm	Configure RS232...	RS232 beállítása...
+form	HW_.dfm	IDE Drives	IDE meghajtók
+form	HW_.dfm	The +3e ROM is supported by this IDE device. Browse for the appropriate ROM from the Advanced Settings tab. Disable the on-board ROM using the jumper.	Ez az IDE eszköz támogatja a +3e ROM-ot. A megfelelő ROM-ot a Speciális beállítások fülön választhatja ki. A beépített ROM-ot az átkötéssel (jumper) tiltsa le.
+form	HW_.dfm	Advanced Settings	Speciális beállítások
+form	HW_.dfm	ROM File:	ROM-fájl:
+form	HW_.dfm	Protect ROM from Writes	ROM írásvédelme
+form	HW_.dfm	60Hz Frame Rate	60 Hz-es képfrissítés
+form	HW_.dfm	RAM in 8K-16K Region	RAM a 8K-16K tartományban
+form	HW_.dfm	Overcomes the restriction that prevents machine code running from the 32K-48K range on the ZX81	Feloldja a korlátozást, amely a ZX81-en megakadályozza a gépi kód futtatását a 32K-48K tartományból
+form	HW_.dfm	M1Not Circuit	M1Not áramkör
+form	HW_.dfm	Issue 2 EAR Behaviour	Issue 2 EAR viselkedés
+form	HW_.dfm	Sinclair fitted a strap-on board to the Z80 to overcome the floating point maths bug in the edition 1 ZX81 ROM	A Sinclair egy rátétpanelt szerelt a Z80-ra, hogy kikerülje az 1. kiadású ZX81 ROM lebegőpontos hibáját
+form	HW_.dfm	Floating Point Hardware Fix	Lebegőpontos hiba hardveres javítása
+form	HW_.dfm	More...	Továbbiak...
+form	HW_.dfm	Wilf Rigter's modification to prevent Wait state insertion at every NMI to speed up ZX81 SLOW mode by 10%	Wilf Rigter módosítása: nem szúr be várakozási állapotot minden NMI-nél, így a ZX81 SLOW módja 10%-kal gyorsabb
+form	HW_.dfm	Improved Wait Circuit	Javított várakozó áramkör
+form	HW_.dfm	Defaults	Alapértékek
+form	HW_.dfm	Apply	Alkalmaz
+form	HW_.dfm	Restore	Visszaállítás
+form	HW_.dfm	Cartridge Files	Kártyafájlok
+form	HW_.dfm	Select Cartridge File	Kártyafájl kiválasztása
+form	Interface1.dfm	Serial Port	Soros port
+form	Interface1.dfm Parallel.dfm	Connect To:	Csatlakozás ide:
+form	Interface1.dfm Parallel.dfm	Baud Rate:	Átviteli sebesség:
+form	Interface1.dfm Parallel.dfm	Data Bits:	Adatbitek:
+form	Interface1.dfm Parallel.dfm	Stop Bits:	Stopbitek:
+form	Interface1.dfm Parallel.dfm	Parity:	Paritás:
+form	Interface1.dfm	Auto	Automatikus
+form	Interface1.dfm Parallel.dfm	Odd	Páratlan
+form	Interface1.dfm Parallel.dfm	Even	Páros
+form	Interface1.dfm Parallel.dfm	Mark	Mark
+form	Interface1.dfm Parallel.dfm	Space	Space
+form	Interface1.dfm Parallel.dfm	Port:	Port:
+form	Interface1.dfm	Input File:	Bemeneti fájl:
+form	Interface1.dfm Parallel.dfm	Output File:	Kimeneti fájl:
+form	Interface1.dfm MemSave_.dfm Parallel.dfm wavload_.dfm	All Files	Minden fájl
+form	KeyboardFunctions_.dfm	Functions	Funkciók
+form	Keyboard_.dfm kb_.dfm	Keyboard	Billentyűzet
+form	Keypad_.dfm	Keypad	Numerikus billentyűzet
+form	LiveMemoryWindow_.dfm	Live Memory	Élő memórianézet
+form	LiveMemoryWindow_.dfm	&Display	&Megjelenítés
+form	LiveMemoryWindow_.dfm	&Reset	&Alaphelyzet
+form	LiveMemoryWindow_.dfm	&Show Touched Bytes	&Érintett bájtok megjelenítése
+form	LiveMemoryWindow_.dfm	&View	&Nézet
+form	LiveMemoryWindow_.dfm	&Reads	&Olvasások
+form	LiveMemoryWindow_.dfm	&Writes	Í&rások
+form	LiveMemoryWindow_.dfm	&Range	&Tartomány
+form	MakeHDF.dfm	Create HDF File	HDF fájl létrehozása
+form	MakeHDF.dfm	File Name:	Fájlnév:
+form	MakeHDF.dfm	Cylinders:	Cilinderek:
+form	MakeHDF.dfm	Heads:	Fejek:
+form	MakeHDF.dfm	Sectors:	Szektorok:
+form	MakeHDF.dfm	Effective Size:	Tényleges méret:
+form	MakeHDF.dfm	HDF Image Size:	HDF képfájl mérete:
+form	MakeHDF.dfm	8 Bit Image	8 bites képfájl
+form	MemSave_.dfm	MemSave	Memória mentése
+form	MemSave_.dfm	Size:	Méret:
+form	MemSave_.dfm SerialPort.dfm	Filename:	Fájlnév:
+form	MemSave_.dfm	Save File...	Fájl mentése...
+form	MemSave_.dfm	Binary Files	Bináris fájlok
+form	MemSave_.dfm	ROM Files	ROM-fájlok
+form	MemSave_.dfm	Sprectrum Screen	Spectrum képernyő
+form	MemSave_.dfm	Save Memory Block...	Memóriablokk mentése...
+form	MemSave_.dfm	Spectrum Screen	Spectrum képernyő
+form	Parallel.dfm	Printer Port	Nyomtatóport
+form	Plus3Drives.dfm	Drive A:	A: meghajtó
+form	Plus3Drives.dfm	Drive B:	B: meghajtó
+form	Plus3Drives.dfm	Eject	Kiadás
+form	Plus3Drives.dfm	Hard Drives	Merevlemezek
+form	Plus3Drives.dfm	Redetect Physical Drives	Fizikai meghajtók újrakeresése
+form	Plus3Drives.dfm	Read Only	Csak olvasható
+form	Plus3Drives.dfm	Microdrives	Microdrive-ok
+form	Plus3Drives.dfm	Drive 1:	1. meghajtó:
+form	Plus3Drives.dfm	Drive 2:	2. meghajtó:
+form	Plus3Drives.dfm	Drive 3:	3. meghajtó:
+form	Plus3Drives.dfm	Drive 4:	4. meghajtó:
+form	Plus3Drives.dfm	Drive 5:	5. meghajtó:
+form	Plus3Drives.dfm	Drive 6:	6. meghajtó:
+form	Plus3Drives.dfm	Drive 7:	7. meghajtó:
+form	Plus3Drives.dfm	Drive 8:	8. meghajtó:
+form	Plus3Drives.dfm	Disk Images	Lemezképek
+form	Plus3Drives.dfm	+3 Disk Images (*.dsk)	+3 lemezképek (*.dsk)
+form	Plus3Drives.dfm	Plus D/Disciple Disk Images (*.mgt, *.img)	Plus D/DISCiPLE lemezképek (*.mgt, *.img)
+form	Plus3Drives.dfm	Opus Discovery Disk Images (*.opd, *.opu)	Opus Discovery lemezképek (*.opd, *.opu)
+form	Plus3Drives.dfm	TR-DOS Disk Images (*.trd)	TR-DOS lemezképek (*.trd)
+form	Plus3Drives.dfm	Larken Disk Images (*.lar)	Larken lemezképek (*.lar)
+form	Plus3Drives.dfm	Compressed Disk Images (*.zip)	Tömörített lemezképek (*.zip)
+form	Plus3Drives.dfm	Select Floppy Disk Image	Hajlékonylemez-kép kiválasztása
+form	Plus3Drives.dfm	All Hard Drive Images (*.hdf; *.vhd)	Minden merevlemezkép (*.hdf; *.vhd)
+form	Plus3Drives.dfm	ZX Hard Drive Images (*.hdf)	ZX merevlemezképek (*.hdf)
+form	Plus3Drives.dfm	VirtualPC Uncompressed Images (*.vhd)	VirtualPC tömörítetlen képek (*.vhd)
+form	Plus3Drives.dfm	Select Hard Drive Image	Merevlemezkép kiválasztása
+form	Plus3Drives.dfm	Create Hard Drive Image	Merevlemezkép létrehozása
+form	SerialPort.dfm	TS2050 Configuration	TS2050 beállításai
+form	SerialPort.dfm	Connect to:	Csatlakozás ide:
+form	SerialPort.dfm	/1 Baud Rate:	/1 átviteli sebesség:
+form	SerialPort.dfm	/16 Baud Rate:	/16 átviteli sebesség:
+form	SerialPort.dfm	/64 Baud Rate:	/64 átviteli sebesség:
+form	SerialPort.dfm	Browse	Tallózás
+form	SerialPort.dfm	Connected:	Csatlakoztatva:
+form	SerialPort.dfm	Address	Cím
+form	SerialPort.dfm	Port	Port
+form	SerialPort.dfm	Listen on port:	Figyelés a porton:
+form	SerialPort.dfm	All Files (*.*)	Minden fájl (*.*)
+form	Speed_.dfm	Speed	Sebesség
+form	Speed_.dfm	Speed:	Sebesség:
+form	Speed_.dfm	Enable Frame Skip	Képkockák kihagyása
+form	SymBrowse.dfm	Symbol Browser	Szimbólumböngésző
+form	ZipFile_.dfm	Please Select:	Válasszon:
+form	kb_.dfm	Cursor keys:	Kurzorbillentyűk:
+form	kb_.dfm	CTRL Key Maps to:	A CTRL billentyű:
+form	kb_.dfm	5, 6, 7, 8 (Shifted)	5, 6, 7, 8 (SHIFT-tel)
+form	kb_.dfm	C,V,B,N (Shifted)	C,V,B,N (SHIFT-tel)
+form	kb_.dfm	Custom	Egyéni
+form	kb_.dfm	Function	FUNCTION
+form	kb_.dfm	0 (Zero)	0 (nulla)
+form	kb_.dfm	Use Right Shift as Symbol Shift	Jobb Shift SYMBOL SHIFT-ként
+form	kb_.dfm	Use numeric keypad for joystick input (when Num Lock is on):	Numerikus billentyűzet joystickként (ha a Num Lock be van kapcsolva):
+form	kb_.dfm	Use the Windows keyboard layout	Windows billentyűkiosztás használata
+form	kb_.dfm	Use left Alt as Shift with number keys	Bal Alt SHIFT-ként a számbillentyűkkel
+form	main_.dfm	File	Fájl
+form	main_.dfm	Open Tape...	Kazetta megnyitása...
+form	main_.dfm	Save Tape...	Kazetta mentése...
+form	main_.dfm TZXMan.dfm	New Tape	Új kazetta
+form	main_.dfm	Drives...	Meghajtók...
+form	main_.dfm	Load Snapshot...	Pillanatkép betöltése...
+form	main_.dfm	Save Snapshot...	Pillanatkép mentése...
+form	main_.dfm	Load Memory Block	Memóriablokk betöltése
+form	main_.dfm	Save Memory Block	Memóriablokk mentése
+form	main_.dfm	Save Screenshot	Képernyőkép mentése
+form	main_.dfm	Exit	Kilépés
+form	main_.dfm	Zoom	Nagyítás
+form	main_.dfm	User Defined	Egyéni
+form	main_.dfm	Full Screen	Teljes képernyő
+form	main_.dfm	Border Size	Keret mérete
+form	main_.dfm	None          (256x192)	Nincs          (256x192)
+form	main_.dfm	Small          (264x200)	Kicsi           (264x200)
+form	main_.dfm	Normal      (320x240)	Normál      (320x240)
+form	main_.dfm	Large          (400x300)	Nagy            (400x300)
+form	main_.dfm	Full Frame (414x313)	Teljes kép (414x313)
+form	main_.dfm	Inverse Video	Inverz kép
+form	main_.dfm	Annotations	Jelölések
+form	main_.dfm	Select All Colourisations	Minden színezés kiválasztása
+form	main_.dfm	Deselect All Colourisations	Minden színezés kikapcsolása
+form	main_.dfm	Vertical Sync Pulse	Függőleges szinkronimpulzus
+form	main_.dfm	ROM Display Driver	ROM képmeghajtó rutin
+form	main_.dfm	Horizontal Sync Pulse	Vízszintes szinkronimpulzus
+form	main_.dfm	Back Porch	Hátsó váll (back porch)
+form	main_.dfm	NMI Response (Non-Maskable Interrupt)	NMI-válasz (nem maszkolható megszakítás)
+form	main_.dfm	NMI Response Wait States	NMI-válasz várakozási állapotai
+form	main_.dfm	NMI Service Routine	NMI-kiszolgáló rutin
+form	main_.dfm	NMI Service Routine Recursion	NMI-kiszolgáló rutin ismétlődése
+form	main_.dfm	Instruction Straddling NMI	NMI-n átnyúló utasítás
+form	main_.dfm	Instruction Straddling NMI Wait States	NMI-n átnyúló utasítás várakozási állapotai
+form	main_.dfm	INT Response (Maskable Interrupt)	INT-válasz (maszkolható megszakítás)
+form	main_.dfm	INT Service Routine	INT-kiszolgáló rutin
+form	main_.dfm	Z80 Halted	Z80 HALT állapotban
+form	main_.dfm	User Program Instruction Start Positions	A felhasználói program utasításainak kezdőpontjai
+form	main_.dfm	Status Bar	Állapotsor
+form	main_.dfm	Gather Windows	Ablakok összegyűjtése
+form	main_.dfm	Bring Windows to Front	Ablakok előrehozása
+form	main_.dfm	Show Splash Screen	Nyitókép megjelenítése
+form	main_.dfm	Play RZX File...	RZX fájl lejátszása...
+form	main_.dfm	Soft Reset (RESET Line)	Újraindítás (RESET vonal)
+form	main_.dfm	Hard Reset (Power Cycle)	Hidegindítás (ki- és bekapcsolás)
+form	main_.dfm TZXMan.dfm tzxEditData.dfm tzxEditGeneral.dfm	Pause	Szünet
+form	main_.dfm	Select Joystick 1 Game Controller	Játékvezérlő kiválasztása az 1. joystickhoz
+form	main_.dfm	Select Joystick 2 Game Controller	Játékvezérlő kiválasztása a 2. joystickhoz
+form	main_.dfm	Connect Joystick 1	1. joystick csatlakoztatása
+form	main_.dfm	Connect Joystick 2	2. joystick csatlakoztatása
+form	main_.dfm	Switch On Joystick 1 Auto-Fire	1. joystick automata tüzelése
+form	main_.dfm	Switch On Joystick 2 Auto-Fire	2. joystick automata tüzelése
+form	main_.dfm	Connect Spectrum 128 Keypad	Spectrum 128 numerikus billentyűzet csatlakoztatása
+form	main_.dfm	Reset Memotech HRG Display Mode	Memotech HRG megjelenítési mód alaphelyzetbe
+form	main_.dfm	Reset Quicksilva Hi-Res Display Mode	Quicksilva nagyfelbontású mód alaphelyzetbe
+form	main_.dfm	Reset Speech Output	Beszédkimenet alaphelyzetbe
+form	main_.dfm	Enable Quicksilva Character Board	Quicksilva karakterkártya bekapcsolása
+form	main_.dfm	Enable Chroma Colour	Chroma szín bekapcsolása
+form	main_.dfm	Enable Spectra Colour	Spectra szín bekapcsolása
+form	main_.dfm	Switch On Memotech Memocalc	Memotech Memocalc bekapcsolása
+form	main_.dfm	Switch On Memotech Memotext	Memotech Memotext bekapcsolása
+form	main_.dfm	Switch On Memotech Z80 Assembler	Memotech Z80 Assembler bekapcsolása
+form	main_.dfm	Enable divIDE Memory (Close Jumper E)	divIDE memória bekapcsolása (E átkötés zárva)
+form	main_.dfm	Enable ZXCF Memory (Close UPLOAD Jumper)	ZXCF memória bekapcsolása (UPLOAD átkötés zárva)
+form	main_.dfm	Enable Simple IDE ROM	Simple IDE ROM bekapcsolása
+form	main_.dfm	Write Protect 8K-16K RAM	A 8K-16K RAM írásvédelme
+form	main_.dfm zxprinter.dfm	Options	Beállítások
+form	main_.dfm	Configuration	Konfiguráció
+form	main_.dfm	Save Configuration	Konfiguráció mentése
+form	main_.dfm	Delete Configurations	Konfigurációk törlése
+form	main_.dfm	Delete All	Összes törlése
+form	main_.dfm	Reset To Default Settings	Alapbeállítások visszaállítása
+form	main_.dfm TZXMan.dfm	Tape	Kazetta
+form	main_.dfm	Source	Forrás
+form	main_.dfm	TZX Manager	TZX-kezelő
+form	main_.dfm wavload_.dfm	Wave Loader	Hangfájl-betöltő
+form	main_.dfm	Audio In	Hangbemenet
+form	main_.dfm	Destination	Cél
+form	main_.dfm	Audio Out	Hangkimenet
+form	main_.dfm	Ports	Portok
+form	main_.dfm	Centronics Printer Port	Centronics nyomtatóport
+form	main_.dfm	Beeper So&und	Beeper han&g
+form	main_.dfm	Display Settings...	Megjelenítési beállítások...
+form	main_.dfm	Hardware...	Hardver...
+form	main_.dfm	Keyboard...	Billentyűzet...
+form	main_.dfm	Sound...	Hang...
+form	main_.dfm	Speed...	Sebesség...
+form	main_.dfm	TV Emulation...	TV-emuláció...
+form	main_.dfm	Tools	Eszközök
+form	main_.dfm	Live Memory View...	Élő memórianézet...
+form	main_.dfm	Debug Window...	Hibakereső ablak...
+form	main_.dfm	ZX Printer Output...	ZX Printer kimenete...
+form	main_.dfm	Sound Output...	Hangkimenet...
+form	main_.dfm	Tape Manager...	Kazettakezelő...
+form	main_.dfm	Wav Loader...	Hangfájl-betöltő...
+form	main_.dfm	BASIC Listing...	BASIC lista...
+form	main_.dfm	Help	Súgó
+form	main_.dfm	Help Topics	Súgótémakörök
+form	main_.dfm	Keyboard Map	Billentyűzetkiosztás
+form	main_.dfm	Interface Manuals/Technical Details	Interfészek kézikönyvei és műszaki adatai
+form	main_.dfm	Interface Utilities/Examples (ZX81)	Interfész-segédprogramok és példák (ZX81)
+form	main_.dfm	Interface Utilities/Examples (ZX Spectrum)	Interfész-segédprogramok és példák (ZX Spectrum)
+form	main_.dfm	Release History	Változások története
+form	main_.dfm	Check For Updates	Frissítések keresése
+form	main_.dfm	About EightyOne	Az EightyOne névjegye
+form	main_.dfm	EightyOne Snapshots (*.z81)	EightyOne pillanatképek (*.z81)
+form	main_.dfm	Jupiter Ace Snapshots (*.ace)	Jupiter Ace pillanatképek (*.ace)
+form	main_.dfm	.Z81 Snapshot	.Z81 pillanatkép
+form	main_.dfm	All ZX Files (*.tzx;*.wav;*.csw;*.tap;*.t81;*.p;*.p81;*.o;*.81;*.a83;*.b80;*.b81;*.b82;*.bas;*.txt;*.zip)	Minden ZX fájl (*.tzx;*.wav;*.csw;*.tap;*.t81;*.p;*.p81;*.o;*.81;*.a83;*.b80;*.b81;*.b82;*.bas;*.txt;*.zip)
+form	main_.dfm	Tape Files (*.tap;*.t81;*.p;*.p81;*.o;*.81;*.a83)	Kazettafájlok (*.tap;*.t81;*.p;*.p81;*.o;*.81;*.a83)
+form	main_.dfm	TZX Files (*.tzx)	TZX fájlok (*.tzx)
+form	main_.dfm	TAP Files (*.tap)	TAP fájlok (*.tap)
+form	main_.dfm	Wave Files (*.wav;*.csw)	Hangfájlok (*.wav;*.csw)
+form	main_.dfm	BASIC Listing Files (*.b80;*.b81;*.b82;*.bas;*.txt)	BASIC listafájlok (*.b80;*.b81;*.b82;*.bas;*.txt)
+form	main_.dfm	Compressed Files (*.zip)	Tömörített fájlok (*.zip)
+form	main_.dfm	Timex Dock Files (*.dck)	Timex Dock fájlok (*.dck)
+form	main_.dfm	Compressed Dock Files (*.zip)	Tömörített Dock fájlok (*.zip)
+form	main_.dfm	Configuration Files (*.ini)	Konfigurációs fájlok (*.ini)
+form	main_.dfm	Windows Bitmap (.bmp)	Windows bitkép (.bmp)
+form	main_.dfm	Spectrum Screen (.scr)	Spectrum képernyő (.scr)
+form	main_.dfm	RZX Recording (.rzx)	RZX felvétel (.rzx)
+form	memoryWindow.dfm	View Hex Bytes and Characters	Hexa bájtok és karakterek
+form	memoryWindow.dfm	View Hex Bytes	Hexa bájtok
+form	memoryWindow.dfm	View Hex Words	Hexa szavak
+form	memoryWindow.dfm	View Binary Bytes	Bináris bájtok
+form	memoryWindow.dfm	View Decimal Bytes	Decimális bájtok
+form	memoryWindow.dfm	Jump To ...	Ugrás ide...
+form	memoryWindow.dfm	Jump To	Ugrás ide
+form	memoryWindow.dfm	Find...	Keresés...
+form	memoryWindow.dfm	Clear Highlights	Kiemelések törlése
+form	midifrm.dfm SoundForm.dfm	Sound Settings	Hangbeállítások
+form	midifrm.dfm SoundForm.dfm	Send MIDI Output to:	MIDI kimenet ide:
+form	midifrm.dfm	Volume	Hangerő
+form	midifrm.dfm SoundForm.dfm	AY Channel	AY csatorna
+form	midifrm.dfm	Mute	Némítás
+form	SoundForm.dfm	Mix	Keverés
+form	SoundForm.dfm	=   Mute	=   némítás
+form	SoundForm.dfm	Stereo Mode	Sztereó mód
+form	SoundForm.dfm	Speech	Beszéd
+form	SoundForm.dfm	Mono	Mono
+form	SoundForm.dfm	Video Sound Settings	Videóhang beállításai
+form	SoundForm.dfm	Exclude ZX81 HSync Pulses	ZX81 vízszintes szinkronimpulzusok kihagyása
+form	SoundOP.dfm	Sound Output	Hangkimenet
+form	TZXMan.dfm wavload_.dfm	Rewind to Start	Visszatekerés az elejére
+form	TZXMan.dfm	Rewind to Previous Block	Visszatekerés az előző blokkra
+form	TZXMan.dfm wavload_.dfm	Play	Lejátszás
+form	TZXMan.dfm	Fast Forward to Next Block	Előretekerés a következő blokkra
+form	TZXMan.dfm wavload_.dfm	Fast Forward to End	Előretekerés a végére
+form	TZXMan.dfm wavload_.dfm	Auto Start/Stop	Automatikus indítás/megállítás
+form	TZXMan.dfm wavload_.dfm	Auto LOAD on Insert	Automatikus LOAD behelyezéskor
+form	TZXMan.dfm	Flash Load	Gyorstöltés
+form	TZXMan.dfm	Open Tape File	Kazettafájl megnyitása
+form	TZXMan.dfm	Save Tape File	Kazettafájl mentése
+form	TZXMan.dfm wavload_.dfm	Loading Sounds	Betöltés hangja
+form	TZXMan.dfm	All Tape Files	Minden kazettafájl
+form	TZXMan.dfm	Spectrum Files	Spectrum fájlok
+form	TZXMan.dfm	ZX81 Files	ZX81 fájlok
+form	TZXMan.dfm	ZX80 Files	ZX80 fájlok
+form	TZXMan.dfm	Lambda Files	Lambda fájlok
+form	TZXMan.dfm	.TZX File	.TZX fájl
+form	TZXMan.dfm	Edit...	Szerkesztés...
+form	TZXMan.dfm	Insert	Beszúrás
+form	TZXMan.dfm	Information	Információ
+form	TZXMan.dfm	Archive Information	Archív információ
+form	TZXMan.dfm	Hardware Information	Hardverinformáció
+form	TZXMan.dfm	Message	Üzenet
+form	TZXMan.dfm	Text Description	Szöveges leírás
+form	TZXMan.dfm	Group	Csoport
+form	TZXMan.dfm	Group Start	Csoport eleje
+form	TZXMan.dfm	Group End	Csoport vége
+form	TZXMan.dfm	Loop	Ismétlés
+form	TZXMan.dfm	Loop Start	Ismétlés eleje
+form	TZXMan.dfm	Loop End	Ismétlés vége
+form	TZXMan.dfm tzxEditData.dfm tzxEditGeneral.dfm	Data	Adat
+form	TZXMan.dfm	Extract	Kibontás
+form	TZXMan.dfm	Move Up	Mozgatás fel
+form	TZXMan.dfm	Move Down	Mozgatás le
+form	TZXMan.dfm	Convert Block to Wave	Blokk átalakítása hanggá
+form	TZXMan.dfm	Convert Tape to Wave	Kazetta átalakítása hanggá
+form	TZXMan.dfm	ZX81 Files (.p)	ZX81 fájlok (.p)
+form	TZXMan.dfm	ZX80 Files (.o)	ZX80 fájlok (.o)
+form	tzxEditArchive.dfm	Edit Archive Information	Archív információ szerkesztése
+form	tzxEditArchive.dfm	Title:	Cím:
+form	tzxEditArchive.dfm	Publisher:	Kiadó:
+form	tzxEditArchive.dfm	Author:	Szerző:
+form	tzxEditArchive.dfm	Year of Publication:	Kiadás éve:
+form	tzxEditArchive.dfm	Language:	Nyelv:
+form	tzxEditArchive.dfm	Price:	Ár:
+form	tzxEditArchive.dfm	Protection Scheme:	Másolásvédelem:
+form	tzxEditArchive.dfm	Origin:	Eredet:
+form	tzxEditArchive.dfm	Comments:	Megjegyzések:
+form	tzxEditData.dfm	Edit Data Block	Adatblokk szerkesztése
+form	tzxEditData.dfm	Pilot Pulse Length	Vezetőimpulzus hossza
+form	tzxEditData.dfm	No. of Pilot pulses	Vezetőimpulzusok száma
+form	tzxEditData.dfm	Final Byte Used Bits	Utolsó bájt használt bitjei
+form	tzxEditData.dfm	Sync Pulse 1 Length	1. szinkronimpulzus hossza
+form	tzxEditData.dfm	Sync Pulse 2 Length	2. szinkronimpulzus hossza
+form	tzxEditData.dfm	Bit 0 Length	0 bit hossza
+form	tzxEditData.dfm	Bit 1 Length	1 bit hossza
+form	tzxEditData.dfm tzxEditGeneral.dfm	Character Set:	Karakterkészlet:
+form	tzxEditGeneral.dfm	Edit General Data Block	Általános adatblokk szerkesztése
+form	tzxEditGeneral.dfm	Pilot/Sync Symbol Table	Vezető/szinkron jeltáblázat
+form	tzxEditGeneral.dfm	Data Symbol Table	Adat jeltáblázat
+form	tzxEditGeneral.dfm tzxEditPause.dfm	Pause:	Szünet:
+form	tzxEditGeneral.dfm	Pilot/Sync Data	Vezető/szinkron adat
+form	tzxEditGeneral.dfm	Save...	Mentés...
+form	tzxEditHWInfo.dfm	Edit Hardware Information	Hardverinformáció szerkesztése
+form	tzxEditHWInfo.dfm	Computers	Számítógépek
+form	tzxEditHWInfo.dfm	Sound	Hang
+form	tzxEditHWInfo.dfm	Graphics	Grafika
+form	tzxEditHWInfo.dfm	Low Ram	Alsó RAM
+form	tzxEditHWInfo.dfm	Doesn't Run On	Nem fut rajta
+form	tzxEditHWInfo.dfm	Uses Features of	Kihasználja
+form	tzxEditHWInfo.dfm	Runs On	Fut rajta
+form	tzxEditHWInfo.dfm	Not Specified	Nincs megadva
+form	tzxEditPause.dfm	Edit Pause Block	Szünetblokk szerkesztése
+form	tzxEditText.dfm	Edit Text Block	Szövegblokk szerkesztése
+form	tzxEditText.dfm	Text:	Szöveg:
+form	wavload_.dfm	Rewind	Visszatekerés
+form	wavload_.dfm	Record	Felvétel
+form	wavload_.dfm	Fast Forward	Előretekerés
+form	wavload_.dfm	New Wav	Új hangfájl
+form	wavload_.dfm	Open Wav File	Hangfájl megnyitása
+form	wavload_.dfm	Save Wav File	Hangfájl mentése
+form	wavload_.dfm	Convert Next Block to TZX	Következő blokk átalakítása TZX-szé
+form	wavload_.dfm	44.1kHz, 8 bit Stereo	44,1 kHz, 8 bites, sztereó
+form	wavload_.dfm	Recording	Felvétel
+form	wavload_.dfm	WAV Files	WAV fájlok
+form	wavload_.dfm	CSW Files	CSW fájlok
+form	wavload_.dfm	Compressed Files	Tömörített fájlok
+form	zx97Config.dfm	ZX97 Configuration	ZX97 beállításai
+form	zx97Config.dfm	Protect:	Védelem:
+form	zx97Config.dfm	Bank 0 (ROM)	0. bank (ROM)
+form	zx97Config.dfm	Bank 1-15 (RAM)	1-15. bank (RAM)
+form	zx97Config.dfm	Save RAM on power down	RAM mentése kikapcsoláskor
+form	zx97Config.dfm	Swap ROM/RAM	ROM/RAM csere
+form	zxprinter.dfm	Carriage Speed	Kocsisebesség
+form	zxprinter.dfm	Paper Feed Speed	Papírtovábbítás sebessége
+form	zxprinter.dfm	Style:	Stílus:
+form	zxprinter.dfm	Plain Paper	Sima papír
+form	zxprinter.dfm	Feed	Papírtovábbítás
+form	zxprinter.dfm	Windows Bitmap (BMP)	Windows bitkép (BMP)
+form	About_.dfm	lib765 and libdsk © 2000-2005 John Elliot.	lib765 és libdsk © 2000-2005 John Elliot.
+form	About_.dfm	© 2011-2025 Charlie Robson and Paul Farrow	© 2011-2025 Charlie Robson és Paul Farrow
+code	main_.cpp	Language	Nyelv
+code	About_.cpp	Version {0}	Verzió: {0}
+code	About_.cpp	Unknown	Ismeretlen
+code	BasicLister_.cpp	There is no BASIC program loaded.	Nincs betöltve BASIC program.
+code	BasicLister_.cpp	Save BASIC Listing	BASIC lista mentése
+code	IBasicLoader.cpp	Load BASIC Listing	BASIC lista betöltése
+code	IBasicLoader.cpp	Unable to parse line {0} - {1}	A(z) {0}. sor nem értelmezhető – {1}
+code	IBasicLoader.cpp	File not found:	A fájl nem található:
+code	IBasicLoader.cpp	Failed to load file:	A fájl betöltése nem sikerült:
+code	IBasicLoader.cpp	Error reading line {0} - {1}	Hiba a(z) {0}. sor olvasásakor – {1}
+code	IBasicLoader.cpp	Invalid character Code: {0}	Érvénytelen karakter, kód: {0}
+code	specBasicLoader.cpp	Invalid graphic Code: {0}	Érvénytelen grafikus jel, kód: {0}
+code	zx80BasicLoader.cpp	Invalid graphic - Code {0}	Érvénytelen grafikus jel, kód: {0}
+code	zx80BasicLoader.cpp	Invalid character - Character {0}	Érvénytelen karakter: {0}
+code	zx81BasicLoader.cpp	Invalid character: {0}	Érvénytelen karakter: {0}
+code	Debug.cpp	On	Be
+code	Debug.cpp	Off	Ki
+code	Debug.cpp	Black	Fekete
+code	Debug.cpp	Enabled	Bekapcsolva
+code	Debug.cpp	Run	Futtatás
+code	Debug.cpp	ZXC1 Cartridge	ZXC1 kártya
+code	ProfilePlot_.cpp	Profiler - {0}	Profilozó – {0}
+code	Profiler.cpp	Are you sure you wish to delete this entry?	Biztosan törli ezt a bejegyzést?
+code	Profiler.cpp	Delete Profile Entry	Profilbejegyzés törlése
+code	HW_.cpp	Opus Printer Port	Opus nyomtatóport
+code	HW_.cpp	DISCiPLE Printer Port	DISCiPLE nyomtatóport
+code	HW_.cpp	Plus D Printer Port	Plus D nyomtatóport
+code	HW_.cpp	+2A/+3 Printer Port	+2A/+3 nyomtatóport
+code	HW_.cpp; main_.cpp	Sound Error	Hanghiba
+code	HW_.cpp	Failed to load cartridge file:\n\n{0}	A kártyafájl betöltése nem sikerült:\n\n{0}
+code	HW_.cpp; Interface1.cpp; SerialPort.cpp; Parallel.cpp; ZipFile_.cpp	Error	Hiba
+code	HW_.cpp	DSERR_ALLOCATED:\n\nThe request failed because resources, such as a priority level, were already in use by another caller.	DSERR_ALLOCATED:\n\nA kérés nem sikerült, mert az erőforrásokat (például egy prioritási szintet) már egy másik program használja.
+code	HW_.cpp	DSERR_INVALIDPARAM:\n\nAn invalid parameter was passed to the returning function.	DSERR_INVALIDPARAM:\n\nA függvény érvénytelen paramétert kapott.
+code	HW_.cpp	DSERR_NOAGGREGATION:\n\nThe object does not support aggregation.	DSERR_NOAGGREGATION:\n\nAz objektum nem támogatja az aggregációt.
+code	HW_.cpp	DSERR_NODRIVER:\n\nNo sound driver is available for use, or the given GUID is not a valid DirectSound device ID.	DSERR_NODRIVER:\n\nNincs használható hangmeghajtó, vagy a megadott GUID nem érvényes DirectSound eszközazonosító.
+code	HW_.cpp	DSERR_OUTOFMEMORY:\n\nThe DirectSound subsystem could not allocate sufficient memory to complete the caller's request.	DSERR_OUTOFMEMORY:\n\nA DirectSound nem tudott elég memóriát lefoglalni a kérés teljesítéséhez.
+code	HW_.cpp	Standard 16K	Normál 16K
+code	HW_.cpp	Video So&und	Videó han&g
+code	HW_.cpp	Total RAM: {0}K	Teljes RAM: {0}K
+code	HW_.cpp	The +3e ROM is required by this IDE device. Select an appropriate ROM from the Advanced Settings tab.	Ehhez az IDE eszközhöz a +3e ROM szükséges. A megfelelő ROM-ot a Speciális beállítások fülön választhatja ki.
+code	HW_.cpp	The +3e ROM is supported by this IDE device. Select an appropriate ROM from the Advanced Settings tab. Disable the on-board ROM using the jumper.	Ez az IDE eszköz támogatja a +3e ROM-ot. A megfelelő ROM-ot a Speciális beállítások fülön választhatja ki. A beépített ROM-ot az átkötéssel (jumper) tiltsa le.
+code	HW_.cpp	Color:	Szín:
+code	HW_.cpp	Select ROM File	ROM-fájl kiválasztása
+code	HW_.cpp	ROM Files (*.rom;*.bin)	ROM-fájlok (*.rom;*.bin)
+code	HW_.cpp	Automatically select the following ZXpand+ facilities?\n\n32K RAM Pack, RAM in 8K-16K Region, WRX High Resolution,\nZON X Sound, ZXpand Joystick	Kiválassza automatikusan a következő ZXpand+ szolgáltatásokat?\n\n32K RAM-bővítő, RAM a 8K-16K tartományban, WRX nagy felbontás,\nZON X hang, ZXpand joystick
+code	HW_.cpp	ZXpand+ Configuration	ZXpand+ beállításai
+code	HW_.cpp	Select ROM Cartridge File	ROM-kártyafájl kiválasztása
+code	HW_.cpp	ROM Cartridge Files (*.rom;*.bin;*.dck)	ROM-kártyafájlok (*.rom;*.bin;*.dck)
+code	Interface1.cpp; Parallel.cpp; midifrm.cpp; SoundForm.cpp	Nothing	Semmi
+code	Interface1.cpp; Parallel.cpp; SerialPort.cpp	FILE...	FÁJL...
+code	Interface1.cpp; Parallel.cpp; SerialPort.cpp	Could not open port {0}	A(z) {0} port nem nyitható meg
+code	MemSave_.cpp	Save Block...	Blokk mentése...
+code	MemSave_.cpp	Load File...	Fájl betöltése...
+code	MemSave_.cpp	Load Block...	Blokk betöltése...
+code	MemSave_.cpp	Memory save failed	A memória mentése nem sikerült
+code	MemSave_.cpp	Memory load failed	A memória betöltése nem sikerült
+code	Plus3Drives.cpp	HDF Image File...	HDF képfájl...
+code	Plus3Drives.cpp	Microdrive Cartridges (*.mdr;*.mdv)	Microdrive-kazetták (*.mdr;*.mdv)
+code	Plus3Drives.cpp	Select Microdrive Cartridge	Microdrive-kazetta kiválasztása
+code	Plus3Drives.cpp	DSK Disk Images (*.dsk)	DSK lemezképek (*.dsk)
+code	Plus3Drives.cpp	Select +3 Disk	+3 lemez kiválasztása
+code	Plus3Drives.cpp	Plus D Disk Images (*.mgt;*.img)	Plus D lemezképek (*.mgt;*.img)
+code	Plus3Drives.cpp	Select Plus D Disk	Plus D lemez kiválasztása
+code	Plus3Drives.cpp	DISCiPLE Disk Images (*.mgt;*.img)	DISCiPLE lemezképek (*.mgt;*.img)
+code	Plus3Drives.cpp	Select DISCiPLE Disk	DISCiPLE lemez kiválasztása
+code	Plus3Drives.cpp	Select Beta Disk	Beta lemez kiválasztása
+code	Plus3Drives.cpp	Opus Discovery Disk Images (*.opd;*.opu)	Opus Discovery lemezképek (*.opd;*.opu)
+code	Plus3Drives.cpp	Select Opus Discovery Disk	Opus Discovery lemez kiválasztása
+code	Plus3Drives.cpp	Select Larken Disk	Larken lemez kiválasztása
+code	Plus3Drives.cpp	Select ZX1541 Disk	ZX1541 lemez kiválasztása
+code	Plus3Drives.cpp	{0} does not exist.\nWould you like to create it?	A(z) {0} nem létezik.\nLétrehozza?
+code	Plus3Drives.cpp	Select Hard Disk Image	Merevlemezkép kiválasztása
+code	Plus3Drives.cpp	File already exists.	A fájl már létezik.
+code	Plus3Drives.cpp	Create New Microdrive Cartridge	Új Microdrive-kazetta létrehozása
+code	Plus3Drives.cpp	Microdrive Cartridge (*.mdr)	Microdrive-kazetta (*.mdr)
+code	Plus3Drives.cpp	Failed to create Microdrive cartridge	A Microdrive-kazetta létrehozása nem sikerült
+code	SplashScreen.cpp	Initialising {0}...	Indítás: {0}...
+code	splashImpl.cpp	Main Timer	Fő időzítő
+code	splashImpl.cpp	About Box	Névjegy
+code	splashImpl.cpp	Keyboard Helper	Billentyűzetsegéd
+code	splashImpl.cpp	Memory Manager	Memóriakezelő
+code	splashImpl.cpp	Z80 Debugger	Z80 hibakereső
+code	splashImpl.cpp	Wav Loader	Hangfájl-betöltő
+code	splashImpl.cpp	ZIP Support	ZIP-támogatás
+code	splashImpl.cpp	Basic Loader	BASIC-betöltő
+code	splashImpl.cpp	Basic Lister	BASIC-listázó
+code	splashImpl.cpp	Floppy Disk	Hajlékonylemez
+code	splashImpl.cpp	Hard Disk	Merevlemez
+code	splashImpl.cpp	Machine Emulation	Gépemuláció
+code	splashImpl.cpp	Midi	MIDI
+code	splashImpl.cpp	Parallel Port	Párhuzamos port
+code	ZipFile_.cpp	Sorry, that archive does not contain any files of the relevant type	Az archívum nem tartalmaz megfelelő típusú fájlt
+code	main_.cpp	The location of the EightyOne folder may cause selection of alternate ROMs\nor ROM cartridges to exceed to maximum path length supported by Windows.\n\nCheck and show this warning next time EightyOne is started?	Az EightyOne mappájának helye miatt más ROM-ok vagy ROM-kártyák\nkiválasztásakor az elérési út túllépheti a Windows által támogatott hosszt.\n\nEllenőrizze és jelenítse meg ezt a figyelmeztetést az EightyOne következő indításakor?
+code	main_.cpp	Warning	Figyelmeztetés
+code	main_.cpp	Changes pending on Hardware Dialog	A Hardver ablakban nem alkalmazott változtatások vannak
+code	main_.cpp	.ACE Snapshot	.ACE pillanatkép
+code	main_.cpp	.Z80 Snapshot	.Z80 pillanatkép
+code	main_.cpp	.SNA Snapshot	.SNA pillanatkép
+code	main_.cpp	Compressed Snapshot	Tömörített pillanatkép
+code	main_.cpp	All Snapshot Files	Minden pillanatképfájl
+code	main_.cpp	Spectrum Snapshots	Spectrum pillanatképek
+code	main_.cpp	Paused	Szünet
+code	main_.cpp	Debug Mode	Hibakereső mód
+code	main_.cpp	Game Controller {0}	{0}. játékvezérlő
+code	memoryWindow.cpp	First	Első
+code	memoryWindow.cpp	Previous	Előző
+code	memoryWindow.cpp	Next	Következő
+code	memoryWindow.cpp	Last	Utolsó
+code	memoryWindow.cpp	{0} Change	{0} változás
+code	SoundDX.cpp	Message Sending Error	Üzenetküldési hiba
+code	SoundForm.cpp	Video	Videó
+code	TZXFILE.cpp	Code	Kód
+code	TZXFILE.cpp	--- Stop The Tape ---	--- Kazetta megállítása ---
+code	TZXMan.cpp	Description	Leírás
+code	TZXMan.cpp	Size	Méret
+code	TZXMan.cpp	{0} - Tape	{0} – Kazetta
+code	TZXMan.cpp	Untitled - Tape	Névtelen – Kazetta
+code	TZXMan.cpp	Open	Megnyitás
+code	tzxEditGeneral.cpp	ZX81 Nameless Program (*.p)	ZX81 név nélküli program (*.p)
+code	tzxEditGeneral.cpp	ZX81 Named Program (*.p81)	ZX81 névvel ellátott program (*.p81)
+code	tzxEditGeneral.cpp	ZX80 Program (*.o)	ZX80 program (*.o)
+code	tzxEditGeneral.cpp	File saving failed: '{0}'	A fájl mentése nem sikerült: „{0}”
+code	tzxEditText.cpp	Edit Group Start Block	Csoportkezdő blokk szerkesztése
+code	tzxload.cpp	The start of the program data could not be found.	A programadatok eleje nem található.
+code	tzxload.cpp	File integrity error	Sérült fájl
+code	tzxload.cpp	File size warning	Fájlméret-figyelmeztetés
+code	wavload_.cpp	Stopped	Megállítva
+code	wavload_.cpp	Wave Loader - {0}	Hangfájl-betöltő – {0}
+code	wavload_.cpp	Untitled - Wave	Névtelen – Hang
+code	wavload_.cpp	{0} - Wave	{0} – Hang
+code	snap.cpp	Load snapshot failed.	A pillanatkép betöltése nem sikerült.
+code	snap.cpp	Save snapshot failed.	A pillanatkép mentése nem sikerült.
+code	snap.cpp	ROM load to address failed:\n{0}	A ROM betöltése a megadott címre nem sikerült:\n{0}
+code	snap.cpp	ROM load failed:\n{0}	A ROM betöltése nem sikerült:\n{0}
+code	snap.cpp	Font load failed:\n{0}	A karakterkészlet betöltése nem sikerült:\n{0}
+code	zxprinter.cpp	Carriage Speed: {0}	Kocsisebesség: {0}
+code	zxprinter.cpp	Paper Feed Speed: {0}	Papírtovábbítás sebessége: {0}
+code	BasicLister_.cpp	{0} ZxText2P BASIC File (*.{1})	{0} ZxText2P BASIC-fájl (*.{1})
+code	BasicLister_.cpp	{0} ZxToken BASIC File (*.{1})	{0} ZxToken BASIC-fájl (*.{1})
+code	BasicLister_.cpp	Bitmap File (*.bmp)	Bitkép (*.bmp)
+code	BasicLister_.cpp	Line {0}: 	{0}. sor: 
+code	BasicLister_.cpp	Lines {0}	{0} sor
+code	Debug.cpp	ZXC2 Cartridge	ZXC2 kártya
+code	Debug.cpp	ZXC3 Cartridge	ZXC3 kártya
+code	Debug.cpp	ZXC4 Cartridge	ZXC4 kártya
+code	Debug.cpp	Hit Count = {0}	Találatok száma = {0}
+code	ProfilePlot_.cpp	Min: {0} Max: {1}	Min: {0} Max: {1}
+code	ProfilePlot_.cpp	Current: {0}	Aktuális: {0}
+code	ProfilePlot_.cpp	Sample: {0}	Minta: {0}
+code	SetBreakpoint_.cpp	Addr Start	Kezdőcím
+code	SetBreakpoint_.cpp	Addr End	Végcím
+code	SetBreakpoint_.cpp	Value	Érték
+code	SetBreakpoint_.cpp	Addr A7-0	Cím A7-0
+code	SetBreakpoint_.cpp	Addr A15-8	Cím A15-8
+code	SetBreakpoint_.cpp	T-States	T-állapotok
+code	SetBreakpoint_.cpp	Bit	Bit
+code	Plus3Drives.cpp	Removable Drive, 	Cserélhető meghajtó, 
+code	Plus3Drives.cpp	Fixed Drive, 	Beépített meghajtó, 
+code	Plus3Drives.cpp	Create New +3 Floppy Disk	Új +3 hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New Plus D Floppy Disk	Új Plus D hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New DISCiPLE Floppy Disk	Új DISCiPLE hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New Beta Floppy Disk	Új Beta hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New Opus Discovory Floppy Disk	Új Opus Discovery hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New Larken Floppy Disk	Új Larken hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Create New ZX1541 Floppy Disk	Új ZX1541 hajlékonylemez létrehozása
+code	Plus3Drives.cpp	Microdrive Cartridges	Microdrive-kazetták
+code	Plus3Drives.cpp	Microdrive Cartridge	Microdrive-kazetta
+code	Plus3Drives.cpp	DSK Disk Images	DSK lemezképek
+code	Plus3Drives.cpp	Compressed Disk Images	Tömörített lemezképek
+code	Plus3Drives.cpp	All Disk Images	Minden lemezkép
+code	Plus3Drives.cpp	Plus D Disk Images	Plus D lemezképek
+code	Plus3Drives.cpp	DISCiPLE Disk Images	DISCiPLE lemezképek
+code	Plus3Drives.cpp	TR-DOS Disk Images	TR-DOS lemezképek
+code	Plus3Drives.cpp	Opus Discovery Disk Images	Opus Discovery lemezképek
+code	Plus3Drives.cpp	Larken Disk Images	Larken lemezképek
+code	main_.cpp	{0} Scanlines	{0} sor
+code	TZXFILE.cpp	Program: 	Program: 
+code	TZXFILE.cpp	Num Array: 	Számtömb: 
+code	TZXFILE.cpp	Chr Array: 	Karaktertömb: 
+code	TZXFILE.cpp	Code: 	Kód: 
+code	TZXFILE.cpp	Unknown: 	Ismeretlen: 
+code	TZXFILE.cpp	Dict: 	Szótár: 
+code	TZXFILE.cpp	Bytes: 	Bájtok: 
+code	TZXFILE.cpp	Hardware - 	Hardver – 
+code	TZXFILE.cpp	Spectrum ROM	Spectrum ROM
+code	TZXFILE.cpp	Turbo Loader	Turbó betöltő
+code	TZXFILE.cpp	Pure Tone	Tiszta hang
+code	TZXFILE.cpp	Pulse Sequence	Impulzussorozat
+code	TZXFILE.cpp	Pure Data	Nyers adat
+code	TZXFILE.cpp	Direct Recording	Közvetlen felvétel
+code	TZXFILE.cpp	CSW Recording	CSW felvétel
+code	TZXFILE.cpp	General Data	Általános adat
+code	TZXFILE.cpp	Jump to Block	Ugrás blokkra
+code	TZXFILE.cpp	Select Block	Blokkválasztás
+code	TZXFILE.cpp	Stop Tape	Kazetta megállítása
+code	TZXFILE.cpp	Set Level	Jelszint beállítása
+code	TZXFILE.cpp	Archive info	Archív információ
+code	TZXFILE.cpp	Hardware Type	Hardvertípus
+code	TZXFILE.cpp	Custom Info	Egyéni információ
+code	TZXFILE.cpp	Glue	Összefűzés
+code	TZXMan.cpp	TZX File	TZX fájl
+code	TZXMan.cpp	TAP File	TAP fájl
+code	TZXMan.cpp	T81 File	T81 fájl
+code	TZXMan.cpp	P File	P fájl
+code	TZXMan.cpp	O File	O fájl
+code	TZXMan.cpp	P81 File	P81 fájl
+code	tzxload.cpp	The file contains {0} bytes more than specifed by ELINE. These will be ignored.	A fájl {0} bájttal hosszabb, mint amit az ELINE megad. A többletet figyelmen kívül hagyja.
+code	tzxload.cpp	The file contains {0} byte more than specifed by ELINE. This will be ignored.	A fájl {0} bájttal hosszabb, mint amit az ELINE megad. A többletet figyelmen kívül hagyja.
+code	wavload_.cpp	{0}kHz, {1}bit Stereo	{0} kHz, {1} bites, sztereó
+code	wavload_.cpp	{0}kHz, {1}bit Mono	{0} kHz, {1} bites, monó
+code	wavload_.cpp	Loading	Betöltés
+code	wavload_.cpp	Playing	Lejátszás
+code	wavload_.cpp	Windows WAV Files	Windows WAV fájlok
+code	AccDraw_.cpp	Count not initialise DirectDraw.\nPlease ensure DirectX 7 or greater is installed	A DirectDraw nem indítható el.\nEllenőrizze, hogy a DirectX 7 vagy újabb telepítve van-e.
+code	main_.cpp	Automatic	Automatikus

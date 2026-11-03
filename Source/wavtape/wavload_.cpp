@@ -29,6 +29,7 @@
 #include "sound.h"
 #include "ZipFile_.h"
 #include "BasicLister\BasicLister_.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "OffBtn"
@@ -133,7 +134,7 @@ __fastcall TWavLoad::TWavLoad(TComponent* Owner)
         Playing=0;
         Threshold=50;
         Channel=0;
-        StatusText="Stopped";
+        StatusText=Tr("Stopped");
 
         IgnoreZX81=false;
 
@@ -171,7 +172,7 @@ void TWavLoad::LoadFile(AnsiString FName)
         ScrollBar->Max = Wav.NoSamples;
         ScrollBar->Position = 0;
 
-        Caption="Wave Loader - "+FileNameGetFname(FileName)+FileNameGetExt(FileName);
+        Caption=TrF("Wave Loader - {0}", FileNameGetFname(FileName)+FileNameGetExt(FileName));
 
         UpdateImage();
         DoCaption("Stopped");
@@ -310,7 +311,7 @@ void TWavLoad::DoCaption(AnsiString Message)
         if (Message=="") Message=StatusText;
         else StatusText=Message;
 
-        StatusBar1->Panels->Items[2]->Text=Message;
+        StatusBar1->Panels->Items[2]->Text=Tr(Message);
         if (Wav.SampleRate>0)
         {
                 AnsiString text;
@@ -320,19 +321,18 @@ void TWavLoad::DoCaption(AnsiString Message)
                 text += "s";
                 StatusBar1->Panels->Items[1]->Text=text;
 
-                text = Wav.SampleRate / 1000;
-                text += "kHz, ";
-                text += Wav.Bits;
-                text += "bit ";
-                if (Wav.Stereo) text += "Stereo";
-                else text += "Mono";
+                AnsiString rate, bits;
+                rate = Wav.SampleRate / 1000;
+                bits = Wav.Bits;
+                if (Wav.Stereo) text = TrF("{0}kHz, {1}bit Stereo", rate, bits);
+                else text = TrF("{0}kHz, {1}bit Mono", rate, bits);
 
                 StatusBar1->Panels->Items[0]->Text=text;
 
         }
 
-        if (FileName=="") Caption="Untitled - Wave";
-        else Caption=FileNameGetFname(FileName)+FileNameGetExt(FileName)+" - Wave";
+        if (FileName=="") Caption=Tr("Untitled - Wave");
+        else Caption=TrF("{0} - Wave", FileNameGetFname(FileName)+FileNameGetExt(FileName));
 }
 
 void __fastcall TWavLoad::Image1MouseMove(TObject *Sender, TShiftState Shift, int X, int Y)
@@ -398,7 +398,7 @@ void TWavLoad::SaveSettings(TIniFile *ini)
 
 void __fastcall TWavLoad::SaveBtnClick(TObject *Sender)
 {
-        AnsiString Filter = "Windows WAV Files|*.wav";
+        AnsiString Filter = LanguageFilter("Windows WAV Files|*.wav");
 
         if (FileName != "") SaveWavDialog->FileName = RemoveExt(FileName);
         else SaveWavDialog->FileName = RemoveExt(SaveWavDialog->FileName);
@@ -511,7 +511,7 @@ void __fastcall TWavLoad::NewClick(TObject *Sender)
         ScrollBar->Max = Wav.NoSamples;
         ScrollBar->Position = 0;
 
-        Caption="Wave Loader";
+        Caption=Tr("Wave Loader");
 
         UpdateImage();
         DoCaption("Stopped");
@@ -593,7 +593,7 @@ void __fastcall TWavLoad::BiasChange(TObject *Sender)
 
 void __fastcall TWavLoad::SaveWav1Click(TObject *Sender)
 {
-        AnsiString Filter = "Windows WAV Files|*.wav";
+        AnsiString Filter = LanguageFilter("Windows WAV Files|*.wav");
 
         if (FileName != "") SaveWavDialog->FileName = RemoveExt(FileName);
         else SaveWavDialog->FileName = RemoveExt(SaveWavDialog->FileName);
@@ -639,7 +639,7 @@ void __fastcall TWavLoad::NewWav1Click(TObject *Sender)
         ScrollBar->Max = Wav.NoSamples;
         ScrollBar->Position = 0;
 
-        Caption="Wave Loader";
+        Caption=Tr("Wave Loader");
 
         UpdateImage();
         DoCaption("Stopped");

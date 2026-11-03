@@ -24,6 +24,8 @@ USERES("EightyOne.res");
 USEUNIT("z80\z80_ops.c");
 USEUNIT("z80\z80.c");
 USEUNIT("kbstatus.cpp");
+USEUNIT("Language.cpp");
+USEUNIT("LanguageHu.cpp");
 USEFORM("About_.cpp", About);
 USEFORM("Keyboard_.cpp", Keyboard);
 USEFORM("Speed_.cpp", Speed);
@@ -142,6 +144,7 @@ USEUNIT("Keypad\keypad.cpp");
 //---------------------------------------------------------------------------
 #include "SplashScreen.h"
 #include "main_.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 char **CommandLine;
 TSplash *spl;
@@ -208,6 +211,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdline, int)
                 Application->Initialize();
                 Application->Title = "EightyOne";
                  #include "splashImpl.cpp"
+
+                LanguageTranslateAll();
 
                 Application->ProcessMessages();
                 delete spl;

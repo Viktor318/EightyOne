@@ -26,6 +26,7 @@
 #include "z80.h"
 #include "utils.h"
 #include "Plus3Drives.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "CPort"
@@ -37,8 +38,8 @@ __fastcall TParallelPort::TParallelPort(TComponent* Owner)
 {
         TIniFile *ini;
 
-        ComPortList->Items->Add("Nothing");
-        ComPortList->Items->Add("FILE...");
+        ComPortList->Items->Add(Tr("Nothing"));
+        ComPortList->Items->Add(Tr("FILE..."));
         ComPortList->Items->Add("TCP/IP...");
         if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"COM");
         if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"LPT");
@@ -124,9 +125,8 @@ void __fastcall TParallelPort::OKClick(TObject *Sender)
                         try { ComPort->Open(); }
                         catch(EComPort &E)
                         {
-                                AnsiString Msg = "Could not open port ";
-                                Msg += ComPortList->Items->Strings[ComPortList->ItemIndex];
-                                if (Sender) Application->MessageBox(Msg.c_str(),"Error", MB_OK | MB_ICONERROR);
+                                AnsiString Msg = TrF("Could not open port {0}", ComPortList->Items->Strings[ComPortList->ItemIndex]);
+                                if (Sender) Application->MessageBox(Msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
                         }
                 }
                 break;
@@ -146,7 +146,7 @@ void __fastcall TParallelPort::ComPortListChange(TObject *Sender)
         TCPPanel->Visible=false;
         FilePanel->Visible=false;
 
-        if (Port.SubString(1,3)=="FIL") FilePanel->Visible=true;
+        if (LanguageSame(Port, "FILE...")) FilePanel->Visible=true;
         if (Port.SubString(1,3)=="TCP") TCPPanel->Visible=true;
         if (Port.SubString(1,3)=="COM") PortPanel->Visible=true;
 }

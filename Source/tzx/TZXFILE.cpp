@@ -29,6 +29,7 @@
 #include "tzxEditHWInfo.h"
 #include "tzxEditGeneral.h"
 #include "tzxEditData.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 
@@ -186,7 +187,7 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                         switch(data[1])
                         {
                         case 0:
-                                text="Program: ";
+                                text=Tr("Program: ");
                                 i=(unsigned char)data[14]+(unsigned char)data[15]*256;
                                 if (i<32768)
                                 {
@@ -194,10 +195,10 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                                         parameters+=i;
                                 }
                                 break;
-                        case 1: text="Num Array: "; break;
-                        case 2: text="Chr Array: "; break;
+                        case 1: text=Tr("Num Array: "); break;
+                        case 2: text=Tr("Chr Array: "); break;
                         case 3:
-                                text="Code: ";
+                                text=Tr("Code: ");
                                 i=(unsigned char)data[14]+(unsigned char)data[15]*256;
                                 parameters+=i;
                                 parameters+=",";
@@ -207,7 +208,7 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                                         parameters="SCREEN$";
 
                                 break;
-                        default: text="Unknown: "; break;
+                        default: text=Tr("Unknown: "); break;
                         }
 
                         text += "\"";
@@ -222,16 +223,16 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                 {
                         switch(data[1])
                         {
-                        case 0: text="Dict: \""; break;
+                        case 0: text=Tr("Dict: ") + "\""; break;
                         case 32:
-                                text="Bytes: \"";
+                                text=Tr("Bytes: ") + "\"";
                                 i=(unsigned char)data[14]+(unsigned char)data[15]*256;
                                 parameters+=i;
                                 parameters+=",";
                                 i=(unsigned char)data[12]+(unsigned char)data[13]*256;
                                 parameters+=i;
                                 break;
-                        default: text="Unknown: \""; break;
+                        default: text=Tr("Unknown: ") + "\""; break;
                         }
                         for(i=2;i<12;i++)
                                 if (data[i]>=32 && data[i]<127) text += data[i];
@@ -256,7 +257,7 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                 return(text);
 
         case 0x33:
-                text="Hardware - ";
+                text=Tr("Hardware - ");
                 text += HWName[Tape[BlockNo].Data.HWTypes[0].ID];
                 return(text);
 
@@ -268,15 +269,15 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                         && (Tape[BlockNo].Head.General.ASD==2))
                 {
                         text=GetFName(BlockNo);
-                        if (text!="") text = "Program: \""+text+"\"";
-                        else text="Code";
+                        if (text!="") text = Tr("Program: ") + "\""+text+"\"";
+                        else text=Tr("Code");
                 }
                 else    text="";
                 return(text);
 
         case TZX_BLOCK_PAUSE:
-                if (Tape[BlockNo].Pause==0) text="--- Stop The Tape ---";
-                else text="Pause";
+                if (Tape[BlockNo].Pause==0) text=Tr("--- Stop The Tape ---");
+                else text=Tr("Pause");
                 return(text);
 
         default:
@@ -284,7 +285,7 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                 do
                 {
                         if (BlockNames[i].id==Tape[BlockNo].BlockID)
-                                return(BlockNames[i].name);
+                                return(Tr(BlockNames[i].name));
 
                                 i++;
                 } while (BlockNames[i].id != -1);
@@ -406,7 +407,7 @@ AnsiString TTZXFile::GetBlockType(int BlockNo)
         case 0x32:
         case 0x33:
         case 0x35:
-                return("Info");
+                return(Tr("Info"));
 
         default:
                 return(IntToHex(Tape[BlockNo].BlockID,2));

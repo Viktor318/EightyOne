@@ -25,6 +25,7 @@
 #include "tzxfile.h"
 #include "tzxman.h"
 #include "utils.h"
+#include "Language.h"
 extern TTZXFile TZXFile;
 
 //---------------------------------------------------------------------------
@@ -242,7 +243,7 @@ void __fastcall TEditGeneralForm::SaveZX81File()
                 ++px;
         }
 
-        SaveDialog1->Filter = "ZX81 Nameless Program (*.p)|*.p|ZX81 Named Program (*.p81)|*.p81";
+        SaveDialog1->Filter = LanguageFilter("ZX81 Nameless Program (*.p)|*.p|ZX81 Named Program (*.p81)|*.p81");
         SaveDialog1->FileName = fn;
         if (SaveDialog1->Execute())
         {
@@ -267,14 +268,14 @@ void __fastcall TEditGeneralForm::SaveZX81File()
                 }
                 else
                 {
-                        ShowMessage("File saving failed: '" + filename + "'");
+                        ShowMessage(TrF("File saving failed: '{0}'", filename));
                 }
         }
 }
 
 void __fastcall TEditGeneralForm::SaveZX80File()
 {
-        SaveDialog1->Filter = "ZX80 Program (*.o)|*.o";
+        SaveDialog1->Filter = LanguageFilter("ZX80 Program (*.o)|*.o");
         SaveDialog1->FileName = "";
         if (SaveDialog1->Execute())
         {
@@ -290,7 +291,7 @@ void __fastcall TEditGeneralForm::SaveZX80File()
                 }
                 else
                 {
-                        ShowMessage("File saving failed: '" + filename + "'");
+                        ShowMessage(TrF("File saving failed: '{0}'", filename));
                 }
         }
 }

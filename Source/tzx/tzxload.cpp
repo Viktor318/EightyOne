@@ -24,6 +24,7 @@
 
 #include "tzxfile.h"
 #include "utils.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 
 #pragma package(smart_init)
@@ -807,8 +808,8 @@ void TTZXFile::ValidateFile(AnsiString FileName, char* tempdata, int len)
 
                 if (length < (elineOffset + 2))
                 {
-                        msg = "The start of the program data could not be found.";
-                        Application->MessageBox(msg.c_str(), "File integrity error", MB_OK | MB_ICONERROR);
+                        msg = Tr("The start of the program data could not be found.");
+                        Application->MessageBox(msg.c_str(), Tr("File integrity error").c_str(), MB_OK | MB_ICONERROR);
                         return;
                 }
 
@@ -831,9 +832,12 @@ void TTZXFile::ValidateFile(AnsiString FileName, char* tempdata, int len)
         {
                 int surplusBytes = length - expectedLen;
                 bool includesSurplusBytes = surplusBytes > 1;
-                msg = "The file contains " + IntToStr(surplusBytes) + " byte" + (includesSurplusBytes ? "s" : "") + " more than specifed by ELINE. Th" + (includesSurplusBytes ? "ese" : "is") + " will be ignored.";
+                if (includesSurplusBytes)
+                        msg = TrF("The file contains {0} bytes more than specifed by ELINE. These will be ignored.", IntToStr(surplusBytes));
+                else
+                        msg = TrF("The file contains {0} byte more than specifed by ELINE. This will be ignored.", IntToStr(surplusBytes));
 
-                Application->MessageBox(msg.c_str(), "File size warning", MB_OK | MB_ICONWARNING);
+                Application->MessageBox(msg.c_str(), Tr("File size warning").c_str(), MB_OK | MB_ICONWARNING);
         }
 }
 

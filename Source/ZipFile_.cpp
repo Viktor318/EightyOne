@@ -24,6 +24,7 @@
 #include "unzip.h"
 #include "utils.h"
 #include "zx81config.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -146,7 +147,7 @@ AnsiString TZipFile::ExpandZIP(AnsiString Path, AnsiString DialogueFilter)
         else
         {
                 // Couldn't file any files in the zip that match the permitted extensions
-                Application->MessageBox("Sorry, that archive does not contain any files of the relevant type","Error", MB_OK | MB_ICONERROR);
+                Application->MessageBox(Tr("Sorry, that archive does not contain any files of the relevant type").c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
                 unzClose(ZFile);
                 return("");
         }

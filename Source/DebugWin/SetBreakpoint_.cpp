@@ -22,6 +22,7 @@
 #include "SetBreakpoint_.h"
 #include "symbolstore.h"
 #include "z80.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -317,7 +318,7 @@ bool TSetBreakpoint::GetBreakpointFields(struct breakpoint& bp)
         bp.ConditionValue = (BreakpointCondition)BreakConditionValue->ItemIndex;
         bp.Value = value;
         bp.Permanent = true;
-        bp.Enabled = (ComboBoxBreakEnabled->Text == "Yes");
+        bp.Enabled = (ComboBoxBreakEnabled->Text == Tr("Yes"));
         bp.HitCount = StrToInt(BreakHitCount->Text);
         bp.Hits = 0;
 
@@ -479,8 +480,8 @@ void TSetBreakpoint::BreakTypeChangeTStates()
 
 void TSetBreakpoint::SetEditBoxLabels(AnsiString breakAddressLabel, AnsiString breakValueLabel)
 {
-        LabelBreakAddress->Caption = breakAddressLabel + ":";
-        LabelBreakValue->Caption = breakValueLabel + ":";
+        LabelBreakAddress->Caption = Tr(breakAddressLabel) + ":";
+        LabelBreakValue->Caption = Tr(breakValueLabel) + ":";
 }
 
 //---------------------------------------------------------------------------

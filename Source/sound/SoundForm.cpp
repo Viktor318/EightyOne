@@ -26,6 +26,7 @@
 #include "sound\SoundForm.h"
 #include "zx81config.h"
 #include "main_.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -45,7 +46,7 @@ __fastcall TMidiForm::TMidiForm(TComponent* Owner)
 
         while(MidiBox->Items->Count) MidiBox->Items->Delete(0);
 
-        MidiBox->Items->Add("Nothing");
+        MidiBox->Items->Add(Tr("Nothing"));
         MidiBox->Items->Add("Midi Mapper");
 
         for(i=0;i<Devices;i++)
@@ -148,7 +149,7 @@ void TMidiForm::SetComputer(bool zx81)
 {
         if (zx81)
         {
-                BeeperLabel->Caption = "Video";
+                BeeperLabel->Caption = Tr("Video");
                 VideoSoundGroupBox->Enabled = true;
                 BeeperExcludeHSyncs->Enabled = true;
         }

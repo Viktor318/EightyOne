@@ -28,6 +28,7 @@
 #include <fstream>
 #include "BasicListerOptions_.h"
 #include "BasicListingFormatInfo_.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -262,7 +263,7 @@ void TBasicLister::HighlightEntry(int index)
         if (index != -1)
         {
                 int lineNumber = (*mLines)[index].lineNumber;
-                lineDetails += "Line " + AnsiString(lineNumber) + ": ";
+                lineDetails += TrF("Line {0}: ", AnsiString(lineNumber));
 
                 int startAddress = (*mLines)[index].address;
                 lineDetails += "$" + AnsiString::IntToHex(startAddress, 4);
@@ -428,7 +429,7 @@ void TBasicLister::ConfigureStatusBar()
 
         if (mBasicLister != NULL)
         {
-                programDetails += "Lines " + AnsiString(mLines->size());
+                programDetails += TrF("Lines {0}", AnsiString((int)mLines->size()));
 
                 int programSize = ProgramSize();
                 if (programSize > 0)
@@ -582,7 +583,7 @@ void TBasicLister::SaveListingToFile()
         bool programLoaded = (ProgramSize() > 0);
         if (!programLoaded)
         {
-                Application->MessageBox("There is no BASIC program loaded.", "Save BASIC Listing", MB_OK | MB_ICONERROR);
+                Application->MessageBox(Tr("There is no BASIC program loaded.").c_str(), Tr("Save BASIC Listing").c_str(), MB_OK | MB_ICONERROR);
                 return;
         }
 
@@ -590,19 +591,19 @@ void TBasicLister::SaveListingToFile()
         AnsiString basicFileExtension = mBasicLister->GetBasicFileExtension();
         bool zxTokenFormatSupported = mBasicLister->ZxTokenSupported();
 
-        AnsiString filter = machineName + " ZxText2P BASIC File (*." + basicFileExtension + ")|*." + basicFileExtension;
+        AnsiString filter = TrF("{0} ZxText2P BASIC File (*.{1})", machineName, basicFileExtension) + "|*." + basicFileExtension;
         if (zxTokenFormatSupported)
         {
-                filter += "|" + machineName + " ZxToken BASIC File (*." + basicFileExtension + ")|*." + basicFileExtension;
+                filter += "|" + TrF("{0} ZxToken BASIC File (*.{1})", machineName, basicFileExtension) + "|*." + basicFileExtension;
         }
-        filter += "|Bitmap File (*.bmp)|*.bmp";
+        filter += "|" + Tr("Bitmap File (*.bmp)") + "|*.bmp";
 
         SaveDialog->Filter = filter;
         SaveDialog->DefaultExt = basicFileExtension;
         SaveDialog->FilterIndex = mLastFilterIndex;
         SaveDialog->FileName = "";
         SaveDialog->Options << ofOverwritePrompt;
-        SaveDialog->Title = "Save BASIC Listing";
+        SaveDialog->Title = Tr("Save BASIC Listing");
 
         if (!SaveDialog->Execute())
         {

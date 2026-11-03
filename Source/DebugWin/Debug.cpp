@@ -28,6 +28,7 @@
 #include "hist.h"
 
 #include "main_.h"
+#include "Language.h"
 #include "EditValue_.h"
 #include "SetBreakpoint_.h"
 #include "SearchSequence_.h"
@@ -956,8 +957,8 @@ void TDbg::UpdateVals(void)
                 Scanline->Caption = RasterY;
                 ShiftReg->Caption = Bin8(shift_store);
                 TStates->Caption = frametstates;
-                NMIGen->Caption = nmiGeneratorEnabled ? "On":"Off";
-                SyncOutput->Caption = syncOutputWhite ? "White":"Black";
+                NMIGen->Caption = Tr(nmiGeneratorEnabled ? "On":"Off");
+                SyncOutput->Caption = Tr(syncOutputWhite ? "White":"Black");
 
                 ChromaColourModeLabel->Enabled = (machine.colour == COLOURCHROMA);
                 ChromaColourMode->Enabled = (machine.colour == COLOURCHROMA) && zx81.chromaColourSwitchOn;
@@ -968,19 +969,19 @@ void TDbg::UpdateVals(void)
         switch (romcartridge.type)
         {
                 case ROMCARTRIDGEZXC1:
-                        GroupBoxZXC->Caption = "ZXC1 Cartridge";
+                        GroupBoxZXC->Caption = Tr("ZXC1 Cartridge");
                         break;
                 case ROMCARTRIDGEZXC2:
-                        GroupBoxZXC->Caption = "ZXC2 Cartridge";
+                        GroupBoxZXC->Caption = Tr("ZXC2 Cartridge");
                         break;
                 case ROMCARTRIDGEZXC3:
-                        GroupBoxZXC->Caption = "ZXC3 Cartridge";
+                        GroupBoxZXC->Caption = Tr("ZXC3 Cartridge");
                         break;
                 case ROMCARTRIDGEZXC4:
-                        GroupBoxZXC->Caption = "ZXC4 Cartridge";
+                        GroupBoxZXC->Caption = Tr("ZXC4 Cartridge");
                         break;
                 default:
-                        GroupBoxZXC->Caption = "ZXC Cartridge";
+                        GroupBoxZXC->Caption = Tr("ZXC Cartridge");
                         break;
         }
 
@@ -1046,8 +1047,8 @@ void TDbg::UpdateVals(void)
         Disass10->Caption = Disassemble(&i);
         Disass11->Caption = Disassemble(&i);
 
-        Halt->Caption = z80.halted ? "Yes":"No" ;
-        Interrupts->Caption = z80.iff1 ? "Enabled":"Disabled" ;
+        Halt->Caption = Tr(z80.halted ? "Yes":"No");
+        Interrupts->Caption = Tr(z80.iff1 ? "Enabled":"Disabled");
         IM->Caption = z80.im;
 
         if ((displayedTStatesCount >= 0) && (displayedTStatesCount < 1000000))
@@ -1131,7 +1132,7 @@ void TDbg::UpdateVals(void)
 
         if (emulation_stop)
         {
-                RunStop->Caption = "Run";
+                RunStop->Caption = Tr("Run");
                 SingleStep->Enabled = true;
                 StepOver->Enabled = true;
                 StepOut->Enabled = true;
@@ -1142,7 +1143,7 @@ void TDbg::UpdateVals(void)
         }
         else
         {
-                RunStop->Caption = "Stop";
+                RunStop->Caption = Tr("Stop");
                 SingleStep->Enabled = false;
                 StepOver->Enabled = false;
                 StepOut->Enabled = false;
@@ -2259,8 +2260,7 @@ void __fastcall TDbg::BPListContextPopup(TObject *Sender, TPoint &MousePos,
                 BreakpointWindowPopup->Items->Items[Separator]->Visible = true;
                 BreakpointWindowPopup->Items->Items[Count]->Visible = true;
 
-                AnsiString hitCount = "Hit Count = ";
-                hitCount += Breakpoint[BPList->Row].Hits;
+                AnsiString hitCount = TrF("Hit Count = {0}", AnsiString(Breakpoint[BPList->Row].Hits));
                 BreakpointWindowPopup->Items->Items[Count]->Caption = hitCount;
 
                 BreakpointWindowPopup->Items->Items[Reset]->Enabled = (Breakpoint[BPList->Row].Hits > 0);

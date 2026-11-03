@@ -24,6 +24,7 @@
 #include "midifrm.h"
 #include "midi.h"
 #include "zx81config.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -44,7 +45,7 @@ __fastcall TMidiForm::TMidiForm(TComponent* Owner)
 
         while(MidiBox->Items->Count) MidiBox->Items->Delete(0);
 
-        MidiBox->Items->Add("Nothing");
+        MidiBox->Items->Add(Tr("Nothing"));
         MidiBox->Items->Add("Midi Mapper");
 
         for(i=0;i<Devices;i++)

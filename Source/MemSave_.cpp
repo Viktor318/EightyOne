@@ -26,6 +26,7 @@
 #include "main_.h"
 #include "utils.h"
 #include "zx81config.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -45,8 +46,8 @@ __fastcall TMemSave::TMemSave(TComponent* Owner)
 //---------------------------------------------------------------------------
 void TMemSave::SaveMem(void)
 {
-        Save->Caption="Save File...";
-        MemSave->Caption="Save Block...";
+        Save->Caption=Tr("Save File...");
+        MemSave->Caption=Tr("Save Block...");
         Label2->Enabled=true;
         Size->Enabled=true;
         ShowModal();
@@ -54,8 +55,8 @@ void TMemSave::SaveMem(void)
 //---------------------------------------------------------------------------
 void TMemSave::LoadMem(void)
 {
-        Save->Caption="Load File...";
-        MemSave->Caption="Load Block...";
+        Save->Caption=Tr("Load File...");
+        MemSave->Caption=Tr("Load Block...");
         Label2->Enabled=false;
         Size->Enabled=false;
         Size->Text="";
@@ -110,7 +111,7 @@ void __fastcall TMemSave::SaveClick(TObject *Sender)
         }
         if (addr<0 || addr>65535) return;
 
-        if (Save->Caption=="Save File...")
+        if (Save->Caption == Tr("Save File..."))
         {
                 if (!len) return;
                 FileName=Fname->Text;
@@ -129,7 +130,7 @@ void __fastcall TMemSave::SaveClick(TObject *Sender)
                 }
                 else
                 {
-                        ShowMessage("Memory save failed");
+                        ShowMessage(Tr("Memory save failed"));
                 }
         }
         else
@@ -166,7 +167,7 @@ void __fastcall TMemSave::SaveClick(TObject *Sender)
                 }
                 else
                 {
-                        ShowMessage("Memory load failed");
+                        ShowMessage(Tr("Memory load failed"));
                 }
 
         }
@@ -178,7 +179,7 @@ void __fastcall TMemSave::BrowseClick(TObject *Sender)
 {
         AnsiString Ext, Path;
 
-        if (Save->Caption=="Save File...")
+        if (Save->Caption == Tr("Save File..."))
         {
                 if (SaveDialog->Execute())
                 {

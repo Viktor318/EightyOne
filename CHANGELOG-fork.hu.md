@@ -8,6 +8,19 @@ eredetihez képest.
 
 ## Kiadatlan
 
+### Magyar felület
+
+- A menük, az ablakok és az üzenetek **magyarul** vagy angolul jelennek
+  meg: *Options > Language* (Automatikus, English, Magyar; az Automatikus a
+  Windows nyelvét követi). A nyelv futás közben is átállítható.
+- Az ablakleírók (.dfm) változatlanok: a feliratokat futás közben cseréli a
+  `Translations/hu.tsv` alapján (ebből a `Translations/make_table.py`
+  készíti a `Source/LanguageHu.cpp`-t), így az angol változat ugyanaz marad.
+- A pillanatképek és a beállításfájl a hardverválasztások angol szövegét
+  tárolják, így bármelyik nyelvvel és az eredeti EightyOne-nal is működnek.
+- A gép- és terméknevek és a rövidítések (ROM, RAM, NMI, AY...) angolul
+  maradnak.
+
 ### Billentyűzet
 
 - **A Windows billentyűzetkiosztásának használata** (Options > Keyboard,

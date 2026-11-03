@@ -28,6 +28,7 @@
 #include "zx81.h"
 #include "zx81config.h"
 #include "Fullscreen.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 
@@ -124,7 +125,7 @@ bool DDError(bool result, AnsiString Message)
 {
         if (result)
                 MessageBoxA(NULL,
-                "Count not initialise DirectDraw.\nPlease ensure DirectX 7 or greater is installed",
+                Tr("Count not initialise DirectDraw.\nPlease ensure DirectX 7 or greater is installed").c_str(),
                 Message.c_str(),
                 MB_OK);
 

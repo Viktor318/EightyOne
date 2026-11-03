@@ -25,6 +25,7 @@
 #include "ProfilePlot_.h"
 #include "symbolstore.h"
 #include "z80.h"
+#include "Language.h"
 
 static const int START = 0;
 static const int END = 1;
@@ -129,7 +130,7 @@ void __fastcall TProfiler::ButtonDeleteClick(TObject *Sender)
 
         Timer->Enabled = false;
 
-        int ret = Application->MessageBox("Are you sure you wish to delete this entry?", "Delete Profile Entry", MB_YESNO | MB_ICONQUESTION);
+        int ret = Application->MessageBox(Tr("Are you sure you wish to delete this entry?").c_str(), Tr("Delete Profile Entry").c_str(), MB_YESNO | MB_ICONQUESTION);
 
         if (ret == IDYES)
         {

@@ -33,6 +33,7 @@
 #include "zx81.h"
 #include "z80thread.h"
 #include "kbstatus.h"
+#include "Language.h"
 #include "snap.h"
 #include "zx81config.h"
 #include "FullScreen.h"
@@ -224,6 +225,9 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         ShowSplash = ini->ReadBool("MAIN","ShowSplash", ShowSplash);
         EnableSplashScreen->Checked = ShowSplash;
 
+        LanguageSetSetting(ini->ReadInteger("MAIN", "Language", LANGUAGE_AUTOMATIC));
+        BuildLanguageMenu();
+
         iniFileExists = FileExists(emulator.inipath);
         LoadSettings(ini);
 
@@ -256,11 +260,11 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         BuildZX81ExamplesMenu();
         BuildSpectrumExamplesMenu();
 
-        if (Sound.Initialise(Form1->Handle, machine.fps, 16, 44100, 2)) MessageBox(NULL, "", "Sound Error", 0);
+        if (Sound.Initialise(Form1->Handle, machine.fps, 16, 44100, 2)) MessageBox(NULL, "", Tr("Sound Error").c_str(), 0);
 
         if (emulator.checkInstallationPathLength && strlen(emulator.cwd) >= 180)
         {
-                int ret = MessageBox(NULL, "The location of the EightyOne folder may cause selection of alternate ROMs\nor ROM cartridges to exceed to maximum path length supported by Windows.\n\nCheck and show this warning next time EightyOne is started?", "Warning", MB_YESNO |MB_ICONWARNING);
+                int ret = MessageBox(NULL, Tr("The location of the EightyOne folder may cause selection of alternate ROMs\nor ROM cartridges to exceed to maximum path length supported by Windows.\n\nCheck and show this warning next time EightyOne is started?").c_str(), Tr("Warning").c_str(), MB_YESNO |MB_ICONWARNING);
                 if (ret == IDNO)
                 {
                         emulator.checkInstallationPathLength = 0;
@@ -472,7 +476,7 @@ void __fastcall TForm1::Hardware1Click(TObject *Sender)
                 HW->Close();
                 Hardware1->Checked=false;
         }
-        else ShowMessage("Changes pending on Hardware Dialog");
+        else ShowMessage(Tr("Changes pending on Hardware Dialog"));
 }
 //---------------------------------------------------------------------------
 
@@ -582,17 +586,17 @@ void __fastcall TForm1::SaveSnapshot1Click(TObject *Sender)
 
         if (emulator.machine==MACHINEACE)
         {
-                SaveSnapDialog->Filter = ".ACE Snapshot|*.ace";
+                SaveSnapDialog->Filter = LanguageFilter(".ACE Snapshot|*.ace");
                 SaveSnapDialog->DefaultExt = "ACE";
         }
         else if (emulator.machine==MACHINESPECTRUM)
         {
-                SaveSnapDialog->Filter = ".Z80 Snapshot|*.z80|.SNA Snapshot|*.sna";
+                SaveSnapDialog->Filter = LanguageFilter(".Z80 Snapshot|*.z80|.SNA Snapshot|*.sna");
                 SaveSnapDialog->DefaultExt = "Z80";
         }
         else
         {
-                SaveSnapDialog->Filter = ".Z81 Snapshot|*.z81";
+                SaveSnapDialog->Filter = LanguageFilter(".Z81 Snapshot|*.z81");
                 SaveSnapDialog->DefaultExt = "Z81";
         }
 
@@ -620,17 +624,17 @@ void __fastcall TForm1::LoadSnapshot1Click(TObject *Sender)
 
         if (emulator.machine==MACHINEACE)
         {
-                LoadSnapDialog->Filter = ".ACE Snapshot|*.ace|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip";
+                LoadSnapDialog->Filter = LanguageFilter(".ACE Snapshot|*.ace|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip");
                 LoadSnapDialog->DefaultExt = "ACE";
         }
         else if (emulator.machine==MACHINESPECTRUM)
         {
-                LoadSnapDialog->Filter = "Spectrum Snapshots|*.z80;*.sna|.Z80 Snapshot|*.z80|.SNA Snapshot|*.sna|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip";
+                LoadSnapDialog->Filter = LanguageFilter("Spectrum Snapshots|*.z80;*.sna|.Z80 Snapshot|*.z80|.SNA Snapshot|*.sna|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip");
                 LoadSnapDialog->DefaultExt = "Z80";
         }
         else
         {
-                LoadSnapDialog->Filter = ".Z81 Snapshot|*.z81|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip";
+                LoadSnapDialog->Filter = LanguageFilter(".Z81 Snapshot|*.z81|Compressed Snapshot|*.zip|All Snapshot Files|*.ace;*.sna;*.z80;*.z81;*.zip");
                 LoadSnapDialog->DefaultExt = "Z81";
         }
 
@@ -879,12 +883,12 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
 
         if (emulation_stop)
         {
-                text +="Paused";
+                text += Tr("Paused");
         }
         else
         {
                 if (emulator.single_step)
-                        text +="Debug Mode";
+                        text += Tr("Debug Mode");
                 else
                 {
                         text += fps;
@@ -900,9 +904,9 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
         AnsiString scanlinesInfo = "";
         if (emulator.scanlinesPerFrame > 0)
         {
-                scanlinesInfo = "     ";
-                scanlinesInfo += emulator.scanlinesPerFrame;
-                scanlinesInfo += " Scanlines";
+                AnsiString count;
+                count += emulator.scanlinesPerFrame;
+                scanlinesInfo = "     " + TrF("{0} Scanlines", count);
         }
         StatusBar1->Panels->Items[3]->Text = scanlinesInfo;
         
@@ -1261,6 +1265,7 @@ void TForm1::LoadSettings(TIniFile *ini)
 
 void TForm1::SaveSettings(TIniFile *ini)
 {
+        ini->WriteInteger("MAIN", "Language", LanguageGetSetting());
         ini->WriteInteger("MAIN", "Top",    Top);
         ini->WriteInteger("MAIN", "Left",   Left);
         ini->WriteInteger("MAIN", "Height", ClientHeight);
@@ -2158,10 +2163,10 @@ void __fastcall TForm1::SaveScreenshot1Click(TObject *Sender)
         AnsiString Extension, Filename;
         FILE *f;
 
-        SaveScrDialog->Filter = "Windows Bitmap (.bmp)|*.bmp";
+        SaveScrDialog->Filter = LanguageFilter("Windows Bitmap (.bmp)|*.bmp");
 
         if (emulator.machine==MACHINESPECTRUM)
-                SaveScrDialog->Filter += "|Spectrum Screen (.scr)|*.scr";    
+                SaveScrDialog->Filter += "|" + LanguageFilter("Spectrum Screen (.scr)|*.scr");    
 
         if (!SaveScrDialog->Execute()) return;
 
@@ -2975,11 +2980,11 @@ void TForm1::BuildMenuJoystickSelection()
                 AnsiString menuEntryCaption;
                 if (i >= 0)
                 {
-                        menuEntryCaption = "Game Controller " + IntToStr(i + 1);
+                        menuEntryCaption = TrF("Game Controller {0}", IntToStr(i + 1));
                 }
                 else
                 {
-                        menuEntryCaption = "None";
+                        menuEntryCaption = Tr("None");
                 }
 
                 SelectJoystick1->Add(selectJoystick1SubMenuEntry);
@@ -3081,3 +3086,44 @@ void __fastcall TForm1::SwitchOnZ80AssemblerClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+// Options > Language: Automatic (the language of Windows), English, Magyar
+
+void TForm1::BuildLanguageMenu()
+{
+        static const char *names[] = { "Automatic", "English", "Magyar" };
+        TMenuItem *separator, *language;
+        int i;
+
+        separator = new TMenuItem(this);
+        separator->Caption = "-";
+        Options1->Add(separator);
+
+        language = new TMenuItem(this);
+        language->Caption = "Language";
+        Options1->Add(language);
+
+        for (i=0; i<3; i++)
+        {
+                LanguageItems[i] = new TMenuItem(this);
+                LanguageItems[i]->Caption = names[i];
+                LanguageItems[i]->RadioItem = true;
+                LanguageItems[i]->GroupIndex = 1;
+                LanguageItems[i]->Tag = i;
+                LanguageItems[i]->Checked = (i == LanguageGetSetting());
+                LanguageItems[i]->OnClick = LanguageClick;
+                language->Add(LanguageItems[i]);
+        }
+}
+
+void __fastcall TForm1::LanguageClick(TObject *Sender)
+{
+        TMenuItem *item = dynamic_cast<TMenuItem *>(Sender);
+
+        if (!item) return;
+
+        item->Checked = true;
+        LanguageSetSetting(item->Tag);
+        LanguageTranslateAll();
+}
+//---------------------------------------------------------------------------

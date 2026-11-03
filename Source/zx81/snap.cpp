@@ -36,6 +36,7 @@
 #include "Artifacts_.h"
 #include "SoundForm.h"
 #include "kb_.h"
+#include "Language.h"
 
 extern int lineCounter;
 extern int MemotechMode;
@@ -115,7 +116,7 @@ void SetComboBox(TComboBox* comboBox, char* text)
 
         for (int i = 0; i < comboBox->Items->Count; i++)
         {
-                if (comboBox->Items->Strings[i] == newText)
+                if (LanguageSame(comboBox->Items->Strings[i], newText))
                 {
                         comboBox->ItemIndex = i;
                         break;
@@ -839,7 +840,7 @@ int do_load_snap(char *filename)
         {
                 if (!load_ACE_snapshot(filename))
                 {
-                        ShowMessage("Load snapshot failed.");
+                        ShowMessage(Tr("Load snapshot failed."));
                         return 0;
                 }
         }
@@ -848,7 +849,7 @@ int do_load_snap(char *filename)
                 // Load twice - the first selects the correct hardware settings, the second ensures they are initialised, e.g. ZXpand
                 if (!load_ZX81_snapshot(filename))
                 {
-                        ShowMessage("Load snapshot failed.");
+                        ShowMessage(Tr("Load snapshot failed."));
                         return 0;
                 }
 
@@ -895,7 +896,7 @@ int save_snap(char *filename)
 
         if (f)
         {
-                ShowMessage("Save snapshot failed.");
+                ShowMessage(Tr("Save snapshot failed."));
         }
 
         return(0);
@@ -932,7 +933,7 @@ int save_snap_zx81(char *filename)
 	fprintf(f,"LINE %03X\n", lineCounter);
 
 	fprintf(f,"\n[MEMORY]\n");
-	fprintf(f,"RAM_PACK %s\n", HW->RamPackBox->Text.c_str());
+	fprintf(f,"RAM_PACK %s\n", LanguageEnglish(HW->RamPackBox->Text).c_str());
 	fprintf(f,"8K_RAM_ENABLED %02X\n", zx81.RAM816k);
 	fprintf(f,"ROM_PROTECTED %02X\n", zx81.RAM816kWriteProtected);
 
@@ -970,8 +971,8 @@ int save_snap_zx81(char *filename)
 //	fprintf(f,"MEMOTEXT_ON %02X\n", zx81.memotextOn);
 
 	fprintf(f,"\n[DRIVES]\n");
-	fprintf(f,"FDC %s\n", HW->FDCBox->Text.c_str());
-	fprintf(f,"IDE %s\n", HW->IDEBox->Text.c_str());
+	fprintf(f,"FDC %s\n", LanguageEnglish(HW->FDCBox->Text).c_str());
+	fprintf(f,"IDE %s\n", LanguageEnglish(HW->IDEBox->Text).c_str());
 
 	fprintf(f,"\n[ADVANCED]\n");
 	fprintf(f,"ROM %s\n", ReplaceSpaces(HW->RomBox->Text).c_str());
@@ -982,16 +983,16 @@ int save_snap_zx81(char *filename)
 	fprintf(f,"FRAME_RATE_60HZ %02X\n", machine.NTSC);
 
 	fprintf(f,"\n[SOUND]\n");
-	fprintf(f,"TYPE %s\n", ReplaceSpaces(HW->SoundCardBox->Text).c_str());
+	fprintf(f,"TYPE %s\n", ReplaceSpaces(LanguageEnglish(HW->SoundCardBox->Text)).c_str());
         fprintf(f,"VIDEO_SOUND %02X\n", zx81.vsyncsound);
         fprintf(f,"EXCLUDE_HSYNCS %02X\n", zx81.beeperExcludeHSyncs);
 
 	fprintf(f,"\n[SPEECH]\n");
-	fprintf(f,"TYPE %s\n", ReplaceSpaces(HW->SpeechBox->Text).c_str());
+	fprintf(f,"TYPE %s\n", ReplaceSpaces(LanguageEnglish(HW->SpeechBox->Text)).c_str());
 
 	// Must output this before the Chr$ Generator section
 	fprintf(f,"\n[COLOUR]\n");
-	fprintf(f,"TYPE %s\n", HW->ColourBox->Text.c_str());
+	fprintf(f,"TYPE %s\n", LanguageEnglish(HW->ColourBox->Text).c_str());
 
 	if (machine.colour == COLOURCHROMA)
 	{
@@ -1016,7 +1017,7 @@ int save_snap_zx81(char *filename)
 	}
 
 	fprintf(f,"\n[CHR$_GENERATOR]\n");
-	fprintf(f,"TYPE %s\n", HW->ChrGenBox->Text.c_str());
+	fprintf(f,"TYPE %s\n", LanguageEnglish(HW->ChrGenBox->Text).c_str());
 
 	if (zx81.chrgen == CHRGENQS)
 	{
@@ -1041,10 +1042,10 @@ int save_snap_zx81(char *filename)
 	}
 
 	fprintf(f,"\n[HIGH_RESOLUTION]\n");
-	fprintf(f,"TYPE %s\n", HW->HiResBox->Text.c_str());
+	fprintf(f,"TYPE %s\n", LanguageEnglish(HW->HiResBox->Text).c_str());
 
 	fprintf(f,"\n[JOYSTICK]\n");
-	fprintf(f,"TYPE %s\n",  ReplaceSpaces(HW->JoystickBox->Text).c_str());
+	fprintf(f,"TYPE %s\n",  ReplaceSpaces(LanguageEnglish(HW->JoystickBox->Text)).c_str());
         fprintf(f,"CONTROLLER %02X\n", machine.joystick1Controller);
        	fprintf(f,"CONNECTED %02X\n",  machine.joystick1Connected);
        	fprintf(f,"AUTOFIRE %02X\n",   machine.joystick1AutoFireEnabled);
@@ -1057,9 +1058,9 @@ int save_snap_zx81(char *filename)
 	fprintf(f,"PROGRAMMABLE_FIRE %s\n",  ReplaceSpaces(HW->JoystickFireBox->Text).c_str());
 
 	fprintf(f,"\n[ROM_CARTRIDGE]\n");
-        AnsiString type = StringReplace(HW->RomCartridgeBox->Text, " ", "_", TReplaceFlags() << rfReplaceAll);
+        AnsiString type = StringReplace(LanguageEnglish(HW->RomCartridgeBox->Text), " ", "_", TReplaceFlags() << rfReplaceAll);
 	fprintf(f,"TYPE %s\n", type.c_str());
-	if (HW->RomCartridgeBox->Text != "None")
+	if (!LanguageSame(HW->RomCartridgeBox->Text, "None"))
 	{
 	        AnsiString path = StringReplace(HW->RomCartridgeFileBox->Text, " ", "_", TReplaceFlags() << rfReplaceAll);
 		fprintf(f,"PATH %s\n", path.c_str());
@@ -1083,7 +1084,7 @@ int save_snap_ace(char *filename)
 	f=fopen(filename,"wb");
 	if (!f)
 	{
-	        ShowMessage("Save snapshot failed.");
+	        ShowMessage(Tr("Save snapshot failed."));
 		return -1;
 	}
 
@@ -1197,7 +1198,7 @@ int memoryLoadToAddress(char *filename, void* destAddress, int length)
         if (fptr<0)
         {
                 int err=errno;
-                AnsiString errMsg = "ROM load to address failed:\n" + AnsiString(filename);
+                AnsiString errMsg = TrF("ROM load to address failed:\n{0}", AnsiString(filename));
                 ShowMessage(errMsg);
                 return(err);
         }
@@ -1206,7 +1207,7 @@ int memoryLoadToAddress(char *filename, void* destAddress, int length)
         {
                 int err=errno;
                 close(fptr);
-                AnsiString errMsg = "ROM load to address failed:\n" + AnsiString(filename);
+                AnsiString errMsg = TrF("ROM load to address failed:\n{0}", AnsiString(filename));
                 ShowMessage(errMsg);
                 return(err);
         }
@@ -1225,7 +1226,7 @@ int do_memory_load(char *file, int address, int length, int secondBank)
         if (fptr<0)
         {
                 int err=errno;
-                AnsiString errMsg = "ROM load failed:\n" + AnsiString(file);
+                AnsiString errMsg = TrF("ROM load failed:\n{0}", AnsiString(file));
                 ShowMessage(errMsg);
                 return(err);
         }
@@ -1234,7 +1235,7 @@ int do_memory_load(char *file, int address, int length, int secondBank)
         {
                 int err=errno;
                 close(fptr);
-                AnsiString errMsg = "ROM load failed:\n" + AnsiString(file);
+                AnsiString errMsg = TrF("ROM load failed:\n{0}", AnsiString(file));
                 ShowMessage(errMsg);
                 return(err);
         }
@@ -1245,7 +1246,7 @@ int do_memory_load(char *file, int address, int length, int secondBank)
                 {
                         int err=errno;
                         close(fptr);
-                        AnsiString errMsg = "ROM load failed:\n" + AnsiString(file);
+                        AnsiString errMsg = TrF("ROM load failed:\n{0}", AnsiString(file));
                         ShowMessage(errMsg);
                         return(err);
                 }
@@ -1296,7 +1297,7 @@ int font_load(const char *filename, char *address, int length)
         {
                 int err=errno;
                 close(fptr);
-                AnsiString errMsg = "Font load failed:\n" + AnsiString(filename);
+                AnsiString errMsg = TrF("Font load failed:\n{0}", AnsiString(filename));
                 ShowMessage(errMsg);
                 return(err);
         }

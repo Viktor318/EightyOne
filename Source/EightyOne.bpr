@@ -4,7 +4,7 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="EightyOne.exe"/>
-    <OBJFILES value="EightyOne.obj z80\z80_ops.obj z80\z80.obj kbstatus.obj About_.obj 
+    <OBJFILES value="EightyOne.obj z80\z80_ops.obj z80\z80.obj kbstatus.obj Language.obj LanguageHu.obj About_.obj 
       Keyboard_.obj Speed_.obj kb_.obj DebugWin\Debug.obj Utils.obj 
       sound\SoundOP.obj DebugWin\Hist.obj MemSave_.obj zx97Config.obj 
       peripherals\dev8255.obj SerialPort.obj DebugWin\EditValue_.obj 

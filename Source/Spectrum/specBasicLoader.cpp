@@ -17,6 +17,7 @@
  */
 
 #include "specBasicLoader.h"
+#include "Language.h"
 #include <fstream>
 #include <map>
 #include <string>
@@ -464,7 +465,7 @@ unsigned char specBasicLoader::DecodeGraphic(unsigned char chr1, unsigned char c
                 ostringstream code;
                 code << chr1;
                 code << chr2;
-                string msg = "Invalid graphic Code: " + code.str();
+                string msg = TrF("Invalid graphic Code: {0}", code.str().c_str()).c_str();
                 throw invalid_argument(msg.c_str());
         }
 

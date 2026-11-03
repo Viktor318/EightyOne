@@ -24,6 +24,7 @@
 #include "zxprinter.h"
 #include "main_.h"
 #include "zx81config.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -363,8 +364,7 @@ void TZXPrinter::SaveSettings(TIniFile *ini)
 }
 void __fastcall TZXPrinter::BitRateChange(TObject *Sender)
 {
-        BitRateTxt->Caption = ((int) BitRate->Position);
-        BitRateTxt->Caption = "Carriage Speed: "+BitRateTxt->Caption;
+        BitRateTxt->Caption = TrF("Carriage Speed: {0}", AnsiString((int) BitRate->Position));
         BitSpeed = 99 - BitRate->Position;
 
 }
@@ -372,8 +372,7 @@ void __fastcall TZXPrinter::BitRateChange(TObject *Sender)
 
 void __fastcall TZXPrinter::LineRateChange(TObject *Sender)
 {
-        LineRateTxt->Caption = ((int) LineRate->Position);
-        LineRateTxt->Caption = "Paper Feed Speed: "+LineRateTxt->Caption;
+        LineRateTxt->Caption = TrF("Paper Feed Speed: {0}", AnsiString((int) LineRate->Position));
         LineSpeed = 100 - LineRate->Position;
 
 }

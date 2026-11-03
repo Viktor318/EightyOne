@@ -27,6 +27,7 @@
 #include "SearchSequence_.h"
 #include <set>
 #include "zx81config.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -721,7 +722,7 @@ void __fastcall TMemoryWindow::FormMouseMove(TObject *Sender,
 void __fastcall TMemoryWindow::FormMouseDown(TObject *Sender,
       TMouseButton Button, TShiftState Shift, int X, int Y)
 {
-        JumpTo1->Caption = "Jump To";
+        JumpTo1->Caption = Tr("Jump To");
 
         int address = 0;
         bool gotAddress = xyToAddress(X,Y,address);
@@ -790,7 +791,7 @@ void __fastcall TMemoryWindow::ButtonChangeMouseMove(TObject *Sender,
                 "First", "Previous", "Next", "Last"
         };
 
-        StatusBar1->Panels->Items[4]->Text = btnDescs[((TButton*)Sender)->Tag] + " Change";
+        StatusBar1->Panels->Items[4]->Text = TrF("{0} Change", Tr(btnDescs[((TButton*)Sender)->Tag]));
 }
 //---------------------------------------------------------------------------
 

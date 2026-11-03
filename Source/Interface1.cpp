@@ -26,6 +26,7 @@
 #include "z80.h"
 #include "utils.h"
 #include "Plus3Drives.h"
+#include "Language.h"
 
 #define MDVTPERBYTE 265  // Tape Speed - No of T states for 1 byte to pass the tape head
 
@@ -612,8 +613,8 @@ __fastcall TIF1::TIF1(TComponent* Owner)
         TIniFile *ini;
         int i;
 
-        ComPortList->Items->Add("Nothing");
-        ComPortList->Items->Add("FILE...");
+        ComPortList->Items->Add(Tr("Nothing"));
+        ComPortList->Items->Add(Tr("FILE..."));
         ComPortList->Items->Add("TCP/IP...");
         if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"COM");
         if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"LPT");
@@ -721,9 +722,8 @@ void __fastcall TIF1::OKClick(TObject *Sender)
                         try { ComPort->Open(); }
                         catch(EComPort &E)
                         {
-                                AnsiString Msg = "Could not open port ";
-                                Msg += ComPortList->Items->Strings[ComPortList->ItemIndex];
-                                if (Sender) Application->MessageBox(Msg.c_str(),"Error", MB_OK | MB_ICONERROR);
+                                AnsiString Msg = TrF("Could not open port {0}", ComPortList->Items->Strings[ComPortList->ItemIndex]);
+                                if (Sender) Application->MessageBox(Msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
                         }
                 }
                 break;
@@ -748,7 +748,7 @@ void __fastcall TIF1::ComPortListChange(TObject *Sender)
 
         FilePanel->Visible=false;
 
-        if (Port.SubString(1,3)=="FIL") FilePanel->Visible=true;
+        if (LanguageSame(Port, "FILE...")) FilePanel->Visible=true;
         if (Port.SubString(1,3)=="TCP") TCPPanel->Visible=true;
         if (Port.SubString(1,3)=="COM") PortPanel->Visible=true;
 }
@@ -783,8 +783,8 @@ void __fastcall TIF1::ComPortTxEmpty(TObject *Sender)
 void __fastcall TIF1::ClientSocketError(TObject *Sender,
       TCustomWinSocket *Socket, TErrorEvent ErrorEvent, int &ErrorCode)
 {
-        AnsiString Msg = "Could not open port ";
-        Application->MessageBox(Msg.c_str(),"Error", MB_OK | MB_ICONERROR);
+        AnsiString Msg = TrF("Could not open port {0}", "");
+        Application->MessageBox(Msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
         ErrorCode=0;
 }
 //---------------------------------------------------------------------------

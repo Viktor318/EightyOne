@@ -24,6 +24,7 @@
 #include "ProfilePlot_.h"
 #include "ProfileDetail.h"
 #include "Profiler.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -110,7 +111,7 @@ void TProfilePlot::InitScrollbar()
 void __fastcall TProfilePlot::PlotTGraph(ProfileDetail* pd, AnsiString caption)
 {
         _pd = pd;
-        Caption = "Profiler - " + caption;
+        Caption = TrF("Profiler - {0}", caption);
         InitScrollbar();
         UpdateMinMax(pd);
         Show();
@@ -125,12 +126,12 @@ void TProfilePlot::UpdateMinMax(ProfileDetail* pd)
                 max = _pd->Max();
         }
 
-        AnsiString minmax = "Min: ---- Max: ----";
+        AnsiString minmax = Tr("Min: ---- Max: ----");
         if (_pd) {
-                minmax = "Min: ";
-                minmax += min;
-                minmax += " Max: ";
-                minmax += max;
+                AnsiString minText, maxText;
+                minText += min;
+                maxText += max;
+                minmax = TrF("Min: {0} Max: {1}", minText, maxText);
         }
         StatusBar1->Panels->Items[0]->Text = minmax;
 }
@@ -160,14 +161,15 @@ void __fastcall TProfilePlot::FormMouseMove(TObject *Sender,
                 sample += ScrollBarHorizontal->Position;
         }
 
-        AnsiString cur = "Current: ----";
-        AnsiString sam = "Sample: ----";
+        AnsiString cur = Tr("Current: ----");
+        AnsiString sam = Tr("Sample: ----");
 
         if (_pd) {
-                cur = "Current: ";
-                cur += _pd->Sample(sample);
-                sam = "Sample: ";
-                sam += sample;
+                AnsiString curText, samText;
+                curText += _pd->Sample(sample);
+                samText += sample;
+                cur = TrF("Current: {0}", curText);
+                sam = TrF("Sample: {0}", samText);
         }
         StatusBar1->Panels->Items[1]->Text = sam;
         StatusBar1->Panels->Items[2]->Text = cur;

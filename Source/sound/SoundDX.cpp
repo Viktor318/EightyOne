@@ -18,6 +18,7 @@
 
 #include <dsound.h>
 #include "sound\SoundDX.h"
+#include "Language.h"
 
 CDSnd::CDSnd(void)
 {
@@ -313,7 +314,7 @@ void CDSnd::ThreadFN()
                                 NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                                 buf, sizeof(buf), NULL);
 
-                       MessageBox(NULL, buf,"Message Sending Error",2);
+                       MessageBox(NULL, buf, Tr("Message Sending Error").c_str(), 2);
                 }
         }
 }

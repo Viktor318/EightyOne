@@ -353,6 +353,9 @@ public:		// User declarations
         int SaveScrW, SaveScrH, SaveScrBpp;
         LONG_PTR SaveStyle, SaveExStyle;
         void __fastcall AppMessage(TMsg &Msg, bool &Handled);
+        void __fastcall LanguageClick(TObject *Sender);
+        void BuildLanguageMenu();
+        TMenuItem *LanguageItems[3];
         void LoadSettings(TIniFile *ini);
         void SaveSettings(TIniFile *ini);
         void DoAutoLoad(void);

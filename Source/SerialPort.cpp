@@ -25,6 +25,7 @@
 #include "SerialPort.h"
 #include "utils.h"
 #include "zx81config.h"
+#include "Language.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "CPort"
@@ -242,7 +243,7 @@ __fastcall TSerialConfig::TSerialConfig(TComponent* Owner)
 {
         TIniFile *ini;
 
-        ComPortList->Items->Add("FILE...");
+        ComPortList->Items->Add(Tr("FILE..."));
         ComPortList->Items->Add("TCP/IP...");
         if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"COM");
         //if (access("nocomport",0)) EnumeratePorts(ComPortList->Items,"LPT");
@@ -272,7 +273,7 @@ void __fastcall TSerialConfig::OKClick(TObject *Sender)
 
         if (ClientSocket->Active) ClientSocket->Close();
 
-        if (ComPortList->Items->Strings[ComPortList->ItemIndex]=="FILE...")
+        if (ComPortList->Items->Strings[ComPortList->ItemIndex]== Tr("FILE..."))
         {
                 SendTo=SERIALFILE;
         }
@@ -297,9 +298,8 @@ void __fastcall TSerialConfig::OKClick(TObject *Sender)
                         try { ComPort1->Open(); }
                         catch(EComPort &E)
                         {
-                                AnsiString Msg = "Could not open port ";
-                                Msg += ComPortList->Items->Strings[ComPortList->ItemIndex];
-                                if (Sender) Application->MessageBox(Msg.c_str(),"Error", MB_OK | MB_ICONERROR);
+                                AnsiString Msg = TrF("Could not open port {0}", ComPortList->Items->Strings[ComPortList->ItemIndex]);
+                                if (Sender) Application->MessageBox(Msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
                                 Enabled->Checked=false;
                                 Sender=NULL;
                         }
@@ -363,7 +363,7 @@ void TSerialConfig::SaveSettings(TIniFile *ini)
 
 void __fastcall TSerialConfig::ComPortListChange(TObject *Sender)
 {
-        if (ComPortList->Items->Strings[ComPortList->ItemIndex]=="FILE...")
+        if (ComPortList->Items->Strings[ComPortList->ItemIndex]== Tr("FILE..."))
         {
                 SerialPanel->Visible=false;
                 TCPPanel->Visible=false;
@@ -394,8 +394,8 @@ void __fastcall TSerialConfig::BrowseClick(TObject *Sender)
 void __fastcall TSerialConfig::ClientSocketError(TObject *Sender,
       TCustomWinSocket *Socket, TErrorEvent ErrorEvent, int &ErrorCode)
 {
-        AnsiString Msg = "Could not open port ";
-        Application->MessageBox(Msg.c_str(),"Error", MB_OK | MB_ICONERROR);
+        AnsiString Msg = TrF("Could not open port {0}", "");
+        Application->MessageBox(Msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
         Enabled->Checked=false;
         ErrorCode=0;
 }

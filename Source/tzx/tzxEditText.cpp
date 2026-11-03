@@ -24,6 +24,7 @@
 #include "tzxEditText.h"
 #include "tzxfile.h"
 #include "tzxman.h"
+#include "Language.h"
 extern TTZXFile TZXFile;
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -50,9 +51,9 @@ void TEditTextForm::Go(int BlockNo, int Mx, int My)
         if (Top+Height > monitor->Top+monitor->Height) Top = monitor->Top+monitor->Height - Height;
 
         if (TZXFile.Tape[BlockNo].BlockID==TZX_BLOCK_GSTART)
-                Caption="Edit Group Start Block";
+                Caption=Tr("Edit Group Start Block");
         else
-                Caption="Edit Text Block";
+                Caption=Tr("Edit Text Block");
 
         text="";
         for(i=0;i<TZXFile.Tape[BlockNo].Head.Text.TextLen;i++)
