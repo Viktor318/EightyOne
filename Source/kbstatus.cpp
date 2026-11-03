@@ -61,6 +61,10 @@ void AdjustLocalKeyboard();
 // Windows keyboard layout gives, not the positions of the keys
 bool WindowsLayout = true;
 
+// "Use left Alt as Shift with number keys": the left Alt and a number key
+// give SHIFT (CAPS SHIFT on the Spectrum) + that number
+bool AltShift = true;
+
 // The base map of the emulated machine, for the positions of the keys
 static const kb *BaseMap = NULL;
 
@@ -1458,6 +1462,21 @@ void PCKeyDownWin(WORD key)
         unsigned short c;
         int digit, i;
 
+        // The left Alt and a number key: SHIFT + number
+        if (AltShift && IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU))
+        {
+                digit = NumberKeyDigit(key);
+                if (digit != -1)
+                {
+                        MSG msg;
+
+                        // No beep for a menu letter not found
+                        PeekMessageW(&msg, NULL, WM_SYSCHAR, WM_SYSCHAR, PM_REMOVE);
+                        PressCharKey(key, (char)('0' + digit), KEYMOD_SHIFT);
+                        return;
+                }
+        }
+
         if (!WindowsLayout || (key >= VK_NUMPAD0 && key <= VK_DIVIDE)
                 || key == VK_SHIFT || key == VK_MENU)
         {
@@ -1471,20 +1490,8 @@ void PCKeyDownWin(WORD key)
                 return;
         }
 
-        // The left Alt and a number key: SHIFT + number
-        if (IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU))
-        {
-                digit = NumberKeyDigit(key);
-                if (digit != -1)
-                {
-                        MSG msg;
-
-                        // No beep for a menu letter not found
-                        PeekMessageW(&msg, NULL, WM_SYSCHAR, WM_SYSCHAR, PM_REMOVE);
-                        PressCharKey(key, (char)('0' + digit), KEYMOD_SHIFT);
-                }
-                return;
-        }
+        // Other keys with the left Alt are for Windows (menus)
+        if (IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU)) return;
 
         c = PeekChar();
 
@@ -1522,18 +1529,14 @@ void PCKeyUpWin(WORD key)
 {
         int i;
 
-        if (WindowsLayout)
+        i = FindCharKey(key);
+        if (i != -1)
         {
-                i = FindCharKey(key);
-                if (i != -1)
-                {
-                        ReleaseBits(CharKeys[i]);
-                        CharKeys[i] = CharKeys[--CharKeyCount];
-                        if (!QueueCount && PCShift == 2)
-                                ZXKeyboard[kbA8] |= kbD0;
-                        PressCharKeys();
-                        return;
-                }
+                ReleaseBits(CharKeys[i]);
+                CharKeys[i] = CharKeys[--CharKeyCount];
+                if (!QueueCount && PCShift == 2) ZXKeyboard[kbA8] |= kbD0;
+                PressCharKeys();
+                return;
         }
 
         PCKeyUp(key);

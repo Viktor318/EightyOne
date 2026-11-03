@@ -81,6 +81,7 @@ void __fastcall TKb::OKClick(TObject *Sender)
         emulator.UseNumericPadForJoystick2 = (CFGBYTE)((UseNumericPadForJoystickCheckBox->Checked && UseNumericPadForJoystick2->Checked) ? 1 : 0);
 
         WindowsLayout = WindowsLayoutCheckBox->Checked;
+        AltShift = AltShiftCheckBox->Checked;
         Form1->Keyboard1->Checked=false;
         
         Close();
@@ -124,6 +125,7 @@ void TKb::LoadSettings(TIniFile *ini)
         UseNumericPadForJoystick1->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick1", UseNumericPadForJoystick1->Checked);
         UseNumericPadForJoystick2->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
         WindowsLayoutCheckBox->Checked            = ini->ReadBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
+        AltShiftCheckBox->Checked                 = ini->ReadBool("KB", "AltShift", AltShiftCheckBox->Checked);
 
         UpdateJoystickSettings();
         CursorModeChange(NULL);
@@ -150,6 +152,7 @@ void TKb::SaveSettings(TIniFile *ini)
         ini->WriteBool("KB", "UseNumericPadForJoystick1", UseNumericPadForJoystick1->Checked);
         ini->WriteBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
         ini->WriteBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
+        ini->WriteBool("KB", "AltShift", AltShiftCheckBox->Checked);
 }
 
 void TKb::UpdateCursors()

@@ -38,6 +38,7 @@ extern void PCKeyDownWin(WORD key);
 extern void PCKeyUpWin(WORD key);
 extern void PCKeyFrame(void);
 extern bool WindowsLayout;
+extern bool AltShift;
 extern void PCKeySetCursor(char left, char down, char right, char up, int shift);
 extern void PCKeySetCTRL(char key);
 extern void PCAllKeysUp(void);

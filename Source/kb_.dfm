@@ -4,7 +4,7 @@ object Kb: TKb
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Keyboard'
-  ClientHeight = 162
+  ClientHeight = 172
   ClientWidth = 330
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -50,12 +50,12 @@ object Kb: TKb
   end
   object OK: TButton
     Left = 240
-    Top = 128
+    Top = 136
     Width = 81
     Height = 25
     Caption = 'OK'
     Default = True
-    TabOrder = 12
+    TabOrder = 13
     OnClick = OKClick
   end
   object CustomUp: TEdit
@@ -154,12 +154,22 @@ object Kb: TKb
   end
   object WindowsLayoutCheckBox: TCheckBox
     Left = 8
-    Top = 132
+    Top = 128
     Width = 225
     Height = 17
     Caption = 'Use the Windows keyboard layout'
     Checked = True
     State = cbChecked
     TabOrder = 11
+  end
+  object AltShiftCheckBox: TCheckBox
+    Left = 8
+    Top = 148
+    Width = 229
+    Height = 17
+    Caption = 'Use left Alt as Shift with number keys'
+    Checked = True
+    State = cbChecked
+    TabOrder = 12
   end
 end

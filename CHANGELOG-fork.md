@@ -26,8 +26,11 @@ The changes of the `hungarian-windows` branch, compared with
     the order of typing is kept.
   - `×` and `÷` (AltGr on the Hungarian layout) are typed as `*` and `/`.
   - Accented letters are typed without the accent.
-  - The left Alt and a number key give SHIFT + that number (EDIT, AND, THEN,
-    cursors, GRAPHICS, RUBOUT...).
   - Keys without a character (cursors, Enter, Backspace, Ctrl), the numeric
     keypad and the joystick keys work as before.
   - The Ctrl that Windows sends with AltGr is no longer passed on.
+- **Use left Alt as Shift with number keys** (Options > Keyboard, on by
+  default): the left Alt and a number key give SHIFT + that number (CAPS
+  SHIFT on the Spectrum: EDIT, AND, THEN, cursors, GRAPHICS, RUBOUT,
+  DELETE...), which Shift+number can't give with the Windows layout. Other
+  keys with Alt still go to Windows (menus).

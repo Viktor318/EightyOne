@@ -27,8 +27,11 @@ eredetihez képest.
     kivárnak, így a gépelés sorrendje megmarad.
   - A `×` és a `÷` (AltGr a magyar kiosztáson) `*`-ként és `/`-ként megy át.
   - Az ékezetes betűk ékezet nélkül mennek át.
-  - A bal Alt és egy számbillentyű SHIFT + azt a számot adja (EDIT, AND,
-    THEN, kurzorok, GRAPHICS, RUBOUT...).
   - A karakter nélküli billentyűk (kurzorok, Enter, Backspace, Ctrl), a
     numerikus billentyűzet és a joystick billentyűi a régi módon működnek.
   - Az AltGr-rel együtt küldött Ctrl-t nem adja tovább a gépnek.
+- **A bal Alt SHIFT-ként a számbillentyűkkel** (Options > Keyboard, alapból
+  bekapcsolva): a bal Alt és egy számbillentyű SHIFT + azt a számot adja (a
+  Spectrumon CAPS SHIFT-et: EDIT, AND, THEN, kurzorok, GRAPHICS, RUBOUT,
+  DELETE...), amit a Windows-kiosztással a Shift+szám nem tud. A többi
+  billentyűvel az Alt továbbra is a Windowsé (menük).
