@@ -57,6 +57,13 @@ struct kb
 void SetKeyMap(const kb *source);
 void AdjustLocalKeyboard();
 
+// "Use the Windows keyboard layout": typing follows the characters the
+// Windows keyboard layout gives, not the positions of the keys
+bool WindowsLayout = true;
+
+// The base map of the emulated machine, for the positions of the keys
+static const kb *BaseMap = NULL;
+
 struct kb KeyMap[100];
 
 const struct kb KBZX81[]=
@@ -547,25 +554,27 @@ void PCKbInit(void)
         switch(emulator.machine)
         {
         case MACHINEZX80:
-                SetKeyMap(KBZX80);
+                BaseMap = KBZX80;
                 break;
 
         case MACHINESPECTRUM:
-                SetKeyMap(KBSPEC);
+                BaseMap = KBSPEC;
                 break;
 
         case MACHINEACE:
-                SetKeyMap(KBACE);
+                BaseMap = KBACE;
                 break;
 
         case MACHINELAMBDA:
-                SetKeyMap(KBLAMBDA);
+                BaseMap = KBLAMBDA;
                 break;
 
         default:
-                SetKeyMap(KBZX81);
+                BaseMap = KBZX81;
                 break;
         }
+
+        SetKeyMap(BaseMap);
 
         AdjustLocalKeyboard();
 }
@@ -736,10 +745,13 @@ void PCKeyUp(WORD key)
         if (PCShift == 2) ZXKeyboard[kbA8] |= kbD0;
 }
 
+static void ForgetCharKeys();
+
 void PCAllKeysUp()
 {
         int i;
         for(i=0; i<8; i++) ZXKeyboard[i]=0;
+        ForgetCharKeys();
 }
 
 void AdjustLocalKeyboard()
@@ -850,4 +862,461 @@ void DetermineKeyMatrixPosition(int machine, KeyInfo& keyInfo)
 
                 mapEntry++;
         }
+}
+
+//---------------------------------------------------------------------------
+// Typing with the Windows keyboard layout
+//
+// A key that gives a character is typed as that character: the key
+// combination that gives the character on the emulated machine is pressed,
+// whatever Windows key it came from (on the Hungarian layout, Shift+2 gives
+// " which is SHIFT+P on the ZX81). The machine's own shift is taken off
+// for it, or put on if the character needs it.
+//
+// - Letters stay keys: Shift+letter is the machine's SHIFT+letter, as
+//   before (keywords and symbols on the ZX80, ZX81 and Lambda, capitals on
+//   the Spectrum and the Ace).
+// - Accented letters are typed without the accent.
+// - Characters the machine has no key for are ignored.
+// - Keys without a character (cursors, Enter, Backspace, Ctrl, the function
+//   keys) and the numeric keypad work as before.
+// - The left Alt and a number key give SHIFT + that number (EDIT, AND,
+//   THEN, cursors, GRAPHICS, RUBOUT...), which Shift+number now can't.
+// - AltGr is sent by Windows as Ctrl + Alt; its Ctrl is not passed on, so
+//   the characters typed with AltGr don't press what Ctrl is mapped to.
+//---------------------------------------------------------------------------
+
+// The modifier a character needs
+#define KEYMOD_NONE   0
+#define KEYMOD_SHIFT  1    // SHIFT (CAPS SHIFT on the Spectrum)
+#define KEYMOD_SYMBOL 2    // SYMBOL SHIFT (Spectrum and Ace)
+
+// The period key of the ZX80, ZX81 and Lambda
+#define KEY_PERIOD '.'
+
+struct kbchar
+{
+        unsigned short Char;    // UTF-16
+        char Key;               // 'A'-'Z', '0'-'9', ' ' or KEY_PERIOD
+        BYTE Mod;
+};
+
+static const struct kbchar CharsZX81[]=
+{
+        { '"', 'P', KEYMOD_SHIFT },  { '$', 'U', KEYMOD_SHIFT },
+        { '(', 'I', KEYMOD_SHIFT },  { ')', 'O', KEYMOD_SHIFT },
+        { '-', 'J', KEYMOD_SHIFT },  { '+', 'K', KEYMOD_SHIFT },
+        { '=', 'L', KEYMOD_SHIFT },  { ':', 'Z', KEYMOD_SHIFT },
+        { ';', 'X', KEYMOD_SHIFT },  { '?', 'C', KEYMOD_SHIFT },
+        { '/', 'V', KEYMOD_SHIFT },  { '*', 'B', KEYMOD_SHIFT },
+        { '<', 'N', KEYMOD_SHIFT },  { '>', 'M', KEYMOD_SHIFT },
+        { ',', KEY_PERIOD, KEYMOD_SHIFT }, { '.', KEY_PERIOD, KEYMOD_NONE },
+        { 0x00a3, ' ', KEYMOD_SHIFT },     // pound sign
+        { 0, 0, 0 }
+};
+
+static const struct kbchar CharsZX80[]=
+{
+        { '"', 'Y', KEYMOD_SHIFT },  { '$', 'U', KEYMOD_SHIFT },
+        { '(', 'I', KEYMOD_SHIFT },  { ')', 'O', KEYMOD_SHIFT },
+        { '*', 'P', KEYMOD_SHIFT },  { '-', 'J', KEYMOD_SHIFT },
+        { '+', 'K', KEYMOD_SHIFT },  { '=', 'L', KEYMOD_SHIFT },
+        { ':', 'Z', KEYMOD_SHIFT },  { ';', 'X', KEYMOD_SHIFT },
+        { '?', 'C', KEYMOD_SHIFT },  { '/', 'V', KEYMOD_SHIFT },
+        { '<', 'N', KEYMOD_SHIFT },  { '>', 'M', KEYMOD_SHIFT },
+        { ',', KEY_PERIOD, KEYMOD_SHIFT }, { '.', KEY_PERIOD, KEYMOD_NONE },
+        { 0x00a3, ' ', KEYMOD_SHIFT },     // pound sign
+        { 0, 0, 0 }
+};
+
+static const struct kbchar CharsLambda[]=
+{
+        { '$', '4', KEYMOD_SHIFT },  { '"', '5', KEYMOD_SHIFT },
+        { ';', '6', KEYMOD_SHIFT },  { ',', '7', KEYMOD_SHIFT },
+        { '(', '8', KEYMOD_SHIFT },  { ')', '9', KEYMOD_SHIFT },
+        { '=', '0', KEYMOD_SHIFT },  { '<', 'O', KEYMOD_SHIFT },
+        { '>', 'P', KEYMOD_SHIFT },  { '/', 'H', KEYMOD_SHIFT },
+        { '*', 'J', KEYMOD_SHIFT },  { '-', 'K', KEYMOD_SHIFT },
+        { '+', 'L', KEYMOD_SHIFT },  { '.', KEY_PERIOD, KEYMOD_NONE },
+        { 0, 0, 0 }
+};
+
+static const struct kbchar CharsSpectrum[]=
+{
+        { '!', '1', KEYMOD_SYMBOL }, { '@', '2', KEYMOD_SYMBOL },
+        { '#', '3', KEYMOD_SYMBOL }, { '$', '4', KEYMOD_SYMBOL },
+        { '%', '5', KEYMOD_SYMBOL }, { '&', '6', KEYMOD_SYMBOL },
+        { '\'', '7', KEYMOD_SYMBOL }, { '(', '8', KEYMOD_SYMBOL },
+        { ')', '9', KEYMOD_SYMBOL }, { '_', '0', KEYMOD_SYMBOL },
+        { '<', 'R', KEYMOD_SYMBOL }, { '>', 'T', KEYMOD_SYMBOL },
+        { ';', 'O', KEYMOD_SYMBOL }, { '"', 'P', KEYMOD_SYMBOL },
+        { '^', 'H', KEYMOD_SYMBOL }, { '-', 'J', KEYMOD_SYMBOL },
+        { '+', 'K', KEYMOD_SYMBOL }, { '=', 'L', KEYMOD_SYMBOL },
+        { ':', 'Z', KEYMOD_SYMBOL }, { 0x00a3, 'X', KEYMOD_SYMBOL },
+        { '?', 'C', KEYMOD_SYMBOL }, { '/', 'V', KEYMOD_SYMBOL },
+        { '*', 'B', KEYMOD_SYMBOL }, { ',', 'N', KEYMOD_SYMBOL },
+        { '.', 'M', KEYMOD_SYMBOL },
+        { 0, 0, 0 }
+};
+
+static const struct kbchar CharsAce[]=
+{
+        { '!', '1', KEYMOD_SYMBOL }, { '@', '2', KEYMOD_SYMBOL },
+        { '#', '3', KEYMOD_SYMBOL }, { '$', '4', KEYMOD_SYMBOL },
+        { '%', '5', KEYMOD_SYMBOL }, { '&', '6', KEYMOD_SYMBOL },
+        { '\'', '7', KEYMOD_SYMBOL }, { '(', '8', KEYMOD_SYMBOL },
+        { ')', '9', KEYMOD_SYMBOL }, { '_', '0', KEYMOD_SYMBOL },
+        { '<', 'R', KEYMOD_SYMBOL }, { '>', 'T', KEYMOD_SYMBOL },
+        { '[', 'Y', KEYMOD_SYMBOL }, { ']', 'U', KEYMOD_SYMBOL },
+        { 0x00a9, 'I', KEYMOD_SYMBOL },    // copyright sign
+        { ';', 'O', KEYMOD_SYMBOL }, { '"', 'P', KEYMOD_SYMBOL },
+        { '~', 'A', KEYMOD_SYMBOL }, { '|', 'S', KEYMOD_SYMBOL },
+        { '\\', 'D', KEYMOD_SYMBOL }, { '{', 'F', KEYMOD_SYMBOL },
+        { '}', 'G', KEYMOD_SYMBOL }, { '^', 'H', KEYMOD_SYMBOL },
+        { '-', 'J', KEYMOD_SYMBOL }, { '+', 'K', KEYMOD_SYMBOL },
+        { '=', 'L', KEYMOD_SYMBOL }, { ':', 'Z', KEYMOD_SYMBOL },
+        { 0x00a3, 'X', KEYMOD_SYMBOL },    // pound sign
+        { '?', 'C', KEYMOD_SYMBOL }, { '/', 'V', KEYMOD_SYMBOL },
+        { '*', 'B', KEYMOD_SYMBOL }, { ',', 'N', KEYMOD_SYMBOL },
+        { '.', 'M', KEYMOD_SYMBOL },
+        { 0, 0, 0 }
+};
+
+// Accented letters, typed without the accent
+static const struct
+{
+        unsigned short Char;
+        char Letter;
+} AccentedLetters[]=
+{
+        { 0x00e1, 'a' }, { 0x00e9, 'e' }, { 0x00ed, 'i' }, { 0x00f3, 'o' },
+        { 0x00f6, 'o' }, { 0x0151, 'o' }, { 0x00fa, 'u' }, { 0x00fc, 'u' },
+        { 0x0171, 'u' }, { 0x00e4, 'a' },
+        { 0x00c1, 'A' }, { 0x00c9, 'E' }, { 0x00cd, 'I' }, { 0x00d3, 'O' },
+        { 0x00d6, 'O' }, { 0x0150, 'O' }, { 0x00da, 'U' }, { 0x00dc, 'U' },
+        { 0x0170, 'U' }, { 0x00c4, 'A' },
+        { 0, 0 }
+};
+
+// Keys held down that were typed as characters, by their Windows key
+struct charkey
+{
+        WORD WinKey;
+        BYTE Addr1, Data1, Addr2, Data2;
+};
+
+#define MAX_CHAR_KEYS 16
+static struct charkey CharKeys[MAX_CHAR_KEYS];
+static int CharKeyCount = 0;
+
+static void ForgetCharKeys()
+{
+        CharKeyCount = 0;
+}
+
+static int FindCharKey(WORD winKey)
+{
+        int i;
+
+        for (i=0; i<CharKeyCount; i++)
+                if (CharKeys[i].WinKey == winKey) return i;
+
+        return -1;
+}
+
+static void ReleaseBits(const struct charkey &k)
+{
+        ZXKeyboard[k.Addr1] &= (BYTE)(~k.Data1);
+        if (k.Addr2 != 255) ZXKeyboard[k.Addr2] &= (BYTE)(~k.Data2);
+}
+
+static void PressBits(const struct charkey &k)
+{
+        ZXKeyboard[k.Addr1] |= k.Data1;
+        if (k.Addr2 != 255) ZXKeyboard[k.Addr2] |= k.Data2;
+}
+
+// Keys still held keep their bits, if another key shared them
+static void PressCharKeys()
+{
+        int i;
+
+        for (i=0; i<CharKeyCount; i++) PressBits(CharKeys[i]);
+}
+
+static bool IsZX81Family()
+{
+        return emulator.machine != MACHINESPECTRUM
+                && emulator.machine != MACHINEACE;
+}
+
+// The place of a key of the emulated machine in its keyboard matrix
+static bool FindKeyPosition(char key, BYTE &addr, BYTE &data)
+{
+        int i;
+
+        if (key == KEY_PERIOD)
+        {
+                if (!IsZX81Family()) return false;
+                addr = kbA15;
+                data = kbD1;
+                return true;
+        }
+
+        if (!BaseMap) return false;
+
+        for (i=0; BaseMap[i].WinKey; i++)
+        {
+                if (BaseMap[i].Shift == 0 && BaseMap[i].WinKey == (WORD)key
+                        && BaseMap[i].Addr2 == 255)
+                {
+                        addr = BaseMap[i].Addr1;
+                        data = BaseMap[i].Data1;
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+// Press the key of the emulated machine for a Windows key, with the
+// modifier given; the shift of the machine is taken off otherwise
+static void PressCharKey(WORD winKey, char key, BYTE mod)
+{
+        struct charkey k;
+        int i;
+
+        if (!FindKeyPosition(key, k.Addr1, k.Data1)) return;
+
+        k.WinKey = winKey;
+        k.Addr2 = 255;
+        k.Data2 = 255;
+
+        if (mod == KEYMOD_SHIFT)
+        {
+                k.Addr2 = kbA8;
+                k.Data2 = kbD0;
+        }
+        else if (mod == KEYMOD_SYMBOL)
+        {
+                if (emulator.machine == MACHINESPECTRUM)
+                {
+                        k.Addr2 = kbA15;
+                        k.Data2 = kbD1;
+                }
+                else if (emulator.machine == MACHINEACE)
+                {
+                        k.Addr2 = kbA8;
+                        k.Data2 = kbD1;
+                }
+                else return;
+        }
+
+        // A key repeating may give another character now
+        i = FindCharKey(winKey);
+        if (i != -1)
+        {
+                ReleaseBits(CharKeys[i]);
+                CharKeys[i] = k;
+        }
+        else if (CharKeyCount < MAX_CHAR_KEYS)
+        {
+                CharKeys[CharKeyCount++] = k;
+        }
+
+        // The SHIFT key is on the same place on every machine
+        ZXKeyboard[kbA8] &= (BYTE)(~kbD0);
+        PressBits(k);
+}
+
+static const struct kbchar *CharMap()
+{
+        switch (emulator.machine)
+        {
+        case MACHINEZX80:     return CharsZX80;
+        case MACHINESPECTRUM: return CharsSpectrum;
+        case MACHINEACE:      return CharsAce;
+        case MACHINELAMBDA:   return CharsLambda;
+        default:              return CharsZX81;
+        }
+}
+
+// Type a character with the key combination of the emulated machine.
+// Returns false if it has none
+static bool TypeChar(WORD winKey, unsigned short c)
+{
+        const struct kbchar *map;
+        int i;
+
+        for (i=0; AccentedLetters[i].Char; i++)
+        {
+                if (AccentedLetters[i].Char == c)
+                {
+                        c = AccentedLetters[i].Letter;
+                        break;
+                }
+        }
+
+        if (c >= '0' && c <= '9')
+        {
+                PressCharKey(winKey, (char)c, KEYMOD_NONE);
+                return true;
+        }
+
+        // A letter that came from another key than its own (like an
+        // accented one): capitals with SHIFT on the machines that have
+        // lower case letters
+        if (c >= 'a' && c <= 'z')
+        {
+                PressCharKey(winKey, (char)(c - 'a' + 'A'), KEYMOD_NONE);
+                return true;
+        }
+
+        if (c >= 'A' && c <= 'Z')
+        {
+                PressCharKey(winKey, (char)c,
+                             IsZX81Family() ? KEYMOD_NONE : KEYMOD_SHIFT);
+                return true;
+        }
+
+        map = CharMap();
+        for (i=0; map[i].Char; i++)
+        {
+                if (map[i].Char == c)
+                {
+                        PressCharKey(winKey, map[i].Key, map[i].Mod);
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+// The character of this key press. TranslateMessage() has already posted
+// the WM_CHAR message for it, right behind the WM_KEYDOWN being handled.
+// The W variant gives Unicode even for an ANSI window. Returns 0 if none
+// (keys like cursors or dead keys, which give no WM_CHAR). The message is
+// left in the queue: the main form's OnKeyPress still needs some (space,
+// Esc); TakeChar() removes it when it is typed here
+static unsigned short PeekChar()
+{
+        MSG msg;
+        unsigned short c;
+
+        if (!PeekMessageW(&msg, NULL, WM_CHAR, WM_CHAR, PM_NOREMOVE)) return 0;
+
+        c = (unsigned short)msg.wParam;
+
+        // A character outside the Basic Multilingual Plane comes as a
+        // surrogate pair; none of them is on these machines
+        if (c >= 0xd800 && c <= 0xdfff) return 0;
+
+        return c;
+}
+
+static void TakeChar()
+{
+        MSG msg;
+
+        PeekMessageW(&msg, NULL, WM_CHAR, WM_CHAR, PM_REMOVE);
+}
+
+// Is this Ctrl press the one Windows sends with AltGr? The right Alt
+// press follows it in the queue, with the same time
+static bool IsAltGrCtrl()
+{
+        MSG msg;
+
+        if (!PeekMessage(&msg, NULL, WM_KEYDOWN, WM_SYSKEYDOWN, PM_NOREMOVE))
+                return false;
+
+        return (msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN)
+                && msg.wParam == VK_MENU
+                && (msg.lParam & (1 << 24))
+                && msg.time == (DWORD)GetMessageTime();
+}
+
+// The digit of a number key of the main block, or -1. The digit may be on
+// another key than VK_0-VK_9 (like 0 on the Hungarian layout), so it is
+// the character the key gives without Shift
+static int NumberKeyDigit(WORD key)
+{
+        unsigned int c;
+
+        if (key >= VK_NUMPAD0 && key <= VK_DIVIDE) return -1;
+
+        c = LOWORD(MapVirtualKey(key, 2));      // MAPVK_VK_TO_CHAR
+        if (c >= '0' && c <= '9') return (int)(c - '0');
+
+        return -1;
+}
+
+void PCKeyDownWin(WORD key)
+{
+        unsigned short c;
+        int digit;
+
+        if (!WindowsLayout || (key >= VK_NUMPAD0 && key <= VK_DIVIDE)
+                || key == VK_SHIFT || key == VK_MENU)
+        {
+                PCKeyDown(key);
+                return;
+        }
+
+        if (key == VK_CONTROL)
+        {
+                if (!IsAltGrCtrl()) PCKeyDown(key);
+                return;
+        }
+
+        // The left Alt and a number key: SHIFT + number
+        if (IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU))
+        {
+                digit = NumberKeyDigit(key);
+                if (digit != -1)
+                {
+                        MSG msg;
+
+                        // No beep for a menu letter not found
+                        PeekMessageW(&msg, NULL, WM_SYSCHAR, WM_SYSCHAR, PM_REMOVE);
+                        PressCharKey(key, (char)('0' + digit), KEYMOD_SHIFT);
+                }
+                return;
+        }
+
+        c = PeekChar();
+
+        // Keys without a character, control characters, space and the
+        // letters of their own keys go as before
+        if (c < 0x20 || c == ' ' || c == 0x7f
+                || (key >= 'A' && key <= 'Z'
+                    && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))))
+        {
+                PCKeyDown(key);
+                return;
+        }
+
+        TakeChar();
+        TypeChar(key, c);
+}
+
+void PCKeyUpWin(WORD key)
+{
+        int i;
+
+        if (WindowsLayout)
+        {
+                i = FindCharKey(key);
+                if (i != -1)
+                {
+                        ReleaseBits(CharKeys[i]);
+                        CharKeys[i] = CharKeys[--CharKeyCount];
+                        if (PCShift == 2) ZXKeyboard[kbA8] |= kbD0;
+                        PressCharKeys();
+                        return;
+                }
+        }
+
+        PCKeyUp(key);
+        PressCharKeys();
 }

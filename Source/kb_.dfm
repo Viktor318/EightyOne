@@ -4,7 +4,7 @@ object Kb: TKb
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Keyboard'
-  ClientHeight = 138
+  ClientHeight = 162
   ClientWidth = 330
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -50,12 +50,12 @@ object Kb: TKb
   end
   object OK: TButton
     Left = 240
-    Top = 104
+    Top = 128
     Width = 81
     Height = 25
     Caption = 'OK'
     Default = True
-    TabOrder = 11
+    TabOrder = 12
     OnClick = OKClick
   end
   object CustomUp: TEdit
@@ -151,5 +151,15 @@ object Kb: TKb
     TabOrder = 10
     TabStop = True
     OnClick = UseNumericPadForJoystick2Click
+  end
+  object WindowsLayoutCheckBox: TCheckBox
+    Left = 8
+    Top = 132
+    Width = 225
+    Height = 17
+    Caption = 'Use the Windows keyboard layout'
+    Checked = True
+    State = cbChecked
+    TabOrder = 11
   end
 end

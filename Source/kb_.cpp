@@ -80,6 +80,7 @@ void __fastcall TKb::OKClick(TObject *Sender)
         emulator.UseNumericPadForJoystick1 = (CFGBYTE)((UseNumericPadForJoystickCheckBox->Checked && UseNumericPadForJoystick1->Checked) ? 1 : 0);
         emulator.UseNumericPadForJoystick2 = (CFGBYTE)((UseNumericPadForJoystickCheckBox->Checked && UseNumericPadForJoystick2->Checked) ? 1 : 0);
 
+        WindowsLayout = WindowsLayoutCheckBox->Checked;
         Form1->Keyboard1->Checked=false;
         
         Close();
@@ -122,6 +123,7 @@ void TKb::LoadSettings(TIniFile *ini)
         UseNumericPadForJoystickCheckBox->Checked = ini->ReadBool("KB", "UseNumericPadForJoystick", UseNumericPadForJoystickCheckBox->Checked);
         UseNumericPadForJoystick1->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick1", UseNumericPadForJoystick1->Checked);
         UseNumericPadForJoystick2->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
+        WindowsLayoutCheckBox->Checked            = ini->ReadBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
 
         UpdateJoystickSettings();
         CursorModeChange(NULL);
@@ -147,6 +149,7 @@ void TKb::SaveSettings(TIniFile *ini)
         ini->WriteBool("KB", "UseNumericPadForJoystick", UseNumericPadForJoystickCheckBox->Checked);
         ini->WriteBool("KB", "UseNumericPadForJoystick1", UseNumericPadForJoystick1->Checked);
         ini->WriteBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
+        ini->WriteBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
 }
 
 void TKb::UpdateCursors()

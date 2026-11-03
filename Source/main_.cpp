@@ -310,7 +310,7 @@ void __fastcall TForm1::FormKeyDown(TObject *Sender, WORD &Key,
         if ((Key==VK_SHIFT) && emulator.UseRShift) return;
         if (Key==VK_LSHIFT) Key=VK_SHIFT;
         if (Key==VK_RSHIFT) Key=VK_CONTROL;
-        PCKeyDown(Key);
+        PCKeyDownWin(Key);
 }
 //---------------------------------------------------------------------------
 
@@ -320,7 +320,7 @@ void __fastcall TForm1::FormKeyUp(TObject *Sender, WORD &Key,
         if ((Key==VK_SHIFT) && emulator.UseRShift) return;
         if (Key==VK_LSHIFT) Key=VK_SHIFT;
         if (Key==VK_RSHIFT) Key=VK_CONTROL;
-        PCKeyUp(Key);
+        PCKeyUpWin(Key);
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::AboutEightyOne1Click(TObject *Sender)
