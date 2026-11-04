@@ -1050,6 +1050,10 @@ struct queuedchar
 
 #define QUEUE_SIZE 32
 #define STEP_FRAMES 3   // frames each step of a sequence lasts
+#define RELEASE_FRAMES 6        // and the last one, the key released: the
+                                // ROM takes a key pressed again within 5
+                                // interrupts for the same press held, so
+                                // in "[11]" or "[y" the next one was lost
 
 static struct queuedchar Queue[QUEUE_SIZE];
 static int QueueStart = 0, QueueCount = 0;
@@ -1379,7 +1383,7 @@ void PCKeyFrame()
                 break;
         }
 
-        if (++QueueStepFrames < STEP_FRAMES) return;
+        if (++QueueStepFrames < (QueueStep == 3 ? RELEASE_FRAMES : STEP_FRAMES)) return;
 
         QueueStepFrames = 0;
         if (++QueueStep <= 3) return;
@@ -1493,6 +1497,15 @@ void PCKeyDownWin(WORD key)
         // Other keys with the left Alt are for Windows (menus)
         if (IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU)) return;
 
+        // The right Shift used as SYMBOL SHIFT: the key goes as on the
+        // machine (Windows would give its shifted character, "&" or "="
+        // for 7 instead of the machine's SYMBOL SHIFT + 7)
+        if (emulator.UseRShift && IsKeyPressed(VK_RSHIFT) && !IsKeyPressed(VK_LSHIFT))
+        {
+                PCKeyDown(key);
+                return;
+        }
+
         c = PeekChar();
 
         // Repeats of a key that holds nothing (queued or ignored)
@@ -1519,6 +1532,21 @@ void PCKeyDownWin(WORD key)
         {
                 PCKeyDown(key);
                 return;
+        }
+
+        // A letter key giving a character the machine has not got (a
+        // Russian or Greek layout): the letter of the key, as before
+        if (key >= 'A' && key <= 'Z')
+        {
+                char mappedKey;
+                BYTE mod;
+                bool extended;
+
+                if (!MapChar(c, mappedKey, mod, extended))
+                {
+                        PCKeyDown(key);
+                        return;
+                }
         }
 
         TakeChar();

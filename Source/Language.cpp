@@ -159,32 +159,31 @@ AnsiString Tr(const AnsiString &english)
         return Tr(english.c_str());
 }
 
-static AnsiString ReplaceAll(AnsiString text, const AnsiString &what,
-                             const AnsiString &with)
-{
-        AnsiString result;
-        int position;
-
-        while ((position = text.Pos(what)) > 0)
-        {
-                result += text.SubString(1, position - 1) + with;
-                text = text.SubString(position + what.Length(),
-                                      text.Length());
-        }
-
-        return result + text;
-}
-
+// The values are put in in one pass, so a value containing "{1}" (a file
+// name) is not replaced again
 AnsiString TrF(const char *english, const AnsiString &a0,
                const AnsiString &a1, const AnsiString &a2)
 {
-        AnsiString text = Tr(english);
+        AnsiString text = Tr(english), result;
+        const AnsiString *values[3] = { &a0, &a1, &a2 };
+        int i = 1, length = text.Length();
 
-        text = ReplaceAll(text, "{0}", a0);
-        text = ReplaceAll(text, "{1}", a1);
-        text = ReplaceAll(text, "{2}", a2);
+        while (i <= length)
+        {
+                if (text[i] == '{' && i + 2 <= length && text[i + 2] == '}'
+                        && text[i + 1] >= '0' && text[i + 1] <= '2')
+                {
+                        result += *values[text[i + 1] - '0'];
+                        i += 3;
+                }
+                else
+                {
+                        result += text[i];
+                        i++;
+                }
+        }
 
-        return text;
+        return result;
 }
 
 //---------------------------------------------------------------------------
@@ -218,9 +217,23 @@ AnsiString LanguageEnglish(const AnsiString &text)
         return EnglishOf(text);
 }
 
+// The Hungarian of an English text of the table, whatever the language
+static AnsiString HungarianOf(const AnsiString &text)
+{
+        TextMap::const_iterator i;
+
+        BuildMaps();
+        i = ToHungarian.find(text.c_str());
+        return i != ToHungarian.end() ? AnsiString(i->second.c_str()) : text;
+}
+
+// Some Hungarian texts stand for more English ones ("Automatikus" for
+// "Auto" and "Automatic"), and EnglishOf() gives only the first: so the
+// Hungarian is compared too
 bool LanguageSame(const AnsiString &a, const AnsiString &b)
 {
-        return a == b || EnglishOf(a) == EnglishOf(b);
+        return a == b || EnglishOf(a) == EnglishOf(b)
+                || HungarianOf(a) == HungarianOf(b);
 }
 
 // The text to show for an English one
@@ -326,9 +339,32 @@ static void TranslateProperty(TObject *object, int property)
         Originals[key].LastSet = text;
 }
 
-// List items (combo boxes, list boxes, radio groups): no originals are
-// kept, as the code often fills them; the items of the table are turned
-// back into English first
+// A text of a list item or a status panel: the English it was made from
+// is kept with the text put there, as some Hungarian texts stand for more
+// English ones ("Automatikus": "Auto" and "Automatic"). When the code has
+// put a new text there since, that is taken as it is (or as the English of
+// a Hungarian text of the table)
+typedef std::map<std::pair<void *, int>, Original> TextOriginalMap;
+static TextOriginalMap TextOriginals;
+
+static AnsiString TranslateText(void *owner, int index, const AnsiString &current)
+{
+        std::pair<void *, int> key(owner, index);
+        TextOriginalMap::iterator i = TextOriginals.find(key);
+        AnsiString english, text;
+
+        if (i != TextOriginals.end() && i->second.LastSet == current)
+                english = i->second.English;
+        else
+                english = EnglishOf(current);
+
+        text = Shown(english);
+        TextOriginals[key].English = english;
+        TextOriginals[key].LastSet = text;
+        return text;
+}
+
+// List items (combo boxes, list boxes, radio groups)
 static void TranslateList(TStrings *items)
 {
         int i;
@@ -339,10 +375,26 @@ static void TranslateList(TStrings *items)
         items->BeginUpdate();
         for (i=0; i<items->Count; i++)
         {
-                text = Shown(EnglishOf(items->Strings[i]));
+                text = TranslateText(items, i, items->Strings[i]);
                 if (text != items->Strings[i]) items->Strings[i] = text;
         }
         items->EndUpdate();
+}
+
+// Menu items made by the code may belong to other menu items, not to the
+// form: the whole tree of a menu
+static void TranslateMenuItems(TMenuItem *item)
+{
+        int i;
+
+        if (!item) return;
+
+        for (i=0; i<item->Count; i++)
+        {
+                TranslateProperty(item->Items[i], 0);
+                TranslateProperty(item->Items[i], 1);
+                TranslateMenuItems(item->Items[i]);
+        }
 }
 
 static void TranslateComponent(TComponent *component)
@@ -375,7 +427,7 @@ static void TranslateComponent(TComponent *component)
                 for (i=0; i<status->Panels->Count; i++)
                 {
                         TStatusPanel *panel = status->Panels->Items[i];
-                        AnsiString text = Shown(EnglishOf(panel->Text));
+                        AnsiString text = TranslateText(panel, 0, panel->Text);
                         if (text != panel->Text) panel->Text = text;
                 }
         }
@@ -396,6 +448,10 @@ void LanguageTranslateForm(TForm *form)
         TranslateProperty(form, 0);
         for (i=0; i<form->ComponentCount; i++)
                 TranslateComponent(form->Components[i]);
+
+        for (i=0; i<form->ComponentCount; i++)
+                if (TMenu *menuOfForm = dynamic_cast<TMenu *>(form->Components[i]))
+                        TranslateMenuItems(menuOfForm->Items);
 
         // The menu bar of the form does not show the new captions of its
         // top items until the menu is built again
