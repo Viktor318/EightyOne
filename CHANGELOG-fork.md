@@ -12,7 +12,8 @@ The changes of the `hungarian-windows` branch, compared with
 - Double click changes the size of the picture in steps: 1x, 1.25x, 1.5x,
   1.75x, 2x and again 1x (it was 1x and 2x), together with the ZX80
   functions and the Spectrum 128 keypad beside it. The picture is scaled
-  smoothly (halftone), and its size is remembered.
+  smoothly (halftone), and its size is remembered. The window can be
+  resized too, but it jumps between these sizes.
 
 ### Hungarian user interface
 

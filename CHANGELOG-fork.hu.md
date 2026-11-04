@@ -13,7 +13,8 @@ eredetihez képest.
 - A dupla kattintás lépésenként változtatja a kép méretét: 1x, 1,25x,
   1,5x, 1,75x, 2x, majd újra 1x (eddig csak 1x és 2x volt), a mellette lévő
   ZX80 funkciókkal és Spectrum 128 numerikus billentyűzettel együtt. A kép
-  simán (halftone) skálázódik, a méretét megjegyzi.
+  simán (halftone) skálázódik, a méretét megjegyzi. Az ablak húzással is
+  átméretezhető, de csak ezek között a méretek között ugrik.
 
 ### Magyar felület
 

@@ -40,9 +40,11 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
 
         // The size of the picture is changed by double clicking it: 1x,
         // 1.25x, 1.5x, 1.75x, 2x and again 1x; it is scaled smoothly. The
-        // pictures of the machines stay as they are, under the one shown
+        // window can be resized too, but only to these sizes. The pictures
+        // of the machines stay as they are, under the one shown
         Size = 0;
         AutoSize = false;
+        BorderStyle = bsSizeToolWin;
         ClientWidth = PictureWidth;
         ClientHeight = PictureHeight;
 
@@ -51,6 +53,9 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
         Display->Align = alClient;
         Display->OnDblClick = KeyboardDblClick;
         Display->BringToFront();
+
+        OnCanResize = CanResizeWindow;
+        OnResize = ResizeWindow;
 
         ini = new TIniFile(emulator.inipath);
         LoadSettings(ini);
@@ -427,6 +432,56 @@ void TKeyboard::KbChange(void)
         Keypad128->Top = Keyboard->Top;
 
         SetSize(Size);
+}
+
+// Resizing the window: it jumps to the size nearest to the one dragged to
+// (the side dragged decides)
+void __fastcall TKeyboard::CanResizeWindow(TObject *Sender, int &NewWidth,
+                                           int &NewHeight, bool &Resize)
+{
+        int frameWidth = Width - ClientWidth;
+        int frameHeight = Height - ClientHeight;
+        bool byHeight = (NewWidth == Width && NewHeight != Height);
+        int wanted, size, best = 0, bestDistance = -1, distance, i;
+
+        for (i=0; i<(int)SIZES; i++)
+        {
+                if (byHeight)
+                {
+                        wanted = NewHeight - frameHeight;
+                        size = (PictureHeight * Sizes[i] + 2) / 4;
+                }
+                else
+                {
+                        wanted = NewWidth - frameWidth;
+                        size = (PictureWidth * Sizes[i] + 2) / 4;
+                }
+
+                distance = wanted > size ? wanted - size : size - wanted;
+                if (bestDistance < 0 || distance < bestDistance)
+                {
+                        best = i;
+                        bestDistance = distance;
+                }
+        }
+
+        NewWidth = (PictureWidth * Sizes[best] + 2) / 4 + frameWidth;
+        NewHeight = (PictureHeight * Sizes[best] + 2) / 4 + frameHeight;
+}
+
+// The picture is drawn again only when the size has changed
+void __fastcall TKeyboard::ResizeWindow(TObject *Sender)
+{
+        int i;
+
+        for (i=0; i<(int)SIZES; i++)
+        {
+                if (ClientWidth == (PictureWidth * Sizes[i] + 2) / 4)
+                {
+                        if (i != Size) SetSize(i);
+                        return;
+                }
+        }
 }
 
 // Double click: the next size

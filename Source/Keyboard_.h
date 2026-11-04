@@ -73,6 +73,9 @@ private:	// User declarations
         int Size;               // index into the sizes: 1x, 1.25x ... 2x
         void SetSize(int size);
         void UpdateDisplay(void);
+        void __fastcall ResizeWindow(TObject *Sender);
+        void __fastcall CanResizeWindow(TObject *Sender, int &NewWidth,
+                                        int &NewHeight, bool &Resize);
 public:		// User declarations
         __fastcall TKeyboard(TComponent* Owner);
         void LoadSettings(TIniFile *ini);
