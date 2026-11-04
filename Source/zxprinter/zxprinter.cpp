@@ -25,6 +25,7 @@
 #include "main_.h"
 #include "zx81config.h"
 #include "Language.h"
+#include "Utils.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -93,7 +94,7 @@ __fastcall TZXPrinter::TZXPrinter(TComponent* Owner)
         Zoom=1;
 
         DisplayImage->OnDblClick = DisplayImageDblClick;
-        DisplayImage->Hint = "Double click: normal or double size";
+        DisplayImage->Hint = "Double click: 1x, 2x or 3x size";
         DisplayImage->ShowHint = true;
 
         PrinterOutput= new Graphics::TBitmap;
@@ -142,13 +143,13 @@ void __fastcall TZXPrinter::DrawImage()
         dest.Right = DisplayImage->Width;
         dest.Bottom = DisplayImage->Height;
 
-        // At 2x every dot becomes 2x2 pixels
+        // Zoomed, every dot becomes 2x2 or 3x3 pixels
         SetStretchBltMode(DisplayImage->Canvas->Handle, COLORONCOLOR);
         DisplayImage->Canvas->CopyRect(dest, PrinterOutput->Canvas, source);
 }
 //---------------------------------------------------------------------------
 
-// The paper at 1x or 2x: the picture, the scroll bar, the buttons and the
+// The paper at 1x, 2x or 3x: the picture, the scroll bar, the buttons and the
 // options below it follow
 
 #define PRINTER_PAPER_WIDTH     256
@@ -160,7 +161,7 @@ void TZXPrinter::SetZoom(int zoom)
 {
         int w, h, y, width;
 
-        if (zoom != 2) zoom = 1;
+        if (zoom < 1 || zoom > 3) zoom = 1;
         Zoom = zoom;
 
         w = PRINTER_PAPER_WIDTH * zoom;
@@ -207,7 +208,7 @@ void TZXPrinter::SetZoom(int zoom)
 
 void __fastcall TZXPrinter::DisplayImageDblClick(TObject *Sender)
 {
-        SetZoom(Zoom == 1 ? 2 : 1);
+        SetZoom(Zoom % 3 + 1);
 }
 //---------------------------------------------------------------------------
 void TZXPrinter::ClockTick(int ts)
@@ -367,10 +368,55 @@ void __fastcall TZXPrinter::ClearImageClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+// Saved as PNG or BMP, at the size shown (1x, 2x or 3x)
+
 void __fastcall TZXPrinter::SaveImageClick(TObject *Sender)
 {
-        if (SaveDialog->Execute())
-                PrinterOutput->SaveToFile(SaveDialog->FileName);
+        AnsiString Filename, Extension;
+        Graphics::TBitmap *Image;
+        bool Bmp, ok = true;
+
+        if (!SaveDialog->Execute()) return;
+
+        Filename = SaveDialog->FileName;
+        Extension = FileNameGetExt(Filename);
+
+        if (Extension == ".PNG") Bmp = false;
+        else if (Extension == ".BMP") Bmp = true;
+        else
+        {
+                Bmp = SaveDialog->FilterIndex == 2;
+                Filename += Bmp ? ".bmp" : ".png";
+        }
+
+        Image = PrinterOutput;
+        if (Zoom > 1)
+        {
+                Image = new Graphics::TBitmap();
+                Image->PixelFormat = pf24bit;
+                Image->Width = PrinterOutput->Width * Zoom;
+                Image->Height = PrinterOutput->Height * Zoom;
+                SetStretchBltMode(Image->Canvas->Handle, COLORONCOLOR);
+                Image->Canvas->CopyRect(Rect(0, 0, Image->Width, Image->Height),
+                        PrinterOutput->Canvas,
+                        Rect(0, 0, PrinterOutput->Width, PrinterOutput->Height));
+        }
+
+        try
+        {
+                if (Bmp) Image->SaveToFile(Filename);
+                else ok = SaveBitmapAsPNG(Image, Filename);
+        }
+        catch (Exception &)
+        {
+                ok = false;
+        }
+
+        if (Image != PrinterOutput) delete Image;
+
+        if (!ok)
+                MessageBox(Handle, Tr("The picture could not be saved.").c_str(),
+                           Tr("Save").c_str(), MB_OK | MB_ICONERROR);
 }
 //---------------------------------------------------------------------------
 

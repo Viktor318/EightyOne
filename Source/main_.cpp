@@ -2244,7 +2244,9 @@ void __fastcall TForm1::SaveScreenshot1Click(TObject *Sender)
         AnsiString Extension, Filename;
         FILE *f;
 
-        SaveScrDialog->Filter = LanguageFilter("Windows Bitmap (.bmp)|*.bmp");
+        int Type;
+
+        SaveScrDialog->Filter = LanguageFilter("PNG Image (.png)|*.png|Windows Bitmap (.bmp)|*.bmp");
 
         if (emulator.machine==MACHINESPECTRUM)
                 SaveScrDialog->Filter += "|" + LanguageFilter("Spectrum Screen (.scr)|*.scr");    
@@ -2254,14 +2256,27 @@ void __fastcall TForm1::SaveScreenshot1Click(TObject *Sender)
         Filename=SaveScrDialog->FileName;
         Extension=FileNameGetExt(Filename);
 
-        switch(SaveScrDialog->FilterIndex)
+        // The type: by the extension typed, or else by the filter chosen
+        Type=SaveScrDialog->FilterIndex;
+        if (Extension==".PNG") Type=1;
+        else if (Extension==".BMP") Type=2;
+        else if (Extension==".SCR" && emulator.machine==MACHINESPECTRUM) Type=3;
+
+        switch(Type)
         {
         case 1:
+                if (Extension!=".PNG") Filename += ".png";
+                if (!SaveScreenShot(Filename))
+                        MessageBox(Handle, Tr("The picture could not be saved.").c_str(),
+                                   Tr("Save Screenshot").c_str(), MB_OK | MB_ICONERROR);
+                break;
+
+        case 2:
                 if (Extension!=".BMP") Filename += ".bmp";
                 SaveScreenShot(Filename);
                 break;
 
-        case 2:
+        case 3:
                 if (Extension!=".SCR") Filename += ".scr";
                 f=fopen(Filename.c_str(), "wb");
                 if (f)

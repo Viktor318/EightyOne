@@ -29,6 +29,7 @@
 #include "zx81config.h"
 #include "Fullscreen.h"
 #include "Language.h"
+#include "Utils.h"
 
 //---------------------------------------------------------------------------
 
@@ -928,7 +929,7 @@ static void GetPixelColour(int x, int y, unsigned char *r, unsigned char *g, uns
         *b=0;
 }
 
-void SaveScreenShot(AnsiString Filename)
+bool SaveScreenShot(AnsiString Filename)
 {
         FILE *f;
         int w,h,x,y,Pw;
@@ -948,7 +949,29 @@ void SaveScreenShot(AnsiString Filename)
 
         size = ((Pw+pad)*h)+54;
 
+        if (FileNameGetExt(Filename) == ".PNG")
+        {
+                unsigned char *rgb = new unsigned char[(w > 0 && h > 0) ? w * h * 3 : 1];
+                bool ok;
+
+                for(i=0;i<h;i++)
+                {
+                        for(j=0;j<w;j++)
+                        {
+                                GetPixelColour(x+j, y+i, &r, &g, &b);
+                                rgb[(i*w+j)*3]   = r;
+                                rgb[(i*w+j)*3+1] = g;
+                                rgb[(i*w+j)*3+2] = b;
+                        }
+                }
+
+                ok = SavePNG(Filename, w, h, rgb);
+                delete [] rgb;
+                return ok;
+        }
+
         f=fopen(Filename.c_str(),"wb");
+        if (!f) return false;
 
         fwrite("BM", 1, 2, f);
         b32=size; fwrite(&b32, 1, 4, f);
@@ -980,5 +1003,6 @@ void SaveScreenShot(AnsiString Filename)
         }
 
         fclose(f);
+        return true;
 }
 

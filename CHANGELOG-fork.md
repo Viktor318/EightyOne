@@ -57,9 +57,16 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### ZX Printer
 
-- Double click the paper to see it at **double size** (every dot 2x2
-  pixels) or normal again; the buttons and the options follow the width
-  of the window, and the size is remembered.
+- Double click the paper to see it at **double or triple size** (every
+  dot 2x2 or 3x3 pixels) or normal again; the buttons and the options
+  follow the width of the window, and the size is remembered.
+- The printout is saved as **PNG** (or BMP, still to be chosen), at the
+  size shown: 1x, 2x or 3x.
+
+### Screenshots
+
+- *File > Save Screenshot* saves **PNG** too, as the first choice (BMP
+  and, on the Spectrum, SCR stay).
 
 ### Keyboard picture (Help > Keyboard Map)
 

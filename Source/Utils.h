@@ -23,6 +23,7 @@
 //---------------------------------------------------------------------------
 
 #include <IniFiles.hpp>
+#include <Graphics.hpp>
 #include "zx81config.h"
 
 #define IsAsyncKeyPressed(key) (GetAsyncKeyState(key)<0)
@@ -60,6 +61,12 @@ void AccessIniFileBoolean(TIniFile* ini, IniFileAccessType accessType, AnsiStrin
 void AccessIniFileInteger(TIniFile* ini, IniFileAccessType accessType, AnsiString section, AnsiString entryName, int& entryValue);
 void AccessIniFileString(TIniFile* ini, IniFileAccessType accessType, AnsiString section, AnsiString entryName, AnsiString& entryValue);
 void AccessIniFileString(TIniFile* ini, IniFileAccessType accessType, AnsiString section, AnsiString entryName, char* entryValue);
+
+// PNG files: an image of width x height pixels given as R, G, B bytes, top
+// line first; or a bitmap. With up to 256 colours a palette is used (1, 2,
+// 4 or 8 bits a pixel). They return false if the file cannot be written.
+bool SavePNG(const AnsiString &filename, int width, int height, const unsigned char *rgb);
+bool SaveBitmapAsPNG(Graphics::TBitmap *bitmap, const AnsiString &filename);
 
 #endif
 

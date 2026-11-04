@@ -31,6 +31,7 @@ extern void RenderDrawBorder(void);
 extern void CompleteFrame(void);
 extern void AccurateUpdateDisplay(int);
 extern void RecalcWinSize(void);
-extern void SaveScreenShot(AnsiString Filename);
+// BMP, or PNG if the name ends in .png; false if it cannot be written
+extern bool SaveScreenShot(AnsiString Filename);
 
 #endif

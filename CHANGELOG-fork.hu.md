@@ -61,10 +61,17 @@ eredetihez képest.
 
 ### ZX Printer
 
-- A papírra duplán kattintva a nyomat **kétszeres méretben** látszik
-  (minden pont 2x2 képpont), újabb dupla kattintásra ismét normál
-  méretben; a gombok és a beállítások követik az ablak szélességét, a
-  méretet megjegyzi.
+- A papírra duplán kattintva a nyomat **kétszeres, majd háromszoros
+  méretben** látszik (minden pont 2x2, illetve 3x3 képpont), újabb dupla
+  kattintásra ismét normál méretben; a gombok és a beállítások követik az
+  ablak szélességét, a méretet megjegyzi.
+- A nyomat **PNG**-ben mentődik (a BMP továbbra is választható), abban a
+  méretben, ahogy az ablakban látszik: 1x, 2x vagy 3x.
+
+### Képernyőkép
+
+- A *Fájl > Képernyőkép mentése* **PNG**-ben is ment, ez az első
+  választás (a BMP és Spectrumon az SCR megmarad).
 
 ### Billentyűzetkép (Help > Keyboard Map)
 

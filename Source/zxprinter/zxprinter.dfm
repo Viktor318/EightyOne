@@ -149,8 +149,8 @@ object ZXPrinter: TZXPrinter
     OnMouseUp = FeedMouseUp
   end
   object SaveDialog: TSaveDialog
-    DefaultExt = 'bmp'
-    Filter = 'Windows Bitmap (BMP)|*.bmp'
+    DefaultExt = 'png'
+    Filter = 'PNG Image (PNG)|*.png|Windows Bitmap (BMP)|*.bmp'
     Left = 8
     Top = 8
   end

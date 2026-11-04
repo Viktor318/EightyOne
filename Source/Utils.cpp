@@ -24,6 +24,7 @@
 #pragma hdrstop
 
 #include "Utils.h"
+#include "zlib.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -413,3 +414,187 @@ void AccessIniFileString(TIniFile* ini, IniFileAccessType accessType, AnsiString
         }
 }
 
+//---------------------------------------------------------------------------
+// PNG
+
+static void PNGPut32(unsigned char *p, unsigned long value)
+{
+        p[0] = (unsigned char)(value >> 24);
+        p[1] = (unsigned char)(value >> 16);
+        p[2] = (unsigned char)(value >> 8);
+        p[3] = (unsigned char)value;
+}
+
+// A chunk: length, type, data, and the CRC of the type and the data
+static bool PNGWriteChunk(FILE *f, const char *type, const unsigned char *data, unsigned long length)
+{
+        unsigned char word[4];
+        unsigned long crc;
+
+        PNGPut32(word, length);
+        if (fwrite(word, 1, 4, f) != 4) return false;
+        if (fwrite(type, 1, 4, f) != 4) return false;
+        if (length && fwrite(data, 1, length, f) != length) return false;
+
+        crc = crc32(0L, Z_NULL, 0);
+        crc = crc32(crc, (const Bytef *)type, 4);
+        if (length) crc = crc32(crc, (const Bytef *)data, length);
+        PNGPut32(word, crc);
+        return fwrite(word, 1, 4, f) == 4;
+}
+
+bool SavePNG(const AnsiString &filename, int width, int height, const unsigned char *rgb)
+{
+        static const unsigned char signature[8] =
+                { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+        unsigned long palette[256];
+        unsigned char *index = NULL, *raw = NULL, *packed = NULL;
+        unsigned char header[13], plte[256 * 3];
+        int colours = 0, depth, rowBytes, x, y, i, last = -1;
+        unsigned long rawLength;
+        uLongf packedLength;
+        bool ok = false;
+        FILE *f = NULL;
+
+        if (width <= 0 || height <= 0 || !rgb) return false;
+
+        // The colours: a palette if there are no more than 256
+        index = new unsigned char[width * height];
+        for (i=0; i<width*height; i++)
+        {
+                unsigned long colour = ((unsigned long)rgb[i*3] << 16)
+                                     | ((unsigned long)rgb[i*3+1] << 8) | rgb[i*3+2];
+                int c;
+
+                if (last >= 0 && palette[last] == colour)
+                {
+                        c = last;
+                }
+                else
+                {
+                        for (c=0; c<colours && palette[c]!=colour; c++)
+                                ;
+                        if (c == colours)
+                        {
+                                if (colours == 256) { colours = 257; break; }
+                                palette[colours++] = colour;
+                        }
+                        last = c;
+                }
+                index[i] = (unsigned char)c;
+        }
+
+        if (colours <= 256)
+        {
+                depth = colours <= 2 ? 1 : colours <= 4 ? 2 : colours <= 16 ? 4 : 8;
+                rowBytes = (width * depth + 7) / 8;
+        }
+        else
+        {
+                depth = 8;
+                rowBytes = width * 3;
+        }
+
+        // The lines, each with filter type 0 (none) before it
+        rawLength = (unsigned long)(rowBytes + 1) * height;
+        raw = new unsigned char[rawLength];
+        memset(raw, 0, rawLength);
+
+        for (y=0; y<height; y++)
+        {
+                unsigned char *line = raw + (unsigned long)y * (rowBytes + 1) + 1;
+
+                if (colours <= 256)
+                {
+                        for (x=0; x<width; x++)
+                        {
+                                int bit = x * depth;
+                                line[bit >> 3] |= (unsigned char)
+                                        (index[y * width + x] << (8 - depth - (bit & 7)));
+                        }
+                }
+                else
+                {
+                        memcpy(line, rgb + (unsigned long)y * width * 3, width * 3);
+                }
+        }
+
+        packedLength = compressBound(rawLength);
+        packed = new unsigned char[packedLength];
+        if (compress2(packed, &packedLength, raw, rawLength, 9) != Z_OK) goto done;
+
+        f = fopen(filename.c_str(), "wb");
+        if (!f) goto done;
+
+        PNGPut32(header, width);
+        PNGPut32(header + 4, height);
+        header[8] = (unsigned char)depth;
+        header[9] = (unsigned char)(colours <= 256 ? 3 : 2);   // palette / RGB
+        header[10] = 0;                                         // deflate
+        header[11] = 0;                                         // filters
+        header[12] = 0;                                         // no interlace
+
+        if (fwrite(signature, 1, 8, f) != 8) goto done;
+        if (!PNGWriteChunk(f, "IHDR", header, 13)) goto done;
+
+        if (colours <= 256)
+        {
+                for (i=0; i<colours; i++)
+                {
+                        plte[i*3]   = (unsigned char)(palette[i] >> 16);
+                        plte[i*3+1] = (unsigned char)(palette[i] >> 8);
+                        plte[i*3+2] = (unsigned char)palette[i];
+                }
+                if (!PNGWriteChunk(f, "PLTE", plte, colours * 3)) goto done;
+        }
+
+        if (!PNGWriteChunk(f, "IDAT", packed, packedLength)) goto done;
+        if (!PNGWriteChunk(f, "IEND", NULL, 0)) goto done;
+
+        ok = true;
+
+done:
+        if (f && fclose(f) != 0) ok = false;
+        if (f && !ok) remove(filename.c_str());
+        delete [] index;
+        delete [] raw;
+        delete [] packed;
+        return ok;
+}
+
+bool SaveBitmapAsPNG(Graphics::TBitmap *bitmap, const AnsiString &filename)
+{
+        Graphics::TBitmap *copy;
+        unsigned char *rgb;
+        int x, y, w, h;
+        bool ok;
+
+        if (!bitmap) return false;
+
+        // As 24 bits a pixel, which ScanLine gives as B, G, R
+        copy = new Graphics::TBitmap();
+        copy->Assign(bitmap);
+        copy->PixelFormat = pf24bit;
+
+        w = copy->Width;
+        h = copy->Height;
+        rgb = new unsigned char[(w > 0 && h > 0) ? w * h * 3 : 1];
+
+        for (y=0; y<h; y++)
+        {
+                unsigned char *line = (unsigned char *)copy->ScanLine[y];
+
+                for (x=0; x<w; x++)
+                {
+                        rgb[(y * w + x) * 3]     = line[x * 3 + 2];
+                        rgb[(y * w + x) * 3 + 1] = line[x * 3 + 1];
+                        rgb[(y * w + x) * 3 + 2] = line[x * 3];
+                }
+        }
+
+        ok = SavePNG(filename, w, h, rgb);
+
+        delete [] rgb;
+        delete copy;
+        return ok;
+}

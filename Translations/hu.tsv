@@ -448,6 +448,7 @@ form	main_.dfm	Timex Dock Files (*.dck)	Timex Dock fájlok (*.dck)
 form	main_.dfm	Compressed Dock Files (*.zip)	Tömörített Dock fájlok (*.zip)
 form	main_.dfm	Configuration Files (*.ini)	Konfigurációs fájlok (*.ini)
 form	main_.dfm	Windows Bitmap (.bmp)	Windows bitkép (.bmp)
+code	main_.cpp	PNG Image (.png)	PNG-kép (.png)
 form	main_.dfm	Spectrum Screen (.scr)	Spectrum képernyő (.scr)
 form	main_.dfm	RZX Recording (.rzx)	RZX felvétel (.rzx)
 form	memoryWindow.dfm	View Hex Bytes and Characters	Hexa bájtok és karakterek
@@ -577,6 +578,7 @@ form	zxprinter.dfm	Style:	Stílus:
 form	zxprinter.dfm	Plain Paper	Sima papír
 form	zxprinter.dfm	Feed	Előtolás
 form	zxprinter.dfm	Windows Bitmap (BMP)	Windows bitkép (BMP)
+form	zxprinter.dfm	PNG Image (PNG)	PNG-kép (PNG)
 form	About_.dfm	lib765 and libdsk © 2000-2005 John Elliot.	lib765 és libdsk © 2000-2005 John Elliot.
 form	About_.dfm	© 2011-2025 Charlie Robson and Paul Farrow	© 2011-2025 Charlie Robson és Paul Farrow
 code	main_.cpp	Language	Nyelv
@@ -716,7 +718,8 @@ code	snap.cpp	ROM load failed:\n{0}	A ROM betöltése nem sikerült:\n{0}
 code	snap.cpp	Font load failed:\n{0}	A karakterkészlet betöltése nem sikerült:\n{0}
 code	zxprinter.cpp	Carriage Speed: {0}	Kocsisebesség: {0}
 code	zxprinter.cpp	Paper Feed Speed: {0}	Előtolás sebessége: {0}
-code	zxprinter.cpp	Double click: normal or double size	Dupla kattintás: normál vagy kétszeres méret
+code	zxprinter.cpp	Double click: 1x, 2x or 3x size	Dupla kattintás: 1x, 2x vagy 3x méret
+code	zxprinter.cpp main_.cpp	The picture could not be saved.	A képet nem sikerült menteni.
 code	BasicLister_.cpp	{0} ZxText2P BASIC File (*.{1})	{0} ZxText2P BASIC-fájl (*.{1})
 code	BasicLister_.cpp	{0} ZxToken BASIC File (*.{1})	{0} ZxToken BASIC-fájl (*.{1})
 code	BasicLister_.cpp	Bitmap File (*.bmp)	Bitkép (*.bmp)
