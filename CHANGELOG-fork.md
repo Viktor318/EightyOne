@@ -9,6 +9,19 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Sound
 
+- The **Sound Settings** window is redesigned: a **main volume** on the
+  left, faders twice as tall (0-100%) with a **level meter** beside each
+  (after its volume), the percentage under them and above them while
+  dragging. Double click a fader for its default (main volume 100%, the
+  others 50%); the mouse wheel and the arrow keys move it by 1%, with
+  Shift by 10%. *Reset* sets every volume back, unmuted.
+- Each AY channel can be muted on its own, and there are **seven AY
+  stereo modes**: ABC, ACB, BAC, BCA, CAB, CBA and Mono (was ACB and
+  Mono). The AY faders are in the order of the stereo mode: left, centre,
+  right.
+- The sources are mixed with headroom and the result is clipped after the
+  main volume, so loud sounds together no longer wrap round and crackle.
+- The old settings are taken over (the 0-31 sliders as percentages).
 - The DirectSound output is rewritten, so the sound is continuous on
   Windows 10/11. It filled the half of its short buffer that was already
   playing, so part of each frame was late and old sound was heard

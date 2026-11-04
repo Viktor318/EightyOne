@@ -93,7 +93,7 @@ form	Debug.dfm	T-Cycles Count:	T-ciklusszám:
 form	Debug.dfm	Add	Hozzáadás
 form	Debug.dfm Profiler.dfm TZXMan.dfm	Delete	Törlés
 form	Debug.dfm Profiler.dfm	Edit	Szerkesztés
-form	Debug.dfm Profiler.dfm	Reset	Alaphelyzet
+form	Debug.dfm Profiler.dfm SoundForm.dfm	Reset	Alaphelyzet
 form	Debug.dfm	Stack	Verem
 form	Debug.dfm	Jupiter Ace Forth Stack	Jupiter Ace Forth-verem
 form	Debug.dfm main_.dfm	Control	Vezérlés
@@ -463,7 +463,7 @@ form	midifrm.dfm SoundForm.dfm	Sound Settings	Hangbeállítások
 form	midifrm.dfm SoundForm.dfm	Send MIDI Output to:	MIDI kimenet ide:
 form	midifrm.dfm	Volume	Hangerő
 form	midifrm.dfm SoundForm.dfm	AY Channel	AY csatorna
-form	midifrm.dfm	Mute	Némítás
+form	midifrm.dfm SoundForm.cpp	Mute	Néma
 form	SoundForm.dfm	Mix	Keverés
 form	SoundForm.dfm	=   Mute	=   némítás
 form	SoundForm.dfm	Stereo Mode	Sztereó mód
@@ -471,6 +471,12 @@ form	SoundForm.dfm	Speech	Beszéd
 form	SoundForm.dfm	Mono	Mono
 form	SoundForm.dfm	Video Sound Settings	Videóhang beállításai
 form	SoundForm.dfm	Exclude ZX81 HSync Pulses	ZX81 vízszintes szinkronimpulzusok kihagyása
+form	SoundForm.dfm	Stereo mode (AY):	Sztereó mód (AY):
+form	SoundForm.dfm	Double click a slider: default value.   Mouse wheel or arrow keys: 1%, with Shift: 10%.	Dupla kattintás egy csúszkán: alapérték.   Egérgörgő vagy nyilak: 1%, Shifttel 10%.
+code	SoundForm.cpp	Main volume	Fő hangerő
+code	SoundForm.cpp	left	bal
+code	SoundForm.cpp	centre	közép
+code	SoundForm.cpp	right	jobb
 form	SoundOP.dfm	Sound Output	Hangkimenet
 form	TZXMan.dfm wavload_.dfm	Rewind to Start	Visszatekerés az elejére
 form	TZXMan.dfm	Rewind to Previous Block	Visszatekerés az előző blokkra

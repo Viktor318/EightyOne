@@ -62,9 +62,14 @@
 #define SPEECH_TYPE_DIGITALKER          8
 
 // assume all three tone channels together match the beeper volume.
-// Must be <=127 for all channels; 4 x 31 = 124.
 
-#define VOLUME_MAX              31
+// Volumes are percentages: at VOLUME_MAX a source is as loud as it can be,
+// as it was with the old 0-31 sliders at 31. The sources are mixed with
+// more headroom than 16 bits, and the result is clipped after the main
+// volume.
+
+#define VOLUME_MAX              100
+#define VOLUME_DEFAULT          50
 #define AMPL_BEEPER             31
 #define AMPL_AY_TONE            (31*256) /* three of these */
 #define ADJUSTTO16BIT           256
@@ -79,6 +84,34 @@
 // At 50fps this is about 440 samples, which I doubled and rounded up to get this. 
 #define SPECDRUM_BUFFSIZE       1000
 
+
+// The volumes, mutes and level meters of the sound settings window
+#define VOLUME_AY_A             0
+#define VOLUME_AY_B             1
+#define VOLUME_AY_C             2
+#define VOLUME_BEEPER           3
+#define VOLUME_SPEECH           4
+#define VOLUME_SPECDRUM         5
+#define VOLUME_SOURCES          6
+#define VOLUME_MAIN             6       // level meter only
+#define VOLUME_METERS           7
+
+// AY stereo modes: the channels on the left, in the centre and on the
+// right (the centre one is heard on both sides, a little quieter)
+#define AY_STEREO_MONO          0
+#define AY_STEREO_ABC           1
+#define AY_STEREO_ACB           2
+#define AY_STEREO_BAC           3
+#define AY_STEREO_BCA           4
+#define AY_STEREO_CAB           5
+#define AY_STEREO_CBA           6
+#define AY_STEREO_MODES         7
+
+// The names of the modes ("Mono", "ABC"...), also kept in the settings
+extern const char *AYStereoNames[AY_STEREO_MODES];
+
+// The channel (0-2 for A-C) on the left, in the centre and on the right
+extern const int AYStereoPlaces[AY_STEREO_MODES][3];
 
 struct AYChangeTag
 {
@@ -95,6 +128,7 @@ struct SpecDrumChangeTag
 class CSound
 {
 public:
+        CSound();
 	void InitDevices(void);
         int Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
         int ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
@@ -112,8 +146,16 @@ public:
         void Frame(bool pause);
         void Beeper(int on, int frametstates);
 
-        int VolumeLevel[6];
-        bool ACBMix;
+        // Percentages (0 when muted): VOLUME_AY_A ... VOLUME_SPECDRUM
+        int VolumeLevel[VOLUME_SOURCES];
+        int MainVolume;
+        int AYStereo;                   // AY_STEREO_...
+
+        // The highest level of each source after its volume, and of the
+        // output after the main volume, since the window last looked
+        // (it sets them to 0); and what is full scale for each
+        int Peak[VOLUME_METERS];
+        static int PeakFullScale(int meter);
         unsigned char AYRegisterStore[16];
 
 private:
@@ -139,7 +181,8 @@ private:
         int FramesPerSecond;
 
         double AYToneLevels[16];
-        short *Buffer;
+        int *Mix;                       // the sources added up
+        short *Buffer;                  // the output, after the main volume
         int OldPos,FillPos,OldVal,OldValOrig;
 
 	// timer used for fadeout after beeper-toggle;

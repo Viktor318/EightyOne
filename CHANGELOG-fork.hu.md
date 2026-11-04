@@ -10,6 +10,21 @@ eredetihez képest.
 
 ### Hang
 
+- Megújult a **Hangbeállítások** ablak: bal oldalon **fő hangerő**,
+  kétszer olyan magas csúszkák (0–100%), mindegyik mellett
+  **szintjelzővel** (a hangerő után mér), alattuk a százalék, húzás közben
+  fölöttük is. Dupla kattintásra a csúszka az alapértékre áll (fő hangerő
+  100%, a többi 50%); az egérgörgő és a nyilak 1%-kal, Shifttel 10%-kal
+  állítják. Az *Alaphelyzet* minden hangerőt visszaállít, és a némítást
+  is kikapcsolja.
+- Az AY csatornái külön is némíthatók, és **hét AY sztereó mód** van:
+  ABC, ACB, BAC, BCA, CAB, CBA és Mono (eddig csak ACB és Mono). Az AY
+  csúszkái a sztereó mód sorrendjében állnak: bal, közép, jobb.
+- A források keverése tartalékkal történik, és a jel a fő hangerő után
+  van levágva, így az együtt szóló hangos hangok nem fordulnak át, nem
+  recsegnek.
+- A régi beállítások megmaradnak (a 0–31-es csúszkák százalékra
+  átszámolva).
 - Újraírt DirectSound-kimenet: Windows 10/11-en is folyamatos a hang.
   Eddig a rövid puffer éppen szóló felét töltötte, így minden képkocka
   egy része elkésett, és helyette régi hang szólt; a sorba pedig a végén
