@@ -24,6 +24,7 @@
 #pragma hdrstop
 
 #include "FullScreen.h"
+#include "Language.h"
 #include "main_.h"
 #include "AccDraw_.h"
 #include "zx81config.h"
@@ -116,7 +117,8 @@ void __fastcall TFSSettings::ModeListChange(TObject *Sender)
 
         Txt = ModeList->Items->Strings[ModeList->ItemIndex];
 
-        if (Txt=="Automatic")
+        // The item may have been translated (Automatikus)
+        if (LanguageSame(Txt, "Automatic") || !isnum(Txt[1]))
         {
                 FScreen.Width=nativeSizeW;
                 FScreen.Height=nativeSizeH;
