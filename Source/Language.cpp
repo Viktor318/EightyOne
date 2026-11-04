@@ -82,7 +82,7 @@ static bool WindowsIsHungarian()
 {
         typedef LANGID (WINAPI *UILanguageFunction)(void);
         UILanguageFunction function;
-        LANGID language = 0;
+        LANGID language;
         HMODULE kernel = GetModuleHandle("kernel32.dll");
 
         // GetUserDefaultUILanguage() is there from Windows 2000 on

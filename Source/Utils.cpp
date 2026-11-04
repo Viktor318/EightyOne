@@ -448,7 +448,7 @@ bool SavePNG(const AnsiString &filename, int width, int height, const unsigned c
         static const unsigned char signature[8] =
                 { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
         unsigned long palette[256];
-        unsigned char *index = NULL, *raw = NULL, *packed = NULL;
+        unsigned char *index, *raw, *packed;
         unsigned char header[13], plte[256 * 3];
         int colours = 0, depth, rowBytes, x, y, i, last = -1;
         unsigned long rawLength;
