@@ -38,15 +38,13 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
 {
         TIniFile *ini;
 
-        // The window can be resized; the picture keeps its proportions and
-        // is scaled smoothly. The pictures of the machines stay as they
-        // are, under the one shown
-        Large = false;
+        // The size of the picture is changed by double clicking it: 1x,
+        // 1.25x, 1.5x, 1.75x, 2x and again 1x; it is scaled smoothly. The
+        // pictures of the machines stay as they are, under the one shown
+        Size = 0;
         AutoSize = false;
-        BorderStyle = bsSizeToolWin;
         ClientWidth = PictureWidth;
         ClientHeight = PictureHeight;
-        Constraints->MinWidth = PictureWidth / 4;
 
         Display = new TImage(this);
         Display->Parent = this;
@@ -54,13 +52,14 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
         Display->OnDblClick = KeyboardDblClick;
         Display->BringToFront();
 
-        OnCanResize = CanResizeWindow;
-        OnResize = ResizeWindow;
-
         ini = new TIniFile(emulator.inipath);
         LoadSettings(ini);
         delete ini;
 }
+
+// The sizes, in quarters of the normal size
+static const int Sizes[] = { 4, 5, 6, 7, 8 };
+#define SIZES (sizeof(Sizes) / sizeof(Sizes[0]))
 
 // The picture of the machine, scaled to the window with halftone
 // stretching (much smoother than the stretching of TImage)
@@ -102,53 +101,43 @@ void TKeyboard::UpdateDisplay(void)
         Display->BringToFront();
 }
 
-// Keep the proportions of the picture: the side dragged decides
-void __fastcall TKeyboard::CanResizeWindow(TObject *Sender, int &NewWidth,
-                                           int &NewHeight, bool &Resize)
+// A picture of the windows beside the keyboard at a size; its normal size
+// is kept in its Tag
+static void ScaleImage(TImage *image, int quarters)
 {
-        int frameWidth = Width - ClientWidth;
-        int frameHeight = Height - ClientHeight;
-        int clientWidth = NewWidth - frameWidth;
-        int clientHeight = NewHeight - frameHeight;
+        if (!image) return;
 
-        if (NewWidth == Width && NewHeight != Height)
-                clientWidth = (clientHeight * PictureWidth + PictureHeight / 2) / PictureHeight;
+        if (!image->Tag) image->Tag = (image->Width << 16) | image->Height;
 
-        if (clientWidth < PictureWidth / 4) clientWidth = PictureWidth / 4;
-        clientHeight = (clientWidth * PictureHeight + PictureWidth / 2) / PictureWidth;
-
-        NewWidth = clientWidth + frameWidth;
-        NewHeight = clientHeight + frameHeight;
+        image->Width = ((image->Tag >> 16) * quarters + 2) / 4;
+        image->Height = ((image->Tag & 0xffff) * quarters + 2) / 4;
 }
 
-void __fastcall TKeyboard::ResizeWindow(TObject *Sender)
+void TKeyboard::SetSize(int size)
 {
+        if (size < 0 || size >= (int)SIZES) size = 0;
+        Size = size;
+
+        ClientWidth = (PictureWidth * Sizes[size] + 2) / 4;
+        ClientHeight = (PictureHeight * Sizes[size] + 2) / 4;
         UpdateDisplay();
 
-        // The windows beside the keyboard follow its right edge
-        if (KeyboardFunctions && KeyboardFunctions->Visible)
+        // The windows beside the keyboard (ZX80 functions, Spectrum 128
+        // keypad) with it, following its right edge
+        if (KeyboardFunctions)
         {
+                ScaleImage(KeyboardFunctions->zx80IntegralFunctions, Sizes[size]);
                 KeyboardFunctions->Left = Left + Width + FunctionsOffset;
                 KeyboardFunctions->Top = Top;
         }
-        if (Keypad128 && Keypad128->Visible)
+        if (Keypad128)
         {
+                ScaleImage(Keypad128->KeypadUk, Sizes[size]);
+                ScaleImage(Keypad128->KeypadSpanish, Sizes[size]);
                 Keypad128->Left = Left + Width + KeypadOffset;
                 Keypad128->Top = Top;
         }
 }
-//---------------------------------------------------------------------------
-void __fastcall TKeyboard::FormClose(TObject *Sender, TCloseAction &Action)
-{
-        Form1->KeyboardMap1->Checked=false;
-
-        KeyboardFunctions->Visible = false;
-        KeyboardFunctions->EnableTimer(false);
-
-        Keypad128->Visible = false;
-        Keypad128->EnableTimer(false);
-}
-//---------------------------------------------------------------------------
 
 void TKeyboard::LoadSettings(TIniFile *ini)
 {
@@ -157,18 +146,19 @@ void TKeyboard::LoadSettings(TIniFile *ini)
         Top = ini->ReadInteger("KBMAP","Top",Top);
         Left = ini->ReadInteger("KBMAP","Left",Left);
 
-        width = ini->ReadInteger("KBMAP","PictureWidth",PictureWidth);
-        if (width < PictureWidth / 4) width = PictureWidth / 4;
-        if (width > Screen->Width) width = Screen->Width;
-        ClientWidth = width;
-        ClientHeight = (width * PictureHeight + PictureWidth / 2) / PictureWidth;
+        // The side windows don't exist yet: their size follows in KbChange
+        width = ini->ReadInteger("KBMAP","Size",0);
+        if (width < 0 || width >= (int)SIZES) width = 0;
+        Size = width;
+        ClientWidth = (PictureWidth * Sizes[Size] + 2) / 4;
+        ClientHeight = (PictureHeight * Sizes[Size] + 2) / 4;
 }
 
 void TKeyboard::SaveSettings(TIniFile *ini)
 {
         ini->WriteInteger("KBMAP","Top",Top);
         ini->WriteInteger("KBMAP","Left",Left);
-        ini->WriteInteger("KBMAP","PictureWidth",ClientWidth);
+        ini->WriteInteger("KBMAP","Size",Size);
 }
 
 void __fastcall TKeyboard::FormKeyDown(TObject *Sender, WORD &Key,
@@ -424,34 +414,12 @@ void TKeyboard::KbChange(void)
         Keypad128->Left = Keyboard->Left + Keyboard->Width + Keyboard->KeypadOffset;
         Keypad128->Top = Keyboard->Top;
 
-        UpdateDisplay();
+        SetSize(Size);
 }
 
-void SetKeyboardSize(TImage* image, bool large)
-{
-        if (large)
-        {
-                image->Width = image->Width * 2;
-                image->Height = image->Height * 2;
-        }
-        else
-        {
-                image->Width = image->Width / 2;
-                image->Height = image->Height / 2;
-        }
-}
-
-// Double click: the normal or the double size, and the windows beside
-// it (ZX80 functions, Spectrum 128 keypad) with it
+// Double click: the next size
 void __fastcall TKeyboard::KeyboardDblClick(TObject *Sender)
 {
-        Large = !Large;
-
-        ClientWidth = Large ? PictureWidth * 2 : PictureWidth;
-        ClientHeight = Large ? PictureHeight * 2 : PictureHeight;
-
-        SetKeyboardSize(KeyboardFunctions->zx80IntegralFunctions, Large);
-        SetKeyboardSize(Keypad128->KeypadUk, Large);
-        SetKeyboardSize(Keypad128->KeypadSpanish, Large);
+        SetSize((Size + 1) % SIZES);
 }
 

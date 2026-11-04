@@ -9,10 +9,10 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Keyboard picture (Help > Keyboard Map)
 
-- The window can be resized; the picture keeps its proportions and is
-  scaled smoothly (halftone), down to a quarter of its size. Its size is
-  remembered. Double click still switches between the normal and the
-  double size (with the ZX80 functions and the Spectrum 128 keypad).
+- Double click changes the size of the picture in steps: 1x, 1.25x, 1.5x,
+  1.75x, 2x and again 1x (it was 1x and 2x), together with the ZX80
+  functions and the Spectrum 128 keypad beside it. The picture is scaled
+  smoothly (halftone), and its size is remembered.
 
 ### Hungarian user interface
 

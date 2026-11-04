@@ -10,10 +10,10 @@ eredetihez képest.
 
 ### Billentyűzetkép (Help > Keyboard Map)
 
-- Az ablak átméretezhető; a kép megtartja az arányait, és simán
-  (halftone) skálázódik, egészen a negyed méretig. A méretét megjegyzi. A
-  dupla kattintás továbbra is a normál és a dupla méret között vált (a ZX80
-  funkcióival és a Spectrum 128 numerikus billentyűzetével együtt).
+- A dupla kattintás lépésenként változtatja a kép méretét: 1x, 1,25x,
+  1,5x, 1,75x, 2x, majd újra 1x (eddig csak 1x és 2x volt), a mellette lévő
+  ZX80 funkciókkal és Spectrum 128 numerikus billentyűzettel együtt. A kép
+  simán (halftone) skálázódik, a méretét megjegyzi.
 
 ### Magyar felület
 
