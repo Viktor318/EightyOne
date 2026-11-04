@@ -68,6 +68,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
         // The text below the link, drawn justified
         TPaintBox *Body;
+        AnsiString VersionNumber;       // empty if not found
         void LayOut(void);
         int Paragraph(TCanvas *canvas, const AnsiString &text, int y, bool draw);
         void __fastcall BodyPaint(TObject *Sender);

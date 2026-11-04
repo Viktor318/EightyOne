@@ -233,11 +233,7 @@ __fastcall TAbout::TAbout(TComponent* Owner)
                                 version = version + "." + AnsiString(versionNumberPart4);
                         }
                 }
-                Version->Caption = TrF("Version {0}", version);
-        }
-        else
-        {
-                Version->Caption = Tr("Unknown");
+                VersionNumber = version;
         }
 
         // The labels of the text are kept (their texts are in the
@@ -268,6 +264,10 @@ __fastcall TAbout::TAbout(TComponent* Owner)
 // Shown: laid out again, as the language may have changed since
 void __fastcall TAbout::FormShow(TObject *Sender)
 {
+        // Put together with the language now (the language switch cannot
+        // turn a text made by TrF back into English)
+        Version->Caption = VersionNumber.IsEmpty() ? Tr("Unknown")
+                                : TrF("Version {0}", VersionNumber);
         LayOut();
 }
 
