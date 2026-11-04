@@ -64,7 +64,13 @@ __published:	// IDE-managed Components
           TMouseButton Button, TShiftState Shift, int X, int Y);
         void __fastcall Label15MouseUp(TObject *Sender,
           TMouseButton Button, TShiftState Shift, int X, int Y);
+        void __fastcall FormShow(TObject *Sender);
 private:	// User declarations
+        // The text below the link, drawn justified
+        TPaintBox *Body;
+        void LayOut(void);
+        int Paragraph(TCanvas *canvas, const AnsiString &text, int y, bool draw);
+        void __fastcall BodyPaint(TObject *Sender);
 
 public:		// User declarations
         __fastcall TAbout(TComponent* Owner);

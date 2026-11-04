@@ -15,6 +15,7 @@ object About: TAbout
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Scaled = False
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Image1: TImage

@@ -31,6 +31,47 @@ TAbout *About;
 
 #define MaxWidth(label,width) if((label->Width + label->Left) > width) width=label->Width + label->Left
 
+// The text below the link: paragraphs made of the English lines of the old
+// labels (each translated), wrapped to the width of the window and justified
+// (the last line of a paragraph left aligned). The old labels had their own
+// line breaks, which the longer Hungarian lines did not fit.
+static const char *const Paragraphs[][5] =
+{
+        { "Releases up to 1.0a were created by Michael D Wynne, with all",
+          "subsequent releases created by Charlie Robson and Paul Farrow.", NULL },
+        { "This program is released under the GNU GPL. Please see the",
+          "attached readme.txt file that should be included with this distribution.", NULL },
+        { "Z80 core and DirectSound code taken from fuse, the free UNIX",
+          "Spectrum emulator \xA9 2003 Philip Kendall.", NULL },
+        { "AY8910 Code taken from Z81 \xA9 1995-2001 Russell Marks.", NULL },
+        { "Many thanks to Wilf Rigter for providing essential technical",
+          "information on the internal workings of the ZX81 itself and also ",
+          "various add-ons including the Memotech and G007 Hi-res cards.",
+          "G007 information also provided by Kryton.", NULL },
+        { "dk'tronics graphics ROM dump and several bug reports provided",
+          "by Simon Holdsworth.  ", NULL },
+        { "lib765 and libdsk \xA9 2000-2005 John Elliot.", NULL },
+        { "Speech synthesis code from SP0256_CTS256A-AL2.", NULL },
+        { "Icon designed by Paul E Collins.", NULL },
+};
+#define PARAGRAPHS (sizeof(Paragraphs) / sizeof(Paragraphs[0]))
+#define PARAGRAPH_GAP   8       // pixels between paragraphs
+#define LINE_GAP        3       // and between lines
+
+static AnsiString ParagraphText(int i)
+{
+        AnsiString text;
+        int j;
+
+        for (j=0; Paragraphs[i][j]; j++)
+        {
+                if (j) text += " ";
+                text += Tr(Paragraphs[i][j]).Trim();
+        }
+
+        return text;
+}
+
 //---------------------------------------------------------------------------
 
 static AnsiString ExtractPart(AnsiString versionNumber, int& s, int&e)
@@ -199,17 +240,148 @@ __fastcall TAbout::TAbout(TComponent* Owner)
                 Version->Caption = Tr("Unknown");
         }
 
-        MaxWidth(Label1,w); MaxWidth(Label9,w);
-        MaxWidth(Label2,w); MaxWidth(Label10,w);
-        MaxWidth(Label3,w); MaxWidth(Label11,w);
-        MaxWidth(Label4,w); MaxWidth(Label12,w);
-        MaxWidth(Label5,w); MaxWidth(Label13,w);
-        MaxWidth(Label6,w); MaxWidth(Label14,w);
-        MaxWidth(Label7,w); MaxWidth(Label15,w);
-        MaxWidth(Label8,w); MaxWidth(Label16,w);
-        MaxWidth(Label17,w);
+        // The labels of the text are kept (their texts are in the
+        // translations) but hidden: the text is drawn by Body
+        {
+                TLabel *labels[] = { Label19, Label20, Label2, Label3, Label5,
+                        Label6, Label10, Label9, Label11, Label4, Label12, Label16,
+                        Label13, Label14, Label7, Label22, Label17 };
+                unsigned int i;
 
-        ClientWidth=w+8;
+                for (i=0; i<sizeof(labels)/sizeof(labels[0]); i++)
+                        labels[i]->Visible = false;
+        }
+
+        // As wide as the head of the window needs, but not narrower than
+        // the form was designed
+        MaxWidth(Label1,w); MaxWidth(Label21,w);
+        MaxWidth(Label8,w); MaxWidth(Label15,w);
+        ClientWidth = w + 8 > 380 ? w + 8 : 380;
+
+        Body = new TPaintBox(this);
+        Body->Parent = this;
+        Body->OnPaint = BodyPaint;
+
+        LayOut();
+}
+
+// Shown: laid out again, as the language may have changed since
+void __fastcall TAbout::FormShow(TObject *Sender)
+{
+        LayOut();
+}
+
+// A paragraph wrapped to the width of Body, from y; returns the y below it.
+// Drawn only if draw is set (else just measured)
+int TAbout::Paragraph(TCanvas *canvas, const AnsiString &text, int y, bool draw)
+{
+        AnsiString words[64];
+        int widths[64];
+        int count = 0, i, start, width = Body->Width;
+        int space = canvas->TextWidth(" ");
+        int lineHeight = canvas->TextHeight("Ag") + LINE_GAP;
+        AnsiString rest = text.Trim();
+
+        // The words
+        while (rest.Length() && count < 64)
+        {
+                int position = rest.Pos(" ");
+
+                if (position)
+                {
+                        words[count] = rest.SubString(1, position - 1);
+                        rest = rest.SubString(position + 1, rest.Length()).TrimLeft();
+                }
+                else
+                {
+                        words[count] = rest;
+                        rest = "";
+                }
+                widths[count] = canvas->TextWidth(words[count]);
+                count++;
+        }
+
+        // The lines: as many words as fit
+        start = 0;
+        while (start < count)
+        {
+                int end = start + 1, used = widths[start], x;
+                bool last;
+
+                while (end < count && used + space + widths[end] <= width)
+                {
+                        used += space + widths[end];
+                        end++;
+                }
+                last = (end == count);
+
+                if (draw)
+                {
+                        int gaps = end - start - 1;
+                        int extra = (last || !gaps) ? 0 : width - used;
+
+                        x = 0;
+                        for (i=start; i<end; i++)
+                        {
+                                canvas->TextOut(x, y, words[i]);
+                                if (i < end - 1)
+                                {
+                                        // The extra room shared by the gaps
+                                        int k = i - start;
+                                        x += widths[i] + space
+                                                + (extra * (k + 1)) / gaps - (extra * k) / gaps;
+                                }
+                        }
+                }
+
+                y += lineHeight;
+                start = end;
+        }
+
+        return y;
+}
+
+// Body below the link, then the dedication and OK below it
+void TAbout::LayOut(void)
+{
+        int y = 0;
+        unsigned int i;
+
+        Canvas->Font->Assign(Font);
+
+        Body->SetBounds(8, Label15->Top + Label15->Height + 12,
+                        ClientWidth - 16, 10);
+
+        for (i=0; i<PARAGRAPHS; i++)
+        {
+                if (i) y += PARAGRAPH_GAP;
+                y = Paragraph(Canvas, ParagraphText(i), y, false);
+        }
+
+        Body->Height = y;
+
+        Button1->Top = Body->Top + Body->Height + 10;
+        Button1->Left = ClientWidth - 8 - Button1->Width;
+        Label18->Top = Button1->Top + (Button1->Height - Label18->Height) / 2;
+        Image2->Top = Label18->Top + (Label18->Height - Image2->Height) / 2;
+        ClientHeight = Button1->Top + Button1->Height + 8;
+
+        Body->Invalidate();
+}
+
+void __fastcall TAbout::BodyPaint(TObject *Sender)
+{
+        int y = 0;
+        unsigned int i;
+
+        Body->Canvas->Font->Assign(Font);
+        Body->Canvas->Brush->Style = bsClear;
+
+        for (i=0; i<PARAGRAPHS; i++)
+        {
+                if (i) y += PARAGRAPH_GAP;
+                y = Paragraph(Body->Canvas, ParagraphText(i), y, true);
+        }
 }
 
 //---------------------------------------------------------------------------
