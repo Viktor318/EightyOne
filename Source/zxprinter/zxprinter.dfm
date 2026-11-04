@@ -39,25 +39,25 @@ object ZXPrinter: TZXPrinter
   object SaveImage: TButton
     Left = 8
     Top = 272
-    Width = 60
+    Width = 56
     Height = 25
     Caption = 'Save'
     TabOrder = 1
     OnClick = SaveImageClick
   end
   object ClearImage: TButton
-    Left = 74
+    Left = 70
     Top = 272
-    Width = 60
+    Width = 56
     Height = 25
     Caption = 'Clear'
     TabOrder = 2
     OnClick = ClearImageClick
   end
   object OptionsBtn: TButton
-    Left = 208
+    Left = 194
     Top = 272
-    Width = 60
+    Width = 71
     Height = 25
     Caption = 'Options'
     TabOrder = 4
@@ -138,9 +138,9 @@ object ZXPrinter: TZXPrinter
     end
   end
   object Feed: TButton
-    Left = 141
+    Left = 132
     Top = 272
-    Width = 60
+    Width = 56
     Height = 25
     Caption = 'Feed'
     TabOrder = 3

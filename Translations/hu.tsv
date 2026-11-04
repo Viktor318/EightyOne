@@ -572,10 +572,10 @@ form	zx97Config.dfm	Bank 1-15 (RAM)	1-15. bank (RAM)
 form	zx97Config.dfm	Save RAM on power down	RAM mentése kikapcsoláskor
 form	zx97Config.dfm	Swap ROM/RAM	ROM/RAM csere
 form	zxprinter.dfm	Carriage Speed	Kocsisebesség
-form	zxprinter.dfm	Paper Feed Speed	Papírtovábbítás sebessége
+form	zxprinter.dfm	Paper Feed Speed	Előtolás sebessége
 form	zxprinter.dfm	Style:	Stílus:
 form	zxprinter.dfm	Plain Paper	Sima papír
-form	zxprinter.dfm	Feed	Papírtovábbítás
+form	zxprinter.dfm	Feed	Előtolás
 form	zxprinter.dfm	Windows Bitmap (BMP)	Windows bitkép (BMP)
 form	About_.dfm	lib765 and libdsk © 2000-2005 John Elliot.	lib765 és libdsk © 2000-2005 John Elliot.
 form	About_.dfm	© 2011-2025 Charlie Robson and Paul Farrow	© 2011-2025 Charlie Robson és Paul Farrow
@@ -715,7 +715,7 @@ code	snap.cpp	ROM load to address failed:\n{0}	A ROM betöltése a megadott cím
 code	snap.cpp	ROM load failed:\n{0}	A ROM betöltése nem sikerült:\n{0}
 code	snap.cpp	Font load failed:\n{0}	A karakterkészlet betöltése nem sikerült:\n{0}
 code	zxprinter.cpp	Carriage Speed: {0}	Kocsisebesség: {0}
-code	zxprinter.cpp	Paper Feed Speed: {0}	Papírtovábbítás sebessége: {0}
+code	zxprinter.cpp	Paper Feed Speed: {0}	Előtolás sebessége: {0}
 code	BasicLister_.cpp	{0} ZxText2P BASIC File (*.{1})	{0} ZxText2P BASIC-fájl (*.{1})
 code	BasicLister_.cpp	{0} ZxToken BASIC File (*.{1})	{0} ZxToken BASIC-fájl (*.{1})
 code	BasicLister_.cpp	Bitmap File (*.bmp)	Bitkép (*.bmp)
