@@ -7,6 +7,13 @@ The changes of the `hungarian-windows` branch, compared with
 
 ## Unreleased
 
+### Keyboard picture (Help > Keyboard Map)
+
+- The window can be resized; the picture keeps its proportions and is
+  scaled smoothly (halftone), down to a quarter of its size. Its size is
+  remembered. Double click still switches between the normal and the
+  double size (with the ZX80 functions and the Spectrum 128 keypad).
+
 ### Hungarian user interface
 
 - The menus, windows and messages are in **Hungarian** or English:

@@ -38,9 +38,104 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
 {
         TIniFile *ini;
 
+        // The window can be resized; the picture keeps its proportions and
+        // is scaled smoothly. The pictures of the machines stay as they
+        // are, under the one shown
+        Large = false;
+        AutoSize = false;
+        BorderStyle = bsSizeToolWin;
+        ClientWidth = PictureWidth;
+        ClientHeight = PictureHeight;
+        Constraints->MinWidth = PictureWidth / 4;
+
+        Display = new TImage(this);
+        Display->Parent = this;
+        Display->Align = alClient;
+        Display->OnDblClick = KeyboardDblClick;
+        Display->BringToFront();
+
+        OnCanResize = CanResizeWindow;
+        OnResize = ResizeWindow;
+
         ini = new TIniFile(emulator.inipath);
         LoadSettings(ini);
         delete ini;
+}
+
+// The picture of the machine, scaled to the window with halftone
+// stretching (much smoother than the stretching of TImage)
+void TKeyboard::UpdateDisplay(void)
+{
+        TImage *source = NULL;
+        Graphics::TBitmap *picture;
+        int i;
+
+        if (!Display) return;
+
+        for (i=0; i<ComponentCount; i++)
+        {
+                TImage *image = dynamic_cast<TImage *>(Components[i]);
+                if (image && image != Display && image->Visible)
+                {
+                        source = image;
+                        break;
+                }
+        }
+
+        if (!source || ClientWidth <= 0 || ClientHeight <= 0) return;
+
+        picture = new Graphics::TBitmap();
+        picture->PixelFormat = pf24bit;
+        picture->Width = ClientWidth;
+        picture->Height = ClientHeight;
+
+        SetStretchBltMode(picture->Canvas->Handle, HALFTONE);
+        SetBrushOrgEx(picture->Canvas->Handle, 0, 0, NULL);
+        StretchBlt(picture->Canvas->Handle, 0, 0, ClientWidth, ClientHeight,
+                   source->Picture->Bitmap->Canvas->Handle, 0, 0,
+                   source->Picture->Bitmap->Width,
+                   source->Picture->Bitmap->Height, SRCCOPY);
+
+        Display->Picture->Bitmap = picture;
+        delete picture;
+
+        Display->BringToFront();
+}
+
+// Keep the proportions of the picture: the side dragged decides
+void __fastcall TKeyboard::CanResizeWindow(TObject *Sender, int &NewWidth,
+                                           int &NewHeight, bool &Resize)
+{
+        int frameWidth = Width - ClientWidth;
+        int frameHeight = Height - ClientHeight;
+        int clientWidth = NewWidth - frameWidth;
+        int clientHeight = NewHeight - frameHeight;
+
+        if (NewWidth == Width && NewHeight != Height)
+                clientWidth = (clientHeight * PictureWidth + PictureHeight / 2) / PictureHeight;
+
+        if (clientWidth < PictureWidth / 4) clientWidth = PictureWidth / 4;
+        clientHeight = (clientWidth * PictureHeight + PictureWidth / 2) / PictureWidth;
+
+        NewWidth = clientWidth + frameWidth;
+        NewHeight = clientHeight + frameHeight;
+}
+
+void __fastcall TKeyboard::ResizeWindow(TObject *Sender)
+{
+        UpdateDisplay();
+
+        // The windows beside the keyboard follow its right edge
+        if (KeyboardFunctions && KeyboardFunctions->Visible)
+        {
+                KeyboardFunctions->Left = Left + Width + FunctionsOffset;
+                KeyboardFunctions->Top = Top;
+        }
+        if (Keypad128 && Keypad128->Visible)
+        {
+                Keypad128->Left = Left + Width + KeypadOffset;
+                Keypad128->Top = Top;
+        }
 }
 //---------------------------------------------------------------------------
 void __fastcall TKeyboard::FormClose(TObject *Sender, TCloseAction &Action)
@@ -57,14 +152,23 @@ void __fastcall TKeyboard::FormClose(TObject *Sender, TCloseAction &Action)
 
 void TKeyboard::LoadSettings(TIniFile *ini)
 {
+        int width;
+
         Top = ini->ReadInteger("KBMAP","Top",Top);
         Left = ini->ReadInteger("KBMAP","Left",Left);
+
+        width = ini->ReadInteger("KBMAP","PictureWidth",PictureWidth);
+        if (width < PictureWidth / 4) width = PictureWidth / 4;
+        if (width > Screen->Width) width = Screen->Width;
+        ClientWidth = width;
+        ClientHeight = (width * PictureHeight + PictureWidth / 2) / PictureWidth;
 }
 
 void TKeyboard::SaveSettings(TIniFile *ini)
 {
         ini->WriteInteger("KBMAP","Top",Top);
         ini->WriteInteger("KBMAP","Left",Left);
+        ini->WriteInteger("KBMAP","PictureWidth",ClientWidth);
 }
 
 void __fastcall TKeyboard::FormKeyDown(TObject *Sender, WORD &Key,
@@ -319,6 +423,8 @@ void TKeyboard::KbChange(void)
 
         Keypad128->Left = Keyboard->Left + Keyboard->Width + Keyboard->KeypadOffset;
         Keypad128->Top = Keyboard->Top;
+
+        UpdateDisplay();
 }
 
 void SetKeyboardSize(TImage* image, bool large)
@@ -335,42 +441,17 @@ void SetKeyboardSize(TImage* image, bool large)
         }
 }
 
+// Double click: the normal or the double size, and the windows beside
+// it (ZX80 functions, Spectrum 128 keypad) with it
 void __fastcall TKeyboard::KeyboardDblClick(TObject *Sender)
 {
-        const int normalWidth = 505;
-        bool large = (zx81kb->Width == normalWidth);
+        Large = !Large;
 
-        SetKeyboardSize(zx80kb, large);
-        SetKeyboardSize(zx80zxpandkb, large);
-        SetKeyboardSize(zx81kb, large);
-        SetKeyboardSize(zx81zxpandkb, large);
-        SetKeyboardSize(ts1000kb, large);
-        SetKeyboardSize(ts1000zxpandkb, large);
-        SetKeyboardSize(ts1500kb, large);
-        SetKeyboardSize(ts1500zxpandkb, large);
-        SetKeyboardSize(lambdakb, large);
-        SetKeyboardSize(r470kb, large);
-        SetKeyboardSize(tk85kb, large);
-        SetKeyboardSize(acekb, large);
-        SetKeyboardSize(zx97kb, large);
-        SetKeyboardSize(spec16kb, large);
-        SetKeyboardSize(spec48kb, large);
-        SetKeyboardSize(spec48kbNordic, large);
-        SetKeyboardSize(spec128kb, large);
-        SetKeyboardSize(spec128kbSpanish, large);
-        SetKeyboardSize(spec128kbArabic, large);
-        SetKeyboardSize(tc2048kb, large);
-        SetKeyboardSize(tc2068kbTimeWord, large);
-        SetKeyboardSize(ts2068kb, large);
-        SetKeyboardSize(specPlus2kb, large);
-        SetKeyboardSize(specPlus2kbSpanish, large);
-        SetKeyboardSize(specPlus2kbArabic, large);
-        SetKeyboardSize(specPlus3kb, large);
-        SetKeyboardSize(specPlus3kbSpanish, large);
-        SetKeyboardSize(specPlus3kbArabic, large);
+        ClientWidth = Large ? PictureWidth * 2 : PictureWidth;
+        ClientHeight = Large ? PictureHeight * 2 : PictureHeight;
 
-        SetKeyboardSize(KeyboardFunctions->zx80IntegralFunctions, large);
-        SetKeyboardSize(Keypad128->KeypadUk, large);
-        SetKeyboardSize(Keypad128->KeypadSpanish, large);
+        SetKeyboardSize(KeyboardFunctions->zx80IntegralFunctions, Large);
+        SetKeyboardSize(Keypad128->KeypadUk, Large);
+        SetKeyboardSize(Keypad128->KeypadSpanish, Large);
 }
 

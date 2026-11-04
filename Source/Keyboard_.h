@@ -68,6 +68,13 @@ __published:	// IDE-managed Components
           TShiftState Shift);
         void __fastcall KeyboardDblClick(TObject *Sender);
 private:	// User declarations
+        // The picture shown: the one of the machine, scaled to the window
+        TImage *Display;
+        bool Large;
+        void UpdateDisplay(void);
+        void __fastcall ResizeWindow(TObject *Sender);
+        void __fastcall CanResizeWindow(TObject *Sender, int &NewWidth,
+                                        int &NewHeight, bool &Resize);
 public:		// User declarations
         __fastcall TKeyboard(TComponent* Owner);
         void LoadSettings(TIniFile *ini);
@@ -75,6 +82,8 @@ public:		// User declarations
         void KbChange(void);
 
         static const int FunctionsOffset = 20;
+        static const int PictureWidth = 505;
+        static const int PictureHeight = 223;
         static const int KeypadOffset = 20;
 };
 //---------------------------------------------------------------------------

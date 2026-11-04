@@ -8,6 +8,13 @@ eredetihez képest.
 
 ## Kiadatlan
 
+### Billentyűzetkép (Help > Keyboard Map)
+
+- Az ablak átméretezhető; a kép megtartja az arányait, és simán
+  (halftone) skálázódik, egészen a negyed méretig. A méretét megjegyzi. A
+  dupla kattintás továbbra is a normál és a dupla méret között vált (a ZX80
+  funkcióival és a Spectrum 128 numerikus billentyűzetével együtt).
+
 ### Magyar felület
 
 - A menük, az ablakok és az üzenetek **magyarul** vagy angolul jelennek
