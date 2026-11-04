@@ -7,6 +7,13 @@ The changes of the `hungarian-windows` branch, compared with
 
 ## Unreleased
 
+### Main window size
+
+- New zoom: **300%** (*View > Zoom*, Ctrl+F3), between 200% and 400%.
+- With 100%, 200%, 300% or 400% chosen, the window can be resized too, but
+  it jumps between these sizes (the zoom ticked follows). *User Defined*
+  still allows any size.
+
 ### Keyboard picture (Help > Keyboard Map)
 
 - Double click changes the size of the picture in steps: 1x, 1.25x, 1.5x,

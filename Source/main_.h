@@ -354,6 +354,13 @@ public:		// User declarations
         LONG_PTR SaveStyle, SaveExStyle;
         void __fastcall AppMessage(TMsg &Msg, bool &Handled);
         void __fastcall LanguageClick(TObject *Sender);
+        // View > Zoom: 100%, 200%, 300%, 400%; the window can be resized
+        // between these sizes (freely with User Defined)
+        TMenuItem *N3001;
+        void __fastcall N3001Click(TObject *Sender);
+        void SetZoom(int factor);
+        void __fastcall FormCanResize(TObject *Sender, int &NewWidth,
+                                      int &NewHeight, bool &Resize);
         void BuildLanguageMenu();
         TMenuItem *LanguageItems[3];
         void LoadSettings(TIniFile *ini);

@@ -8,6 +8,13 @@ eredetihez képest.
 
 ## Kiadatlan
 
+### A főablak mérete
+
+- Új nagyítás: **300%** (*View > Zoom*, Ctrl+F3), a 200% és a 400% között.
+- A 100%, 200%, 300% vagy 400% nagyításnál az ablak húzással is
+  átméretezhető, de csak ezek között a méretek között ugrik (a bejelölt
+  nagyítás követi). A *User Defined* továbbra is bármilyen méretet enged.
+
 ### Billentyűzetkép (Help > Keyboard Map)
 
 - A dupla kattintás lépésenként változtatja a kép méretét: 1x, 1,25x,

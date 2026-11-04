@@ -228,6 +228,13 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         LanguageSetSetting(ini->ReadInteger("MAIN", "Language", LANGUAGE_AUTOMATIC));
         BuildLanguageMenu();
 
+        N3001 = new TMenuItem(this);
+        N3001->Caption = "300%";
+        N3001->ShortCut = ShortCut(VK_F3, TShiftState() << ssCtrl);
+        N3001->OnClick = N3001Click;
+        Zoom1->Insert(Zoom1->IndexOf(N4001), N3001);
+        OnCanResize = FormCanResize;
+
         iniFileExists = FileExists(emulator.inipath);
         LoadSettings(ini);
 
@@ -289,6 +296,19 @@ void __fastcall TForm1::FormResize(TObject *Sender)
         extern void RecalcWinSize(void);
 
         RecalcWinSize();
+
+        // The zoom ticked follows a size dragged to
+        if (!FullScreen && N3001 && !UserDefined1->Checked && BaseWidth > 0)
+        {
+                int factor = ClientWidth / BaseWidth;
+                if (ClientWidth == BaseWidth * factor && factor >= 1 && factor <= 4)
+                {
+                        N1001->Checked = (factor == 1);
+                        N2001->Checked = (factor == 2);
+                        N3001->Checked = (factor == 3);
+                        N4001->Checked = (factor == 4);
+                }
+        }
 
         StatusBar1->Panels->Items[3]->Width =
                 StatusBar1->ClientWidth -
@@ -358,45 +378,46 @@ void __fastcall TForm1::KeyboardMap1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::N1001Click(TObject *Sender)
 {
-        N1001->Checked=true;
-        N2001->Checked=false;
-        N4001->Checked=false;
-        UserDefined1->Checked=false;
-
-        StatusBar1->SizeGrip = false;
-        BorderStyle = bsSingle;
-        TBorderIcons newBorderIcons = BorderIcons;
-        newBorderIcons >> biMinimize;
-        newBorderIcons >> biMaximize;
-        BorderIcons = newBorderIcons;
-
-        ClientWidth=BaseWidth;
-        ClientHeight=BaseHeight;
-        if (StatusBar1->Visible)
-        {
-                ClientHeight += StatusBar1->Height;
-                StatusBar1->Refresh();
-                StatusBar1->Invalidate();
-        }
+        SetZoom(1);
 }
 //-----------------------------------------------------------------------
 
 void __fastcall TForm1::N2001Click(TObject *Sender)
 {
-        N1001->Checked=false;
-        N2001->Checked=true;
-        N4001->Checked=false;
+        SetZoom(2);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N4001Click(TObject *Sender)
+{
+        SetZoom(4);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::N3001Click(TObject *Sender)
+{
+        SetZoom(3);
+}
+//---------------------------------------------------------------------------
+
+void TForm1::SetZoom(int factor)
+{
+        N1001->Checked = (factor == 1);
+        N2001->Checked = (factor == 2);
+        N3001->Checked = (factor == 3);
+        N4001->Checked = (factor == 4);
         UserDefined1->Checked=false;
 
-        StatusBar1->SizeGrip = false;
-        BorderStyle = bsSingle;
+        // Resizable, but FormCanResize lets it have these sizes only
+        StatusBar1->SizeGrip = true;
         TBorderIcons newBorderIcons = BorderIcons;
         newBorderIcons >> biMinimize;
         newBorderIcons >> biMaximize;
         BorderIcons = newBorderIcons;
+        BorderStyle = bsSizeable;
 
-        ClientWidth=BaseWidth*2;
-        ClientHeight=BaseHeight*2;
+        ClientWidth=BaseWidth*factor;
+        ClientHeight=BaseHeight*factor;
         if (StatusBar1->Visible)
         {
                 ClientHeight += StatusBar1->Height;
@@ -406,28 +427,37 @@ void __fastcall TForm1::N2001Click(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::N4001Click(TObject *Sender)
+// Resizing the window with one of the zoom sizes chosen: it jumps to the
+// zoom nearest to the size dragged to (the side dragged decides)
+void __fastcall TForm1::FormCanResize(TObject *Sender, int &NewWidth,
+                                      int &NewHeight, bool &Resize)
 {
-        N1001->Checked=false;
-        N2001->Checked=false;
-        N4001->Checked=true;
-        UserDefined1->Checked=false;
+        int frameWidth, frameHeight, statusHeight, factor, best = 1;
+        int wanted, size, distance, bestDistance = -1;
+        bool byHeight;
 
-        StatusBar1->SizeGrip = false;
-        BorderStyle = bsSingle;
-        TBorderIcons newBorderIcons = BorderIcons;
-        newBorderIcons >> biMinimize;
-        newBorderIcons >> biMaximize;
-        BorderIcons = newBorderIcons;
+        if (FullScreen || UserDefined1->Checked || BaseWidth <= 0
+                || BaseHeight <= 0) return;
 
-        ClientWidth=BaseWidth*4;
-        ClientHeight=BaseHeight*4;
-        if (StatusBar1->Visible)
+        statusHeight = StatusBar1->Visible ? StatusBar1->Height : 0;
+        frameWidth = Width - ClientWidth;
+        frameHeight = Height - ClientHeight + statusHeight;
+        byHeight = (NewWidth == Width && NewHeight != Height);
+
+        for (factor=1; factor<=4; factor++)
         {
-                ClientHeight += StatusBar1->Height;
-                StatusBar1->Refresh();
-                StatusBar1->Invalidate();
+                wanted = byHeight ? NewHeight - frameHeight : NewWidth - frameWidth;
+                size = byHeight ? BaseHeight * factor : BaseWidth * factor;
+                distance = wanted > size ? wanted - size : size - wanted;
+                if (bestDistance < 0 || distance < bestDistance)
+                {
+                        best = factor;
+                        bestDistance = distance;
+                }
         }
+
+        NewWidth = BaseWidth * best + frameWidth;
+        NewHeight = BaseHeight * best + frameHeight;
 }
 //---------------------------------------------------------------------------
 
@@ -435,6 +465,7 @@ void __fastcall TForm1::UserDefined1Click(TObject *Sender)
 {
         N1001->Checked=false;
         N2001->Checked=false;
+        N3001->Checked=false;
         N4001->Checked=false;
         UserDefined1->Checked=true;
 
@@ -1247,6 +1278,7 @@ void TForm1::LoadSettings(TIniFile *ini)
 
         if (ini->ReadBool("MAIN", "N1001",N1001->Checked)) N1001Click(NULL);
         if (ini->ReadBool("MAIN", "N2001",N2001->Checked)) N2001Click(NULL);
+        if (ini->ReadBool("MAIN", "N3001",N3001->Checked)) N3001Click(NULL);
         if (ini->ReadBool("MAIN", "N4001",N4001->Checked)) N4001Click(NULL);
         if (ini->ReadBool("MAIN", "UserDefined",UserDefined1->Checked)) UserDefined1Click(NULL);
         if (!StatusBar2->Checked) StatusBar2Click(NULL);
@@ -1277,6 +1309,7 @@ void TForm1::SaveSettings(TIniFile *ini)
 
         ini->WriteBool("MAIN", "N1001",       N1001->Checked);
         ini->WriteBool("MAIN", "N2001",       N2001->Checked);
+        ini->WriteBool("MAIN", "N3001",       N3001->Checked);
         ini->WriteBool("MAIN", "N4001",       N4001->Checked);
         ini->WriteBool("MAIN", "UserDefined", UserDefined1->Checked);
 

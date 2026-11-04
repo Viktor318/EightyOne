@@ -1941,6 +1941,11 @@ void THW::ResetDisplaySize()
                 Form1->N1001Click(NULL);
                 Form1->N2001Click(NULL);
         }
+        else if (Form1->N3001->Checked)
+        {
+                Form1->N1001Click(NULL);
+                Form1->N3001Click(NULL);
+        }
         else if (Form1->N4001->Checked)
         {
                 Form1->N1001Click(NULL);
