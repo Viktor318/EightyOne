@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <string.h>
 #include <TypInfo.hpp>
 #include <StdCtrls.hpp>
 #include <ExtCtrls.hpp>
@@ -117,6 +118,26 @@ bool LanguageIsHungarian(void)
 //---------------------------------------------------------------------------
 // Texts of the code
 
+// A text without its hotkey marks: the VCL puts "&" into the captions of
+// menus by itself ("File" becomes "&File"), so the table has to be found
+// without them too ("&&" is a "&" itself)
+static std::string StripHotkeys(const char *text)
+{
+        std::string result;
+
+        for (; *text; text++)
+        {
+                if (*text == '&')
+                {
+                        if (text[1] != '&') continue;
+                        text++;
+                }
+                result += *text;
+        }
+
+        return result;
+}
+
 AnsiString Tr(const char *english)
 {
         TextMap::const_iterator i;
@@ -126,6 +147,9 @@ AnsiString Tr(const char *english)
 
         BuildMaps();
         i = ToHungarian.find(english);
+        if (i == ToHungarian.end() && strchr(english, '&'))
+                i = ToHungarian.find(StripHotkeys(english));
+
         return i != ToHungarian.end() ? AnsiString(i->second.c_str())
                                       : AnsiString(english);
 }
@@ -171,10 +195,22 @@ AnsiString TrF(const char *english, const AnsiString &a0,
 static AnsiString EnglishOf(const AnsiString &text)
 {
         TextMap::const_iterator i;
+        std::string stripped;
 
         BuildMaps();
         i = ToEnglish.find(text.c_str());
-        return i != ToEnglish.end() ? AnsiString(i->second.c_str()) : text;
+        if (i != ToEnglish.end()) return i->second.c_str();
+
+        if (!text.Pos("&")) return text;
+
+        // With hotkey marks the VCL has put in
+        stripped = StripHotkeys(text.c_str());
+        i = ToEnglish.find(stripped);
+        if (i != ToEnglish.end()) return i->second.c_str();
+        if (ToHungarian.find(stripped) != ToHungarian.end())
+                return stripped.c_str();
+
+        return text;
 }
 
 AnsiString LanguageEnglish(const AnsiString &text)
@@ -268,7 +304,9 @@ static void TranslateProperty(TObject *object, int property)
         current = GetStrProp(object, info);
 
         i = Originals.find(key);
-        if (i == Originals.end() || i->second.LastSet != current)
+        if (i == Originals.end()
+                || StripHotkeys(i->second.LastSet.c_str())
+                   != StripHotkeys(current.c_str()))
         {
                 // First time here, or the code has set a new text since
                 english = property == PROPERTY_FILTER ?
