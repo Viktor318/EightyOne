@@ -8,19 +8,19 @@ form	About_.dfm	Z80 core and DirectSound code taken from fuse, the free UNIX	A Z
 form	About_.dfm	Unknown Version	Ismeretlen verzió
 form	About_.dfm	Spectrum emulator © 2003 Philip Kendall.	Spectrum emulátorból származik © 2003 Philip Kendall.
 form	About_.dfm	Many thanks to Wilf Rigter for providing essential technical	Köszönet Wilf Rigternek a nélkülözhetetlen műszaki
-form	About_.dfm	AY8910 Code taken from Z81 © 1995-2001 Russell Marks.	Az AY8910 kód a Z81-ből származik © 1995-2001 Russell Marks.
+form	About_.dfm	AY8910 Code taken from Z81 © 1995-2001 Russell Marks.	Az AY8910 kód a Z81-ből © 1995-2001 Russell Marks.
 form	About_.dfm	information on the internal workings of the ZX81 itself and also 	információkért a ZX81 belső működéséről, valamint
-form	About_.dfm	various add-ons including the Memotech and G007 Hi-res cards.	számos bővítőről, köztük a Memotech és a G007 nagyfelbontású kártyáról.
+form	About_.dfm	various add-ons including the Memotech and G007 Hi-res cards.	sok bővítőről, köztük a Memotech és G007 grafikus kártyákról.
 form	About_.dfm	dk'tronics graphics ROM dump and several bug reports provided	A dk'tronics grafikus ROM tartalmát és számos hibajelentést
 form	About_.dfm	by Simon Holdsworth.  	Simon Holdsworth küldte.  
 form	About_.dfm	Click to visit the EightyOne home page	Kattintson az EightyOne honlapjának megnyitásához
 form	About_.dfm	G007 information also provided by Kryton.	G007-információk: Kryton.
 form	About_.dfm	Icon designed by Paul E Collins.	Az ikont Paul E Collins tervezte.
 form	About_.dfm	Dedicated to Abbey (1998-2008)	Abbey emlékére (1998-2008)
-form	About_.dfm	Releases up to 1.0a were created by Michael D Wynne, with all	Az 1.0a-ig terjedő kiadásokat Michael D Wynne készítette, az összes
-form	About_.dfm	subsequent releases created by Charlie Robson and Paul Farrow.	későbbit Charlie Robson és Paul Farrow.
+form	About_.dfm	Releases up to 1.0a were created by Michael D Wynne, with all	Az 1.0a-ig terjedő kiadásokat Michael D Wynne készítette,
+form	About_.dfm	subsequent releases created by Charlie Robson and Paul Farrow.	a későbbieket Charlie Robson és Paul Farrow.
 form	About_.dfm	Michael's daughter	Michael lánya
-form	About_.dfm	Speech synthesis code from SP0256_CTS256A-AL2.	A beszédszintézis kódja az SP0256_CTS256A-AL2-ből származik.
+form	About_.dfm	Speech synthesis code from SP0256_CTS256A-AL2.	Beszédszintézis: SP0256_CTS256A-AL2.
 form	Artifacts_.dfm	TV Emulation	TV-emuláció
 form	Artifacts_.dfm	Colour	Szín
 form	Artifacts_.dfm	Brightness	Fényerő
