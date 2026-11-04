@@ -127,7 +127,9 @@ void __fastcall TForm1::WndProc(TMessage &Message)
         switch(Message.Msg)
         {
         case WM_USER:
-                if (RunFrameEnable)
+                // Sent by the audio thread for each frame of sound it needs;
+                // not while the sound is being stopped
+                if (RunFrameEnable && !Sound.Stopping())
                         Form1->RunFrame();
                 break;
 

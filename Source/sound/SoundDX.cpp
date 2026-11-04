@@ -16,46 +16,87 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+// DirectSound output.
+//
+// The audio thread is also the emulator's clock: for each frame of sound
+// it needs, it asks the main window (WM_USER) to run one frame, which hands
+// its sound back through Frame().
+//
+// The circular DirectSound buffer is about a second long, but it is only
+// kept filled a little beyond DirectSound's write cursor (DSND_MARGIN_MS).
+// What is before the write cursor may already have been mixed - on Windows
+// Vista and later DirectSound runs on top of WASAPI, and the write cursor
+// can be tens of milliseconds ahead of the play cursor - so it is never
+// written. The bytes written and played are counted, so an underrun is
+// noticed and writing continues a little after the write cursor. After
+// each write, the rest of the buffer is filled with the last sample fading
+// to zero: if the main window is held up (a menu, a dialog being opened),
+// the buffer plays silence instead of old sound again.
+
 #include <dsound.h>
 #include "sound\SoundDX.h"
 #include "Language.h"
 
 CDSnd::CDSnd(void)
 {
-        m_ThreadHandle=NULL;
         m_hWnd=NULL;
+        m_BitsPerSample=0;
+        m_SampleRate=0;
+        m_Channels=0;
+        m_FPS=0;
+
+        m_ThreadID=0;
+        m_ThreadHandle=NULL;
+        m_StopEvent=NULL;
+        m_Stopping=false;
+        m_SendErrorShown=false;
+
+        ZeroMemory(&m_WFE, sizeof(m_WFE));
+        m_lpDS=NULL;
+        m_lpDSB=NULL;
+        m_DXBufLen=0;
+        m_DXBufMs=0;
+        m_BytesPerMs=0;
+        m_FrameBytes=0;
+
+        m_NextPos=0;
+        m_LastPlay=0;
+        m_LastFrameTime=0;
+        m_WrittenTotal=0;
+        m_PlayedTotal=0;
+        m_LastSample[0]=m_LastSample[1]=0;
+
+        m_QueueLockInit=false;
+        m_lpAudioQueue=NULL;
+        m_QueueLen=0;
+        m_QueueSize=0;
+        m_QueueStart=0;
+        m_lpFrameBuf=NULL;
 }
 
 int CDSnd::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels)
 {
-
         m_BitsPerSample=BitsPerSample;
         m_SampleRate=SampleRate;
         m_Channels=Channels;
         m_FPS=FPS;
         m_hWnd=hWnd;
 
-
         // If any essentials haven't been initialised,
-        // or the audio thread is already running
+        // or DirectSound is already set up
 
         if (!m_hWnd || !m_FPS || !m_BitsPerSample || !m_SampleRate || !m_Channels) return(0);
-        if (m_ThreadHandle) return(0);
+        if (m_lpDS) return(0);
 
-        // Initialise Variables
+        if (!m_QueueLockInit)
+        {
+                InitializeCriticalSection(&m_QueueLock);
+                m_QueueLockInit=true;
+        }
+
+        // Set Sound Output Format
 
 	ZeroMemory(&m_WFE, sizeof(m_WFE));
-	m_lpDS = NULL;
-	m_lpDSB = NULL;
-	m_pHEvent[0] = CreateEvent(NULL, FALSE, FALSE, "DSound_Buf_Notify_0");
-	m_pHEvent[1] = CreateEvent(NULL, FALSE, FALSE, "DSound_Buf_Notify_1");
-        m_lpAudioQueue = NULL;
-
-        LPVOID lpvAudio1 = NULL, lpvAudio2 = NULL;
-	DWORD dwBytesAudio1, dwBytesAudio2;
-
-        // Set Sound Output Format - Stereo/22kHz/8Bit
-
         m_WFE.wFormatTag =  WAVE_FORMAT_PCM;
         m_WFE.nChannels = (WORD)m_Channels;
         m_WFE.nSamplesPerSec = m_SampleRate;
@@ -63,24 +104,39 @@ int CDSnd::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int
         m_WFE.nBlockAlign = (WORD)(m_WFE.nChannels * m_BitsPerSample / 8);
         m_WFE.nAvgBytesPerSec = m_WFE.nSamplesPerSec * m_WFE.nBlockAlign;
 
-        // Calculate Bufferlengths
-        // AudioQueue is 2 Seconds long
-        // DXbuffer is 2 frames long
+        // Buffer lengths: one frame is what CSound::Frame() hands over,
+        // the DirectSound buffer is a second long
 
-        m_DXBufLen = (m_WFE.nBlockAlign * m_WFE.nSamplesPerSec) / FPS;
-        m_DXBufLen = (m_DXBufLen & ~1) * 2;
-        m_QueueLen = m_DXBufLen * 40;
+        m_FrameBytes = (m_SampleRate / m_FPS) * m_WFE.nBlockAlign;
+        m_DXBufLen = m_WFE.nAvgBytesPerSec;
+        m_DXBufMs = 1000;
+        m_BytesPerMs = m_WFE.nAvgBytesPerSec / 1000;
+
+        m_StopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if (!m_StopEvent)
+        {
+                Release();
+                return -1;
+        }
 
 	//Create DirectSound
         int r = DirectSoundCreate(NULL, &m_lpDS, NULL);
         if (r)
+        {
+                m_lpDS=NULL;
+                Release();
                 return(r); // Create DirectSound Failed
+        }
 
 	//Set Cooperative Level
         if (m_lpDS->SetCooperativeLevel(m_hWnd, DSSCL_PRIORITY))
+        {
+                Release();
                 return(-1); // SetCooperativeLevel Failed
+        }
 
-	//Create Primary Buffer
+	//Set the format of the primary buffer. Not needed for the sound to
+        //play (DirectSound converts), so a failure here is not an error.
 	DSBUFFERDESC dsbd;
 	ZeroMemory(&dsbd, sizeof(dsbd));
 	dsbd.dwSize = sizeof(DSBUFFERDESC);
@@ -88,117 +144,144 @@ int CDSnd::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int
 	dsbd.dwBufferBytes = 0;
 	dsbd.lpwfxFormat = NULL;
 
-	LPDIRECTSOUNDBUFFER lpDSB = NULL;
-        if (m_lpDS->CreateSoundBuffer(&dsbd, &lpDSB, NULL))
-                return -1; //Create Primary Sound Buffer Failed
-
-	//Set Primary Buffer Format
-        if (lpDSB->SetFormat(&m_WFE))
-               return -1; // Set Primary Format Failed!"));
+	LPDIRECTSOUNDBUFFER lpPrimary = NULL;
+        if (m_lpDS->CreateSoundBuffer(&dsbd, &lpPrimary, NULL) == DS_OK)
+        {
+                lpPrimary->SetFormat(&m_WFE);
+                lpPrimary->Release();
+        }
 
 	//Create Secondary Buffer
-	dsbd.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GLOBALFOCUS;
+        ZeroMemory(&dsbd, sizeof(dsbd));
+	dsbd.dwSize = sizeof(DSBUFFERDESC);
+	dsbd.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS;
 	dsbd.dwBufferBytes = m_DXBufLen;
 	dsbd.lpwfxFormat = &m_WFE;
 
         if (m_lpDS->CreateSoundBuffer(&dsbd, &m_lpDSB, NULL))
+        {
+                m_lpDSB=NULL;
+                Release();
                 return(-1);// Create Second Sound Buffer Failed
-
-	//Query DirectSoundNotify
-	LPDIRECTSOUNDNOTIFY lpDSBNotify;
-
-        if (m_lpDSB->QueryInterface(IID_IDirectSoundNotify, (LPVOID *)&lpDSBNotify))
-                return -1; // QueryInterface DirectSoundNotify Failed
-
-	//Set Direct Sound Buffer Notify Position
-	DSBPOSITIONNOTIFY pPosNotify[2];
-	pPosNotify[0].dwOffset = m_DXBufLen / 2;
-	pPosNotify[0].hEventNotify = m_pHEvent[0];
-	pPosNotify[1].dwOffset = m_DXBufLen - 1;
-	pPosNotify[1].hEventNotify = m_pHEvent[1];
-
-        if (lpDSBNotify->SetNotificationPositions(2, pPosNotify))
-                return -1; //Set NotificationPosition Failed
+        }
 
 	//New audio Queue
-	if (m_lpAudioQueue !=NULL)
-        {
-	       	delete []m_lpAudioQueue;
-		m_lpAudioQueue = NULL;
-	}
 
+        m_QueueLen = m_FrameBytes * DSND_QUEUE_FRAMES;
 	m_lpAudioQueue = new BYTE[m_QueueLen];
-
-	//Initialise Audio Queue
+        m_lpFrameBuf = new BYTE[m_QueueLen];
         m_QueueStart = 0;
         m_QueueSize = 0;
 
-	memset(m_lpAudioQueue, m_BitsPerSample==8?0x80:0, m_QueueLen);
+        // Start with silence
 
-        if (m_lpDSB->Lock(0, m_DXBufLen, &lpvAudio1, &dwBytesAudio1, &lpvAudio2, &dwBytesAudio2, 0))
-                return -1; // Lock DirectSoundBuffer Failed!
-
-        if (!lpvAudio2)
-        {
-        	memcpy(lpvAudio1, m_lpAudioQueue, dwBytesAudio1);
-        }
-        else
-        {
-	        memcpy(lpvAudio1, m_lpAudioQueue, dwBytesAudio1);
-	        memcpy(lpvAudio2, m_lpAudioQueue + dwBytesAudio1, dwBytesAudio2);
-        }
-
-        // Unlock DirectSoundBuffer
-        m_lpDSB->Unlock(lpvAudio1, dwBytesAudio1, lpvAudio2, dwBytesAudio2);
-
-        // Create the Audio Thread
-        m_ThreadHandle = CreateThread(0, 0, &CallThread, this, 0, &m_ThreadID);
-        if(!m_ThreadHandle) return -1; // Cannot create Audio thread.
-
-        ResumeThread(m_ThreadHandle);    // Start/Resume the Audio Thread
-	m_lpDSB->Play(0, 0, DSBPLAY_LOOPING);
+        m_LastSample[0]=m_LastSample[1]=0;
+        WriteBuffer(0, NULL, m_DXBufLen);
 
         return 0;
 }
 
 int CDSnd::Play()
 {
-        // Ensure Sound is initialised before attempting the play sould
+        // Ensure Sound is initialised before attempting to play sound
 
-        if (!m_hWnd || !m_FPS || !m_BitsPerSample || !m_SampleRate || !m_Channels)
-                return(0);
+        if (!m_lpDSB) return(0);
 
-        ResumeThread(m_ThreadHandle);    // Start/Resume the Audio Thread
-        m_lpDSB->Play(0, 0, DSBPLAY_LOOPING);
+        if (m_lpDSB->Play(0, 0, DSBPLAY_LOOPING) == DSERR_BUFFERLOST)
+        {
+                m_lpDSB->Restore();
+                m_lpDSB->Play(0, 0, DSBPLAY_LOOPING);
+        }
+
+        if (!m_ThreadHandle)
+        {
+                // Nothing written yet: the thread starts by writing a little
+                // after the write cursor
+                DWORD play=0, write=0;
+                m_lpDSB->GetCurrentPosition(&play, &write);
+                m_LastPlay = play;
+                m_NextPos = play;
+                m_WrittenTotal = 0;
+                m_PlayedTotal = 0;
+                m_LastFrameTime = GetTickCount();
+
+                m_Stopping = false;
+                ResetEvent(m_StopEvent);
+
+                m_ThreadHandle = CreateThread(0, 0, &CallThread, this, 0, &m_ThreadID);
+                if(!m_ThreadHandle) return -1; // Cannot create Audio thread.
+        }
+
         return 0;
 }
 
 int CDSnd::End()
 {
-	if (m_lpDSB != NULL)
+        if (m_ThreadHandle)
         {
-		m_lpDSB->Stop();  //Stop Playing Sound
+                // Ask the audio thread to stop. It may be waiting for the
+                // main window to run a frame (SendMessage), and this is
+                // usually called from the main window's thread, so let sent
+                // messages through while waiting. Stopping() makes the main
+                // window skip that frame.
 
-                //Kill the audio thread
-                if (m_ThreadHandle) TerminateThread(m_ThreadHandle,0);
-                m_ThreadHandle=NULL;
+                m_Stopping = true;
+                SetEvent(m_StopEvent);
 
-		//Empty the buffer
-		LPVOID lpvAudio1 = NULL;
-		DWORD dwBytesAudio1 = 0;
+                DWORD start = GetTickCount();
+                while(1)
+                {
+                        DWORD r = MsgWaitForMultipleObjects(1, &m_ThreadHandle,
+                                        FALSE, 100, QS_SENDMESSAGE);
 
-		if (m_lpDSB->Lock(0, 0, &lpvAudio1, &dwBytesAudio1, NULL, NULL, DSBLOCK_ENTIREBUFFER))
-                        return -1; // Lock entirebuffer failed! Stop Failed!
+                        if (r == WAIT_OBJECT_0) break;
 
-		memset(lpvAudio1, 0, dwBytesAudio1);
-		m_lpDSB->Unlock(lpvAudio1, dwBytesAudio1, NULL, NULL);
+                        if (r == WAIT_OBJECT_0 + 1)
+                        {
+                                MSG msg;
+                                PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+                        }
 
-		//Move the current play position to begin
-		m_lpDSB->SetCurrentPosition(0);
+                        if (GetTickCount() - start > 2000)
+                        {
+                                TerminateThread(m_ThreadHandle, 0);
+                                break;
+                        }
+                }
 
-                m_QueueStart=0;
-                m_QueueSize=0;
-	}
+                CloseHandle(m_ThreadHandle);
+                m_ThreadHandle = NULL;
+                m_Stopping = false;
+        }
+
+        Release();
+        return 0;
+}
+
+// Free everything Initialise() made (the thread must not be running)
+
+void CDSnd::Release()
+{
+        if (m_lpDSB)
+        {
+                m_lpDSB->Stop();
+                m_lpDSB->Release();
+                m_lpDSB = NULL;
+        }
+
+        if (m_lpDS)
+        {
+                m_lpDS->Release();
+                m_lpDS = NULL;
+        }
+
+        if (m_StopEvent)
+        {
+                CloseHandle(m_StopEvent);
+                m_StopEvent = NULL;
+        }
+
+        if (m_QueueLockInit) EnterCriticalSection(&m_QueueLock);
 
 	if (m_lpAudioQueue != NULL)
         {
@@ -206,7 +289,17 @@ int CDSnd::End()
 		m_lpAudioQueue = NULL;
 	}
 
-        return 0;
+        if (m_lpFrameBuf != NULL)
+        {
+                delete []m_lpFrameBuf;
+                m_lpFrameBuf = NULL;
+        }
+
+        m_QueueLen=0;
+        m_QueueStart=0;
+        m_QueueSize=0;
+
+        if (m_QueueLockInit) LeaveCriticalSection(&m_QueueLock);
 }
 
 // Helper function to get around not being able to
@@ -221,118 +314,287 @@ DWORD WINAPI CDSnd::CallThread(LPVOID Param)
         return(0);
 }
 
-// Audio thread function - called every frame
-// copy a frame size chunk of audio data from the audio
-// queue into the dx sound portion of buffer that isn't
-// being used
+// Read the cursors, and count how much has been played since last time
+
+void CDSnd::UpdatePlayed(DWORD *play, DWORD *write)
+{
+        if (m_lpDSB->GetCurrentPosition(play, write) != DS_OK)
+        {
+                *play = m_LastPlay;
+                *write = m_LastPlay;
+                return;
+        }
+
+        *play %= m_DXBufLen;
+        *write %= m_DXBufLen;
+
+        m_PlayedTotal += (*play + m_DXBufLen - m_LastPlay) % m_DXBufLen;
+        m_LastPlay = *play;
+}
+
+// Write `bytes' bytes at `position': from `data', or if NULL, the last
+// sample fading to zero (silence without a click). Returns 0 on success
+
+int CDSnd::WriteBuffer(DWORD position, const BYTE *data, DWORD bytes)
+{
+        LPVOID part[2];
+        DWORD length[2];
+        int i;
+
+        if (!bytes) return 0;
+        if (bytes > m_DXBufLen) bytes = m_DXBufLen;
+
+        HRESULT hr = m_lpDSB->Lock(position, bytes, &part[0], &length[0],
+                                        &part[1], &length[1], 0);
+        if (hr == DSERR_BUFFERLOST)
+        {
+                m_lpDSB->Restore();
+                hr = m_lpDSB->Lock(position, bytes, &part[0], &length[0],
+                                        &part[1], &length[1], 0);
+        }
+        if (hr != DS_OK) return 1;
+
+        for(i=0; i<2; i++)
+        {
+                if (!part[i]) continue;
+
+                if (data)
+                {
+                        memcpy(part[i], data, length[i]);
+                        data += length[i];
+                }
+                else if (m_BitsPerSample != 16)
+                {
+                        memset(part[i], 0x80, length[i]);
+                }
+                else
+                {
+                        // Fade from the last sample to zero in about 2 ms
+                        short *out = (short *)part[i];
+                        DWORD j, samples = length[i] / sizeof(short);
+
+                        for(j=0; j<samples; j++)
+                        {
+                                int c = (m_Channels == 2) ? (j & 1) : 0;
+
+                                if (!m_LastSample[0] && !m_LastSample[1])
+                                {
+                                        memset(out + j, 0, (samples - j) * sizeof(short));
+                                        break;
+                                }
+
+                                out[j] = m_LastSample[c];
+                                m_LastSample[c] = (short)(m_LastSample[c] * 15 / 16);
+                        }
+                }
+        }
+
+        m_lpDSB->Unlock(part[0], length[0], part[1], length[1]);
+        return 0;
+}
+
+// Take at most `max' bytes of sound from the queue
+
+DWORD CDSnd::TakeFromQueue(BYTE *dest, DWORD max)
+{
+        DWORD n, first;
+
+        EnterCriticalSection(&m_QueueLock);
+
+        n = m_QueueSize;
+        if (n > max) n = max;
+
+        first = m_QueueLen - m_QueueStart;
+        if (first > n) first = n;
+
+        memcpy(dest, m_lpAudioQueue + m_QueueStart, first);
+        memcpy(dest + first, m_lpAudioQueue, n - first);
+
+        m_QueueStart = (m_QueueStart + n) % m_QueueLen;
+        m_QueueSize -= n;
+
+        LeaveCriticalSection(&m_QueueLock);
+        return n;
+}
+
+// Audio thread: keep the DirectSound buffer filled a little beyond the
+// write cursor, running one emulated frame for each frame of sound
+
 void CDSnd::ThreadFN()
 {
-	LPVOID lpvAudio1 = NULL, lpvAudio2 = NULL;
-	DWORD dwBytesAudio1, dwBytesAudio2;
-	
+        DWORD play, write, lead, margin, align, n;
+        __int64 ahead;
+        int frames;
+        bool wrote;
+
+        align = m_WFE.nBlockAlign;
+
+        margin = DSND_MARGIN_MS * m_BytesPerMs;
+        if (margin < m_FrameBytes * DSND_MARGIN_FRAMES)
+                margin = m_FrameBytes * DSND_MARGIN_FRAMES;
+        margin = margin / align * align;
+
         while(1)
         {
-                int i=WaitForMultipleObjects(2, m_pHEvent, FALSE, INFINITE) - WAIT_OBJECT_0;
+                if (WaitForSingleObject(m_StopEvent, DSND_POLL_MS) == WAIT_OBJECT_0)
+                        return;
 
-                switch(i)
+                wrote = false;
+                frames = 0;
+
+                while(1)
                 {
-                case 0:
-                // Lock DirectSoundBuffer Second Part
-                if (m_lpDSB->Lock(m_DXBufLen/2, m_DXBufLen/2,
-                                &lpvAudio1, &dwBytesAudio1, &lpvAudio2, &dwBytesAudio2, 0))
-                        return;  // Lock Buffer Failed
+                        UpdatePlayed(&play, &write);
+                        lead = (write + m_DXBufLen - play) % m_DXBufLen;
 
-                        break;
-                case 1:
-                        // Lock DirectSoundBuffer First Part
-		        if (m_lpDSB->Lock(0, m_DXBufLen/2, &lpvAudio1, &dwBytesAudio1, &lpvAudio2, &dwBytesAudio2, 0))
-                                return; // Lock Buffer Failed
+                        // Underrun: we are not beyond the write cursor any
+                        // more, or have not written for so long that playing
+                        // may have gone round the buffer. Continue writing a
+                        // little after the write cursor.
 
-                        break;
-
-                default:  // Timed out so just run the frame without sound
-                        break;
-                }
-
-                if (i < 2)
-                {
-	                // Copy AudioQueue to DirectSoundBuffer
-                        // Should check for Queue wrap-around, but can't be bothered for now
-	                if (lpvAudio2 == NULL)
+                        ahead = (__int64)(m_WrittenTotal - m_PlayedTotal);
+                        if (ahead < (__int64)lead
+                                || GetTickCount() - m_LastFrameTime > m_DXBufMs * 3 / 4)
                         {
-                                if (m_QueueStart+dwBytesAudio1 > m_QueueLen)
+                                m_NextPos = write + 5 * m_BytesPerMs;
+                                m_NextPos = m_NextPos / align * align % m_DXBufLen;
+                                m_WrittenTotal = m_PlayedTotal
+                                        + (m_NextPos + m_DXBufLen - play) % m_DXBufLen;
+                                ahead = (__int64)(m_WrittenTotal - m_PlayedTotal);
+                                m_LastFrameTime = GetTickCount();
+                        }
+
+                        // Far enough ahead (or enough frames in one go)
+
+                        if (ahead >= (__int64)(lead + margin) || frames >= 8) break;
+
+                        // Run one frame of the emulator. It puts its sound
+                        // in the queue (Frame()).
+
+                        if (IsWindow(m_hWnd))
+                        {
+                                SendMessage(m_hWnd, WM_USER, 0, 0);
+                        }
+                        else if (!m_SendErrorShown)
+                        {
+                                char buf[256];
+
+                                m_SendErrorShown = true;
+                                FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                        NULL, ERROR_INVALID_WINDOW_HANDLE, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                        buf, sizeof(buf), NULL);
+                                MessageBox(NULL, buf, Tr("Message Sending Error").c_str(), 2);
+                        }
+
+                        if (m_Stopping) return;
+
+                        // The frame may have taken long (a dialog opened):
+                        // look at the cursors again before writing
+
+                        UpdatePlayed(&play, &write);
+                        lead = (write + m_DXBufLen - play) % m_DXBufLen;
+                        ahead = (__int64)(m_WrittenTotal - m_PlayedTotal);
+                        if (ahead < (__int64)lead
+                                || GetTickCount() - m_LastFrameTime > m_DXBufMs * 3 / 4)
+                        {
+                                m_NextPos = write + 5 * m_BytesPerMs;
+                                m_NextPos = m_NextPos / align * align % m_DXBufLen;
+                                m_WrittenTotal = m_PlayedTotal
+                                        + (m_NextPos + m_DXBufLen - play) % m_DXBufLen;
+                        }
+
+                        n = TakeFromQueue(m_lpFrameBuf, m_QueueLen);
+
+                        if (n)
+                        {
+                                WriteBuffer(m_NextPos, m_lpFrameBuf, n);
+
+                                if (m_BitsPerSample == 16 && n >= align)
                                 {
-                                        // Queue wraps around end queueso copy both parts
-                                        int P1Len = m_QueueLen-m_QueueStart;
-                                        int P2Len = m_QueueSize-P1Len;
-                                        char *P1 = (char *) lpvAudio1;
-                                        char *P2 = (char *) lpvAudio1 + P1Len;
-
-                                        memcpy(P1, m_lpAudioQueue + m_QueueStart, P1Len);
-                                        memcpy(P2, m_lpAudioQueue, P2Len);
-
+                                        short *last = (short *)(m_lpFrameBuf + n - align);
+                                        m_LastSample[0] = last[0];
+                                        m_LastSample[1] = (m_Channels == 2) ? last[1] : last[0];
                                 }
-                                else
-                                        memcpy(lpvAudio1, m_lpAudioQueue + m_QueueStart, dwBytesAudio1);
-	                }
-	                else
-                        {       // BUG - doesn't chach for queue wrap around.  However, the
-                                // chances of the queue wrapping around at the same time as
-                                // receiving a split DX Sound frame seem unlikely, so we'll
-                                // live with it for the time being.
-
-		                memcpy(lpvAudio1, m_lpAudioQueue + m_QueueStart, dwBytesAudio1);
-		                memcpy(lpvAudio2, m_lpAudioQueue + dwBytesAudio1 + m_QueueStart, dwBytesAudio2);
-	                }
-
-
-                        int delta;
-
-                        delta= m_QueueSize;
-                        if (m_QueueSize < dwBytesAudio1) delta = m_QueueSize;
+                        }
                         else
+                        {
+                                // No sound from the emulator (it is not
+                                // running): silence keeps the time
+                                n = m_FrameBytes;
+                                WriteBuffer(m_NextPos, NULL, n);
+                        }
 
-                        m_QueueSize -= delta;
-                        m_QueueStart += delta;
-                        if (m_QueueStart >= m_QueueLen)
-                                m_QueueStart -= m_QueueLen;    // BUG //
-
-	                // Unlock DirectSoundBuffer
-	                m_lpDSB->Unlock(lpvAudio1, dwBytesAudio1, lpvAudio2, dwBytesAudio2);
-
+                        m_NextPos = (m_NextPos + n) % m_DXBufLen;
+                        m_WrittenTotal += n;
+                        m_LastFrameTime = GetTickCount();
+                        wrote = true;
+                        frames++;
                 }
 
-                ResetEvent(m_pHEvent[0]);
-                ResetEvent(m_pHEvent[1]);
+                // Fill the rest of the buffer, up to the play cursor, with the
+                // last sample fading to zero, so an underrun plays silence and
+                // not old sound. WriteBuffer() fades m_LastSample, keep a copy.
 
-                SetLastError(0);
-                SendMessage( m_hWnd, WM_USER, NULL, NULL);
-                if (GetLastError())
+                if (wrote)
                 {
-                        char buf[256];
-                        FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                                buf, sizeof(buf), NULL);
+                        DWORD fill = 0;
+                        short saved[2];
 
-                       MessageBox(NULL, buf, Tr("Message Sending Error").c_str(), 2);
+                        ahead = (__int64)(m_WrittenTotal - m_PlayedTotal);
+                        if (ahead >= 0 && ahead + align < (__int64)m_DXBufLen)
+                                fill = (m_DXBufLen - (DWORD)ahead - align) / align * align;
+
+                        if (fill)
+                        {
+                                saved[0] = m_LastSample[0];
+                                saved[1] = m_LastSample[1];
+                                WriteBuffer(m_NextPos, NULL, fill);
+                                m_LastSample[0] = saved[0];
+                                m_LastSample[1] = saved[1];
+                        }
                 }
         }
 }
+
+// Copy a sound frame from the emulator into the Sound Queue. If the
+// emulator gets too far ahead, the oldest sound is dropped.
 
 void CDSnd::Frame( unsigned char *data, unsigned int len )
 {
-// Copy a sound frame from the emulator into the Sound Queue
+        DWORD pos, first, drop;
 
-        DWORD Pos = m_QueueStart + m_QueueSize;
-        if (Pos > m_QueueLen) Pos -= m_QueueLen;
-        m_QueueSize += len;
-        if (m_QueueSize > m_QueueLen) m_QueueSize = m_QueueLen;
+        if (!m_QueueLockInit) return;
 
+        EnterCriticalSection(&m_QueueLock);
 
-        while(len--)
+        if (!m_lpAudioQueue || !m_QueueLen)
         {
-                m_lpAudioQueue[Pos++] = *data++;
-                if( Pos >= m_QueueLen ) Pos -= m_QueueLen;
+                LeaveCriticalSection(&m_QueueLock);
+                return;
         }
-}
 
+        if (len > m_QueueLen)
+        {
+                data += len - m_QueueLen;
+                len = m_QueueLen;
+        }
+
+        if (m_QueueSize + len > m_QueueLen)
+        {
+                drop = m_QueueSize + len - m_QueueLen;
+                m_QueueStart = (m_QueueStart + drop) % m_QueueLen;
+                m_QueueSize -= drop;
+        }
+
+        pos = (m_QueueStart + m_QueueSize) % m_QueueLen;
+
+        first = m_QueueLen - pos;
+        if (first > len) first = len;
+
+        memcpy(m_lpAudioQueue + pos, data, first);
+        memcpy(m_lpAudioQueue, data + first, len - first);
+
+        m_QueueSize += len;
+
+        LeaveCriticalSection(&m_QueueLock);
+}

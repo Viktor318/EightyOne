@@ -100,6 +100,7 @@ public:
         int ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
 
         void End(void);
+        bool Stopping(void) { return DXSound.Stopping(); }
         void AYWrite(int reg,int val, int frametstates);
         void AYWrite128(int reg, int val, int frametstates);
         void AYWriteTimex(int reg, int val, int frametstates);

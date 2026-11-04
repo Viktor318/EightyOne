@@ -8,6 +8,20 @@ eredetihez képest.
 
 ## Kiadatlan
 
+### Hang
+
+- Újraírt DirectSound-kimenet: Windows 10/11-en is folyamatos a hang.
+  Eddig a rövid puffer éppen szóló felét töltötte, így minden képkocka
+  egy része elkésett, és helyette régi hang szólt; a sorba pedig a végén
+  túl is írhatott.
+- A puffer kb. 40 ms-mal a DirectSound írókurzora előtt jár (az emuláció
+  továbbra is a hangkártya órájához igazodik). Kiürülés után kicsivel az
+  írókurzor után folytatja, és ha a program megakad (menü, párbeszédablak),
+  csend hallatszik, nem újra a régi hang.
+- A hangbeállítások változtatásakor már nem maradnak vissza
+  DirectSound-objektumok, és két egyszerre futó EightyOne nem zavarja
+  egymás hangját.
+
 ### A főablak mérete
 
 - Új nagyítás: **300%** (*View > Zoom*, Ctrl+F3), a 200% és a 400% között.

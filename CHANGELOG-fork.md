@@ -7,6 +7,19 @@ The changes of the `hungarian-windows` branch, compared with
 
 ## Unreleased
 
+### Sound
+
+- The DirectSound output is rewritten, so the sound is continuous on
+  Windows 10/11. It filled the half of its short buffer that was already
+  playing, so part of each frame was late and old sound was heard
+  instead; and the queue could be written past its end.
+- The buffer is kept filled about 40 ms beyond DirectSound's write cursor
+  (the emulation still follows the sound card's clock). After an underrun
+  it continues a little after the write cursor, and if the program is held
+  up (a menu, a dialog), silence is heard, not old sound again.
+- Changing the sound settings no longer leaks DirectSound objects, and two
+  EightyOnes running at once no longer disturb each other's sound.
+
 ### Main window size
 
 - New zoom: **300%** (*View > Zoom*, Ctrl+F3), between 200% and 400%.
