@@ -26,6 +26,7 @@
 #include "zx81config.h"
 #include "main_.h"
 #include "joystick.h"
+#include "Language.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -124,7 +125,10 @@ void TKb::LoadSettings(TIniFile *ini)
         UseNumericPadForJoystickCheckBox->Checked = ini->ReadBool("KB", "UseNumericPadForJoystick", UseNumericPadForJoystickCheckBox->Checked);
         UseNumericPadForJoystick1->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick1", UseNumericPadForJoystick1->Checked);
         UseNumericPadForJoystick2->Checked        = ini->ReadBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
-        WindowsLayoutCheckBox->Checked            = ini->ReadBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
+        // Typing by the Windows layout is on by default with the Hungarian
+        // interface only: with an English one the keys go as in the
+        // original EightyOne (Shift+digit is the machine's SHIFT+digit)
+        WindowsLayoutCheckBox->Checked            = ini->ReadBool("KB", "WindowsLayout", LanguageIsHungarian());
         AltShiftCheckBox->Checked                 = ini->ReadBool("KB", "AltShift", AltShiftCheckBox->Checked);
 
         UpdateJoystickSettings();

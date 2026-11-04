@@ -96,8 +96,9 @@ eredetihez képest.
 
 ### Billentyűzet
 
-- **A Windows billentyűzetkiosztásának használata** (Options > Keyboard,
-  alapból bekapcsolva): a gépelés azt a karaktert követi, amit a Windows
+- **A Windows billentyűzetkiosztásának használata** (Options > Keyboard;
+  magyar felülettel alapból bekapcsolva, angollal kikapcsolva, ott a
+  billentyűk úgy működnek, mint az eredeti EightyOne-ban): a gépelés azt a karaktert követi, amit a Windows
   kiosztása ad, nem a billentyűk helyét, így bármilyen kiosztás működik (a
   magyaron a Shift+2 `"`, ami a ZX81-en SHIFT+P). Minden gépen: ZX80, ZX81,
   Lambda, Spectrum és Jupiter Ace.

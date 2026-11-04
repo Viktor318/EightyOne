@@ -92,7 +92,9 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Keyboard
 
-- **Use the Windows keyboard layout** (Options > Keyboard, on by default):
+- **Use the Windows keyboard layout** (Options > Keyboard; on by default
+  with the Hungarian interface, off with the English one, where the keys
+  go as in the original EightyOne):
   typing follows the characters the Windows keyboard layout gives, not the
   positions of the keys, so any layout works (on the Hungarian layout,
   Shift+2 gives `"`, which is SHIFT+P on the ZX81). On every machine: ZX80,
