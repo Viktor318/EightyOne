@@ -466,8 +466,8 @@ void __fastcall TForm1::FormCanResize(TObject *Sender, int &NewWidth,
         int wanted, size, distance, bestDistance = -1;
         bool byHeight;
 
-        if (FullScreen || UserDefined1->Checked || BaseWidth <= 0
-                || BaseHeight <= 0) return;
+        if (FullScreen || NoZoomSnap || UserDefined1->Checked
+                || BaseWidth <= 0 || BaseHeight <= 0) return;
 
         statusHeight = StatusBar1->Visible ? StatusBar1->Height : 0;
         frameWidth = Width - ClientWidth;
@@ -1063,6 +1063,11 @@ void __fastcall TForm1::FormKeyPress(TObject *Sender, char& Key)
                         {
                                 ChangeDisplaySettings(NULL, 0);
                         }
+                        // The window is still borderless and without its
+                        // menu while its size is put back: no jumping to
+                        // the zoom sizes until it has its frame again
+                        NoZoomSnap = true;
+
                         RenderInit();
                         Screen->Cursor = crDefault;
                         AccurateInit(true);
@@ -1083,7 +1088,23 @@ void __fastcall TForm1::FormKeyPress(TObject *Sender, char& Key)
                         SetWindowPos(Form1->Handle, HWND_NOTOPMOST,
                                         Left,Top,
                                         Width,
-                                        Height, SWP_SHOWWINDOW);
+                                        Height, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+
+                        // The client area as it was, with the frame and the
+                        // menu back
+                        NoZoomSnap = false;
+                        if (N1001->Checked) SetZoom(1);
+                        else if (N2001->Checked) SetZoom(2);
+                        else if (N3001->Checked) SetZoom(3);
+                        else if (N4001->Checked) SetZoom(4);
+                        else
+                        {
+                                ClientWidth=SaveW;
+                                ClientHeight=SaveH;
+                        }
+                        Left=SaveX;
+                        Top=SaveY;
+
                         RecalcPalette();
                         RecalcWinSize();
                         Artifacts->TrackBarChange(NULL);

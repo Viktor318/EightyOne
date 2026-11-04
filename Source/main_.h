@@ -357,6 +357,7 @@ public:		// User declarations
         // View > Zoom: 100%, 200%, 300%, 400%; the window can be resized
         // between these sizes (freely with User Defined)
         TMenuItem *N3001;
+        bool NoZoomSnap;        // while leaving full screen
         void __fastcall N3001Click(TObject *Sender);
         void SetZoom(int factor);
         void SetWindowFrame(bool minimizeMaximize);
