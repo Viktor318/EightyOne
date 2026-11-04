@@ -139,6 +139,18 @@ void TKeyboard::SetSize(int size)
         }
 }
 
+void __fastcall TKeyboard::FormClose(TObject *Sender, TCloseAction &Action)
+{
+        Form1->KeyboardMap1->Checked=false;
+
+        KeyboardFunctions->Visible = false;
+        KeyboardFunctions->EnableTimer(false);
+
+        Keypad128->Visible = false;
+        Keypad128->EnableTimer(false);
+}
+//---------------------------------------------------------------------------
+
 void TKeyboard::LoadSettings(TIniFile *ini)
 {
         int width;
