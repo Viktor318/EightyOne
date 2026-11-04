@@ -409,12 +409,7 @@ void TForm1::SetZoom(int factor)
         UserDefined1->Checked=false;
 
         // Resizable, but FormCanResize lets it have these sizes only
-        StatusBar1->SizeGrip = true;
-        TBorderIcons newBorderIcons = BorderIcons;
-        newBorderIcons >> biMinimize;
-        newBorderIcons >> biMaximize;
-        BorderIcons = newBorderIcons;
-        BorderStyle = bsSizeable;
+        SetWindowFrame(false);
 
         ClientWidth=BaseWidth*factor;
         ClientHeight=BaseHeight*factor;
@@ -423,6 +418,41 @@ void TForm1::SetZoom(int factor)
                 ClientHeight += StatusBar1->Height;
                 StatusBar1->Refresh();
                 StatusBar1->Invalidate();
+        }
+}
+//---------------------------------------------------------------------------
+
+// A resizable frame, with or without the minimize and maximize buttons.
+// Once the window exists, the style is changed directly: changing
+// BorderStyle or BorderIcons would make the VCL create the window again,
+// and the sound thread (which sends its messages to the window) and the
+// display would lose it
+void TForm1::SetWindowFrame(bool minimizeMaximize)
+{
+        StatusBar1->SizeGrip = true;
+
+        if (!HandleAllocated())
+        {
+                TBorderIcons icons = BorderIcons;
+                if (minimizeMaximize) icons << biMinimize << biMaximize;
+                else icons >> biMinimize >> biMaximize;
+                BorderIcons = icons;
+                BorderStyle = bsSizeable;
+                return;
+        }
+
+        LONG style = GetWindowLong(Handle, GWL_STYLE);
+        LONG newStyle = style | WS_THICKFRAME;
+
+        if (minimizeMaximize) newStyle |= WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+        else newStyle &= ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+
+        if (newStyle != style)
+        {
+                SetWindowLong(Handle, GWL_STYLE, newStyle);
+                SetWindowPos(Handle, NULL, 0, 0, 0, 0,
+                             SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER
+                             | SWP_NOACTIVATE | SWP_FRAMECHANGED);
         }
 }
 //---------------------------------------------------------------------------
@@ -476,12 +506,7 @@ void __fastcall TForm1::UserDefined1Click(TObject *Sender)
                 baseHeight -= StatusBar1->Height;
         }
 
-        StatusBar1->SizeGrip = true;
-        TBorderIcons newBorderIcons = BorderIcons;
-        newBorderIcons << biMinimize;
-        newBorderIcons << biMaximize;
-        BorderIcons = newBorderIcons;
-        BorderStyle = bsSizeable;
+        SetWindowFrame(true);
 
         ClientWidth=baseWidth;
         ClientHeight=baseHeight;

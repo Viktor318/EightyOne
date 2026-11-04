@@ -359,6 +359,7 @@ public:		// User declarations
         TMenuItem *N3001;
         void __fastcall N3001Click(TObject *Sender);
         void SetZoom(int factor);
+        void SetWindowFrame(bool minimizeMaximize);
         void __fastcall FormCanResize(TObject *Sender, int &NewWidth,
                                       int &NewHeight, bool &Resize);
         void BuildLanguageMenu();
