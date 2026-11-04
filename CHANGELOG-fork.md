@@ -19,6 +19,13 @@ The changes of the `hungarian-windows` branch, compared with
   stereo modes**: ABC, ACB, BAC, BCA, CAB, CBA and Mono (was ACB and
   Mono). The AY faders are in the order of the stereo mode: left, centre,
   right.
+- Steady tones no longer waver. A frame is run until the end of a
+  scanline, so it is up to a scanline longer or shorter than a nominal
+  frame, but its sound was placed as if it began exactly at the start of
+  its buffer: the edges of the beeper (and the AY and SpecDrum changes)
+  moved back and forth by up to about 3 samples. Now each frame starts
+  where the previous one ended, and what falls after the end of a buffer
+  goes into the next one.
 - The sources are mixed with headroom and the result is clipped after the
   main volume, so loud sounds together no longer wrap round and crackle.
 - The old settings are taken over (the 0-31 sliders as percentages).

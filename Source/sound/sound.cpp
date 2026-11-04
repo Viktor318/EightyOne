@@ -55,6 +55,9 @@
 #include "Joystick.h"
 #include "Keypad.h"
 
+// The T-states of the frame being run (set to 0 after Frame() is called)
+extern int frametstates;
+
 CSound Sound;
 
 const char *AYStereoNames[AY_STEREO_MODES] =
@@ -84,6 +87,9 @@ CSound::CSound()
         AYStereo = AY_STEREO_MONO;
         Mix = NULL;
         Buffer = NULL;
+        OffsetTStates = 0;
+        BeeperRequested = 0;
+        BeeperPendingCount = 0;
 }
 
 int CSound::PeakFullScale(int meter)
@@ -140,6 +146,12 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
 
         FrameSize=m_SampleRate/m_FPS;
 
+        // A frame of T-states fills exactly one buffer (the beeper has always
+        // been placed like this; the AY and the SpecDrum used the clock speed,
+        // which put their changes a little early by the end of the frame)
+        if (machine.tperframe > 0)
+                m_SamplesPerTState=FrameSize/(double)machine.tperframe;
+
         Buffer = new short[FrameSize*m_Channels];
         Mix = new int[FrameSize*m_Channels];
 
@@ -154,6 +166,9 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         OldVal=OldValOrig=0;
         OldPos=-1;
         FillPos=0;
+        OffsetTStates=0;
+        BeeperRequested=0;
+        BeeperPendingCount=0;
 
         BeeperTick=0;
         BeeperTickIncr=(1<<24)/m_SampleRate;
@@ -320,7 +335,8 @@ void CSound::AYOverlay(void)
                 // rarely `lose' one this way - hence "f==.." bit below
                 // to catch any that slip through.)
 
-                while(changes_left && (f>=change_ptr->ofs || f==FrameSize-1))
+                while(changes_left && (f>=change_ptr->ofs
+                        || (f==FrameSize-1 && change_ptr->ofs<FrameSize)))
                 {
                         reg=change_ptr->reg;
                         AYRegisters[reg]=change_ptr->val;
@@ -471,7 +487,17 @@ void CSound::AYOverlay(void)
                 }
         }
 
-        AYChangeCount=0;
+        // Changes after the end of this buffer go into the next one
+        for(f=0;f<changes_left;f++)
+        {
+                int ofs = change_ptr[f].ofs - FrameSize;
+
+                if (ofs < 0) ofs = 0;
+                if (ofs >= FrameSize) ofs = FrameSize-1;
+                AYChange[f] = change_ptr[f];
+                AYChange[f].ofs = (unsigned short)ofs;
+        }
+        AYChangeCount=changes_left;
 }
 
 void CSound::AYWrite128(int reg, int val, int frametstates)
@@ -509,7 +535,7 @@ void CSound::AYWrite(int reg, int val, int frametstates)
 
         if (AYChangeCount < AY_CHANGE_MAX)
         {
-                AYChange[AYChangeCount].ofs = (unsigned short)(frametstates * m_SamplesPerTState);
+                AYChange[AYChangeCount].ofs = (unsigned short)SampleOffset(frametstates);
                 AYChange[AYChangeCount].reg = (unsigned char)reg;
                 AYChange[AYChangeCount].val = (unsigned char)val;
                 AYChangeCount++;
@@ -633,7 +659,7 @@ void CSound::SpecDrumWrite(BYTE data, int frametstates)
 {
         if(SpecDrumChangeCount<SPECDRUM_BUFFSIZE)
         {
-                SpecDrumChange[SpecDrumChangeCount].ofs=(unsigned short)(frametstates*m_SamplesPerTState);
+                SpecDrumChange[SpecDrumChangeCount].ofs=(unsigned short)SampleOffset(frametstates);
                 SpecDrumChange[SpecDrumChangeCount].val=data;
                 SpecDrumChangeCount++;
         }
@@ -650,7 +676,8 @@ void CSound::SpecDrumOverlay(void)
 
         for(f=0;f<FrameSize;f++)
         {
-                while(changes_left && (f>=change_ptr->ofs || f==FrameSize-1))
+                while(changes_left && (f>=change_ptr->ofs
+                        || (f==FrameSize-1 && change_ptr->ofs<FrameSize)))
                 {
                         SpecDrumLevel=change_ptr->val-128;
                         change_ptr++;
@@ -666,7 +693,32 @@ void CSound::SpecDrumOverlay(void)
                         Mix[f*m_Channels+1]+=level;
         }
 
-        SpecDrumChangeCount=0;
+        // Changes after the end of this buffer go into the next one
+        for(f=0;f<changes_left;f++)
+        {
+                int ofs = change_ptr[f].ofs - FrameSize;
+
+                if (ofs < 0) ofs = 0;
+                if (ofs >= FrameSize) ofs = FrameSize-1;
+                SpecDrumChange[f] = change_ptr[f];
+                SpecDrumChange[f].ofs = (unsigned short)ofs;
+        }
+        SpecDrumChangeCount=changes_left;
+}
+
+// The sample of the buffer at a T-state of the frame (may be beyond the
+// end of the buffer)
+
+int CSound::SampleOffset(int frametstates)
+{
+        int ofs;
+
+        if (machine.tperframe <= 0) return 0;
+
+        ofs = (int)(((__int64)(frametstates + OffsetTStates) * FrameSize) / machine.tperframe);
+        if (ofs < 0) ofs = 0;
+        if (ofs > 65535) ofs = 65535;
+        return ofs;
 }
 
 
@@ -743,9 +795,6 @@ void CSound::Frame(bool pause)
                 }
         }
 
-                OldPos=-1;
-                FillPos=0;
-
                 if (machine.aytype) AYOverlay();
         if (spectrum.specdrum) SpecDrumOverlay();
 
@@ -772,24 +821,80 @@ void CSound::Frame(bool pause)
 
         DXSound.Frame((unsigned char *)Buffer, FrameSize*m_Channels*m_BytesPerSample);
         SoundOutput->UpdateImage(Buffer,m_Channels,FrameSize);
+
+        // The next buffer
+        OldPos=-1;
+        FillPos=0;
+
+        // The frame just run (frametstates: it is set to 0 after this) began
+        // OffsetTStates into this buffer; the next one begins where it ended.
+        // It stays within a scanline or so, unless the emulator is paused or
+        // sped up: then start again at the beginning of the buffer.
+        if (pause)
+        {
+                OffsetTStates = 0;
+        }
+        else
+        {
+                OffsetTStates += frametstates - machine.tperframe;
+                if (OffsetTStates < -2*machine.tperscanline
+                        || OffsetTStates > 2*machine.tperscanline)
+                        OffsetTStates = 0;
+        }
+
+        // The beeper edges of the frame that fell after this buffer
+        for(f=0;f<BeeperPendingCount;f++)
+                BeeperEdge(BeeperPending[f].on, BeeperPending[f].pos, BeeperPending[f].subpos);
+        BeeperPendingCount=0;
 }
 
 void CSound::Beeper(int on, int frametstates)
-{                                     
-        int newpos,subpos;
-        int val,subval;
-        int f;
+{
+        int newpos,subpos,val;
+        __int64 pos;
 
         // if(!sound_enabled) return;
-        if (!Mix) return;
+        if (!Mix || machine.tperframe <= 0) return;
+
+        val=AMPL_BEEPER*(on?1:-1);
+
+        if(val==BeeperRequested) return;
+        BeeperRequested=val;
+
+        // The position in 1/AMPL_BEEPER samples, from where the frame
+        // began in its buffer
+        pos=((__int64)(frametstates+OffsetTStates)*FrameSize*AMPL_BEEPER)/machine.tperframe;
+        if (pos < 0) pos = 0;
+        newpos=(int)(pos/AMPL_BEEPER);
+        subpos=(int)(pos-(__int64)AMPL_BEEPER*newpos);
+
+        // After the end of this buffer: keep it for the next one. (If there
+        // are too many, or it is too far, the emulator is being sped up:
+        // only the level counts then.)
+        if(newpos>=FrameSize)
+        {
+                newpos-=FrameSize;
+                if (newpos>=FrameSize) newpos=FrameSize-1;
+
+                if (BeeperPendingCount<BEEPER_PENDING_MAX)
+                        BeeperPendingCount++;
+                BeeperPending[BeeperPendingCount-1].on=on;
+                BeeperPending[BeeperPendingCount-1].pos=newpos;
+                BeeperPending[BeeperPendingCount-1].subpos=subpos;
+                return;
+        }
+
+        BeeperEdge(on,newpos,subpos);
+}
+
+void CSound::BeeperEdge(int on, int newpos, int subpos)
+{
+        int val,subval;
+        int f;
 
         val=AMPL_BEEPER*(on?1:-1);
 
         if(val==OldValOrig) return;
-
-        // XXX a lookup table might help here...
-        newpos=(frametstates*FrameSize)/machine.tperframe;
-        subpos=(frametstates*FrameSize*AMPL_BEEPER)/machine.tperframe-AMPL_BEEPER*newpos;
 
         // if we already wrote here, adjust the level.
 

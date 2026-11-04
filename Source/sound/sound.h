@@ -84,6 +84,10 @@
 // At 50fps this is about 440 samples, which I doubled and rounded up to get this. 
 #define SPECDRUM_BUFFSIZE       1000
 
+// Beeper edges that fall after the end of the frame's buffer, kept for the
+// next one
+#define BEEPER_PENDING_MAX      64
+
 
 // The volumes, mutes and level meters of the sound settings window
 #define VOLUME_AY_A             0
@@ -123,6 +127,12 @@ struct SpecDrumChangeTag
 {
         unsigned short ofs;
         unsigned char val;
+};
+
+struct BeeperEdgeTag
+{
+        int on;
+        int pos, subpos;
 };
 
 class CSound
@@ -175,6 +185,8 @@ private:
         void SpecDrumInit(void);
         void SpecDrumOverlay(void);
         void DigiTalkOverlay(void);
+        void BeeperEdge(int on, int newpos, int subpos);
+        int SampleOffset(int frametstates);
 
         int SelectAYReg;
         int FrameSize;
@@ -184,6 +196,16 @@ private:
         int *Mix;                       // the sources added up
         short *Buffer;                  // the output, after the main volume
         int OldPos,FillPos,OldVal,OldValOrig;
+
+        // The emulator runs a frame until the end of a scanline, so a frame
+        // is a little longer or shorter than tperframe (the next one makes up
+        // for it). The sound of a frame fills exactly one buffer, so a frame
+        // starts OffsetTStates into its buffer; what falls after the end of
+        // the buffer goes into the next one.
+        int OffsetTStates;
+        int BeeperRequested;            // the last level asked for
+        struct BeeperEdgeTag BeeperPending[BEEPER_PENDING_MAX];
+        int BeeperPendingCount;
 
 	// timer used for fadeout after beeper-toggle;
 	// fixed-point with low 24 bits as fractional part.

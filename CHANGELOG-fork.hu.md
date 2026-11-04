@@ -20,6 +20,13 @@ eredetihez képest.
 - Az AY csatornái külön is némíthatók, és **hét AY sztereó mód** van:
   ABC, ACB, BAC, BCA, CAB, CBA és Mono (eddig csak ACB és Mono). Az AY
   csúszkái a sztereó mód sorrendjében állnak: bal, közép, jobb.
+- A kitartott hangok már nem hullámzanak. Egy képkocka mindig egy
+  képsor végéig fut, ezért legfeljebb egy képsornyival hosszabb vagy
+  rövidebb a névlegesnél, a hangját viszont úgy helyezte el, mintha
+  pontosan a puffere elején kezdődne: a csipogó élei (és az AY, a SpecDrum
+  változásai) kb. 3 mintányit ide-oda csúsztak. Most minden képkocka ott
+  kezdődik, ahol az előző véget ért, és ami a puffer végén túlra esik, az
+  a következőbe kerül.
 - A források keverése tartalékkal történik, és a jel a fő hangerő után
   van levágva, így az együtt szóló hangos hangok nem fordulnak át, nem
   recsegnek.
