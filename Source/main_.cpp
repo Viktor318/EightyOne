@@ -120,6 +120,27 @@ static bool iniFileExists = false;
 const int bufferLength = 255;
 char webBuffer[bufferLength];
 
+// The documentation, the examples and the release history are next to the
+// program in a release. Run from the Source folder of the repository
+// (while developing), they are in ..\Release Files
+static bool IsFolder(const AnsiString &path)
+{
+        DWORD attributes = GetFileAttributes(path.c_str());
+
+        return attributes != 0xFFFFFFFF && (attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+static AnsiString ReleaseFilesPath(void)
+{
+        AnsiString path = emulator.cwd;
+        AnsiString development = path + "..\\Release Files\\";
+
+        if (!IsFolder(path + "Documentation") && IsFolder(development + "Documentation"))
+                return development;
+
+        return path;
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::WndProc(TMessage &Message)
@@ -1958,8 +1979,16 @@ void TForm1::BuildConfigMenu()
         vector<AnsiString> files;
         vector<AnsiString>::iterator iter;
 
-        while(Config1->Count > 4) Config1->Delete(4);
-        while(DeleteConfigurations->Count > 2) DeleteConfigurations->Delete(2);
+        while(Config1->Count > 4)
+        {
+                LanguageKeepText(Config1->Items[4], false);
+                Config1->Delete(4);
+        }
+        while(DeleteConfigurations->Count > 2)
+        {
+                LanguageKeepText(DeleteConfigurations->Items[2], false);
+                DeleteConfigurations->Delete(2);
+        }
 
         FetchFolderList(&files, emulator.configpath);
 
@@ -1975,6 +2004,7 @@ void TForm1::BuildConfigMenu()
                         TMenuItem *NewItem;
                         NewItem = new TMenuItem(Config1);
                         NewItem->Caption=RemoveExt(FileName);
+                        LanguageKeepText(NewItem);
                         NewItem->OnClick=ConfigItem1Click;
                         Config1->Add(NewItem);
 
@@ -1983,6 +2013,7 @@ void TForm1::BuildConfigMenu()
                                 TMenuItem *NewItem;
                                 NewItem = new TMenuItem(DeleteConfigurations);
                                 NewItem->Caption=RemoveExt(FileName);
+                                LanguageKeepText(NewItem);
                                 NewItem->OnClick=DeleteConfigItem1Click;
                                 DeleteConfigurations->Add(NewItem);
                         }
@@ -1995,7 +2026,7 @@ void TForm1::BuildConfigMenu()
 //---------------------------------------------------------------------------
 void TForm1::BuildDocumentationMenu()
 {
-        AnsiString path = emulator.cwd;
+        AnsiString path = ReleaseFilesPath();
         path += documentationFolder;
 
         AddDocumentationFiles(DocumentationMenuEntry, path);
@@ -2019,6 +2050,7 @@ void TForm1::AddDocumentationFiles(TMenuItem* CategoryMenu, AnsiString path)
                         TMenuItem* CategorySubMenu = new TMenuItem(CategoryMenu);
                         CategoryMenu->Insert(folderIndex, CategorySubMenu);
                         CategorySubMenu->Caption = (*iter).c_str();
+                        LanguageKeepText(CategorySubMenu);
                         folderIndex++;
 
                         AnsiString SubCategoryPath = path;
@@ -2031,6 +2063,7 @@ void TForm1::AddDocumentationFiles(TMenuItem* CategoryMenu, AnsiString path)
                         TMenuItem* InstructionEntry = new TMenuItem(CategoryMenu);
                         CategoryMenu->Add(InstructionEntry);
                         InstructionEntry->Caption = Title;
+                        LanguageKeepText(InstructionEntry);
                         InstructionEntry->OnClick = InstructionMenuItemClick;
                 }
         }
@@ -2049,7 +2082,7 @@ void __fastcall TForm1::InstructionMenuItemClick(TObject *Sender)
                 ParentItem = ParentItem->Parent;
         }
 
-        AnsiString Path = emulator.cwd;
+        AnsiString Path = ReleaseFilesPath();
         Path += documentationFolder;
         Path += subPath;
 
@@ -2102,7 +2135,7 @@ void TForm1::BuildZX81ExamplesMenu()
         vector<AnsiString> folders;
         vector<AnsiString>::iterator iter;
 
-        AnsiString path = emulator.cwd;
+        AnsiString path = ReleaseFilesPath();
         path += exampleZX81ProgramsFolder;
 
         FetchFolderList(&folders, path);
@@ -2112,6 +2145,7 @@ void TForm1::BuildZX81ExamplesMenu()
                 TMenuItem* CategorySubMenu = new TMenuItem(ExampleZX81ProgramsMenuEntry);
                 ExampleZX81ProgramsMenuEntry->Add(CategorySubMenu);
                 CategorySubMenu->Caption = (*iter).c_str();
+                LanguageKeepText(CategorySubMenu);
 
                 AnsiString CategoryFolder = path;
                 CategoryFolder += (*iter).c_str();
@@ -2126,7 +2160,7 @@ void TForm1::BuildSpectrumExamplesMenu()
         vector<AnsiString> folders;
         vector<AnsiString>::iterator iter;
 
-        AnsiString path = emulator.cwd;
+        AnsiString path = ReleaseFilesPath();
         path += exampleSpectrumProgramsFolder;
 
         FetchFolderList(&folders, path);
@@ -2136,6 +2170,7 @@ void TForm1::BuildSpectrumExamplesMenu()
                 TMenuItem* CategorySubMenu = new TMenuItem(ExampleSpectrumProgramsMenuEntry);
                 ExampleSpectrumProgramsMenuEntry->Add(CategorySubMenu);
                 CategorySubMenu->Caption = (*iter).c_str();
+                LanguageKeepText(CategorySubMenu);
 
                 AnsiString CategoryFolder = path;
                 CategoryFolder += (*iter).c_str();
@@ -2157,6 +2192,7 @@ void TForm1::AddZX81ExampleFolders(TMenuItem* CategorySubMenu, AnsiString path)
                 TMenuItem* ExampleFolderEntry = new TMenuItem(CategorySubMenu);
                 CategorySubMenu->Add(ExampleFolderEntry);
                 ExampleFolderEntry->Caption = (*iter).c_str();
+                LanguageKeepText(ExampleFolderEntry);
                 ExampleFolderEntry->OnClick = ExampleZX81ProgramsMenuEntryClick;
         }
 }
@@ -2173,6 +2209,7 @@ void TForm1::AddSpectrumExampleFolders(TMenuItem* CategorySubMenu, AnsiString pa
                 TMenuItem* ExampleFolderEntry = new TMenuItem(CategorySubMenu);
                 CategorySubMenu->Add(ExampleFolderEntry);
                 ExampleFolderEntry->Caption = (*iter).c_str();
+                LanguageKeepText(ExampleFolderEntry);
                 ExampleFolderEntry->OnClick = ExampleSpectrumProgramsMenuEntryClick;
         }
 }
@@ -2182,7 +2219,7 @@ void __fastcall TForm1::ExampleZX81ProgramsMenuEntryClick(TObject *Sender)
         TMenuItem* ClickedItem = dynamic_cast<TMenuItem*>(Sender);
         TMenuItem* ParentItem = ClickedItem->Parent;
 
-        AnsiString Path = emulator.cwd;
+        AnsiString Path = ReleaseFilesPath();
         Path += exampleZX81ProgramsFolder;
         Path += ParentItem->Caption;
         Path += "\\";
@@ -2198,7 +2235,7 @@ void __fastcall TForm1::ExampleSpectrumProgramsMenuEntryClick(
         TMenuItem* ClickedItem = dynamic_cast<TMenuItem*>(Sender);
         TMenuItem* ParentItem = ClickedItem->Parent;
 
-        AnsiString Path = emulator.cwd;
+        AnsiString Path = ReleaseFilesPath();
         Path += exampleSpectrumProgramsFolder;
         Path += ParentItem->Caption;
         Path += "\\";
@@ -3026,7 +3063,7 @@ void __fastcall TForm1::ResetToDefaultSettingsClick(TObject *Sender)
 
 void __fastcall TForm1::ReleaseHistoryNotesClick(TObject *Sender)
 {
-        AnsiString releaseHistoryFile = emulator.cwd;
+        AnsiString releaseHistoryFile = ReleaseFilesPath();
         releaseHistoryFile += "Release history.txt";
         ShellExecute(NULL, "open", releaseHistoryFile.c_str(), "", NULL, SW_RESTORE);
 }

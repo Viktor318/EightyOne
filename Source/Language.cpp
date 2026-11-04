@@ -34,6 +34,7 @@
 #pragma hdrstop
 
 #include <map>
+#include <set>
 #include <string>
 #include <string.h>
 #include <TypInfo.hpp>
@@ -301,12 +302,22 @@ static AnsiString TranslateFilter(const AnsiString &filter, bool toEnglish)
         return result;
 }
 
+static std::set<TObject *> KeptTexts;
+
+void LanguageKeepText(TObject *component, bool keep)
+{
+        if (keep) KeptTexts.insert(component);
+        else KeptTexts.erase(component);
+}
+
 static void TranslateProperty(TObject *object, int property)
 {
         PPropInfo info;
         AnsiString current, english, text;
         OriginalMap::iterator i;
         std::pair<TObject *, int> key(object, property);
+
+        if (KeptTexts.find(object) != KeptTexts.end()) return;
 
         info = GetPropInfo((PTypeInfo)object->ClassInfo(),
                            Properties[property]);

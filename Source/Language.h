@@ -72,4 +72,10 @@ extern AnsiString LanguageFilter(const AnsiString &filter);
 extern void LanguageTranslateForm(TForm *form);
 extern void LanguageTranslateAll(void);
 
+// Components whose texts are names (of files and folders: the
+// documentation and examples menus, the configurations), which the code
+// uses: never translated ("Sound" is a folder there, not "Hang").
+// LanguageKeepText(component, false) forgets one before it is deleted
+extern void LanguageKeepText(TObject *component, bool keep = true);
+
 #endif
