@@ -10,7 +10,7 @@ object Splash: TSplash
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
@@ -4310,7 +4310,7 @@ object Splash: TSplash
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
     Font.Height = -11
-    Font.Name = 'MS Sans Serif'
+    Font.Name = 'Segoe UI'
     Font.Style = []
     ParentColor = False
     ParentFont = False

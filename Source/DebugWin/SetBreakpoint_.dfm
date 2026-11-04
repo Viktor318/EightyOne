@@ -9,7 +9,7 @@ object SetBreakpoint: TSetBreakpoint
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
@@ -177,10 +177,10 @@ object SetBreakpoint: TSetBreakpoint
     Height = 21
     Style = csDropDownList
     DropDownCount = 5
-    Font.Charset = ANSI_CHARSET
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
-    Font.Name = 'MS Sans Serif'
+    Font.Name = 'Segoe UI'
     Font.Style = []
     ItemHeight = 13
     ParentFont = False

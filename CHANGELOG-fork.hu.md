@@ -44,6 +44,14 @@ eredetihez képest.
   DirectSound-objektumok, és két egyszerre futó EightyOne nem zavarja
   egymás hangját.
 
+### Ablakok
+
+- Az ablakok a régi MS Sans Serif helyett a Windows Vista óta használt
+  **Segoe UI** betűtípust használják, azonos méretben, így az
+  elrendezésük nem változik. Az a négy ablak, amelyet a betűcsere
+  felnagyított volna (billentyűzetkép, numerikus billentyűzet,
+  billentyűfunkciók, jelzőbitek szerkesztése), megtartja a méretét.
+
 ### A főablak mérete
 
 - Új nagyítás: **300%** (*View > Zoom*, Ctrl+F3), a 200% és a 400% között.

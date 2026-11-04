@@ -11,7 +11,7 @@ object WavLoad: TWavLoad
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
@@ -118,7 +118,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -151,7 +151,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -184,7 +184,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -218,7 +218,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -262,7 +262,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -296,7 +296,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -329,7 +329,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -371,7 +371,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -404,7 +404,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -439,7 +439,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -473,7 +473,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -508,7 +508,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -543,7 +543,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {
@@ -592,7 +592,7 @@ object WavLoad: TWavLoad
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
       HoverFont.Height = -11
-      HoverFont.Name = 'MS Sans Serif'
+      HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
       InactiveGlyph.Data = {

@@ -40,6 +40,14 @@ The changes of the `hungarian-windows` branch, compared with
 - Changing the sound settings no longer leaks DirectSound objects, and two
   EightyOnes running at once no longer disturb each other's sound.
 
+### Windows
+
+- The windows use the **Segoe UI** font of Windows Vista and later instead
+  of the old MS Sans Serif, at the same size, so the layout stays as it
+  was. The four windows that would have been enlarged by the change of
+  font (keyboard picture, keypad, keyboard functions, edit flags) keep
+  their size.
+
 ### Main window size
 
 - New zoom: **300%** (*View > Zoom*, Ctrl+F3), between 200% and 400%.
