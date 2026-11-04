@@ -666,6 +666,8 @@ const LanguageEntry LanguageHungarianTable[] =
           "Windows billenty\373kioszt\341s haszn\341lata" },
         { "Use left Alt as Shift with number keys",
           "Bal Alt SHIFT-k\351nt a sz\341mbillenty\373kkel" },
+        { "Key repeat on ZX80/81",
+          "Billenty\373ism\351tl\351s ZX80/81-en" },
         { "File",
           "F\341jl" },
         { "Open Tape...",

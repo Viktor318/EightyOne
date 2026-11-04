@@ -1370,7 +1370,7 @@ BYTE ReadInputPort(int Address, int *tstates)
                 keyb=(BYTE)(Address/256);
                 for(i=0; i<8; i++)
                 {
-                        if (! (keyb & (1<<i)) ) data |= ZXKeyboard[i];
+                        if (! (keyb & (1<<i)) ) data |= ZXKeyboard[i] & KeyRepeatMask(i);
                 }
 
                 data = (BYTE)~data;

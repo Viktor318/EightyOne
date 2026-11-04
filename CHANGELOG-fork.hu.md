@@ -96,6 +96,14 @@ eredetihez képest.
 
 ### Billentyűzet
 
+- **Billentyűismétlés ZX80/81-en** (Options > Keyboard, alapból
+  kikapcsolva, a ZX80-nál, a ZX81-nél és klónjainál látszik): a 0,7
+  másodpercnél tovább nyomva tartott billentyű másodpercenként kb.
+  nyolcszor ismétlődik, amit a ZX80 és a ZX81 ROM-ja magától nem tud. A
+  billentyűt az emulátor 4 képkockára felengedettnek, 2-re lenyomottnak
+  mutatja, így a ROM mindegyiket új leütésnek veszi; a SHIFT lenyomva
+  marad, így a SHIFT-es jelek is ismétlődnek. A Windows-kiosztással és
+  anélkül is működik.
 - **A Windows billentyűzetkiosztásának használata** (Options > Keyboard;
   magyar felülettel alapból bekapcsolva, angollal kikapcsolva, ott a
   billentyűk úgy működnek, mint az eredeti EightyOne-ban): a gépelés azt a karaktert követi, amit a Windows

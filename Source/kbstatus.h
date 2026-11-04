@@ -39,6 +39,12 @@ extern void PCKeyUpWin(WORD key);
 extern void PCKeyFrame(void);
 extern bool WindowsLayout;
 extern bool AltShift;
+
+// "Key repeat on ZX80/81": a key held repeats, which the ZX80 and ZX81 ROMs
+// do not do (off by default, like the real machines)
+extern bool ZX8081KeyRepeat;
+extern bool KeyRepeatMachine(void);
+extern BYTE KeyRepeatMask(int row);
 extern void PCKeySetCursor(char left, char down, char right, char up, int shift);
 extern void PCKeySetCTRL(char key);
 extern void PCAllKeysUp(void);

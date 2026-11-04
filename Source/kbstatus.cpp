@@ -65,6 +65,22 @@ bool WindowsLayout = true;
 // give SHIFT (CAPS SHIFT on the Spectrum) + that number
 bool AltShift = true;
 
+// "Key repeat on ZX80/81". A key held longer than the delay is shown to the
+// machine as let go for a few frames and pressed again, over and over, so
+// the ROM takes each as a new key press. The ROM needs to see no key for 4
+// frames to take the next press as new; with 2 frames down that is about
+// 8 a second, near the Spectrum's own repeat. SHIFT is left held, so
+// shifted keys repeat too.
+bool ZX8081KeyRepeat = false;
+
+#define REPEAT_DELAY_FRAMES     35      // 0.7 s before repeating
+#define REPEAT_UP_FRAMES        4       // shown let go
+#define REPEAT_DOWN_FRAMES      2       // shown pressed
+
+static BYTE RepeatKeys[8];              // the keys held (but SHIFT)
+static int RepeatFrames = 0;            // frames they have been held
+static bool RepeatUp = false;           // shown let go now
+
 // The base map of the emulated machine, for the positions of the keys
 static const kb *BaseMap = NULL;
 
@@ -1349,10 +1365,73 @@ static void TypeChar(WORD winKey, unsigned short c)
         PressCharKey(winKey, key, mod);
 }
 
+// The machines without a repeat of their own: the ZX80, the ZX81 and its
+// clones (the Lambda and the ZX97 Lite have other ROMs)
+bool KeyRepeatMachine(void)
+{
+        switch (emulator.machine)
+        {
+        case MACHINEZX80: case MACHINEZX81: case MACHINETS1000:
+        case MACHINETS1500: case MACHINER470: case MACHINETK85:
+                return true;
+        default:
+                return false;
+        }
+}
+
+// The bits of a keyboard row the machine sees: none but SHIFT while a held
+// key is shown let go
+BYTE KeyRepeatMask(int row)
+{
+        if (!RepeatUp) return 0xff;
+        return row == kbA8 ? (BYTE)kbD0 : (BYTE)0;
+}
+
+// Every frame: how long the same keys have been held
+static void KeyRepeatFrame(void)
+{
+        BYTE keys[8];
+        bool any = false, same = true;
+        int i, step;
+
+        if (!ZX8081KeyRepeat || !KeyRepeatMachine())
+        {
+                RepeatFrames = 0;
+                RepeatUp = false;
+                return;
+        }
+
+        for (i=0; i<8; i++)
+        {
+                keys[i] = ZXKeyboard[i];
+                if (i == kbA8) keys[i] &= (BYTE)~kbD0;
+                if (keys[i]) any = true;
+                if (keys[i] != RepeatKeys[i]) same = false;
+                RepeatKeys[i] = keys[i];
+        }
+
+        if (!any || !same)
+        {
+                RepeatFrames = 0;
+                RepeatUp = false;
+                return;
+        }
+
+        if (RepeatFrames < REPEAT_DELAY_FRAMES + REPEAT_UP_FRAMES + REPEAT_DOWN_FRAMES)
+                RepeatFrames++;
+        else
+                RepeatFrames -= REPEAT_UP_FRAMES + REPEAT_DOWN_FRAMES - 1;
+
+        step = RepeatFrames - REPEAT_DELAY_FRAMES;
+        RepeatUp = step > 0 && step <= REPEAT_UP_FRAMES;
+}
+
 // Called every frame: the steps of the timed sequences
 void PCKeyFrame()
 {
         struct queuedchar *q;
+
+        KeyRepeatFrame();
 
         if (!QueueCount) return;
 

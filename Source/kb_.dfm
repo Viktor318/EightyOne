@@ -4,7 +4,7 @@ object Kb: TKb
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Keyboard'
-  ClientHeight = 172
+  ClientHeight = 192
   ClientWidth = 330
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -50,7 +50,7 @@ object Kb: TKb
   end
   object OK: TButton
     Left = 240
-    Top = 136
+    Top = 160
     Width = 81
     Height = 25
     Caption = 'OK'
@@ -171,5 +171,13 @@ object Kb: TKb
     Checked = True
     State = cbChecked
     TabOrder = 12
+  end
+  object KeyRepeatCheckBox: TCheckBox
+    Left = 8
+    Top = 168
+    Width = 229
+    Height = 17
+    Caption = 'Key repeat on ZX80/81'
+    TabOrder = 13
   end
 end

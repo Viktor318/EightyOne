@@ -46,6 +46,7 @@ __published:	// IDE-managed Components
         TRadioButton *UseNumericPadForJoystick2;
         TCheckBox *WindowsLayoutCheckBox;
         TCheckBox *AltShiftCheckBox;
+        TCheckBox *KeyRepeatCheckBox;
         void __fastcall OKClick(TObject *Sender);
         void __fastcall CursorModeChange(TObject *Sender);
         void __fastcall FormShow(TObject *Sender);

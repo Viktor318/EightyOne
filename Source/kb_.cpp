@@ -83,6 +83,7 @@ void __fastcall TKb::OKClick(TObject *Sender)
 
         WindowsLayout = WindowsLayoutCheckBox->Checked;
         AltShift = AltShiftCheckBox->Checked;
+        ZX8081KeyRepeat = KeyRepeatCheckBox->Checked;
         Form1->Keyboard1->Checked=false;
         
         Close();
@@ -130,6 +131,7 @@ void TKb::LoadSettings(TIniFile *ini)
         // original EightyOne (Shift+digit is the machine's SHIFT+digit)
         WindowsLayoutCheckBox->Checked            = ini->ReadBool("KB", "WindowsLayout", LanguageIsHungarian());
         AltShiftCheckBox->Checked                 = ini->ReadBool("KB", "AltShift", AltShiftCheckBox->Checked);
+        KeyRepeatCheckBox->Checked                = ini->ReadBool("KB", "ZX8081KeyRepeat", false);
 
         UpdateJoystickSettings();
         CursorModeChange(NULL);
@@ -157,6 +159,7 @@ void TKb::SaveSettings(TIniFile *ini)
         ini->WriteBool("KB", "UseNumericPadForJoystick2", UseNumericPadForJoystick2->Checked);
         ini->WriteBool("KB", "WindowsLayout", WindowsLayoutCheckBox->Checked);
         ini->WriteBool("KB", "AltShift", AltShiftCheckBox->Checked);
+        ini->WriteBool("KB", "ZX8081KeyRepeat", KeyRepeatCheckBox->Checked);
 }
 
 void TKb::UpdateCursors()
@@ -187,6 +190,9 @@ void __fastcall TKb::FormShow(TObject *Sender)
                 RadioButton2->Visible=true;
                 UseRightShiftCheckBox->Visible=false;
         }
+
+        // The repeat is for the machines without one of their own
+        KeyRepeatCheckBox->Visible = KeyRepeatMachine();
 }
 //---------------------------------------------------------------------------
 

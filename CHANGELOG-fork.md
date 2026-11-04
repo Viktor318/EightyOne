@@ -92,6 +92,12 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Keyboard
 
+- **Key repeat on ZX80/81** (Options > Keyboard, off by default, shown
+  for the ZX80, ZX81 and its clones): a key held longer than 0.7 s
+  repeats about 8 times a second, which the ZX80 and ZX81 ROMs do not do.
+  The key is shown to the machine as let go for 4 frames and pressed for
+  2, so the ROM takes each as a new key press; SHIFT stays held, so
+  shifted keys repeat too. It works with and without the Windows layout.
 - **Use the Windows keyboard layout** (Options > Keyboard; on by default
   with the Hungarian interface, off with the English one, where the keys
   go as in the original EightyOne):

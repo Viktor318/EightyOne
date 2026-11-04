@@ -329,6 +329,7 @@ form	kb_.dfm	Use Right Shift as Symbol Shift	Jobb Shift SYMBOL SHIFT-ként
 form	kb_.dfm	Use numeric keypad for joystick input (when Num Lock is on):	Numerikus billentyűzet joystickként (ha a Num Lock be van kapcsolva):
 form	kb_.dfm	Use the Windows keyboard layout	Windows billentyűkiosztás használata
 form	kb_.dfm	Use left Alt as Shift with number keys	Bal Alt SHIFT-ként a számbillentyűkkel
+form	kb_.dfm	Key repeat on ZX80/81	Billentyűismétlés ZX80/81-en
 form	main_.dfm	File	Fájl
 form	main_.dfm	Open Tape...	Kazetta megnyitása...
 form	main_.dfm	Save Tape...	Kazetta mentése...
