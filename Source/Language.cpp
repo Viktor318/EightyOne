@@ -351,12 +351,23 @@ static void TranslateComponent(TComponent *component)
 void LanguageTranslateForm(TForm *form)
 {
         int i;
+        TMainMenu *menu;
 
         if (!form) return;
 
         TranslateProperty(form, 0);
         for (i=0; i<form->ComponentCount; i++)
                 TranslateComponent(form->Components[i]);
+
+        // The menu bar of the form does not show the new captions of its
+        // top items until the menu is built again
+        menu = form->Menu;
+        if (menu && form->HandleAllocated())
+        {
+                form->Menu = NULL;
+                form->Menu = menu;
+                DrawMenuBar(form->Handle);
+        }
 }
 
 void LanguageTranslateAll(void)
