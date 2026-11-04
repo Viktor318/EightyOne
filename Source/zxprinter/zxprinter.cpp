@@ -90,6 +90,11 @@ __fastcall TZXPrinter::TZXPrinter(TComponent* Owner)
 
         Fg=clBlack;
         Bg=clWhite;
+        Zoom=1;
+
+        DisplayImage->OnDblClick = DisplayImageDblClick;
+        DisplayImage->Hint = "Double click: normal or double size";
+        DisplayImage->ShowHint = true;
 
         PrinterOutput= new Graphics::TBitmap;
         PrinterOutput->PixelFormat=pf4bit;
@@ -119,12 +124,14 @@ void __fastcall TZXPrinter::DrawImage()
         TRect source,dest;
         int pos;
 
+        int shown=DisplayImage->Height/Zoom;   // lines of paper shown
+
         pos=ScrollBar->Position;
 
-        if (pos<DisplayImage->Height) pos=DisplayImage->Height;
+        if (pos<shown) pos=shown;
 
         source.Left=0;
-        source.Top=pos - DisplayImage->Height;
+        source.Top=pos - shown;
         source.Right=PrinterOutput->Width;
         source.Bottom=pos;
 
@@ -135,7 +142,72 @@ void __fastcall TZXPrinter::DrawImage()
         dest.Right = DisplayImage->Width;
         dest.Bottom = DisplayImage->Height;
 
+        // At 2x every dot becomes 2x2 pixels
+        SetStretchBltMode(DisplayImage->Canvas->Handle, COLORONCOLOR);
         DisplayImage->Canvas->CopyRect(dest, PrinterOutput->Canvas, source);
+}
+//---------------------------------------------------------------------------
+
+// The paper at 1x or 2x: the picture, the scroll bar, the buttons and the
+// options below it follow
+
+#define PRINTER_PAPER_WIDTH     256
+#define PRINTER_PAPER_HEIGHT    265
+#define PRINTER_SCROLLBAR_W     17
+#define PRINTER_MARGIN          8
+
+void TZXPrinter::SetZoom(int zoom)
+{
+        int w, h, y, width;
+
+        if (zoom != 2) zoom = 1;
+        Zoom = zoom;
+
+        w = PRINTER_PAPER_WIDTH * zoom;
+        h = PRINTER_PAPER_HEIGHT * zoom;
+        width = w + PRINTER_SCROLLBAR_W;
+        y = h + 7;
+
+        ClientWidth = width;
+
+        DisplayImage->SetBounds(0, 0, w, h);
+        DisplayImage->Picture->Bitmap->Width = w;
+        DisplayImage->Picture->Bitmap->Height = h;
+        ScrollBar->SetBounds(w, 0, PRINTER_SCROLLBAR_W, h);
+
+        // The buttons fill the width, lined up with the options panel, in the
+        // proportions of the 1x layout (Options is wider for "Beállítások")
+        {
+                static const int base[4] = { 56, 56, 56, 71 };
+                TButton *buttons[4] = { SaveImage, ClearImage, Feed, OptionsBtn };
+                int gap = 6, i, x = PRINTER_MARGIN, sum = 0, used = 0;
+                int room = width - 2 * PRINTER_MARGIN - 3 * gap;
+
+                for (i=0; i<4; i++) sum += base[i];
+
+                for (i=0; i<4; i++)
+                {
+                        int bw = i < 3 ? (base[i] * room + sum / 2) / sum : room - used;
+
+                        buttons[i]->SetBounds(x, y, bw, buttons[i]->Height);
+                        x += bw + gap;
+                        used += bw;
+                }
+        }
+
+        Panel1->SetBounds(PRINTER_MARGIN, y + 32, width - 2 * PRINTER_MARGIN, Panel1->Height);
+        BitRate->Width = Panel1->Width - 16;
+        LineRate->Width = Panel1->Width - 16;
+
+        ClientHeight = Panel1->Visible ? Panel1->Top + Panel1->Height + 4 : Panel1->Top;
+
+        ClearBitmap(DisplayImage->Picture->Bitmap);
+        DrawImage();
+}
+
+void __fastcall TZXPrinter::DisplayImageDblClick(TObject *Sender)
+{
+        SetZoom(Zoom == 1 ? 2 : 1);
 }
 //---------------------------------------------------------------------------
 void TZXPrinter::ClockTick(int ts)
@@ -346,6 +418,8 @@ void TZXPrinter::LoadSettings(TIniFile *ini)
         OptionsBtnClick(NULL);
         OptionsBtnClick(NULL);
 
+        SetZoom(ini->ReadInteger("PRINTER","Zoom",1));
+
         if (Form1->ViewPrinter->Checked) Show();
 }
 
@@ -360,6 +434,7 @@ void TZXPrinter::SaveSettings(TIniFile *ini)
         ini->WriteInteger("PRINTER","SLineSpeed",LineRate->Position );
         ini->WriteInteger("Printer","Style",Style->ItemIndex );
         ini->WriteBool("Printer","Options",Panel1->Visible );
+        ini->WriteInteger("PRINTER","Zoom",Zoom);
 
 }
 void __fastcall TZXPrinter::BitRateChange(TObject *Sender)

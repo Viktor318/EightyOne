@@ -59,6 +59,13 @@ eredetihez képest.
   átméretezhető, de csak ezek között a méretek között ugrik (a bejelölt
   nagyítás követi). A *User Defined* továbbra is bármilyen méretet enged.
 
+### ZX Printer
+
+- A papírra duplán kattintva a nyomat **kétszeres méretben** látszik
+  (minden pont 2x2 képpont), újabb dupla kattintásra ismét normál
+  méretben; a gombok és a beállítások követik az ablak szélességét, a
+  méretet megjegyzi.
+
 ### Billentyűzetkép (Help > Keyboard Map)
 
 - A dupla kattintás lépésenként változtatja a kép méretét: 1x, 1,25x,

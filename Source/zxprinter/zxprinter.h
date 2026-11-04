@@ -73,6 +73,9 @@ private:	// User declarations
         Graphics::TBitmap *PrinterOutput;
         bool MotorOn, MotorSlow, StylusActive, OnPaper, EncoderWheel;
         int XPos, YPos, Counter1, Counter2;
+        int Zoom;                       // the paper shown at 1x or 2x
+        void SetZoom(int zoom);
+        void __fastcall DisplayImageDblClick(TObject *Sender);
 public:		// User declarations
         __fastcall TZXPrinter(TComponent* Owner);
         void ResetPrinter(void);

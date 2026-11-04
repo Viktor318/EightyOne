@@ -716,6 +716,7 @@ code	snap.cpp	ROM load failed:\n{0}	A ROM betöltése nem sikerült:\n{0}
 code	snap.cpp	Font load failed:\n{0}	A karakterkészlet betöltése nem sikerült:\n{0}
 code	zxprinter.cpp	Carriage Speed: {0}	Kocsisebesség: {0}
 code	zxprinter.cpp	Paper Feed Speed: {0}	Előtolás sebessége: {0}
+code	zxprinter.cpp	Double click: normal or double size	Dupla kattintás: normál vagy kétszeres méret
 code	BasicLister_.cpp	{0} ZxText2P BASIC File (*.{1})	{0} ZxText2P BASIC-fájl (*.{1})
 code	BasicLister_.cpp	{0} ZxToken BASIC File (*.{1})	{0} ZxToken BASIC-fájl (*.{1})
 code	BasicLister_.cpp	Bitmap File (*.bmp)	Bitkép (*.bmp)

@@ -1440,6 +1440,8 @@ const LanguageEntry LanguageHungarianTable[] =
           "Kocsisebess\351g: {0}" },
         { "Paper Feed Speed: {0}",
           "El\365tol\341s sebess\351ge: {0}" },
+        { "Double click: normal or double size",
+          "Dupla kattint\341s: norm\341l vagy k\351tszeres m\351ret" },
         { "{0} ZxText2P BASIC File (*.{1})",
           "{0} ZxText2P BASIC-f\341jl (*.{1})" },
         { "{0} ZxToken BASIC File (*.{1})",

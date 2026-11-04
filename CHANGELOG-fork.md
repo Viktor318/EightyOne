@@ -55,6 +55,12 @@ The changes of the `hungarian-windows` branch, compared with
   it jumps between these sizes (the zoom ticked follows). *User Defined*
   still allows any size.
 
+### ZX Printer
+
+- Double click the paper to see it at **double size** (every dot 2x2
+  pixels) or normal again; the buttons and the options follow the width
+  of the window, and the size is remembered.
+
 ### Keyboard picture (Help > Keyboard Map)
 
 - Double click changes the size of the picture in steps: 1x, 1.25x, 1.5x,
