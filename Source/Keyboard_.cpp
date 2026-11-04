@@ -439,9 +439,42 @@ void TKeyboard::KbChange(void)
 void __fastcall TKeyboard::CanResizeWindow(TObject *Sender, int &NewWidth,
                                            int &NewHeight, bool &Resize)
 {
+        SnapSize(NewWidth, NewHeight, NewWidth == Width && NewHeight != Height);
+}
+
+// Dragging the frame: the size jumps here, where the side dragged is known,
+// so the opposite side stays where it is (OnCanResize can only change the
+// size, so dragging the left or top side moved the right or bottom one)
+void __fastcall TKeyboard::WndProc(Messages::TMessage &Message)
+{
+        if (Message.Msg == WM_SIZING)
+        {
+                RECT *r = (RECT *)Message.LParam;
+                int edge = Message.WParam;
+                int w = r->right - r->left, h = r->bottom - r->top;
+
+                SnapSize(w, h, edge == WMSZ_TOP || edge == WMSZ_BOTTOM);
+
+                if (edge == WMSZ_LEFT || edge == WMSZ_TOPLEFT || edge == WMSZ_BOTTOMLEFT)
+                        r->left = r->right - w;
+                else
+                        r->right = r->left + w;
+
+                if (edge == WMSZ_TOP || edge == WMSZ_TOPLEFT || edge == WMSZ_TOPRIGHT)
+                        r->top = r->bottom - h;
+                else
+                        r->bottom = r->top + h;
+        }
+
+        TForm::WndProc(Message);
+}
+
+// A window size (frame included) made the nearest picture size, judged by
+// the width or the height
+void TKeyboard::SnapSize(int &NewWidth, int &NewHeight, bool byHeight)
+{
         int frameWidth = Width - ClientWidth;
         int frameHeight = Height - ClientHeight;
-        bool byHeight = (NewWidth == Width && NewHeight != Height);
         int wanted, size, best = 0, bestDistance = -1, distance, i;
 
         for (i=0; i<(int)SIZES; i++)

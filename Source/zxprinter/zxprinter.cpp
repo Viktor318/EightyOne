@@ -138,10 +138,15 @@ void __fastcall TZXPrinter::DrawImage()
 
         if (source.Top < 0) source.Top=0;
 
+        // Not beyond the end of the paper (it may be shorter than the view;
+        // the rest of the view stays blank)
+        if (source.Bottom > PrinterOutput->Height) source.Bottom = PrinterOutput->Height;
+        if (source.Bottom <= source.Top) return;
+
         dest.Left=0;
         dest.Top=0;
         dest.Right = DisplayImage->Width;
-        dest.Bottom = DisplayImage->Height;
+        dest.Bottom = (source.Bottom - source.Top) * Zoom;
 
         // Zoomed, every dot becomes 2x2 or 3x3 pixels
         SetStretchBltMode(DisplayImage->Canvas->Handle, COLORONCOLOR);
@@ -162,6 +167,19 @@ void TZXPrinter::SetZoom(int zoom)
         int w, h, y, width;
 
         if (zoom < 1 || zoom > 3) zoom = 1;
+
+        // No bigger than the screen can show (with the options open)
+        {
+                RECT area;
+                int frame = Height - ClientHeight;
+                int options = Panel1->Height + 4;
+
+                if (SystemParametersInfo(SPI_GETWORKAREA, 0, &area, 0))
+                        while (zoom > 1 && frame + PRINTER_PAPER_HEIGHT * zoom + 7 + 32
+                                                + options > area.bottom - area.top)
+                                zoom--;
+        }
+
         Zoom = zoom;
 
         w = PRINTER_PAPER_WIDTH * zoom;
@@ -390,24 +408,27 @@ void __fastcall TZXPrinter::SaveImageClick(TObject *Sender)
         }
 
         Image = PrinterOutput;
-        if (Zoom > 1)
-        {
-                Image = new Graphics::TBitmap();
-                Image->PixelFormat = pf24bit;
-                Image->Width = PrinterOutput->Width * Zoom;
-                Image->Height = PrinterOutput->Height * Zoom;
-                SetStretchBltMode(Image->Canvas->Handle, COLORONCOLOR);
-                Image->Canvas->CopyRect(Rect(0, 0, Image->Width, Image->Height),
-                        PrinterOutput->Canvas,
-                        Rect(0, 0, PrinterOutput->Width, PrinterOutput->Height));
-        }
 
+        // A long printout at 3x is a big picture: running out of memory is
+        // reported like any other failure
         try
         {
+                if (Zoom > 1)
+                {
+                        Image = new Graphics::TBitmap();
+                        Image->PixelFormat = pf24bit;
+                        Image->Width = PrinterOutput->Width * Zoom;
+                        Image->Height = PrinterOutput->Height * Zoom;
+                        SetStretchBltMode(Image->Canvas->Handle, COLORONCOLOR);
+                        Image->Canvas->CopyRect(Rect(0, 0, Image->Width, Image->Height),
+                                PrinterOutput->Canvas,
+                                Rect(0, 0, PrinterOutput->Width, PrinterOutput->Height));
+                }
+
                 if (Bmp) Image->SaveToFile(Filename);
                 else ok = SaveBitmapAsPNG(Image, Filename);
         }
-        catch (Exception &)
+        catch (...)
         {
                 ok = false;
         }

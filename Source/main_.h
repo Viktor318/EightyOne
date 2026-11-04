@@ -361,6 +361,10 @@ public:		// User declarations
         void __fastcall N3001Click(TObject *Sender);
         void SetZoom(int factor);
         void SetWindowFrame(bool minimizeMaximize);
+        int ZoomChecked(void);
+        bool ZoomSnapping(void);
+        void SnapZoomSize(int &width, int &height, bool byHeight);
+        void FixZoomHeight(void);
         void __fastcall FormCanResize(TObject *Sender, int &NewWidth,
                                       int &NewHeight, bool &Resize);
         void BuildLanguageMenu();

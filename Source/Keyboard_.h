@@ -76,6 +76,9 @@ private:	// User declarations
         void __fastcall ResizeWindow(TObject *Sender);
         void __fastcall CanResizeWindow(TObject *Sender, int &NewWidth,
                                         int &NewHeight, bool &Resize);
+        void SnapSize(int &width, int &height, bool byHeight);
+protected:
+        virtual void __fastcall WndProc(Messages::TMessage &Message);
 public:		// User declarations
         __fastcall TKeyboard(TComponent* Owner);
         void LoadSettings(TIniFile *ini);

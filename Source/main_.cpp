@@ -137,6 +137,36 @@ void __fastcall TForm1::WndProc(TMessage &Message)
                 PCAllKeysUp();
                 break;
 
+        case WM_SIZING:
+                // Dragging the frame with a zoom chosen: the size jumps to
+                // the nearest zoom here, where the side dragged is known,
+                // so that the opposite side stays where it is (OnCanResize
+                // can change only the size, so dragging the left or top
+                // side moved the right or bottom one)
+                if (ZoomSnapping())
+                {
+                        RECT *r = (RECT *)Message.LParam;
+                        int edge = Message.WParam;
+                        int w = r->right - r->left, h = r->bottom - r->top;
+
+                        SnapZoomSize(w, h, edge == WMSZ_TOP || edge == WMSZ_BOTTOM);
+
+                        if (edge == WMSZ_LEFT || edge == WMSZ_TOPLEFT || edge == WMSZ_BOTTOMLEFT)
+                                r->left = r->right - w;
+                        else
+                                r->right = r->left + w;
+
+                        if (edge == WMSZ_TOP || edge == WMSZ_TOPLEFT || edge == WMSZ_TOPRIGHT)
+                                r->top = r->bottom - h;
+                        else
+                                r->bottom = r->top + h;
+                }
+                break;
+
+        case WM_EXITSIZEMOVE:
+                FixZoomHeight();
+                break;
+
         default:
                 break;
         }
@@ -410,6 +440,9 @@ void TForm1::SetZoom(int factor)
         N4001->Checked = (factor == 4);
         UserDefined1->Checked=false;
 
+        // A maximized window would stay maximized (and could not be moved)
+        if (WindowState == wsMaximized) WindowState = wsNormal;
+
         // Resizable, but FormCanResize lets it have these sizes only
         SetWindowFrame(false);
 
@@ -464,21 +497,41 @@ void TForm1::SetWindowFrame(bool minimizeMaximize)
 void __fastcall TForm1::FormCanResize(TObject *Sender, int &NewWidth,
                                       int &NewHeight, bool &Resize)
 {
+        if (!ZoomSnapping()) return;
+
+        SnapZoomSize(NewWidth, NewHeight, NewWidth == Width && NewHeight != Height);
+}
+
+// The zoom ticked (1-4), or 0
+int TForm1::ZoomChecked(void)
+{
+        if (N1001->Checked) return 1;
+        if (N2001->Checked) return 2;
+        if (N3001->Checked) return 3;
+        if (N4001->Checked) return 4;
+        return 0;
+}
+
+bool TForm1::ZoomSnapping(void)
+{
+        return !FullScreen && !NoZoomSnap && !UserDefined1->Checked
+                && BaseWidth > 0 && BaseHeight > 0;
+}
+
+// A window size (frame included) made the size of the nearest zoom, judged
+// by the width or the height
+void TForm1::SnapZoomSize(int &width, int &height, bool byHeight)
+{
         int frameWidth, frameHeight, statusHeight, factor, best = 1;
         int wanted, size, distance, bestDistance = -1;
-        bool byHeight;
-
-        if (FullScreen || NoZoomSnap || UserDefined1->Checked
-                || BaseWidth <= 0 || BaseHeight <= 0) return;
 
         statusHeight = StatusBar1->Visible ? StatusBar1->Height : 0;
         frameWidth = Width - ClientWidth;
         frameHeight = Height - ClientHeight + statusHeight;
-        byHeight = (NewWidth == Width && NewHeight != Height);
 
         for (factor=1; factor<=4; factor++)
         {
-                wanted = byHeight ? NewHeight - frameHeight : NewWidth - frameWidth;
+                wanted = byHeight ? height - frameHeight : width - frameWidth;
                 size = byHeight ? BaseHeight * factor : BaseWidth * factor;
                 distance = wanted > size ? wanted - size : size - wanted;
                 if (bestDistance < 0 || distance < bestDistance)
@@ -488,8 +541,26 @@ void __fastcall TForm1::FormCanResize(TObject *Sender, int &NewWidth,
                 }
         }
 
-        NewWidth = BaseWidth * best + frameWidth;
-        NewHeight = BaseHeight * best + frameHeight;
+        width = BaseWidth * best + frameWidth;
+        height = BaseHeight * best + frameHeight;
+}
+
+// The frame measured while dragging includes the menu bar at the old width:
+// at a narrower width the menu may take two lines (or one line again), so
+// the height is put right once the window has its size
+void TForm1::FixZoomHeight(void)
+{
+        int factor = ZoomChecked(), height;
+
+        if (!ZoomSnapping() || !factor) return;
+
+        height = BaseHeight * factor + (StatusBar1->Visible ? StatusBar1->Height : 0);
+        if (ClientHeight != height)
+        {
+                NoZoomSnap = true;
+                ClientHeight = height;
+                NoZoomSnap = false;
+        }
 }
 //---------------------------------------------------------------------------
 
@@ -2273,7 +2344,9 @@ void __fastcall TForm1::SaveScreenshot1Click(TObject *Sender)
 
         case 2:
                 if (Extension!=".BMP") Filename += ".bmp";
-                SaveScreenShot(Filename);
+                if (!SaveScreenShot(Filename))
+                        MessageBox(Handle, Tr("The picture could not be saved.").c_str(),
+                                   Tr("Save Screenshot").c_str(), MB_OK | MB_ICONERROR);
                 break;
 
         case 3:
@@ -3221,5 +3294,8 @@ void __fastcall TForm1::LanguageClick(TObject *Sender)
         item->Checked = true;
         LanguageSetSetting(item->Tag);
         LanguageTranslateAll();
+
+        // The menu bar may now take a different number of lines
+        FixZoomHeight();
 }
 //---------------------------------------------------------------------------

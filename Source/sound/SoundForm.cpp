@@ -460,6 +460,8 @@ void TMidiForm::CreateMixer(void)
                 Mute[i] = NULL;
         }
         for (i=0; i<3; i++) ChannelLabel[i] = PlaceLabel[i] = NULL;
+        WheelFader = NULL;
+        WheelRest = 0;
 
         MainGroup = CreateSection(x, 1, "Main volume");
         CreateColumn(MainGroup, 0, VOLUME_MAIN, true);
@@ -677,7 +679,9 @@ void __fastcall TMidiForm::MeterTimerTimer(TObject *Sender)
         }
 }
 
-// The mouse wheel moves the fader under the mouse, focused or not
+// The mouse wheel moves the fader under the mouse, focused or not: a step
+// for each notch (WHEEL_DELTA); smooth wheels and touchpads send smaller
+// amounts, which are added up
 
 void __fastcall TMidiForm::MouseWheelHandler(Messages::TMessage &Message)
 {
@@ -685,11 +689,20 @@ void __fastcall TMidiForm::MouseWheelHandler(Messages::TMessage &Message)
 
         if (fader && fader->Owner == this)
         {
-                int delta = (short)HIWORD(Message.WParam);
-                int steps = delta / WHEEL_DELTA;
+                int steps;
 
-                if (!steps) steps = delta > 0 ? 1 : -1;
-                fader->Wheel(steps, (LOWORD(Message.WParam) & MK_SHIFT) != 0);
+                if (fader != WheelFader)
+                {
+                        WheelFader = fader;
+                        WheelRest = 0;
+                }
+
+                WheelRest += (short)HIWORD(Message.WParam);
+                steps = WheelRest / WHEEL_DELTA;
+                WheelRest -= steps * WHEEL_DELTA;
+
+                if (steps)
+                        fader->Wheel(steps, (LOWORD(Message.WParam) & MK_SHIFT) != 0);
                 Message.Result = 1;
                 return;
         }

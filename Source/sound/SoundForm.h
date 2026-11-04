@@ -124,6 +124,8 @@ private:	// User declarations
         TLabel *PlaceLabel[3];          // left, centre, right: stay
         TTimer *MeterTimer;
         bool Loading;
+        TFader *WheelFader;             // the fader the wheel last moved
+        int WheelRest;                  // and what is left of the turns
 
         void CreateMixer(void);
         TGroupBox *CreateSection(int left, int columns, const char *caption);
