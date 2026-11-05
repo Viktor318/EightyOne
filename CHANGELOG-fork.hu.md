@@ -10,6 +10,19 @@ eredetihez képest.
 
 ### Hang
 
+- A hangot a **WASAPI** szólaltatja meg (Windows Vistától), a Windows
+  keverőjének mintavételi frekvenciáján (jellemzően 48000 Hz), így nincs
+  átmintavételezés. Kb. 30 ms hangot tart előre, ezért hamarabb hallatszik,
+  mint a DirectSounddal (kb. 70 ms). Ha a WASAPI nem használható
+  (Windows XP), a DirectSound szól, mint eddig.
+- Ha a hangeszközt kihúzzák, vagy leáll, az emuláció a helyes sebességgel
+  fut tovább, és a hang visszajön, amint újra megnyitható egy eszköz
+  (másodpercenként próbálja). Ha a Windowsban másik eszköz lesz az
+  alapértelmezett, a hang átkerül rá.
+- Hangeszköz nélkül is fut az emuláció (eddig üres „Hanghiba” üzenetet
+  adott, és nem futott).
+- A Hangbeállítások ablak kiírja, mi szólaltatja meg a hangot, és milyen
+  frekvencián.
 - Megújult a **Hangbeállítások** ablak: bal oldalon **fő hangerő**,
   kétszer olyan magas csúszkák (0–100%), mindegyik mellett
   **szintjelzővel** (a hangerő után mér), alattuk a százalék, húzás közben

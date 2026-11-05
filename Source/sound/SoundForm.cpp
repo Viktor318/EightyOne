@@ -501,10 +501,31 @@ void TMidiForm::CreateMixer(void)
         SpecDrumGroup = CreateSection(x, 1, "SpecDrum");
         CreateColumn(SpecDrumGroup, 0, VOLUME_SPECDRUM, false);
 
+        // Beside the OK button: the output (it may change while playing)
+        OutputLabel = new TLabel(this);
+        OutputLabel->Parent = this;
+        OutputLabel->AutoSize = false;
+        OutputLabel->SetBounds(GroupBox1->Left + 4, OK->Top + 5, OK->Left - GroupBox1->Left - 12, 16);
+        LanguageKeepText(OutputLabel);
+        ShowOutput();
+
         MeterTimer = new TTimer(this);
         MeterTimer->Interval = METER_TICK_MS;
         MeterTimer->OnTimer = MeterTimerTimer;
         MeterTimer->Enabled = true;
+}
+
+void TMidiForm::ShowOutput(void)
+{
+        const char *name = Sound.OutputName();
+        AnsiString text;
+
+        if (name)
+                text = TrF("Output: {0}, {1} Hz", name, IntToStr(Sound.OutputRate()));
+        else
+                text = Tr("Output: no sound device");
+
+        if (OutputLabel->Caption != text) OutputLabel->Caption = text;
 }
 
 TGroupBox *TMidiForm::CreateSection(int left, int columns, const char *caption)
@@ -656,6 +677,8 @@ void __fastcall TMidiForm::MeterTimerTimer(TObject *Sender)
         double level;
 
         if (!Visible) return;
+
+        ShowOutput();
 
         for (i=0; i<VOLUME_METERS; i++)
         {

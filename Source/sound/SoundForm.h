@@ -123,6 +123,7 @@ private:	// User declarations
         TLabel *ChannelLabel[3];        // A, B, C: move with their faders
         TLabel *PlaceLabel[3];          // left, centre, right: stay
         TTimer *MeterTimer;
+        TLabel *OutputLabel;            // what is playing the sound
         bool Loading;
         TFader *WheelFader;             // the fader the wheel last moved
         int WheelRest;                  // and what is left of the turns
@@ -133,6 +134,7 @@ private:	// User declarations
         void PlaceAYChannels(void);
         void ShowPercent(int index);
         void ApplySettings(void);
+        void ShowOutput(void);
         void __fastcall FaderChange(TObject *Sender);
         void __fastcall MuteClick(TObject *Sender);
         void __fastcall MeterTimerTimer(TObject *Sender);

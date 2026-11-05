@@ -87,6 +87,9 @@ CSound::CSound()
         AYStereo = AY_STEREO_MONO;
         Mix = NULL;
         Buffer = NULL;
+        Output = NULL;
+        m_hWnd = NULL;
+        m_FPS = m_BitsPerSample = m_SampleRate = m_RequestedRate = m_Channels = 0;
         OffsetTStates = 0;
         BeeperRequested = 0;
         BeeperPendingCount = 0;
@@ -119,28 +122,32 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         if (hWnd) m_hWnd=hWnd;
         if (FPS) m_FPS=FPS;
         if (BitsPerSample) m_BitsPerSample=BitsPerSample;
-        if (SampleRate) m_SampleRate=SampleRate;
+        if (SampleRate) m_RequestedRate=SampleRate;
         if (Channels) m_Channels=Channels;
 
         // If anything is still missing, return
 
-        if (!m_hWnd || !m_FPS || !m_BitsPerSample || !m_SampleRate || !m_Channels) return(0);
+        if (!m_hWnd || !m_FPS || !m_BitsPerSample || !m_RequestedRate || !m_Channels) return(0);
 
         // Otherwise, we're good to go, so configure the sound.
 
         m_BytesPerSample=m_BitsPerSample/8;
-        m_SamplesPerTState=m_SampleRate/(double)machine.clockspeed;
         EnvHeld=0;
         EnvAlternating=0;
         BeeperLastSubpos=0;
 
-        // Start by initialsing DirectSound
+        // Start by opening the output; it may use another sample rate (the
+        // one asked for stays if it fails, the AY needs one)
 
-        int r = DXSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_SampleRate, m_Channels);
+        m_SampleRate=m_RequestedRate;
+        int r = OpenOutput();
         if (r)
         {
                 return(r);
         }
+
+        m_SampleRate=Output->SampleRate();
+        m_SamplesPerTState=m_SampleRate/(double)machine.clockspeed;
 
         // get a 1 frame size buffer
 
@@ -157,7 +164,7 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
 
         if(Buffer==NULL || Mix==NULL)
         {
-                DXSound.End();
+                End();
                 return(-1); // Oh dear, malloc failed
         }
 
@@ -178,8 +185,24 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         sp0256_AL2.SetSamplingFreq(m_SampleRate);
         Digitalker.SetSamplingFreq(m_SampleRate);
 
-        DXSound.Play();
+        Output->Play();
         return(0);
+}
+
+// The first output that works
+
+int CSound::OpenOutput(void)
+{
+        Output = NULL;
+
+        if (!WasapiSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+                Output = &WasapiSound;
+        else if (!DXSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+                Output = &DXSound;
+        else if (!WasapiSound.InitialiseNoDevice(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+                Output = &WasapiSound;
+
+        return Output ? 0 : -1;
 }
 
 // Reinitialise gets called if something changes... we lose the window handle,
@@ -190,7 +213,7 @@ int CSound::ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, 
         if (!hWnd) hWnd = m_hWnd;
         if (!FPS) FPS = m_FPS;
         if (!BitsPerSample) BitsPerSample = m_BitsPerSample;
-        if (!SampleRate) SampleRate = m_SampleRate;
+        if (!SampleRate) SampleRate = m_RequestedRate;
         if (!Channels) Channels = m_Channels;
 
         End();
@@ -200,7 +223,8 @@ int CSound::ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, 
 // End() - free the sound buffer and tell DirectSould it's all over.
 void CSound::End(void)
 {
-        DXSound.End();
+        if (Output) Output->End();
+        Output = NULL;
         if(Buffer) delete []Buffer;
         Buffer=NULL;
         if(Mix) delete []Mix;
@@ -819,7 +843,7 @@ void CSound::Frame(bool pause)
                 Buffer[f] = (short)value;
         }
 
-        DXSound.Frame((unsigned char *)Buffer, FrameSize*m_Channels*m_BytesPerSample);
+        if (Output) Output->Frame((unsigned char *)Buffer, FrameSize*m_Channels*m_BytesPerSample);
         SoundOutput->UpdateImage(Buffer,m_Channels,FrameSize);
 
         // The next buffer

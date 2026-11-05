@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <mmreg.h>
 #include <dsound.h>
+#include "sound\SoundOutput.h"
 
 // How far ahead of DirectSound's write cursor the audio thread keeps the
 // buffer filled. The emulator runs one frame for each frame of sound
@@ -34,7 +35,7 @@
 #define DSND_POLL_MS            5       // how often the audio thread looks
 #define DSND_QUEUE_FRAMES       4       // frames the emulator may get ahead
 
-class CDSnd
+class CDSnd : public CSoundOutput
 {
 public:
         CDSnd();
@@ -46,6 +47,9 @@ public:
         // True while End() is waiting for the audio thread to finish: a
         // frame the thread asked for just before must not be run then
         bool Stopping() { return m_Stopping; }
+
+        int SampleRate() { return m_SampleRate; }
+        const char *Name() { return "DirectSound"; }
 
 private:
         void ThreadFN(void);

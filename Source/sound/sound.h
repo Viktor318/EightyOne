@@ -25,6 +25,7 @@
 #define _SOUND_H
 
 #include "sound\SoundDX.h"
+#include "sound\SoundWASAPI.h"
 
 #define AY_TYPE_NONE                    0
 #define AY_TYPE_QUICKSILVA              1
@@ -144,7 +145,12 @@ public:
         int ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
 
         void End(void);
-        bool Stopping(void) { return DXSound.Stopping(); }
+        bool Stopping(void) { return Output ? Output->Stopping() : false; }
+
+        // What is playing the sound ("WASAPI", "DirectSound"), or NULL if
+        // nothing is; and at what rate
+        const char *OutputName(void) { return Output ? Output->Name() : NULL; }
+        int OutputRate(void) { return Output ? m_SampleRate : 0; }
         void AYWrite(int reg,int val, int frametstates);
         void AYWrite128(int reg, int val, int frametstates);
         void AYWriteTimex(int reg, int val, int frametstates);
@@ -169,12 +175,18 @@ public:
         unsigned char AYRegisterStore[16];
 
 private:
+        // WASAPI if it works, otherwise DirectSound, otherwise WASAPI
+        // without a device (a timer keeps the emulator running)
+        CWasapiSnd WasapiSound;
         CDSnd DXSound;
+        CSoundOutput *Output;
+        int OpenOutput(void);
 
         HWND m_hWnd;
         int m_BitsPerSample;
         int m_BytesPerSample;
-        int m_SampleRate;
+        int m_SampleRate;               // the output's
+        int m_RequestedRate;            // the one asked for
         int m_Channels;
         int m_FPS;
         double m_SamplesPerTState;

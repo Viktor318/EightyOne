@@ -74,6 +74,7 @@ USEFORM("BasicLister\BasicListingFormatInfo_.cpp", BasicListingFormatInfoForm);
 USELIB("..\components\directsound\dsound.lib");
 USEUNIT("sound\sound.cpp");
 USEUNIT("sound\SoundDX.cpp");
+USEUNIT("sound\SoundWASAPI.cpp");
 USEUNIT("Ace\ace.cpp");
 USEUNIT("zx81\rompatch.cpp");
 USEUNIT("zx81\snap.cpp");

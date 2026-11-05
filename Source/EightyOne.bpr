@@ -17,7 +17,7 @@
       BasicLister\BasicLister_.obj BasicLister\IBasicLister.obj 
       BasicLoader\IBasicLoader.obj BasicLoader\BasicLoaderOptions_.obj 
       BasicLister\BasicListerOptions_.obj 
-      BasicLister\BasicListingFormatInfo_.obj sound\sound.obj sound\SoundDX.obj 
+      BasicLister\BasicListingFormatInfo_.obj sound\sound.obj sound\SoundDX.obj sound\SoundWASAPI.obj 
       Ace\ace.obj zx81\rompatch.obj zx81\snap.obj zx81\zx80BasicLister.obj 
       zx81\zx80BasicLoader.obj zx81\zx81.obj zx81\zx81BasicLister.obj 
       zx81\zx81BasicLoader.obj Spectrum\spec48.obj 

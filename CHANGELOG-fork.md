@@ -9,6 +9,19 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Sound
 
+- Sound is played through **WASAPI** (Windows Vista and later), at the
+  sample rate of the Windows mixer (usually 48000 Hz), so it is not
+  resampled. About 30 ms of sound is kept waiting, so it is heard sooner
+  than with DirectSound (about 70 ms). If WASAPI cannot be used (Windows
+  XP), DirectSound plays the sound as before.
+- If the sound device is unplugged or stops working, the emulator keeps
+  running at the right speed, and the sound comes back when a device can
+  be opened again (tried every second). When another device becomes the
+  default in Windows, the sound moves to it.
+- Without any sound device the emulator still runs (it used to show an
+  empty "Sound Error" message and not run).
+- The Sound Settings window shows what is playing the sound, and at what
+  rate.
 - The **Sound Settings** window is redesigned: a **main volume** on the
   left, faders twice as tall (0-100%) with a **level meter** beside each
   (after its volume), the percentage under them and above them while

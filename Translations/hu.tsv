@@ -691,7 +691,7 @@ code	memoryWindow.cpp	Previous	Előző
 code	memoryWindow.cpp	Next	Következő
 code	memoryWindow.cpp	Last	Utolsó
 code	memoryWindow.cpp	{0} Change	{0} változás
-code	SoundDX.cpp	Message Sending Error	Üzenetküldési hiba
+code	SoundDX.cpp; SoundWASAPI.cpp	Message Sending Error	Üzenetküldési hiba
 code	SoundForm.cpp	Video	Videó
 code	TZXFILE.cpp	Code	Kód
 code	TZXFILE.cpp	--- Stop The Tape ---	--- Kazetta megállítása ---
@@ -799,3 +799,5 @@ code	wavload_.cpp	Playing	Lejátszás
 code	wavload_.cpp	Windows WAV Files	Windows WAV fájlok
 code	AccDraw_.cpp	Count not initialise DirectDraw.\nPlease ensure DirectX 7 or greater is installed	A DirectDraw nem indítható el.\nEllenőrizze, hogy a DirectX 7 vagy újabb telepítve van-e.
 code	main_.cpp	Automatic	Automatikus
+code	SoundForm.cpp	Output: {0}, {1} Hz	Kimenet: {0}, {1} Hz
+code	SoundForm.cpp	Output: no sound device	Kimenet: nincs hangeszköz
