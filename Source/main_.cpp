@@ -291,6 +291,9 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         iniFileExists = FileExists(emulator.inipath);
         LoadSettings(ini);
 
+        // The sound output chosen (the sound settings window is made later)
+        Sound.SetOutputChoice(CSound::OutputChoiceOf(ini->ReadString("MIDI","Output","").c_str()));
+
         RenderMode=ini->ReadInteger("MAIN","RenderMode", RENDERGDI);
 
         if (!RenderInit())

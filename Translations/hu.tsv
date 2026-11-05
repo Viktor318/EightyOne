@@ -798,6 +798,6 @@ code	wavload_.cpp	Loading	Betöltés
 code	wavload_.cpp	Playing	Lejátszás
 code	wavload_.cpp	Windows WAV Files	Windows WAV fájlok
 code	AccDraw_.cpp	Count not initialise DirectDraw.\nPlease ensure DirectX 7 or greater is installed	A DirectDraw nem indítható el.\nEllenőrizze, hogy a DirectX 7 vagy újabb telepítve van-e.
-code	main_.cpp	Automatic	Automatikus
-code	SoundForm.cpp	Output: {0}, {1} Hz	Kimenet: {0}, {1} Hz
-code	SoundForm.cpp	Output: no sound device	Kimenet: nincs hangeszköz
+code	main_.cpp; SoundForm.cpp	Automatic	Automatikus
+code	SoundForm.cpp	Output:	Kimenet:
+code	SoundForm.cpp	no sound device	nincs hangeszköz

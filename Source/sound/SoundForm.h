@@ -123,6 +123,8 @@ private:	// User declarations
         TLabel *ChannelLabel[3];        // A, B, C: move with their faders
         TLabel *PlaceLabel[3];          // left, centre, right: stay
         TTimer *MeterTimer;
+        TLabel *OutputCaption;
+        TComboBox *OutputBox;           // Automatic, WASAPI, DirectSound
         TLabel *OutputLabel;            // what is playing the sound
         bool Loading;
         TFader *WheelFader;             // the fader the wheel last moved
@@ -137,6 +139,7 @@ private:	// User declarations
         void ShowOutput(void);
         void __fastcall FaderChange(TObject *Sender);
         void __fastcall MuteClick(TObject *Sender);
+        void __fastcall OutputBoxChange(TObject *Sender);
         void __fastcall MeterTimerTimer(TObject *Sender);
 
 protected:

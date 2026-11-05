@@ -20,8 +20,11 @@ The changes of the `hungarian-windows` branch, compared with
   default in Windows, the sound moves to it.
 - Without any sound device the emulator still runs (it used to show an
   empty "Sound Error" message and not run).
-- The Sound Settings window shows what is playing the sound, and at what
-  rate.
+- The output can be chosen in the Sound Settings window: *Automatic*
+  (WASAPI, or if it cannot be used, DirectSound), *WASAPI* or
+  *DirectSound*. It changes at once, without resetting the sound chips;
+  it is kept in the settings (and in saved configurations). Beside it is
+  what is playing the sound, and at what rate.
 - The **Sound Settings** window is redesigned: a **main volume** on the
   left, faders twice as tall (0-100%) with a **level meter** beside each
   (after its volume), the percentage under them and above them while

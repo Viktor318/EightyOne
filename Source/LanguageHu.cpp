@@ -1606,9 +1606,9 @@ const LanguageEntry LanguageHungarianTable[] =
           "A DirectDraw nem ind\355that\363 el.\nEllen\365rizze, hogy a DirectX 7 vagy \372jabb telep\355tve van-e." },
         { "Automatic",
           "Automatikus" },
-        { "Output: {0}, {1} Hz",
-          "Kimenet: {0}, {1} Hz" },
-        { "Output: no sound device",
-          "Kimenet: nincs hangeszk\366z" },
+        { "Output:",
+          "Kimenet:" },
+        { "no sound device",
+          "nincs hangeszk\366z" },
         { 0, 0 }
 };

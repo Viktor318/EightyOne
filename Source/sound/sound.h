@@ -115,6 +115,18 @@
 // The names of the modes ("Mono", "ABC"...), also kept in the settings
 extern const char *AYStereoNames[AY_STEREO_MODES];
 
+// The output chosen: Automatic tries WASAPI, then DirectSound. Whichever is
+// chosen, if it cannot be opened the emulator is kept running by a timer
+// (with WASAPI or Automatic a device is looked for again every second).
+#define SOUND_OUTPUT_AUTO               0
+#define SOUND_OUTPUT_WASAPI             1
+#define SOUND_OUTPUT_DIRECTSOUND        2
+#define SOUND_OUTPUTS                   3
+
+// Their names ("Automatic", "WASAPI", "DirectSound"), also kept in the
+// settings
+extern const char *SoundOutputNames[SOUND_OUTPUTS];
+
 // The channel (0-2 for A-C) on the left, in the centre and on the right
 extern const int AYStereoPlaces[AY_STEREO_MODES][3];
 
@@ -151,6 +163,12 @@ public:
         // nothing is; and at what rate
         const char *OutputName(void) { return Output ? Output->Name() : NULL; }
         int OutputRate(void) { return Output ? m_SampleRate : 0; }
+
+        // SOUND_OUTPUT_...: used from the next Initialise(), or at once if
+        // the sound is playing (the sound devices are not reset)
+        int OutputChoice;
+        int SetOutputChoice(int choice);
+        static int OutputChoiceOf(const char *name);
         void AYWrite(int reg,int val, int frametstates);
         void AYWrite128(int reg, int val, int frametstates);
         void AYWriteTimex(int reg, int val, int frametstates);
@@ -181,6 +199,7 @@ private:
         CDSnd DXSound;
         CSoundOutput *Output;
         int OpenOutput(void);
+        int StartOutput(bool resetDevices);
 
         HWND m_hWnd;
         int m_BitsPerSample;
@@ -230,6 +249,7 @@ private:
         unsigned int AYToneTick[3],AYNoiseTick;
         unsigned int AYEnvTick,AYEnvSubCycles;
         unsigned int AYTickIncr;
+        int AYClock;                    // 0: no AY
         unsigned int AYTonePeriod[3],AYNoisePeriod,AYEnvPeriod;
 
         int EnvHeld,EnvAlternating;

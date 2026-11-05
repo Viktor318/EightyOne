@@ -46,6 +46,8 @@
 
 #pragma warn -8071
 
+#include <string.h>
+
 #include "sound\sound.h"
 #include "sound\soundop.h"
 #include "sound\midi.h"
@@ -63,6 +65,11 @@ CSound Sound;
 const char *AYStereoNames[AY_STEREO_MODES] =
 {
         "Mono", "ABC", "ACB", "BAC", "BCA", "CAB", "CBA"
+};
+
+const char *SoundOutputNames[SOUND_OUTPUTS] =
+{
+        "Automatic", "WASAPI", "DirectSound"
 };
 
 // The channel (0-2 for A-C) on the left, in the centre and on the right,
@@ -88,6 +95,8 @@ CSound::CSound()
         Mix = NULL;
         Buffer = NULL;
         Output = NULL;
+        OutputChoice = SOUND_OUTPUT_AUTO;
+        AYClock = 0;
         m_hWnd = NULL;
         m_FPS = m_BitsPerSample = m_SampleRate = m_RequestedRate = m_Channels = 0;
         OffsetTStates = 0;
@@ -136,6 +145,19 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         EnvAlternating=0;
         BeeperLastSubpos=0;
 
+        if (Output) Output->End();
+        Output=NULL;
+
+        return StartOutput(true);
+}
+
+// Open the output, and get ready for its sample rate; the sound generating
+// devices are reset if asked (otherwise they go on where they are)
+
+int CSound::StartOutput(bool resetDevices)
+{
+        int oldRate=m_SampleRate;
+
         // Start by opening the output; it may use another sample rate (the
         // one asked for stays if it fails, the AY needs one)
 
@@ -143,66 +165,108 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         int r = OpenOutput();
         if (r)
         {
+                End();
                 return(r);
         }
 
         m_SampleRate=Output->SampleRate();
-        m_SamplesPerTState=m_SampleRate/(double)machine.clockspeed;
 
-        // get a 1 frame size buffer
-
-        FrameSize=m_SampleRate/m_FPS;
-
-        // A frame of T-states fills exactly one buffer (the beeper has always
-        // been placed like this; the AY and the SpecDrum used the clock speed,
-        // which put their changes a little early by the end of the frame)
-        if (machine.tperframe > 0)
-                m_SamplesPerTState=FrameSize/(double)machine.tperframe;
-
-        Buffer = new short[FrameSize*m_Channels];
-        Mix = new int[FrameSize*m_Channels];
-
-        if(Buffer==NULL || Mix==NULL)
+        if (resetDevices || m_SampleRate!=oldRate || !Buffer || !Mix)
         {
-                End();
-                return(-1); // Oh dear, malloc failed
+                m_SamplesPerTState=m_SampleRate/(double)machine.clockspeed;
+
+                // get a 1 frame size buffer
+
+                FrameSize=m_SampleRate/m_FPS;
+
+                // A frame of T-states fills exactly one buffer (the beeper has
+                // always been placed like this; the AY and the SpecDrum used the
+                // clock speed, which put their changes a little early by the end
+                // of the frame)
+                if (machine.tperframe > 0)
+                        m_SamplesPerTState=FrameSize/(double)machine.tperframe;
+
+                if (Buffer) delete []Buffer;
+                if (Mix) delete []Mix;
+                Buffer = new short[FrameSize*m_Channels];
+                Mix = new int[FrameSize*m_Channels];
+
+                if(Buffer==NULL || Mix==NULL)
+                {
+                        End();
+                        return(-1); // Oh dear, malloc failed
+                }
+
+                memset(Mix, 0, FrameSize*m_Channels*sizeof(int));
+
+                // What was in the frame being made (in samples) is lost
+                OldPos=-1;
+                FillPos=0;
+                BeeperPendingCount=0;
+                AYChangeCount=0;
+                SpecDrumChangeCount=0;
+
+                BeeperTickIncr=(1<<24)/m_SampleRate;
+                if (AYClock) AYTickIncr=(int)(65536.*AYClock/m_SampleRate);
+
+                sp0256_AL2.SetSamplingFreq(m_SampleRate);
+                Digitalker.SetSamplingFreq(m_SampleRate);
         }
 
-        memset(Mix, 0, FrameSize*m_Channels*sizeof(int));
+        if (resetDevices)
+        {
+                OldVal=OldValOrig=0;
+                OffsetTStates=0;
+                BeeperRequested=0;
+                BeeperTick=0;
 
-        OldVal=OldValOrig=0;
-        OldPos=-1;
-        FillPos=0;
-        OffsetTStates=0;
-        BeeperRequested=0;
-        BeeperPendingCount=0;
-
-        BeeperTick=0;
-        BeeperTickIncr=(1<<24)/m_SampleRate;
-
-        InitDevices();  // initialise sound generating devices
-
-        sp0256_AL2.SetSamplingFreq(m_SampleRate);
-        Digitalker.SetSamplingFreq(m_SampleRate);
+                InitDevices();  // initialise sound generating devices
+        }
 
         Output->Play();
         return(0);
 }
 
-// The first output that works
+// The first output that works, of the ones the choice allows
 
 int CSound::OpenOutput(void)
 {
+        bool wasapi = OutputChoice != SOUND_OUTPUT_DIRECTSOUND;
+        bool dsound = OutputChoice != SOUND_OUTPUT_WASAPI;
+
         Output = NULL;
 
-        if (!WasapiSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+        if (wasapi && !WasapiSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
                 Output = &WasapiSound;
-        else if (!DXSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+        else if (dsound && !DXSound.Initialise(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
                 Output = &DXSound;
-        else if (!WasapiSound.InitialiseNoDevice(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels))
+        else if (!WasapiSound.InitialiseNoDevice(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels, wasapi))
                 Output = &WasapiSound;
 
         return Output ? 0 : -1;
+}
+
+int CSound::SetOutputChoice(int choice)
+{
+        if (choice < 0 || choice >= SOUND_OUTPUTS) choice = SOUND_OUTPUT_AUTO;
+        if (choice == OutputChoice) return 0;
+
+        OutputChoice = choice;
+        if (!Output) return 0;          // not playing: used when it starts
+
+        Output->End();
+        Output = NULL;
+        return StartOutput(false);
+}
+
+int CSound::OutputChoiceOf(const char *name)
+{
+        int i;
+
+        for (i=0; i<SOUND_OUTPUTS; i++)
+                if (name && !stricmp(name, SoundOutputNames[i])) return i;
+
+        return SOUND_OUTPUT_AUTO;
 }
 
 // Reinitialise gets called if something changes... we lose the window handle,
@@ -256,6 +320,7 @@ void CSound::AYInit(void)
         }
         AYToneLevels[0]=0;
 
+        AYClock=0;
         AYNoiseTick=AYNoisePeriod=0;
         AYEnvTick=AYEnvPeriod=0;
 
@@ -288,6 +353,7 @@ void CSound::AYInit(void)
                 return;
         }
 
+        AYClock=clock;
         AYTickIncr=(int)(65536.*clock/m_SampleRate);
         AYChangeCount=0;
         AYReset();

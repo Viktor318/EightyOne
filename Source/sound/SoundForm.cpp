@@ -501,11 +501,27 @@ void TMidiForm::CreateMixer(void)
         SpecDrumGroup = CreateSection(x, 1, "SpecDrum");
         CreateColumn(SpecDrumGroup, 0, VOLUME_SPECDRUM, false);
 
-        // Beside the OK button: the output (it may change while playing)
+        // Beside the OK button: the output chosen, and what is playing the
+        // sound (it may change while playing)
+        OutputCaption = new TLabel(this);
+        OutputCaption->Parent = this;
+        OutputCaption->SetBounds(GroupBox1->Left + 4, OK->Top + 5, 40, 16);
+        OutputCaption->Caption = "Output:";             // its width follows
+
+        OutputBox = new TComboBox(this);
+        OutputBox->Parent = this;
+        OutputBox->Style = Stdctrls::csDropDownList;
+        OutputBox->SetBounds(GroupBox1->Left + 70, OK->Top + 1, 110, 23);
+        for (i=0; i<SOUND_OUTPUTS; i++)
+                OutputBox->Items->Add(SoundOutputNames[i]);
+        OutputBox->ItemIndex = Sound.OutputChoice;
+        OutputBox->OnChange = OutputBoxChange;
+
         OutputLabel = new TLabel(this);
         OutputLabel->Parent = this;
         OutputLabel->AutoSize = false;
-        OutputLabel->SetBounds(GroupBox1->Left + 4, OK->Top + 5, OK->Left - GroupBox1->Left - 12, 16);
+        OutputLabel->SetBounds(OutputBox->Left + OutputBox->Width + 10, OK->Top + 5,
+                               OK->Left - OutputBox->Left - OutputBox->Width - 18, 16);
         LanguageKeepText(OutputLabel);
         ShowOutput();
 
@@ -521,11 +537,21 @@ void TMidiForm::ShowOutput(void)
         AnsiString text;
 
         if (name)
-                text = TrF("Output: {0}, {1} Hz", name, IntToStr(Sound.OutputRate()));
+                text = AnsiString(name) + ", " + IntToStr(Sound.OutputRate()) + " Hz";
         else
-                text = Tr("Output: no sound device");
+                text = Tr("no sound device");
 
         if (OutputLabel->Caption != text) OutputLabel->Caption = text;
+
+        // The list just after the caption (its length depends on the
+        // language), the text after it up to the OK button
+        int left = OutputCaption->Left + OutputCaption->Width + 8;
+        if (OutputBox->Left != left)
+        {
+                OutputBox->Left = left;
+                OutputLabel->SetBounds(left + OutputBox->Width + 10, OutputLabel->Top,
+                                       OK->Left - left - OutputBox->Width - 18, OutputLabel->Height);
+        }
 }
 
 TGroupBox *TMidiForm::CreateSection(int left, int columns, const char *caption)
@@ -644,6 +670,21 @@ void __fastcall TMidiForm::MuteClick(TObject *Sender)
 
         ShowPercent(component->Tag);
         if (!Loading) ApplySettings();
+}
+
+// Another output: it is opened at once (the window waits for it)
+
+void __fastcall TMidiForm::OutputBoxChange(TObject *Sender)
+{
+        TCursor cursor = Screen->Cursor;
+
+        if (Loading) return;
+
+        Screen->Cursor = crHourGlass;
+        Sound.SetOutputChoice(OutputBox->ItemIndex);
+        Screen->Cursor = cursor;
+
+        ShowOutput();
 }
 
 void __fastcall TMidiForm::StereoBoxChange(TObject *Sender)
@@ -786,6 +827,7 @@ void TMidiForm::SaveSettings(TIniFile *ini)
 
         ini->WriteInteger("MIDI","MidiDev",MidiBox->ItemIndex);
         ini->WriteBool("MIDI","BeeperExcludeHSyncs",BeeperExcludeHSyncs->Checked);
+        ini->WriteString("MIDI","Output",SoundOutputNames[Sound.OutputChoice]);
 }
 
 void TMidiForm::LoadSettings(TIniFile *ini)
@@ -843,6 +885,12 @@ void TMidiForm::LoadSettings(TIniFile *ini)
                 mode = ini->ReadBool("MIDI","AYMixACB",false) ? AY_STEREO_ACB : AY_STEREO_MONO;
         StereoBox->ItemIndex = mode;
         PlaceAYChannels();
+
+        // The output (at start-up the main window has set it already)
+        Sound.SetOutputChoice(CSound::OutputChoiceOf(
+                ini->ReadString("MIDI","Output",SoundOutputNames[Sound.OutputChoice]).c_str()));
+        OutputBox->ItemIndex = Sound.OutputChoice;
+        ShowOutput();
 
         MidiBox->ItemIndex=ini->ReadInteger("MIDI","MidiDev",MidiBox->ItemIndex);
         BeeperExcludeHSyncs->Checked=ini->ReadBool("MIDI","BeeperExcludeHSyncs",BeeperExcludeHSyncs->Checked);

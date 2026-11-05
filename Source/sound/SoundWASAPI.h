@@ -85,9 +85,10 @@ public:
         int Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
 
         // Without a device (none could be opened): keeps the emulator
-        // running at the right speed, at the sample rate asked for, and
-        // plays the sound if a device can be opened later
-        int InitialiseNoDevice(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
+        // running at the right speed, at the sample rate asked for, and if
+        // `openLater', plays the sound when a device can be opened
+        int InitialiseNoDevice(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels,
+                               bool openLater);
 
         int Play();
         int End();
@@ -97,7 +98,8 @@ public:
         const char *Name() { return m_DeviceOpen ? "WASAPI" : NULL; }
 
 private:
-        int Start(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels, bool needDevice);
+        int Start(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels,
+                  bool needDevice, bool openLater);
         void Release(void);
 
         void ThreadFN(void);
@@ -117,6 +119,7 @@ private:
         int m_SampleRate;
         int m_Channels;
         bool m_NeedDevice;
+        bool m_OpenLater;               // look for a device when there is none
 
         DWORD m_ThreadID;
         HANDLE m_ThreadHandle;

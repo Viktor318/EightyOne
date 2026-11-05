@@ -156,6 +156,7 @@ CWasapiSnd::CWasapiSnd(void)
         m_SampleRate=0;
         m_Channels=0;
         m_NeedDevice=true;
+        m_OpenLater=true;
 
         m_ThreadID=0;
         m_ThreadHandle=NULL;
@@ -196,18 +197,20 @@ CWasapiSnd::CWasapiSnd(void)
 
 int CWasapiSnd::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels)
 {
-        return Start(hWnd, FPS, BitsPerSample, SampleRate, Channels, true);
+        return Start(hWnd, FPS, BitsPerSample, SampleRate, Channels, true, true);
 }
 
-int CWasapiSnd::InitialiseNoDevice(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels)
+int CWasapiSnd::InitialiseNoDevice(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels,
+                                   bool openLater)
 {
-        return Start(hWnd, FPS, BitsPerSample, SampleRate, Channels, false);
+        return Start(hWnd, FPS, BitsPerSample, SampleRate, Channels, false, openLater);
 }
 
 // Start the audio thread, which opens the device (and waits for Play()).
 // The sound from the emulator is 16 bit, mono or stereo.
 
-int CWasapiSnd::Start(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels, bool needDevice)
+int CWasapiSnd::Start(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels,
+                      bool needDevice, bool openLater)
 {
         if (m_ThreadHandle) return 0;
         if (!hWnd || FPS <= 0 || BitsPerSample != 16 || SampleRate <= 0
@@ -218,6 +221,7 @@ int CWasapiSnd::Start(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int
         m_SampleRate=SampleRate;
         m_Channels=Channels;
         m_NeedDevice=needDevice;
+        m_OpenLater=openLater;
 
         if (!m_QueueLockInit)
         {
@@ -668,7 +672,15 @@ void CWasapiSnd::ThreadFN()
 
         // Open the device; without one, carry on only if asked to
 
-        m_OpenOK = OpenDevice(m_NeedDevice ? 0 : m_SampleRate) || !m_NeedDevice;
+        if (m_NeedDevice)
+        {
+                m_OpenOK = OpenDevice(0);
+        }
+        else
+        {
+                if (m_OpenLater) OpenDevice(m_SampleRate);
+                m_OpenOK = true;
+        }
         SetEvent(m_ReadyEvent);
 
         events[0] = m_StopEvent;
@@ -691,7 +703,8 @@ void CWasapiSnd::ThreadFN()
                                 m_RetryTime = GetTickCount();
                         }
 
-                        if (!m_DeviceOpen && (LONG)(GetTickCount() - m_RetryTime) >= 0)
+                        if (!m_DeviceOpen && m_OpenLater
+                                && (LONG)(GetTickCount() - m_RetryTime) >= 0)
                         {
                                 m_RetryTime = GetTickCount() + WASAPI_RETRY_MS;
                                 if (OpenDevice(m_SampleRate) && FAILED(m_Client->Start()))

@@ -21,8 +21,11 @@ eredetihez képest.
   alapértelmezett, a hang átkerül rá.
 - Hangeszköz nélkül is fut az emuláció (eddig üres „Hanghiba” üzenetet
   adott, és nem futott).
-- A Hangbeállítások ablak kiírja, mi szólaltatja meg a hangot, és milyen
-  frekvencián.
+- A kimenet a Hangbeállítások ablakban választható: *Automatikus*
+  (WASAPI, vagy ha az nem használható, DirectSound), *WASAPI* vagy
+  *DirectSound*. Azonnal átvált, a hangchipek alaphelyzetbe állítása
+  nélkül; a beállítások (és a mentett konfigurációk) megőrzik. Mellette
+  látszik, mi szólaltatja meg a hangot, és milyen frekvencián.
 - Megújult a **Hangbeállítások** ablak: bal oldalon **fő hangerő**,
   kétszer olyan magas csúszkák (0–100%), mindegyik mellett
   **szintjelzővel** (a hangerő után mér), alattuk a százalék, húzás közben
