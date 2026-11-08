@@ -96,6 +96,9 @@
 #define BLEP_CUTOFF             0.45    /* of the sample rate, -6 dB */
 #define BLEP_KAISER_BETA        9.0     /* about -90 dB */
 
+// What the AY gives out has its DC taken away below this (Hz)
+#define AY_DC_CUTOFF            5.0
+
 
 // The volumes, mutes and level meters of the sound settings window
 #define VOLUME_AY_A             0
@@ -228,7 +231,6 @@ private:
         double SamplePosition(int frametstates);
 
         void AYApplyChange(int reg);
-        void AYEnvCompute(void);
         void AYEmit(double at);
 
         int SelectAYReg;
@@ -271,10 +273,14 @@ private:
         double AYToneTick[3];           // 0 ... twice the half period
         double AYToneHalf[3];           // half a period: 8 * the period set
         double AYNoiseTick, AYNoisePeriod;
-        double AYEnvSubCycles;          // the envelope steps every 256
-        unsigned int AYEnvTick, AYEnvPeriod;
-        int EnvHeld,EnvAlternating;
-        int AYEnvStep;                  // 0-15, as last worked out
+        // The envelope, as the chip has it: 16 steps, each 16 times the
+        // period long (0 counts as 1); the step counts down from 15, and
+        // its level is the step, inverted when attacking
+        double AYEnvSubCycles;          // cycles into the step
+        unsigned int AYEnvPeriod;
+        int AYEnvStep;                  // 15 ... 0
+        int AYEnvAttack;                // 0, or 15 to invert
+        int AYEnvHold, AYEnvAlternate, AYEnvHolding;
         double AYEnvLevel;
         int AYRng, AYNoiseToggle;
 
@@ -283,6 +289,8 @@ private:
         // differences, added up as they are mixed
         double AYOut[2];
         double AYAcc[2];
+        double AYDCIn[2], AYDCOut[2];   // the DC blocker
+        double AYDCPole;
         double *AYDelta;                // two of AYDeltaLen
         int AYDeltaLen;
 

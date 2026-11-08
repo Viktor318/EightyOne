@@ -10,6 +10,20 @@ eredetihez képest.
 
 ### Hang
 
+- Az AY **burkológörbéje** úgy működik, mint a chipé, 16 lépcsővel. 15
+  volt, ezért a lecsengő görbe nem némult el, hanem a legkisebb szinten
+  szólt tovább (a 2-es és 3-as alak majdnem a legfelsőn), a felfutó és
+  tartó alakok pedig egy lépcsővel alacsonyabban tartottak. A gyors
+  burkológörbék (kis periódusú „buzzer” basszusok) is mind a 16 lépcsőt
+  bejárják, nem csak annyit, amennyi a periódus; a 0-s periódus 1-nek
+  számít.
+- Ha egy csatornán **sem hang, sem zaj** nincs bekapcsolva, az AY a
+  csatorna hangerejének szintjét adja ki, mint a chip, így a
+  hangerő-regiszteren át lejátszott **digidobok és minták** is szólnak
+  (eddig némák voltak).
+- Az AY kimenetéből ki van szűrve az egyenfeszültség, mert a hangszóró
+  is kondenzátoron át kapja: a keverőben kikapcsolt, de felhúzott
+  hangerejű csatorna nem veszi el a helyet a hangok elől.
 - **Sávkorlátozott AY** is: folytonos időben fut, és a kimenetének minden
   változása (a hangok élei, a zaj, a burkológörbe lépései, a
   regiszterírások, mind a minta azon a részén, ahol történnek)

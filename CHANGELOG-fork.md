@@ -9,6 +9,18 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Sound
 
+- The AY's **envelope** works as the chip's, with 16 steps. It had 15, so
+  a decaying envelope did not fall silent but stayed at the lowest level
+  (shapes 2 and 3 even near the top), and the attack-and-hold shapes held
+  a step too low. Fast envelopes (envelope "buzzer" basses with a small
+  period) have all 16 steps too, not only as many as the period; period
+  0 counts as 1.
+- With **neither tone nor noise** on a channel, the AY gives out the
+  channel's level, as the chip does, so **digital drums and samples**
+  played through the volume register are heard (they were silent).
+- The AY's output has no DC, as the speaker is coupled through a
+  capacitor: a channel switched off in the mixer with its volume left up
+  takes no headroom.
 - The **AY is band limited** as well: it is run in continuous time, and
   every change of its output (tone edges, noise, envelope steps, register
   writes, each at the fraction of a sample where it happens) is a band

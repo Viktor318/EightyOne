@@ -116,7 +116,11 @@ CSound::CSound()
         AYRng = 1;
         AYNoiseToggle = 1;
         AYEnvStep = 0;
+        AYEnvAttack = 0;
+        AYEnvHold = AYEnvAlternate = AYEnvHolding = 0;
         AYEnvLevel = 0;
+        AYDCIn[0] = AYDCIn[1] = AYDCOut[0] = AYDCOut[1] = 0;
+        AYDCPole = 1;
         BlepInit();
 }
 
@@ -157,8 +161,6 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         // Otherwise, we're good to go, so configure the sound.
 
         m_BytesPerSample=m_BitsPerSample/8;
-        EnvHeld=0;
-        EnvAlternating=0;
 
         if (Output) Output->End();
         Output=NULL;
@@ -238,6 +240,8 @@ int CSound::StartOutput(bool resetDevices)
                 memset(AYDelta, 0, 2*AYDeltaLen*sizeof(double));
                 AYOut[0]=AYOut[1]=0;
                 AYAcc[0]=AYAcc[1]=0;
+                AYDCIn[0]=AYDCIn[1]=AYDCOut[0]=AYDCOut[1]=0;
+                AYDCPole=1.0-2*3.14159265358979323846*AY_DC_CUTOFF/m_SampleRate;
 
                 sp0256_AL2.SetSamplingFreq(m_SampleRate);
                 Digitalker.SetSamplingFreq(m_SampleRate);
@@ -356,9 +360,12 @@ void CSound::AYInit(void)
         AYClock=0;
         AYCyclesPerSample=0;
         AYNoiseTick=AYNoisePeriod=0;
-        AYEnvTick=AYEnvPeriod=0;
+        AYEnvPeriod=0;
         AYEnvSubCycles=0;
         AYEnvStep=0;
+        AYEnvAttack=0;
+        AYEnvHold=AYEnvAlternate=0;
+        AYEnvHolding=1;
         AYEnvLevel=0;
 
         for(f=0;f<3;f++)
@@ -368,6 +375,7 @@ void CSound::AYInit(void)
         if (AYDelta) memset(AYDelta, 0, 2*AYDeltaLen*sizeof(double));
         AYOut[0]=AYOut[1]=0;
         AYAcc[0]=AYAcc[1]=0;
+        AYDCIn[0]=AYDCIn[1]=AYDCOut[0]=AYDCOut[1]=0;
 
         switch(machine.aytype)
         {
@@ -409,9 +417,10 @@ void CSound::AYInit(void)
 // samples (the tone edges only roughly in between), so high notes brought
 // whistling, inharmonic tones with them.
 //
-// What it gives out is as before: a tone is +-its level, the noise 0 or its
-// level, and a tone above half the sample rate (period 0 too) its level
-// (sample playing code uses that). The envelope works as before.
+// What it gives out: a tone is +-its level, the noise 0 or its level, and a
+// tone above half the sample rate (period 0 too) its level; with neither
+// tone nor noise, the level, as the chip gives it (sample playing code uses
+// these). The envelope is the chip's: 16 steps, holding at 0 or 15.
 
 // A register written: what it changes
 
@@ -441,37 +450,30 @@ void CSound::AYApplyChange(int reg)
                 break;
 
         case 11: case 12:
-                // this one counts as the chip does
                 AYEnvPeriod=AYRegisters[11]|(AYRegisters[12]<<8);
-                AYEnvCompute();
                 break;
 
         case 13:
-                AYEnvTick=0;
+                // The shape: CONTINUE, ATTACK, ALTERNATE, HOLD. One that
+                // does not continue holds at 0 at the end, as the one that
+                // does with ALTERNATE and HOLD set as ATTACK is.
+                AYEnvAttack=(AYRegisters[13]&4) ? 15 : 0;
+                if ((AYRegisters[13]&8)==0)
+                {
+                        AYEnvHold=1;
+                        AYEnvAlternate=AYEnvAttack;
+                }
+                else
+                {
+                        AYEnvHold=AYRegisters[13]&1;
+                        AYEnvAlternate=AYRegisters[13]&2;
+                }
+                AYEnvStep=15;
+                AYEnvHolding=0;
                 AYEnvSubCycles=0;
-                EnvHeld=EnvAlternating=0;
-                AYEnvLevel=0;
-                AYEnvCompute();
+                AYEnvLevel=AYToneLevels[AYEnvStep^AYEnvAttack];
                 break;
         }
-}
-
-// The envelope's level, from its tick (unless it is held)
-
-void CSound::AYEnvCompute(void)
-{
-        int v, envshape=AYRegisters[13];
-
-        if (!AYEnvPeriod || EnvHeld) return;
-
-        v=((int)AYEnvTick*15)/(int)AYEnvPeriod;
-        if(v<0) v=0;
-        if(v>15) v=15;
-        if((envshape&4)==0) v=15-v;
-        if(EnvAlternating) v=15-v;
-
-        AYEnvStep=v;
-        AYEnvLevel=AYToneLevels[v];
 }
 
 // What the AY gives out now: if it is not what it gave out, a step at `at'
@@ -497,6 +499,11 @@ void CSound::AYEmit(double at)
                 }
                 if((mixer&(8<<g))==0 && AYNoiseToggle)
                         chv[g]+=level;
+
+                // Neither tone nor noise: the chip gives out the level
+                // (sample playing code, digital drums, uses that)
+                if((mixer&(9<<g))==(9<<g))
+                        chv[g]=level;
 
                 PEAK(g, (int)chv[g]);
         }
@@ -536,8 +543,8 @@ void CSound::AYOverlay(void)
 {       
         struct AYChangeTag *change_ptr;
         int changes_left;
-        double t, next, when, dt, cps, threshold;
-        int f, g, c, event, which, envshape;
+        double t, next, when, dt, cps, threshold, envStep;
+        int f, g, c, event, which;
 
         if (!AYDelta || AYCyclesPerSample <= 0) return;
 
@@ -568,10 +575,11 @@ void CSound::AYOverlay(void)
                         if (when < next) { next=when; event=AY_EVENT_REGISTER; }
                 }
 
-                // envelope gets incr'd every 256 AY cycles
-                if (AYEnvPeriod)
+                // the envelope's next step (none while it holds)
+                envStep=16.0*(AYEnvPeriod ? AYEnvPeriod : 1);
+                if (!AYEnvHolding)
                 {
-                        when=t + (256-AYEnvSubCycles)/cps;
+                        when=t + (envStep-AYEnvSubCycles)/cps;
                         if (when < next) { next=when; event=AY_EVENT_ENVELOPE; }
                 }
 
@@ -612,7 +620,7 @@ void CSound::AYOverlay(void)
                                 AYToneTick[g]=AYToneHalf[g] > 0 ? fmod(AYToneTick[g], 2*AYToneHalf[g]) : 0;
                 }
                 if (AYNoisePeriod >= cps) AYNoiseTick+=dt;
-                if (AYEnvPeriod) AYEnvSubCycles+=dt;
+                if (!AYEnvHolding) AYEnvSubCycles+=dt;
 
                 if (event==AY_EVENT_END) break;
 
@@ -626,24 +634,25 @@ void CSound::AYOverlay(void)
                         break;
 
                 case AY_EVENT_ENVELOPE:
-                        AYEnvSubCycles-=256;
+                        AYEnvSubCycles-=envStep;
                         if (AYEnvSubCycles < 0) AYEnvSubCycles=0;
 
-                        envshape=AYRegisters[13];
-                        AYEnvTick++;
-                        if(AYEnvTick>=AYEnvPeriod)
+                        AYEnvStep--;
+                        if (AYEnvStep < 0)
                         {
-                                AYEnvTick-=AYEnvPeriod;
-                                if(!EnvHeld && ((envshape&1) || (envshape&8)==0))
+                                if (AYEnvHold)
                                 {
-                                        EnvHeld=1;
-                                        if((envshape&2) || (envshape&0xc)==4)
-                                                AYEnvLevel=AYToneLevels[15-AYEnvStep];
+                                        if (AYEnvAlternate) AYEnvAttack^=15;
+                                        AYEnvHolding=1;
+                                        AYEnvStep=0;
                                 }
-                                if(!EnvHeld && (envshape&2))
-                                        EnvAlternating=!EnvAlternating;
+                                else
+                                {
+                                        if (AYEnvAlternate) AYEnvAttack^=15;
+                                        AYEnvStep=15;
+                                }
                         }
-                        AYEnvCompute();
+                        AYEnvLevel=AYToneLevels[AYEnvStep^AYEnvAttack];
                         break;
 
                 case AY_EVENT_TONE:
@@ -676,16 +685,26 @@ void CSound::AYOverlay(void)
                 AYEmit(t);
         }
 
-        // The steps added up into the mix, and what comes after this frame
+        // The steps added up into the mix, without the DC (the speaker is
+        // coupled through a capacitor: the AY gives out a steady level when
+        // tone and noise are off, the noise is on one side of 0, so is an
+        // envelope played as a waveform), and what comes after this frame
         // moved to the start
         for(c=0; c<m_Channels && c<2; c++)
         {
                 double *delta = AYDelta + c*AYDeltaLen;
+                double y;
 
                 for(f=0;f<FrameSize;f++)
                 {
                         AYAcc[c]+=delta[f];
-                        Mix[f*m_Channels+c]+=(int)(AYAcc[c]<0 ? AYAcc[c]-0.5 : AYAcc[c]+0.5);
+
+                        y=AYAcc[c]-AYDCIn[c]+AYDCPole*AYDCOut[c];
+                        if (y > -1e-9 && y < 1e-9) y=0;
+                        AYDCIn[c]=AYAcc[c];
+                        AYDCOut[c]=y;
+
+                        Mix[f*m_Channels+c]+=(int)(y<0 ? y-0.5 : y+0.5);
                 }
 
                 memmove(delta, delta+FrameSize, (AYDeltaLen-FrameSize)*sizeof(double));
