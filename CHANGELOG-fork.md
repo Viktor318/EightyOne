@@ -161,6 +161,10 @@ could not be loaded.
 - With 100%, 200%, 300% or 400% chosen, the window can be resized too, but
   it jumps between these sizes (the zoom ticked follows). *User Defined*
   still allows any size.
+- The status bar stays at the bottom of the window. When the menu bar
+  changed its number of lines without the window being told (seen at 100%
+  with the Hungarian menus, which only just fit), it was left one line
+  higher, under the picture, and looked empty.
 
 ### ZX Printer
 

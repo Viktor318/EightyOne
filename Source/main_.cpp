@@ -1030,6 +1030,13 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
                 return;
         }
 
+        // The status bar belongs at the bottom of the window. When the menu
+        // bar takes another number of lines (a narrow window, a longer
+        // language), the client area can change without the controls being
+        // aligned again, and the bar is left higher up, under the picture
+        if (StatusBar1->Visible && StatusBar1->Top + StatusBar1->Height != ClientHeight)
+                Realign();
+
         AnsiString text="";
 
         if (emulation_stop)
