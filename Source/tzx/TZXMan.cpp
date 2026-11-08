@@ -194,8 +194,23 @@ __fastcall TTZX::TTZX(TComponent* Owner)
         delete ini;
 
         DragAcceptFiles(Handle, true);
-        Table->Rows[0]->CommaText = "\"" + Tr("Description") + "\",\"" + Tr("Size") + "\"";
+        SetTableHeader();
         FormResize(NULL);
+}
+//---------------------------------------------------------------------------
+
+void TTZX::SetTableHeader(void)
+{
+        Table->Rows[0]->CommaText = "\"" + Tr("Description") + "\",\"" + Tr("Size") + "\"";
+}
+
+// After a change of language: the table's header and blocks, and the
+// window's title with the tape's name
+void TTZX::LanguageChanged(void)
+{
+        SetTableHeader();
+        if (CaptionName != "") Caption = TrF("{0} - Tape", CaptionName);
+        UpdateTable(false);
 }
 //---------------------------------------------------------------------------
 void TTZX::LoadFile(AnsiString Filename, bool Insert)
@@ -285,7 +300,8 @@ void TTZX::LoadFile(AnsiString Filename, bool Insert)
                 TZXFile.AutoStart=AutoStartBtn->Down;
                 if (AutoLoadBtn->Down) AutoLoadCount=2;
 
-                Caption = TrF("{0} - Tape", FileNameGetFname(Filename)+FileNameGetExt(Filename));
+                CaptionName = FileNameGetFname(Filename)+FileNameGetExt(Filename);
+                Caption = TrF("{0} - Tape", CaptionName);
                 Form1->InTZXManagerClick(NULL);
                 Form1->OutTZXManagerClick(NULL);
         }
@@ -431,6 +447,7 @@ void __fastcall TTZX::NewTZXClick(TObject *Sender)
         TZXFile.AutoStart=AutoStartBtn->Down;
         UpdateTable(false);
         Table->Row=2;
+        CaptionName="";
         Caption=Tr("Untitled - Tape");
 }
 //---------------------------------------------------------------------------

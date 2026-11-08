@@ -2604,6 +2604,13 @@ void THW::RefreshDefaultRamSettings()
 }
 //---------------------------------------------------------------------------
 
+// After a change of language: what the code puts together
+
+void THW::LanguageChanged()
+{
+        DisplayTotalRam();
+}
+
 void THW::DisplayTotalRam()
 {
         int totalRam = baseRamSize;

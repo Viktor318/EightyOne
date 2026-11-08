@@ -37,6 +37,7 @@ __published:	// IDE-managed Components
         void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 private:	// User declarations
         class ProfileDetail* _pd;
+        AnsiString _plotName;
         void InitScrollbar();
         void UpdateMinMax(ProfileDetail* pd);
         int _mouseX;
@@ -44,6 +45,7 @@ private:	// User declarations
 public:		// User declarations
         __fastcall TProfilePlot(TComponent* Owner);
         void __fastcall PlotTGraph(class ProfileDetail* pd, AnsiString caption);
+        void LanguageChanged();
         void ShowLast();
 };
 //---------------------------------------------------------------------------

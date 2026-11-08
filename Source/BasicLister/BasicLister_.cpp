@@ -423,6 +423,13 @@ void TBasicLister::ConfigureScrollBar()
         ScrollBar->Enabled = scrollable;
 }
 
+// After a change of language: the program's details in the status bar
+
+void TBasicLister::LanguageChanged()
+{
+        ConfigureStatusBar();
+}
+
 void TBasicLister::ConfigureStatusBar()
 {
         AnsiString programDetails;

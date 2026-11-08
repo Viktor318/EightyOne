@@ -131,9 +131,12 @@ __published:	// IDE-managed Components
         void __fastcall GroupEnd1Click(TObject *Sender);
 private:	// User declarations
         int Mx, My;
+        AnsiString CaptionName;
         void UpdateScrollBar(void);
+        void SetTableHeader(void);
 public:		// User declarations
         __fastcall TTZX(TComponent* Owner);
+        void LanguageChanged(void);
         void LoadSettings(TIniFile *ini);
         void SaveSettings(TIniFile *ini);
         void AddBlock(char *Buffer, int Len);

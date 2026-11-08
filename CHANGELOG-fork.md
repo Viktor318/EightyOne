@@ -191,6 +191,12 @@ could not be loaded.
 - The forms are not changed: their texts are replaced while running from
   `Translations/hu.tsv` (made into `Source/LanguageHu.cpp` by
   `Translations/make_table.py`), so the English version stays the same.
+- When the language is changed, the texts the program puts together also
+  change at once (they used to wait for their next update): the tape
+  list with its header and the Tape Manager's title, the total RAM in the
+  Hardware window, the Wave Loader's title and status, the ZX Printer's
+  speeds, the BASIC Lister's status bar, the profiler's plot and the
+  game controller menus.
 - Snapshots and the settings file keep the English texts of the hardware
   choices, so they work with either language and with the original
   EightyOne.

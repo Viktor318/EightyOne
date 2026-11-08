@@ -114,6 +114,7 @@ public:		// User declarations
         __fastcall TBasicLister(TComponent* Owner);
         virtual __fastcall ~TBasicLister();
         void SetBasicLister(IBasicLister* basicLister);
+        void LanguageChanged();
         void SaveSettings(TIniFile* ini);
         void LoadSettings(TIniFile* ini);
         bool ListerAvailable();

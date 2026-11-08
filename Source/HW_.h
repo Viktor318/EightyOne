@@ -406,6 +406,7 @@ private:	// User declarations
 
 public:		// User declarations
         __fastcall THW(TComponent* Owner);
+        void LanguageChanged();
         bool ResetRequired;
         void UpdateHardwareSettings(bool disableReset);
         void SaveSettings(TIniFile* ini);

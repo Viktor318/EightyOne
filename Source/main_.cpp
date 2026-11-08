@@ -3333,6 +3333,18 @@ void __fastcall TForm1::LanguageClick(TObject *Sender)
         LanguageSetSetting(item->Tag);
         LanguageTranslateAll();
 
+        // Texts the code puts together from translated pieces (TrF) cannot
+        // be translated back and forth with the forms: each window puts its
+        // own together again
+        TZX->LanguageChanged();
+        HW->LanguageChanged();
+        WavLoad->DoCaption("");
+        ZXPrinter->BitRateChange(NULL);
+        ZXPrinter->LineRateChange(NULL);
+        BasicLister->LanguageChanged();
+        ProfilePlot->LanguageChanged();
+        BuildMenuJoystickSelection();
+
         // The menu bar may now take a different number of lines
         FixZoomHeight();
 }

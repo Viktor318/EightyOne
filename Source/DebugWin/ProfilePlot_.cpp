@@ -111,10 +111,21 @@ void TProfilePlot::InitScrollbar()
 void __fastcall TProfilePlot::PlotTGraph(ProfileDetail* pd, AnsiString caption)
 {
         _pd = pd;
+        _plotName = caption;
         Caption = TrF("Profiler - {0}", caption);
         InitScrollbar();
         UpdateMinMax(pd);
         Show();
+}
+
+// After a change of language: the title and the minimum and maximum
+
+void TProfilePlot::LanguageChanged()
+{
+        if (!_pd) return;
+
+        Caption = TrF("Profiler - {0}", _plotName);
+        UpdateMinMax(_pd);
 }
 
 void TProfilePlot::UpdateMinMax(ProfileDetail* pd)

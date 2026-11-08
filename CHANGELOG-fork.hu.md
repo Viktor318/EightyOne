@@ -202,6 +202,11 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
 - Az ablakleírók (.dfm) változatlanok: a feliratokat futás közben cseréli a
   `Translations/hu.tsv` alapján (ebből a `Translations/make_table.py`
   készíti a `Source/LanguageHu.cpp`-t), így az angol változat ugyanaz marad.
+- Nyelvváltáskor a program által összerakott szövegek is azonnal váltanak
+  (eddig csak a következő frissítésükkor): a kazettalista a fejlécével és
+  a Kazettakezelő címe, a Hardver ablak teljes RAM-mérete, a
+  Hangfájl-betöltő címe és állapota, a ZX Printer sebességei, a
+  BASIC-lista állapotsora, a profilozó grafikonja és a játékvezérlő-menük.
 - A pillanatképek és a beállításfájl a hardverválasztások angol szövegét
   tárolják, így bármelyik nyelvvel és az eredeti EightyOne-nal is működnek.
 - A gép- és terméknevek és a rövidítések (ROM, RAM, NMI, AY...) angolul
