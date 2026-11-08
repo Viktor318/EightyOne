@@ -10,7 +10,7 @@ object TZX: TTZX
   Constraints.MinWidth = 231
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -20,7 +20,7 @@ object TZX: TTZX
   OnCreate = FormCreate
   OnResize = FormResize
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
     Left = 6
     Top = 34
@@ -36,7 +36,7 @@ object TZX: TTZX
     Anchors = [akLeft, akTop, akRight, akBottom]
     BorderStyle = bsNone
     ColCount = 2
-    DefaultRowHeight = 16
+    DefaultRowHeight = 18
     FixedCols = 0
     RowCount = 2
     GridLineWidth = 0
@@ -68,7 +68,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -101,7 +101,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -135,7 +135,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -169,7 +169,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -203,7 +203,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -236,7 +236,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -291,7 +291,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -325,7 +325,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -361,7 +361,7 @@ object TZX: TTZX
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -395,7 +395,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -428,7 +428,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -463,7 +463,7 @@ object TZX: TTZX
       Color = clBtnFace
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -511,7 +511,7 @@ object TZX: TTZX
         050505050505050500000505050505050505050505050505050505050000}
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace

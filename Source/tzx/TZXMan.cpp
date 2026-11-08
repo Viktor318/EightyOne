@@ -329,7 +329,7 @@ void __fastcall TTZX::Open1Click(TObject *Sender)
 
 void __fastcall TTZX::FormResize(TObject *Sender)
 {
-        Table->ColWidths[1]=50;
+        Table->ColWidths[1]=54;
         Table->ColWidths[0]=Table->Width-Table->ColWidths[1];
         UpdateScrollBar();
 }

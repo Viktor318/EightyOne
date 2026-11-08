@@ -1250,10 +1250,14 @@ int THW::UpdateRomCartridgeControls(int machine, int spectrumModel)
         ZXC1ConfigurationBox->Enabled = zxc1Selected;
         ZXC1ConfigurationBox->Visible = zxc1Selected;
 
+        // The file name box: beside the ZXC1 configuration box when that is
+        // shown, in its place otherwise, up to the browse button
+        int fileBoxRight = BrowseRomCartridge->Left - 2;
+
         if (zxc1Selected)
         {
-                RomCartridgeFileBox->Left = 277;
-                RomCartridgeFileBox->Width = 101;
+                RomCartridgeFileBox->Left = ZXC1ConfigurationBox->Left + ZXC1ConfigurationBox->Width + 4;
+                RomCartridgeFileBox->Width = fileBoxRight - RomCartridgeFileBox->Left;
 
                 if (ZXC1ConfigurationBox->ItemIndex == -1)
                 {
@@ -1262,8 +1266,8 @@ int THW::UpdateRomCartridgeControls(int machine, int spectrumModel)
         }
         else
         {
-                RomCartridgeFileBox->Left = 184;
-                RomCartridgeFileBox->Width = 194;
+                RomCartridgeFileBox->Left = ZXC1ConfigurationBox->Left;
+                RomCartridgeFileBox->Width = fileBoxRight - RomCartridgeFileBox->Left;
         }
 
         return romcartridgetype;

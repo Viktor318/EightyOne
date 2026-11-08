@@ -149,6 +149,11 @@ could not be loaded.
   was. The four windows that would have been enlarged by the change of
   font (keyboard picture, keypad, keyboard functions, edit flags) keep
   their size.
+- The **Hardware** and **Tape Manager** windows use 9 point text, as the
+  Sound Settings window does. The Hardware window is laid out larger to
+  match (and a little wider), so the Hungarian "Karaktergenerátor:" and
+  the longer check boxes of *Advanced Settings* are no longer cut off; the
+  rows of the tape list are taller.
 
 ### Main window size
 

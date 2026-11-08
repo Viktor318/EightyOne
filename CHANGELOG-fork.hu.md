@@ -159,6 +159,11 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
   elrendezésük nem változik. Az a négy ablak, amelyet a betűcsere
   felnagyított volna (billentyűzetkép, numerikus billentyűzet,
   billentyűfunkciók, jelzőbitek szerkesztése), megtartja a méretét.
+- A **Hardver** és a **Kazettakezelő** ablak 9 pontos betűt használ, mint a
+  Hangbeállítások. A Hardver ablak elrendezése ehhez arányosan nagyobb
+  (és kicsit szélesebb), így a „Karaktergenerátor:” felirat és a
+  *Speciális beállítások* hosszabb jelölőnégyzetei már nem csonkák; a
+  kazettalista sorai magasabbak.
 
 ### A főablak mérete
 
