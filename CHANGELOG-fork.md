@@ -9,6 +9,12 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Sound
 
+- The **beeper is band limited**: each edge is a step filtered to below
+  half the sample rate (BLEP), so high notes no longer bring whistling,
+  inharmonic tones with them (they were at -22 to -43 dB, now below
+  -75 dB). The fade after each click is smooth instead of 31 steps, and
+  the high harmonics are no longer dulled, so the beeper sounds a little
+  brighter and cleaner. It is about 0.35 ms later than before.
 - Sound is played through **WASAPI** (Windows Vista and later), at the
   sample rate of the Windows mixer (usually 48000 Hz), so it is not
   resampled. About 30 ms of sound is kept waiting, so it is heard sooner

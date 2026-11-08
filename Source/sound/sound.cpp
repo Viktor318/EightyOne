@@ -47,6 +47,7 @@
 #pragma warn -8071
 
 #include <string.h>
+#include <math.h>
 
 #include "sound\sound.h"
 #include "sound\soundop.h"
@@ -100,8 +101,14 @@ CSound::CSound()
         m_hWnd = NULL;
         m_FPS = m_BitsPerSample = m_SampleRate = m_RequestedRate = m_Channels = 0;
         OffsetTStates = 0;
-        BeeperRequested = 0;
-        BeeperPendingCount = 0;
+        BeeperOut = NULL;
+        BeeperLen = 0;
+        BeeperFilled = 0;
+        BeeperTarget = 0;
+        BeeperLevel = 0;
+        BeeperLevelTime = 0;
+        BeeperSlope = 0;
+        BlepInit();
 }
 
 int CSound::PeakFullScale(int meter)
@@ -143,7 +150,6 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         m_BytesPerSample=m_BitsPerSample/8;
         EnvHeld=0;
         EnvAlternating=0;
-        BeeperLastSubpos=0;
 
         if (Output) Output->End();
         Output=NULL;
@@ -188,10 +194,16 @@ int CSound::StartOutput(bool resetDevices)
 
                 if (Buffer) delete []Buffer;
                 if (Mix) delete []Mix;
+                if (BeeperOut) delete []BeeperOut;
                 Buffer = new short[FrameSize*m_Channels];
                 Mix = new int[FrameSize*m_Channels];
 
-                if(Buffer==NULL || Mix==NULL)
+                // The beeper: two frames (edges may fall beyond the end of
+                // one), and what the edges at the end add after them
+                BeeperLen = 2*FrameSize + 2*BLEP_HALF + 2;
+                BeeperOut = new float[BeeperLen];
+
+                if(Buffer==NULL || Mix==NULL || BeeperOut==NULL)
                 {
                         End();
                         return(-1); // Oh dear, malloc failed
@@ -200,13 +212,14 @@ int CSound::StartOutput(bool resetDevices)
                 memset(Mix, 0, FrameSize*m_Channels*sizeof(int));
 
                 // What was in the frame being made (in samples) is lost
-                OldPos=-1;
-                FillPos=0;
-                BeeperPendingCount=0;
+                memset(BeeperOut, 0, BeeperLen*sizeof(float));
+                BeeperFilled=0;
+                BeeperLevel=0;
+                BeeperLevelTime=0;
                 AYChangeCount=0;
                 SpecDrumChangeCount=0;
 
-                BeeperTickIncr=(1<<24)/m_SampleRate;
+                BeeperSlope=AMPL_BEEPER*150.0/m_SampleRate;
                 if (AYClock) AYTickIncr=(int)(65536.*AYClock/m_SampleRate);
 
                 sp0256_AL2.SetSamplingFreq(m_SampleRate);
@@ -215,10 +228,9 @@ int CSound::StartOutput(bool resetDevices)
 
         if (resetDevices)
         {
-                OldVal=OldValOrig=0;
+                BeeperLevel=0;
+                BeeperTarget=0;
                 OffsetTStates=0;
-                BeeperRequested=0;
-                BeeperTick=0;
 
                 InitDevices();  // initialise sound generating devices
         }
@@ -293,6 +305,8 @@ void CSound::End(void)
         Buffer=NULL;
         if(Mix) delete []Mix;
         Mix=NULL;
+        if(BeeperOut) delete []BeeperOut;
+        BeeperOut=NULL;
 }
 
 void CSound::InitDevices()
@@ -846,36 +860,40 @@ void CSound::DigiTalkOverlay(void)
 // rest position, which I'm a lot happier with. :-)
 
 
-#define BEEPER_FADEOUT	(((1<<24)/150)/AMPL_BEEPER)
-
-#define BEEPER_OLDVAL_ADJUST \
-  BeeperTick+=BeeperTickIncr;	\
-  if(BeeperTick>=BEEPER_FADEOUT)	\
-    {					\
-    BeeperTick-=BEEPER_FADEOUT;	\
-    if(OldVal>0)		\
-      OldVal--;			\
-    else				\
-      if(OldVal<0)		\
-        OldVal++;			\
-    }
+// So the level jumps to +-AMPL_BEEPER at an edge, then fades to 0 at
+// BeeperSlope a sample. The fade is smooth (it went in 31 steps), and the
+// jumps are band limited (they were filtered only by giving the sample
+// with the edge in it a level between the two): see BeeperEdge().
 
 void CSound::Frame(bool pause)
 {                  
         int f;
 
-        if (!Mix || !Buffer) return;
+        if (!Mix || !Buffer || !BeeperOut) return;
 
         if (pause)
         {
                 memset(Mix, 0, FrameSize*m_Channels*sizeof(int));
+
+                // Nothing is heard from the beeper; it starts again from
+                // its rest position
+                memset(BeeperOut, 0, BeeperLen*sizeof(float));
+                BeeperFilled=0;
+                BeeperLevel=0;
+                BeeperLevelTime=0;
         }
         else
         {
-        for(f=FillPos;f<FrameSize;f++)
+        // The beeper: the level up to the end of the frame, then this
+        // frame's samples out, the rest moved to the start
+        BeeperFill(FrameSize);
+
+        double scale=(double)ADJUSTTO16BIT*VolumeLevel[VOLUME_BEEPER]/VOLUME_MAX;
+
+        for(f=0;f<FrameSize;f++)
         {
-                BEEPER_OLDVAL_ADJUST;
-                int tempval=(OldVal*ADJUSTTO16BIT*VolumeLevel[VOLUME_BEEPER])/VOLUME_MAX;
+                double v=BeeperOut[f]*scale;
+                int tempval=(int)(v<0 ? v-0.5 : v+0.5);
                 PEAK(VOLUME_BEEPER, tempval);
                 Mix[f*m_Channels]=tempval;
 
@@ -884,6 +902,11 @@ void CSound::Frame(bool pause)
                         Mix[f*m_Channels+1]=tempval;
                 }
         }
+
+        memmove(BeeperOut, BeeperOut+FrameSize, (BeeperLen-FrameSize)*sizeof(float));
+        memset(BeeperOut+BeeperLen-FrameSize, 0, FrameSize*sizeof(float));
+        BeeperFilled-=FrameSize;
+        BeeperLevelTime-=FrameSize;
 
                 if (machine.aytype) AYOverlay();
         if (spectrum.specdrum) SpecDrumOverlay();
@@ -912,10 +935,6 @@ void CSound::Frame(bool pause)
         if (Output) Output->Frame((unsigned char *)Buffer, FrameSize*m_Channels*m_BytesPerSample);
         SoundOutput->UpdateImage(Buffer,m_Channels,FrameSize);
 
-        // The next buffer
-        OldPos=-1;
-        FillPos=0;
-
         // The frame just run (frametstates: it is set to 0 after this) began
         // OffsetTStates into this buffer; the next one begins where it ended.
         // It stays within a scanline or so, unless the emulator is paused or
@@ -932,118 +951,148 @@ void CSound::Frame(bool pause)
                         OffsetTStates = 0;
         }
 
-        // The beeper edges of the frame that fell after this buffer
-        for(f=0;f<BeeperPendingCount;f++)
-                BeeperEdge(BeeperPending[f].on, BeeperPending[f].pos, BeeperPending[f].subpos);
-        BeeperPendingCount=0;
 }
 
 void CSound::Beeper(int on, int frametstates)
 {
-        int newpos,subpos,val;
-        __int64 pos;
+        double pos;
 
         // if(!sound_enabled) return;
-        if (!Mix || machine.tperframe <= 0) return;
+        if (!Mix || !BeeperOut || machine.tperframe <= 0) return;
 
-        val=AMPL_BEEPER*(on?1:-1);
-
-        if(val==BeeperRequested) return;
-        BeeperRequested=val;
-
-        // The position in 1/AMPL_BEEPER samples, from where the frame
-        // began in its buffer
-        pos=((__int64)(frametstates+OffsetTStates)*FrameSize*AMPL_BEEPER)/machine.tperframe;
+        // The position in samples, from where the frame began in its buffer
+        pos=(double)(frametstates+OffsetTStates)*FrameSize/machine.tperframe;
         if (pos < 0) pos = 0;
-        newpos=(int)(pos/AMPL_BEEPER);
-        subpos=(int)(pos-(__int64)AMPL_BEEPER*newpos);
 
-        // After the end of this buffer: keep it for the next one. (If there
-        // are too many, or it is too far, the emulator is being sped up:
-        // only the level counts then.)
-        if(newpos>=FrameSize)
-        {
-                newpos-=FrameSize;
-                if (newpos>=FrameSize) newpos=FrameSize-1;
-
-                if (BeeperPendingCount<BEEPER_PENDING_MAX)
-                        BeeperPendingCount++;
-                BeeperPending[BeeperPendingCount-1].on=on;
-                BeeperPending[BeeperPendingCount-1].pos=newpos;
-                BeeperPending[BeeperPendingCount-1].subpos=subpos;
-                return;
-        }
-
-        BeeperEdge(on,newpos,subpos);
+        BeeperEdge(on,pos);
 }
 
-void CSound::BeeperEdge(int on, int newpos, int subpos)
+// The level of the beeper `samples' after it was `level'
+
+double CSound::BeeperFade(double level, double samples)
 {
-        int val,subval;
+        double fade;
+
+        if (samples <= 0) return level;
+
+        fade=BeeperSlope*samples;
+        if (level > 0) return level > fade ? level-fade : 0;
+        if (level < 0) return -level > fade ? level+fade : 0;
+        return 0;
+}
+
+// The level, without the edge filtering, up to sample `upto' (not included)
+
+void CSound::BeeperFill(int upto)
+{
         int f;
 
+        if (upto > BeeperLen) upto = BeeperLen;
+
+        for(f=BeeperFilled; f<upto; f++)
+                BeeperOut[f] += (float)BeeperFade(BeeperLevel, f-BeeperLevelTime);
+
+        if (upto > BeeperFilled) BeeperFilled = upto;
+}
+
+// An edge at `pos' samples into the frame's buffer. The beeper is BLEP_HALF
+// samples late: the level jumps there, and what the band limited step
+// differs from a jump by (it is not zero only BLEP_HALF samples either side)
+// is added round it.
+
+void CSound::BeeperEdge(int on, double pos)
+{
+        int val, f, first, last, k;
+        double at, jump, x, i, step;
+
         val=AMPL_BEEPER*(on?1:-1);
+        if(val==BeeperTarget) return;
+        BeeperTarget=val;
 
-        if(val==OldValOrig) return;
+        at=pos+BLEP_HALF;
 
-        // if we already wrote here, adjust the level.
+        // Far beyond the frame (the emulator is sped up): only the level
+        // counts then
+        if (at > BeeperLen-BLEP_HALF-2) at = BeeperLen-BLEP_HALF-2;
 
-        if(newpos==OldPos)
+        // Not before the last edge, nor before a sample already given the
+        // level (if the frames start again, after a pause)
+        if (at < BeeperLevelTime) at = BeeperLevelTime;
+        if (BeeperFilled > 0 && at <= BeeperFilled-1) at = BeeperFilled-1+1e-6;
+
+        // The level up to the edge, then the jump
+        BeeperFill((int)ceil(at));
+
+        jump=val-BeeperFade(BeeperLevel, at-BeeperLevelTime);
+        BeeperLevel=val;
+        BeeperLevelTime=at;
+
+        first=(int)ceil(at-BLEP_HALF);
+        last=(int)floor(at+BLEP_HALF);
+        if (first < 0) first = 0;
+        if (last > BeeperLen-1) last = BeeperLen-1;
+
+        for(f=first; f<=last; f++)
         {
-                // adjust it as if the rest of the sample period were all in
-                // the new state. (Often it will be, but if not, we'll fix
-                // it later by doing this again.)
+                // The step interpolated from the table, less the jump the
+                // level makes (the samples from the edge on have it)
+                x=f-at;
+                i=(x+BLEP_HALF)*BLEP_PHASES;
+                k=(int)i;
+                if (k < 0) { k = 0; i = 0; }
+                if (k >= BLEP_POINTS-1) step=1.0;
+                else step=BlepStep[k]+(i-k)*(BlepStep[k+1]-BlepStep[k]);
 
-                if(on)
-                        BeeperLastSubpos+=AMPL_BEEPER-subpos;
-                else
-                        BeeperLastSubpos-=AMPL_BEEPER-subpos;
+                if (x >= 0) step-=1.0;
+                BeeperOut[f]+=(float)(jump*step);
         }
-        else
-                BeeperLastSubpos=(on?AMPL_BEEPER-subpos:subpos);
+}
 
-        subval=0-AMPL_BEEPER+BeeperLastSubpos;
+// The band limited step: a windowed sinc (Kaiser window), integrated
 
-        if(newpos>=0)
+static double BesselI0(double x)
+{
+        double sum=1, term=1, k;
+
+        for(k=1; k<100; k++)
         {
-                //  fill gap from previous position
-                for(f=FillPos;f<newpos && f<FrameSize;f++)
-                {
-                        BEEPER_OLDVAL_ADJUST;
-                        int tempval=(OldVal*ADJUSTTO16BIT*VolumeLevel[VOLUME_BEEPER])/VOLUME_MAX;
-                        PEAK(VOLUME_BEEPER, tempval);
-                        Mix[f*m_Channels]=tempval;
+                term*=(x/(2*k))*(x/(2*k));
+                sum+=term;
+                if (term < sum*1e-16) break;
+        }
+        return sum;
+}
 
-                        if(m_Channels==2)
-                        {
-                                Mix[f*m_Channels+1]=tempval;
-                        }
-                }
+float CSound::BlepStep[BLEP_POINTS + 1];
 
-                if(newpos<FrameSize)
-                {
-                        // newpos may be less than FillPos, so...
-                        // limit subval in case of faded beeper level,
-                        // to avoid slight spikes on ordinary tones.
+void CSound::BlepInit(void)
+{
+        static bool done=false;
+        static double step[BLEP_POINTS];
+        const double pi=3.14159265358979323846;
+        double h, last=0, sum=0, x, t, w, a;
+        int j;
 
-                        if((OldVal<0 && subval<OldVal) ||
-                                (OldVal>=0 && subval>OldVal))
-                                        subval=OldVal;
+        if (done) return;
+        done=true;
 
-                        // write subsample value
-                        int tempval=(subval*ADJUSTTO16BIT*VolumeLevel[VOLUME_BEEPER])/VOLUME_MAX;
-                        PEAK(VOLUME_BEEPER, tempval);
-                        Mix[newpos*m_Channels]=tempval;
-                        if(m_Channels==2)
-                        {
-                                Mix[newpos*m_Channels+1]=tempval;
-                        }
-                }
+        for(j=0; j<BLEP_POINTS; j++)
+        {
+                x=(double)(j-BLEP_HALF*BLEP_PHASES)/BLEP_PHASES;
+                t=x/BLEP_HALF;
+                w=BesselI0(BLEP_KAISER_BETA*sqrt(t*t<1 ? 1-t*t : 0))/BesselI0(BLEP_KAISER_BETA);
+                a=2*BLEP_CUTOFF*x;
+                h=2*BLEP_CUTOFF*(a==0 ? 1.0 : sin(pi*a)/(pi*a))*w;
+
+                // the trapezoid rule
+                if (j) sum+=(h+last)/2;
+                step[j]=sum;
+                last=h;
         }
 
-        OldPos=newpos;
-        FillPos=newpos+1;
-        OldVal=OldValOrig=val;
+        for(j=0; j<BLEP_POINTS; j++)
+                BlepStep[j]=(float)(step[j]/sum);
+        BlepStep[BLEP_POINTS]=1.0f;
 }
 
 

@@ -10,6 +10,13 @@ eredetihez képest.
 
 ### Hang
 
+- **Sávkorlátozott csipogó:** minden él a mintavételi frekvencia fele
+  alá szűrt lépcsőként kerül a hangba (BLEP), így a magas hangok mellett
+  nem szólnak sípoló, nem harmonikus mellékhangok (eddig −22…−43 dB-en
+  voltak, most −75 dB alatt). A kattanás utáni halkulás 31 lépcső
+  helyett egyenletes, a magas felharmonikusok nem tompulnak, ezért a
+  csipogó kicsit fényesebb és tisztább. Kb. 0,35 ms-mal később szól,
+  mint eddig.
 - A hangot a **WASAPI** szólaltatja meg (Windows Vistától), a Windows
   keverőjének mintavételi frekvenciáján (jellemzően 48000 Hz), így nincs
   átmintavételezés. Kb. 30 ms hangot tart előre, ezért hamarabb hallatszik,

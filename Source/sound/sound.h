@@ -85,9 +85,16 @@
 // At 50fps this is about 440 samples, which I doubled and rounded up to get this. 
 #define SPECDRUM_BUFFSIZE       1000
 
-// Beeper edges that fall after the end of the frame's buffer, kept for the
-// next one
-#define BEEPER_PENDING_MAX      64
+// The beeper is band limited: each edge is a step filtered to below half
+// the sample rate (a windowed sinc, integrated), BLEP_HALF samples either
+// side of it, from a table with BLEP_PHASES points a sample. So that the
+// samples before an edge need not be changed after they have been mixed,
+// the beeper is BLEP_HALF samples late (about 0.35 ms).
+#define BLEP_HALF               16
+#define BLEP_PHASES             64
+#define BLEP_POINTS             (2*BLEP_HALF*BLEP_PHASES + 1)
+#define BLEP_CUTOFF             0.45    /* of the sample rate, -6 dB */
+#define BLEP_KAISER_BETA        9.0     /* about -90 dB */
 
 
 // The volumes, mutes and level meters of the sound settings window
@@ -140,12 +147,6 @@ struct SpecDrumChangeTag
 {
         unsigned short ofs;
         unsigned char val;
-};
-
-struct BeeperEdgeTag
-{
-        int on;
-        int pos, subpos;
 };
 
 class CSound
@@ -216,7 +217,10 @@ private:
         void SpecDrumInit(void);
         void SpecDrumOverlay(void);
         void DigiTalkOverlay(void);
-        void BeeperEdge(int on, int newpos, int subpos);
+        void BeeperEdge(int on, double pos);
+        void BeeperFill(int upto);
+        double BeeperFade(double level, double samples);
+        static void BlepInit(void);
         int SampleOffset(int frametstates);
 
         int SelectAYReg;
@@ -226,7 +230,23 @@ private:
         double AYToneLevels[16];
         int *Mix;                       // the sources added up
         short *Buffer;                  // the output, after the main volume
-        int OldPos,FillPos,OldVal,OldValOrig;
+
+        // The beeper, BLEP_HALF samples late, in AMPL_BEEPER units: this
+        // frame's samples, the next frame's (edges may fall beyond the end
+        // of a frame), and what the last edges add after that. The level
+        // jumps to +-AMPL_BEEPER at an edge, then fades linearly to 0 in
+        // 1/150 s (see Frame()).
+        float *BeeperOut;
+        int BeeperLen;
+        int BeeperFilled;               // samples with the level in them
+        int BeeperTarget;               // the last level asked for
+        double BeeperLevel;             // the level from the last edge...
+        double BeeperLevelTime;         // ...which was here (in samples)
+        double BeeperSlope;             // the fade, a sample
+
+        // The band limited step, from 0 to 1, x from -BLEP_HALF to
+        // BLEP_HALF (one more point, to interpolate the last)
+        static float BlepStep[BLEP_POINTS + 1];
 
         // The emulator runs a frame until the end of a scanline, so a frame
         // is a little longer or shorter than tperframe (the next one makes up
@@ -234,14 +254,6 @@ private:
         // starts OffsetTStates into its buffer; what falls after the end of
         // the buffer goes into the next one.
         int OffsetTStates;
-        int BeeperRequested;            // the last level asked for
-        struct BeeperEdgeTag BeeperPending[BEEPER_PENDING_MAX];
-        int BeeperPendingCount;
-
-	// timer used for fadeout after beeper-toggle;
-	// fixed-point with low 24 bits as fractional part.
-
-        unsigned int BeeperTick,BeeperTickIncr;
 
 	// tick/incr/periods are all fixed-point with low 16 bits as
 	// fractional part, except ay_env_{tick,period} which count as the chip does.
@@ -253,7 +265,6 @@ private:
         unsigned int AYTonePeriod[3],AYNoisePeriod,AYEnvPeriod;
 
         int EnvHeld,EnvAlternating;
-        int BeeperLastSubpos;
 
 	// AY registers
 	// we have 16 so we can fake an 8910 if needed
