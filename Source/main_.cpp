@@ -257,6 +257,89 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 }
 //---------------------------------------------------------------------------
 
+// As TCustomForm::DoCreate, but without showing the window (the form is
+// made visible): WinMain shows it once every window has been made and
+// translated and it has the size it was left at, so that it does not
+// appear first at its design size, in English, with the machine running
+void __fastcall TForm1::DoCreate(void)
+{
+        if (OnCreate)
+        {
+                try
+                {
+                        OnCreate(this);
+                }
+                catch (Exception &exception)
+                {
+                        Application->HandleException(this);
+                }
+        }
+}
+
+// The window the display was last set up for (by the status timer, which
+// sets it up again when the window is made again)
+static HWND RenderedWindow = NULL;
+
+// The display set up for the window, then the size the window was left at
+// (or 100%), and the keyboard settings
+void TForm1::SetStartUpSize(void)
+{
+        RenderEnd();
+        RenderInit();
+        AccurateInit(true);
+        RenderedWindow = Handle;
+
+        if (StartUpWidth==0 || StartUpHeight==0) N1001Click(NULL);
+        else
+        {
+               ClientWidth=StartUpWidth;
+               ClientHeight=StartUpHeight;
+        }
+        Kb->OKClick(NULL);
+}
+
+// The files named on the command line
+void TForm1::LoadCommandLineFiles(void)
+{
+        AnsiString Filename, Ext;
+        int i=0;
+
+        while(CommandLine[i])
+        {
+                Filename=CommandLine[i];
+
+                char escKey = VK_ESCAPE;
+                if (Filename.UpperCase()=="FULLSCREEN") FormKeyPress(NULL, escKey);
+
+                Ext = FileNameGetExt(Filename);
+
+                if (Ext == ".ZIP")
+                {
+                        Filename=ZipFile->ExpandZIP(Filename, "*.wav;*.z81;*.ace;*.z80;*.sna;*.tzx;*.tap;*.t81;*.p;*.p81;*.o;*.a83;*.81;*.80;*.mdr;*.mdv;*.hdf;*.dsk;*.mgt;*.img;*.opd;*.opu;*.trd;*rzx;*.zip");
+                        Ext = FileNameGetExt(Filename);
+                }
+
+                if (Ext==".WAV") WavLoad->LoadFile(Filename);
+                else if (Ext==".Z81" || Ext==".ACE") load_snap(Filename.c_str());
+                else if (Ext==".Z80") spec_load_z80(Filename.c_str());
+                else if (Ext==".SNA") spec_load_sna(Filename.c_str());
+                else if (Ext==".TZX" || Ext==".TAP" || Ext==".T81"
+                          || Ext==".P" || Ext==".O" || Ext==".A83"
+                          || Ext==".81" || Ext==".80" || Ext==".P81")
+                {
+                        TZX->LoadFile(Filename, false);
+                        TZX->UpdateTable(true);
+                }
+                else if (Ext==".MDR" || Ext==".MDV" || Ext==".HDF"
+                          || Ext==".DSK" || Ext==".MGT" || Ext==".IMG"
+                          || Ext==".OPD" || Ext==".OPU" || Ext==".TRD")
+                                P3Drive->InsertFile(Filename);
+                else if (Ext==".RZX")
+                        spec48_LoadRZX(Filename.c_str());
+                i++;
+        }
+}
+
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
         TIniFile *ini;
@@ -972,16 +1055,11 @@ void __fastcall TForm1::ViewPrinterClick(TObject *Sender)
 
 void __fastcall TForm1::Timer2Timer(TObject *Sender)
 {
-        static int startup=0;
         int targetfps;
-        AnsiString Filename, Ext;
-        int i=0;
 
-        static HWND OldhWnd=NULL;
-
-        if (Form1->Handle != OldhWnd)
+        if (Form1->Handle != RenderedWindow)
         {
-                OldhWnd=Form1->Handle;
+                RenderedWindow=Form1->Handle;
 
                 RenderEnd();
                 RenderInit();
@@ -989,62 +1067,8 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
         }
 
 
-        if (startup<=6) startup++;
-
-        switch(startup)
-        {
-        case 1:
-
-                if (StartUpWidth==0 || StartUpHeight==0) N1001Click(NULL);
-                else
-                {
-                       ClientWidth=StartUpWidth;
-                       ClientHeight=StartUpHeight;
-                }
-                Kb->OKClick(NULL);
-                break;
-
-        case 2:
-                startup++;
-                while(CommandLine[i])
-                {
-                        Filename=CommandLine[i];
-
-                        char escKey = VK_ESCAPE;
-                        if (Filename.UpperCase()=="FULLSCREEN") FormKeyPress(NULL, escKey);
-
-                        Ext = FileNameGetExt(Filename);
-
-                        if (Ext == ".ZIP")
-                        {
-                                Filename=ZipFile->ExpandZIP(Filename, "*.wav;*.z81;*.ace;*.z80;*.sna;*.tzx;*.tap;*.t81;*.p;*.p81;*.o;*.a83;*.81;*.80;*.mdr;*.mdv;*.hdf;*.dsk;*.mgt;*.img;*.opd;*.opu;*.trd;*rzx;*.zip");
-                                Ext = FileNameGetExt(Filename);
-                        }
-
-                        if (Ext==".WAV") WavLoad->LoadFile(Filename);
-                        else if (Ext==".Z81" || Ext==".ACE") load_snap(Filename.c_str());
-                        else if (Ext==".Z80") spec_load_z80(Filename.c_str());
-                        else if (Ext==".SNA") spec_load_sna(Filename.c_str());
-                        else if (Ext==".TZX" || Ext==".TAP" || Ext==".T81"
-                                  || Ext==".P" || Ext==".O" || Ext==".A83"
-                                  || Ext==".81" || Ext==".80" || Ext==".P81")
-                        {
-                                TZX->LoadFile(Filename, false);
-                                TZX->UpdateTable(true);
-                        }
-                        else if (Ext==".MDR" || Ext==".MDV" || Ext==".HDF"
-                                  || Ext==".DSK" || Ext==".MGT" || Ext==".IMG"
-                                  || Ext==".OPD" || Ext==".OPU" || Ext==".TRD")
-                                        P3Drive->InsertFile(Filename);
-                        else if (Ext==".RZX")
-                                spec48_LoadRZX(Filename.c_str());
-                        i++;
-                }
-
-                break;
-        default:
-                break;
-        }
+        // (The size the window was left at, and the files on the command
+        // line, are set up by WinMain before the window is shown)
 
         if (P3Drive->Height<80)
         {

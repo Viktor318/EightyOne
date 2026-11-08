@@ -341,9 +341,14 @@ private:	// User declarations
         void __fastcall SelectJoystick2Click(TObject *Sender);
         void UpdateJoystickMenuOptions();
 
+protected:
+        virtual void __fastcall DoCreate(void);
+
 public:		// User declarations
         __fastcall TForm1(TComponent* Owner);
         virtual void __fastcall WndProc(TMessage &Msg);
+        void SetStartUpSize(void);
+        void LoadCommandLineFiles(void);
 
         int BaseWidth;
         int BaseHeight;

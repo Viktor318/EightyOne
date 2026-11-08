@@ -161,6 +161,11 @@ could not be loaded.
 - With 100%, 200%, 300% or 400% chosen, the window can be resized too, but
   it jumps between these sizes (the zoom ticked follows). *User Defined*
   still allows any size.
+- At start the main window appears only once it is ready: at the size it
+  was left at, in its language, with the machine chosen. It used to appear
+  during the splash screen at its design size with English menus, and
+  jump to its size a second after the machine had started. Files named on
+  the command line are loaded straight away (they waited two seconds).
 - The status bar stays at the bottom of the window. At 100% the menu bar
   takes two lines (always with the Hungarian menus, on Windows 11 with the
   English ones too), and as the window changed size the status bar could

@@ -171,6 +171,11 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
 - A 100%, 200%, 300% vagy 400% nagyításnál az ablak húzással is
   átméretezhető, de csak ezek között a méretek között ugrik (a bejelölt
   nagyítás követi). A *User Defined* továbbra is bármilyen méretet enged.
+- Induláskor a főablak csak akkor jelenik meg, amikor már kész: a legutóbbi
+  méretében, a választott nyelven és géppel. Eddig a nyitókép alatt
+  megjelent a tervezési méretében, angol menüvel, és csak egy másodperccel
+  a gép indulása után ugrott a méretére. A parancssorban megadott fájlok
+  azonnal betöltődnek (eddig két másodpercet vártak).
 - Az állapotsor az ablak alján marad. 100%-nál a menüsor két sorba
   törik (a magyar menüvel mindig, Windows 11-en az angollal is), és az
   ablak átméretezésekor az állapotsor lemaradhatott: induláskor feljebb, a

@@ -218,11 +218,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdline, int)
                 Application->ProcessMessages();
                 delete spl;
 
+                // The main window is still hidden (TForm1::DoCreate): it
+                // gets the size it was left at (with the menu bar in its
+                // language, which may take two lines), then it is shown,
+                // then the machine starts and the files named on the
+                // command line are loaded
+                Form1->SetStartUpSize();
                 Form1->GatherWindowsIfRequired();
                 Form1->Caption = "EightyOne";
+                Form1->Show();
                 Form1->Timer2->Enabled=true;
                 Form1->RunFrameEnable=1;
                 Form1->SetFocus();
+                Form1->LoadCommandLineFiles();
 
                 Application->Run();
 
