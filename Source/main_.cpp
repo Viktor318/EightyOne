@@ -204,12 +204,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 
         RunFrameEnable=false;
 
-        strcpy(emulator.cwd, (FileNameGetPath(Application->ExeName)).c_str());
-        if (emulator.cwd[strlen(emulator.cwd)-1]!='\\')
-        {
-                emulator.cwd[strlen(emulator.cwd)-1]='\\';
-                emulator.cwd[strlen(emulator.cwd)]='\0';
-        }
+        AnsiString exePath = FileNameGetPath(Application->ExeName);
+        if (exePath.Length() && exePath[exePath.Length()] != '\\') exePath += "\\";
+        strncpy(emulator.cwd, exePath.c_str(), sizeof(emulator.cwd)-1);
+        emulator.cwd[sizeof(emulator.cwd)-1]='\0';
 
         GetTempPath(256, emulator.temppath);
         strcat(emulator.temppath, temporaryFolder);

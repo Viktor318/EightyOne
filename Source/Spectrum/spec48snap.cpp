@@ -127,14 +127,20 @@ int LoadDock(char *Filename)
         if (!f) return(0);
 
         bank=fgetc(f);
-        if (feof(f)) return 0;
-
-        if (bank > 0 && bank < 254) return 0;
+        if (feof(f) || (bank > 0 && bank < 254))
+        {
+                fclose(f);
+                return 0;
+        }
 
         for(i=0;i<8;i++)
         {
                 int b = fgetc(f);
-                if (feof(f)) return 0;
+                if (feof(f))
+                {
+                        fclose(f);
+                        return 0;
+                }
                 chunks[i]=b;
                 if ((bank==0) && (chunks[i]&1))
                         TimexWritable[i]=1;
@@ -148,99 +154,52 @@ int LoadDock(char *Filename)
                 else if (bank==254) ptr=TimexMem+65536;  //ExROM chunk
                 else if (bank==255) ptr=SpectrumMem;  // Home chunk
 
-                if (ptr == NULL) return 0;
-                
                 ptr += i*8192;
                 if (chunks[i]&2) fread(ptr,1,8192,f);
         }
         fclose(f);
-        strcpy(emulator.ROMDock, Filename);
+        strncpy(emulator.ROMDock, Filename, sizeof(emulator.ROMDock)-1);
+        emulator.ROMDock[sizeof(emulator.ROMDock)-1]='\0';
         return(1);
 }
 
-unsigned char *z80expandSpectra(unsigned char *in, int OutAddr, int Count)
+// Expand a block of a .z80 file, from `in' (going no further than `end')
+// into `out', `count' bytes: a run that would go beyond them is cut short,
+// and what a file cut short leaves out is zero. Returns where it ended.
+// (The lengths in a broken file can be anything.)
+
+static unsigned char *z80unpack(unsigned char *in, unsigned char *end, unsigned char *out, int count)
 {
-        while(Count)
+        int n=0, repeat;
+
+        while(n<count && in<end)
         {
-                if ((in[0]==0xed) && (in[1]==0xed))
+                if (end-in >= 4 && (in[0]==0xed) && (in[1]==0xed))
                 {
-                        int byte, repeat;
                         repeat=in[2];
-                        byte=in[3];
-                        while(repeat)
-                        {
-                                SpectraMem[OutAddr] = (BYTE)byte;
-                                OutAddr++;
-                                repeat--;
-                                Count--;
-                        }
+                        while(repeat-- > 0 && n<count) out[n++]=in[3];
                         in+=4;
                 }
                 else
                 {
-                        SpectraMem[OutAddr] = *in;
-                        in++;
-                        OutAddr++;
-                        Count--;
+                        out[n++]=*(in++);
                 }
         }
 
+        while(n<count) out[n++]=0;
         return(in);
 }
 
-unsigned char *z80expand( unsigned char *in, int OutAddr, int Count)
+// The same, stored as it is (no more than there is)
+
+static unsigned char *z80copy(unsigned char *in, unsigned char *end, unsigned char *out, int count)
 {
-        while(Count)
-        {
-                if ((in[0]==0xed) && (in[1]==0xed))
-                {
-                        int byte, repeat;
-                        repeat=in[2];
-                        byte=in[3];
-                        while(repeat)
-                        {
-                                spec48_setbyte(OutAddr, byte);
-                                OutAddr++;
-                                repeat--;
-                                Count--;
-                        }
-                        in+=4;
-                }
-                else
-                {
-                        spec48_setbyte(OutAddr, *in);
-                        in++;
-                        OutAddr++;
-                        Count--;
-                }
-        }
+        int n = end-in < count ? end-in : count;
 
-        return(in);
-}
-
-unsigned char *z80SkipBlock(unsigned char *in, int Count)
-{
-        while(Count)
-        {
-                if ((in[0]==0xed) && (in[1]==0xed))
-                {
-                        int repeat;
-                        repeat=in[2];
-                        while(repeat)
-                        {
-                                repeat--;
-                                Count--;
-                        }
-                        in+=4;
-                }
-                else
-                {
-                        in++;
-                        Count--;
-                }
-        }
-
-        return(in);
+        if (n < 0) n = 0;
+        memcpy(out, in, n);
+        memset(out+n, 0, count-n);
+        return(in+n);
 }
 
 void spec_load_z80(char *fname)
@@ -260,7 +219,13 @@ void spec_load_z80(char *fname)
         f=fopen(fname, "rb");
         if (!f) return;
 
-        buf=(BYTE*)malloc(311335);
+        // (zeroed: a short file leaves the rest of the header 0)
+        buf=(BYTE*)calloc(311335, 1);
+        if (!buf)
+        {
+                fclose(f);
+                return;
+        }
         FileLen=fread(buf,1,311335, f);
         fclose(f);
 
@@ -419,58 +384,56 @@ void spec_load_z80(char *fname)
 
         if (z80version==1)
         {
-                if (compressed) z80expand(buf+30, 16384, 49152);
-                else for(i=0;i<49152;i++) spec48_setbyte(i+16384, buf[i+30]);
+                unsigned char *block=(unsigned char *)malloc(49152);
+
+                if (block)
+                {
+                        if (compressed) z80unpack(buf+30, buf+FileLen, block, 49152);
+                        else z80copy(buf+30, buf+FileLen, block, 49152);
+
+                        for(i=0;i<49152;i++) spec48_setbyte(i+16384, block[i]);
+                        free(block);
+                }
 
                 free(buf);
                 return;
         }
         else
         {
-                unsigned char *ptr;
+                unsigned char *ptr, *end, block[16384];
                 int page, len;
               
                 ptr = buf+32;
+                end = buf+FileLen;
                 int h2len = buf[30] + (buf[31] << 8);
                 ptr += h2len;
 
-                while(ptr < (buf+FileLen))
+                // Each block: a header of 3 bytes, then its 16K
+                while(ptr+3 <= end)
                 {
                         len=ptr[0] + 256*ptr[1];
                         page=ptr[2];
 
                         ptr += 3;
 
+                        if (len==0xffff) ptr=z80copy(ptr, end, block, 16384);
+                        else ptr=z80unpack(ptr, end, block, 16384);
+
                         if (page == 13)
                         {
-                                ptr=z80expandSpectra(ptr, 0, 16384);
+                                memcpy(SpectraMem, block, 16384);
                         }
                         else if (page == 14)
                         {
-                                ptr=z80expandSpectra(ptr, 0x4000, 16384);
+                                memcpy(SpectraMem+0x4000, block, 16384);
                         }
                         else if (page <= 2)
                         {
-                                if (len==0xffff)
-                                {
-                                        ptr+=16384;
-                                }
-                                else
-                                {
-                                        ptr=z80SkipBlock(ptr, 16384);  // Skip over the 48/128/IF1/Disciple/+D ROMs (in theory it should be loaded to support custom ROMs)
-                                }
+                                // Skip over the 48/128/IF1/Disciple/+D ROMs (in theory it should be loaded to support custom ROMs)
                         }
                         else if (page == 11)
                         {
-                                if (len==0xffff)
-                                {
-                                        ptr+=16384;
-                                }
-                                else
-                                {
-                                        ptr=z80SkipBlock(ptr, 16384);  // Skip over the multiface ROM (in theory it should be loaded to support a custom ROM)
-                                }
-
+                                // Skip over the multiface ROM (in theory it should be loaded to support a custom ROM)
                                 HW->Multiface->Checked = true;
                                 spectrum.MFVersion = (speccy > SPECCYPLUS2A) ? MF128 : MFPLUS3;
                         }
@@ -488,16 +451,20 @@ void spec_load_z80(char *fname)
                                 }
                                 else    page -= 3;
 
+                                // Only the RAM banks there are (0-7); a page
+                                // of another number is dropped
+                                if (page < 0 || page > 7) continue;
+
                                 if (len==0xffff)
                                 {
                                         for(i=0;i<16384;i++)
-                                                RAMWrite((page+4), i, ptr[i]);
-                                        ptr+=16384;
+                                                RAMWrite((page+4), i, block[i]);
                                 }
                                 else
                                 {
                                         SPECBlk[0]=page+4;
-                                        ptr=z80expand(ptr, 0, 16384);
+                                        for(i=0;i<16384;i++)
+                                                spec48_setbyte(i, block[i]);
                                 }
                                 SPECBlk[0]=0;
                         }
@@ -600,7 +567,13 @@ void spec_load_sna(char *fname)
         f=fopen(fname, "rb");
         if (!f) return;
 
-        buf=(BYTE*)malloc(147487);
+        // (zeroed: a short file leaves the rest 0)
+        buf=(BYTE*)calloc(147487, 1);
+        if (!buf)
+        {
+                fclose(f);
+                return;
+        }
         len=fread(buf,1,147487, f);
         fclose(f);
 

@@ -325,7 +325,10 @@ unsigned char* TIF1::FindSector(int Drive)
 
                 const bool header = true;
                 foundSectorNumber = MDVGetNextBlock(Drive, header);
-                if (Drives[Drive].position < currentPosition)
+
+                // Round past the end of the tape (or right round, back to
+                // the same place): every sector has been seen
+                if (Drives[Drive].position <= currentPosition)
                 {
                         foundSectorNumber = -2;
                 }
@@ -368,6 +371,11 @@ int TIF1::MDVGetNextBlock(int Drive, bool header)
 {
         bool found;
         int i, count;
+
+        // The position goes round the tape (MDVPos), so it is never past the
+        // end: look once round it at most (each go moves on), so that a tape
+        // with no block on it is not searched for ever
+        int tries = Drives[Drive].length;
 
         do
         {
@@ -417,7 +425,7 @@ int TIF1::MDVGetNextBlock(int Drive, bool header)
                         }
                 }
         }
-        while (Drives[Drive].position < Drives[Drive].length);
+        while (--tries > 0);
 
         return -2;
 }
@@ -430,6 +438,8 @@ void TIF1::MDVLoadFile(int Drive, char *FileName)
         int len, sectors, i;
 
         MDVSetFileName(Drive, NULL);
+
+        if (strlen(FileName) >= sizeof(Drives[Drive].FileName)) return;
 
         Ext=GetExt(FileName);
 
@@ -446,8 +456,13 @@ void TIF1::MDVLoadFile(int Drive, char *FileName)
                 }
 
                 sectors=0;
-                data=(char *)malloc(256*MDVRECSIZE);
-                memset(data, 0x00, 256*MDVRECSIZE);
+                data=(char *)calloc(256*MDVRECSIZE, 1);
+                if (!data)
+                {
+                        free(buffer);
+                        fclose(f);
+                        return;
+                }
 
                 secptr=data;
 
@@ -489,6 +504,9 @@ void TIF1::MDVLoadFile(int Drive, char *FileName)
         }
         else
         {
+                data=NULL;
+                len=0;
+
                 f=fopen(FileName, "rb");
                 if (f)
                 {
@@ -502,18 +520,28 @@ void TIF1::MDVLoadFile(int Drive, char *FileName)
                         len=fread(buffer, 1, 256*1024, f);
                         len=len - (len%543);
 
-                        data=(char *)malloc(len);
-                        memset(data, 0xfc, 256*MDVRECSIZE);
-                        memcpy(data, buffer, len);
-
                         fclose(f);
+
+                        if (len>0)
+                        {
+                                data=(char *)malloc(len);
+                                if (!data)
+                                {
+                                        free(buffer);
+                                        return;
+                                }
+                                memcpy(data, buffer, len);
+                        }
 
                         free(buffer);
                 }
-                else
+
+                // A new cartridge (or a file too short for even one
+                // sector): a blank one
+                if (!data)
                 {
-                        data=(char *)malloc(256*MDVRECSIZE);
-                        memset(data, 0x00, 256*MDVRECSIZE);
+                        data=(char *)calloc(256*MDVRECSIZE, 1);
+                        if (!data) return;
                         len=256*MDVRECSIZE;
                 }
 
@@ -530,10 +558,22 @@ void TIF1::MDVLoadFile(int Drive, char *FileName)
         }
 }
 
+// Copy from a place on the tape, going round past its end
+
+static void MDVCopyOut(MDVDrive *d, unsigned char *from, unsigned char *to, int count)
+{
+        int offset = from - d->data;
+
+        for (int i = 0; i < count; i++)
+                to[i] = d->data[(offset + i) % d->length];
+}
+
 void TIF1::MDVSaveFile(int Drive)
 {
         unsigned char* buffer;
         int bufferSize;
+
+        if (!Drives[Drive].data || Drives[Drive].length <= 0) return;
 
         AnsiString Ext = GetExt(Drives[Drive].FileName);
         if (Ext == ".MDR")
@@ -546,8 +586,8 @@ void TIF1::MDVSaveFile(int Drive)
                 const int MDR_FILE_SIZE = (MDR_SECTOR_SIZE * MDR_NUMBER_OF_SECTORS) + MDR_WRITE_PROTECT_SIZE;
 
                 bufferSize = MDR_FILE_SIZE;
-                buffer = (unsigned char*)malloc(bufferSize);
-                memset(buffer, 0x00, bufferSize);
+                buffer = (unsigned char*)calloc(bufferSize, 1);
+                if (!buffer) return;
 
                 Drives[Drive].position = 0;
                 unsigned char* headerPosition;
@@ -558,12 +598,12 @@ void TIF1::MDVSaveFile(int Drive)
                         headerPosition = FindSector(Drive);
                         if (headerPosition != 0)
                         {
-                                memcpy(buffer + (sectorIndex * MDR_SECTOR_SIZE), headerPosition, MDR_HEADER_SIZE);
+                                MDVCopyOut(&Drives[Drive], headerPosition, buffer + (sectorIndex * MDR_SECTOR_SIZE), MDR_HEADER_SIZE);
 
                                 unsigned char* dataPosition = FindNextDataBlock(Drive);
                                 if (dataPosition != 0)
                                 {
-                                        memcpy(buffer + (sectorIndex * MDR_SECTOR_SIZE) + MDR_HEADER_SIZE, dataPosition, MDR_RECORD_SIZE);
+                                        MDVCopyOut(&Drives[Drive], dataPosition, buffer + (sectorIndex * MDR_SECTOR_SIZE) + MDR_HEADER_SIZE, MDR_RECORD_SIZE);
                                 }
 
                                 sectorIndex++;
@@ -575,6 +615,7 @@ void TIF1::MDVSaveFile(int Drive)
         {
                 bufferSize = Drives[Drive].length;
                 buffer = (unsigned char*)malloc(bufferSize);
+                if (!buffer) return;
                 memcpy(buffer, Drives[Drive].data, Drives[Drive].length);
         }
 
@@ -584,6 +625,8 @@ void TIF1::MDVSaveFile(int Drive)
                 fwrite(buffer, 1, bufferSize , f);
                 fclose(f);
         }
+
+        free(buffer);
 }
 
 char *TIF1::MDVGetFileName(int Drive)

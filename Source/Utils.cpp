@@ -164,12 +164,15 @@ AnsiString ConvertZX81ASCII(BYTE *str)
 
 
 
+// A name in the ZX81's characters, up to the first character it has not
+// got, the last one with bit 7 set. There is always one character at least
+// (a space), so that the end can be found.
+
 void ConvertASCIIZX81(AnsiString Str, BYTE *Output)
 {
         char c, *p;
         int i;
-
-        if (!Str.Length()) return;
+        BYTE *start = Output;
 
         i=1;
         p=ZXCharTable;
@@ -184,6 +187,7 @@ void ConvertASCIIZX81(AnsiString Str, BYTE *Output)
                 i++;
         }
 
+        if (Output == start) *(Output++) = 0;
 
         Output--;
         *Output |= 128;
@@ -215,11 +219,14 @@ void ASCIIZX81(BYTE *in, BYTE *Out)
 }
 
 
-int ZX81Strlen(BYTE *str)
+// The length of a ZX81 name, up to the character with bit 7 set (no more
+// than `max')
+
+int ZX81Strlen(BYTE *str, int max)
 {
         int len=1;
 
-        while ( !((*str)&128) )
+        while ( !((*str)&128) && len<max )
         {
                 len++;
                 str++;

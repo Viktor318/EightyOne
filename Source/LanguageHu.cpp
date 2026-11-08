@@ -1610,5 +1610,7 @@ const LanguageEntry LanguageHungarianTable[] =
           "Kimenet:" },
         { "no sound device",
           "nincs hangeszk\366z" },
+        { "The file could not be loaded.",
+          "A f\341jlt nem siker\374lt bet\366lteni." },
         { 0, 0 }
 };

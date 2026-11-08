@@ -89,6 +89,69 @@ eredetihez képest.
   DirectSound-objektumok, és két egyszerre futó EightyOne nem zavarja
   egymás hangját.
 
+### Fájlok betöltése
+
+Sérült vagy szándékosan hibás fájl már nem tudja összeomlasztani vagy
+megakasztani az emulátort, és nem írhat felül a memóriájában: minden
+fájlból olvasott hosszt, darabszámot, címet és lapszámot összevet a fájllal
+és azzal, ahová az adat kerül. A sérült fájlból annyi töltődik be, amennyi
+lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
+
+- **Kazetták** (TZX, TAP, T81, P, O, CSW-blokkok): a blokkhosszakat a
+  fájlból még hátralévő részhez méri (a régi kód messze túlolvashatott
+  rajta), az általános adatblokkok szimbólumtábláit és impulzussorozatait
+  is; legfeljebb annyi blokk töltődik be, amennyit a kazetta tárolni tud;
+  a kazettán kívülre mutató ugrásokat és ciklusokat figyelmen kívül
+  hagyja, és megállítja azt a kazettát, amely idő eltelte nélkül
+  folyamatosan váltogatja a jelet.
+- A hibás fejlécű (csatorna nélküli, 0 mintavételi frekvenciájú) **WAV- és
+  CSW-fájlok** már nem állítják meg az emulátort „Division by zero”
+  hibával, és a fájl végén túlnyúló részeket nem olvassa; helyette „A
+  fájlt nem sikerült betölteni.” üzenet jelenik meg. A CSW-fájlnak CSW
+  aláírással és 1.01-es verzióval kell kezdődnie.
+- **.z80 pillanatképek**: a blokkon vagy a fájlon túlnyúló tömörített
+  ismétlések és a gépben nem létező memórialapok már nem írnak az
+  emulált memórián kívülre (az ilyen lapokat kihagyja; amit a csonka fájl
+  kihagy, az nulla). A Spectra lapjait tömörítetlen tárolás esetén is
+  helyesen olvassa.
+- **.z81 pillanatképek**: a szövegben lévő darabszámok és címek abban a
+  memóriában maradnak, ahová tartoznak (memória, a Chroma színmemóriája, a
+  Quicksilva karaktergenerátor); a nagyon sok szakaszból álló fájl már
+  nem tölti túl a vermet. A Quicksilva karaktergenerátort egy bájttal
+  hosszabban mentette (egy azon túli bájtot is).
+- **.ace pillanatképek**: az ismétlések a memórián belül maradnak, és az
+  ismétlés közepén véget érő fájl már nem szalad el. A B' regisztert
+  menti és betölti (a helyén a B-t tárolta). Az .ace pillanatkép mentése
+  már nem írja a pillanatkép fejlécének egy részét a Jupiter Ace ROM-jába
+  (0284h–029Fh, 052Ch és 07C8h), amitől az Ace utána hibásan működhetett.
+- **Microdrive**: az .MDV kép betöltése mindig túlírt a neki fenntartott
+  memórián; az egy szektornál rövidebb fájlból most üres kazetta lesz. Az
+  olyan kazetta mentése, amelyen nincs megtalálható szektor, már nem akad
+  meg, és a szalag végén átnyúló szektorokat is helyesen menti.
+- **Merevlemezek**: az a .HDF fájl, amelynek adatai a fejlécén belül
+  kezdődnének, már nem ír felül memóriát. Azok a VHD-képek, amelyek
+  geometriájában van 128-as vagy nagyobb bájt (a nagy VHD-knek sávonként
+  255 szektoruk van), hibás, negatív geometriát kaptak. A
+  meghajtók ablakában a második merevlemez fej- vagy szektorszámának
+  változtatása az elsőét használta, és az ott beállított 0 már nem okoz
+  nullával osztást.
+- **Larken lemezek**: a 79 fölötti sávszám már nem olvas és nem ír a
+  lemezen kívülre, és a lemezfájl már nem marad nyitva.
+- **ZIP-fájlok**: a legalább 256 karakteres nevű tag már nem kap
+  értelmetlen nevet; az a tag, amelynek nevében `:` vagy más, Windows-fájlnévben
+  nem megengedett karakter van, érvényes néven kerül kibontásra; ha egy
+  tagot nem lehet kibontani (nem írható, vagy sérült az archívum), semmi
+  sem töltődik be hiányzó vagy hibás fájl helyett.
+- **File > Load Memory Block**: a Timex .SCR képernyő (12288 vagy 12289
+  bájt) második fele a helyére kerül (8K-val az első után, eddig 6K-val
+  odébb került), és hi-colour vagy hi-res módba vált a színével (az
+  utolsó bájtot eddig eggyel mögüle olvasta). A memória tetején túl semmit
+  sem tölt be, és a fájlt bezárja.
+- A nem olvasható Timex dokkoló kazetta (.DCK) fájlja már nem marad nyitva.
+- A ROM-ok, betűkészletek és nem felejtő memóriafájlok elérési útja
+  bármilyen hosszú lehet (a mélyen fekvő EightyOne mappa túlcsordított egy
+  256 karakteres puffert).
+
 ### Ablakok
 
 - Az ablakok a régi MS Sans Serif helyett a Windows Vista óta használt

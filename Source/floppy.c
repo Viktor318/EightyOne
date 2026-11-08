@@ -606,6 +606,18 @@ void floppy_eject(int drive)
 
 int do_format(char *outfile, char *outtyp, char *outcomp, int forcehead, dsk_format_t format);
 
+static void LarkenSetPath(int drive, char *filename)
+{
+        char *path;
+
+        if (drive==0) path=LarkenPath0;
+        else if (drive==1) path=LarkenPath1;
+        else return;
+
+        strncpy(path, filename, MAXPATH-1);
+        path[MAXPATH-1]='\0';
+}
+
 void floppy_setimage(int drive, char *filename, int readonly)
 {
         int a;
@@ -619,16 +631,18 @@ void floppy_setimage(int drive, char *filename, int readonly)
                         if (!a)
                         {
                                 a=open( filename, O_RDWR | O_BINARY);
-                                read(a, LarkenDrive + (LARKENSIZE*drive), LARKENSIZE);
-                                if (drive==0) strcpy(LarkenPath0, filename);
-                                if (drive==1) strcpy(LarkenPath1, filename);
+                                if (a!=-1)
+                                {
+                                        read(a, LarkenDrive + (LARKENSIZE*drive), LARKENSIZE);
+                                        close(a);
+                                }
+                                LarkenSetPath(drive, filename);
                         }
                         else
                         {
                                 if (errno==ENOENT)
                                 {
-                                        if (drive==0) strcpy(LarkenPath0, filename);
-                                        if (drive==1) strcpy(LarkenPath1, filename);
+                                        LarkenSetPath(drive, filename);
                                         memset(LarkenDrive + (LARKENSIZE*drive), 0, 1984);
                                         memcpy(LarkenDrive + (LARKENSIZE*drive), LarkenHeader,1984);
                                 }
@@ -851,6 +865,13 @@ int LarkenLoadTrack(int Drive, int TrackNo, unsigned char *buf)
 {
         int offset;
 
+        // (the drive has 80 tracks: another number is an error)
+        if (TrackNo<0 || TrackNo>=LARKENSIZE/1984)
+        {
+                memset(buf, 0, 1984);
+                return(0);
+        }
+
         offset=Drive*LARKENSIZE;
 
         if (LarkenDrive[offset+140]!=0xff)
@@ -869,6 +890,8 @@ int LarkenLoadTrack(int Drive, int TrackNo, unsigned char *buf)
 void LarkenSaveTrack(int Drive, int TrackNo, unsigned char *buf)
 {
         unsigned char *p;
+
+        if (TrackNo<0 || TrackNo>=LARKENSIZE/1984) return;
 
         p=LarkenDrive + LARKENSIZE*Drive;
         p += TrackNo*1984;

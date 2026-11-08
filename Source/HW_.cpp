@@ -3789,13 +3789,9 @@ void THW::AccessIniFile(TIniFile* ini, IniFileAccessType accessType)
 
 void THW::WriteNVMemory(BYTE* memory, int size, int count, const char* fileName)
 {
-        char FilePath[256];
+        AnsiString FilePath = AnsiString(emulator.cwd) + nvMemoryFolder + fileName;
 
-        strcpy(FilePath, emulator.cwd);
-        strcat(FilePath, nvMemoryFolder);
-        strcat(FilePath, fileName);
-
-        FILE* f = fopen(FilePath, "wb");
+        FILE* f = fopen(FilePath.c_str(), "wb");
         if (f)
         {
                 fwrite(memory, size, count, f);
@@ -3805,13 +3801,9 @@ void THW::WriteNVMemory(BYTE* memory, int size, int count, const char* fileName)
 
 void THW::ReadNVMemory(BYTE* memory, int size, int count, const char* fileName)
 {
-        char FilePath[256];
+        AnsiString FilePath = AnsiString(emulator.cwd) + nvMemoryFolder + fileName;
 
-        strcpy(FilePath, emulator.cwd);
-        strcat(FilePath, nvMemoryFolder);
-        strcat(FilePath, fileName);
-
-        FILE* f = fopen(FilePath, "rb");
+        FILE* f = fopen(FilePath.c_str(), "rb");
         if (f)
         {
                 fread(memory, size, count, f);

@@ -160,7 +160,14 @@ void TWavLoad::LoadFile(AnsiString FName)
                 Extension = FileNameGetExt(FName);
         }
 
-        Wav.LoadFile(FName);
+        // (a file it could not load: the one loaded stays)
+        if (!Wav.LoadFile(FName))
+        {
+                DoCaption("Stopped");
+                Application->MessageBox(Tr("The file could not be loaded.").c_str(),
+                        Tr("Wave Loader").c_str(), MB_OK | MB_ICONERROR);
+                return;
+        }
 
         FileName=FName;
 
@@ -691,7 +698,7 @@ void __fastcall TWavLoad::ConvertNextBlock1Click(TObject *Sender)
 
         bool zx81File = (emulator.machine != MACHINEZX80 || (emulator.machine == MACHINEZX80 && (emulator.romcrc != CRCZX80)));
 
-        while (byte!=-1 && DataCount!=E_LINE)
+        while (byte!=-1 && DataCount!=E_LINE && ByteCount<(long)buffersize)
         {
                 if (start) start=false;
                 ByteCount++;

@@ -82,6 +82,66 @@ The changes of the `hungarian-windows` branch, compared with
 - Changing the sound settings no longer leaks DirectSound objects, and two
   EightyOnes running at once no longer disturb each other's sound.
 
+### Loading files
+
+Damaged or deliberately malformed files can no longer crash or hang the
+emulator, or overwrite its memory: every length, count, address and page
+number read from a file is checked against the file and against where the
+data goes. A damaged file loads as far as it can, or a message says it
+could not be loaded.
+
+- **Tapes** (TZX, TAP, T81, P, O, CSW blocks): block lengths are checked
+  against what is left of the file (the old code could read far past it),
+  symbol tables and pulse sequences of generalised data blocks too; at
+  most as many blocks are loaded as the tape can hold; jumps and loops
+  pointing outside the tape are ignored, and a tape that keeps changing
+  the signal without any time passing is stopped.
+- **WAV and CSW files** with a broken header (no channels, a sample rate of
+  0) no longer stop the emulator with a "Division by zero" error, and
+  chunks running past the end of the file are not read; the message
+  "The file could not be loaded." is shown instead. CSW files must have
+  the CSW signature and version 1.01.
+- **.z80 snapshots**: compressed runs reaching beyond a block or beyond the
+  file, and pages of memory the machine does not have, no longer write
+  outside the emulated memory (such pages are skipped; what a file cut
+  short leaves out is zero). The Spectra's pages are read correctly when
+  stored uncompressed too.
+- **.z81 snapshots**: counts and addresses in the text stay within the
+  memory they belong to (memory, the Chroma's colour memory, the
+  Quicksilva character generator); a file of very many sections no longer
+  overflows the stack. The Quicksilva character generator was saved one
+  byte too long (a byte read from beyond it).
+- **.ace snapshots**: runs stay within memory, and a file ending in the
+  middle of a run no longer runs away. B' is saved and loaded (B was
+  stored in its place). Saving an .ace snapshot no longer writes part of
+  the snapshot header into the Jupiter Ace's ROM (at 0284h-029Fh, 052Ch
+  and 07C8h), which could make the Ace misbehave afterwards.
+- **Microdrive**: loading an .MDV image always wrote beyond the memory set
+  aside for it; a file too short for one sector now gives a blank
+  cartridge. Saving a cartridge on which no sector can be found no longer
+  hangs, and sectors running round the end of the tape are saved right.
+- **Hard disks**: an .HDF file whose data seems to start inside its header
+  no longer overwrites memory. VHD images with a byte of 128 or more in
+  their geometry (large VHDs have 255 sectors per track) got a wrong,
+  negative geometry. In the drives window, changing
+  the heads or sectors of the second hard disk used the first one's, and
+  a 0 there no longer divides by zero.
+- **Larken disks**: a track number above 79 no longer reads or writes
+  outside the disk, and the disk file is no longer left open.
+- **ZIP files**: a member with a name of 256 characters or more no longer
+  gives a garbled name; a member whose name has `:` or another character
+  Windows does not allow in a file name is extracted under a valid name;
+  if a member cannot be extracted (it cannot be written, or the archive is
+  broken), nothing is loaded instead of a missing or broken file.
+- **File > Load Memory Block**: a Timex .SCR screen (12288 or 12289 bytes)
+  puts its second half at the right place (8K after the first, it went
+  6K further) and switches to hi-colour or hi-res with its colour (the
+  last byte was read from one byte beyond it). Nothing is loaded past
+  the top of memory, and the file is closed.
+- A Timex dock cartridge (.DCK) that cannot be read is no longer left open.
+- The paths of ROMs, fonts and non-volatile memory files can be of any
+  length (a deep EightyOne folder overflowed a buffer of 256 characters).
+
 ### Windows
 
 - The windows use the **Segoe UI** font of Windows Vista and later instead

@@ -76,13 +76,13 @@ char *get_token(FILE *f)
         char c;
 
         c=(char)fgetc(f);
-        while(isspace(c) && !feof(f)) c=(char)fgetc(f);
+        while(isspace((unsigned char)c) && !feof(f)) c=(char)fgetc(f);
 
         buflen=0;
         buffer[buflen++]=c;
 
         c=(char)fgetc(f);
-        while(!isspace(c) && !feof(f) && buflen<255)
+        while(!isspace((unsigned char)c) && !feof(f) && buflen<255)
         {
                 buffer[buflen++]=c;
                 c=(char)fgetc(f);
@@ -108,6 +108,39 @@ int hex2dec(char *str)
                 str++;
         }
         return(num);
+}
+
+// Snapshot data is kept only where it belongs, since the numbers in a broken
+// file can be anything. Puts `count' bytes of `value' from `addr' into `mem',
+// which holds the addresses `bottom' to `top', and returns the address that
+// follows them.
+
+static int SnapPut(BYTE *mem, int bottom, int top, int addr, int count, int value)
+{
+        __int64 end, a;
+
+        if (count < 0) count = 0;
+        end = (__int64)addr + count;
+
+        for(a = (addr < bottom) ? bottom : addr; a < end && a <= top; a++)
+                mem[(int)(a - bottom)] = (BYTE)value;
+
+        return (int)((end > (__int64)top + 1) ? top + 1 : end);
+}
+
+// The Quicksilva character generator (0x8400-0x87FF), and its copies in
+// the Chroma's memory
+
+static int SnapChrPut(int addr, int count, int value)
+{
+        if (machine.colour == COLOURCHROMA)
+        {
+                SnapPut(memory + 0x8400, 0x8400, 0x87FF, addr, count, value);
+                SnapPut(memory + 0xC400, 0x8400, 0x87FF, addr, count, value);
+                SnapPut(memory + 0x2400, 0x8400, 0x87FF, addr, count, value);
+        }
+
+        return SnapPut(font, 0x8400, 0x87FF, addr, count, value);
 }
 
 void SetComboBox(TComboBox* comboBox, char* text)
@@ -291,6 +324,8 @@ void load_snap_chrgen(FILE *f)
 {
         int Addr, Count, Chr;
 
+        Addr = 0x8400;
+
         while(!feof(f))
         {
                 char* tok=get_token(f);
@@ -322,32 +357,12 @@ void load_snap_chrgen(FILE *f)
                         Count=hex2dec(tok+1);
                         Chr=hex2dec(get_token(f));
 
-                        while(Count--)
-                        {
-                                font[Addr-0x8400] = (BYTE)Chr;
-
-                                if (machine.colour == COLOURCHROMA)
-                                {
-                                        memory[Addr] = (BYTE)Chr;
-                                        memory[Addr + 0x4000] = (BYTE)Chr;
-                                        memory[Addr - 0x6000] = (BYTE)Chr;
-                                }
-
-                                Addr++;
-                        }
+                        Addr = SnapChrPut(Addr, Count, Chr);
                 }
                 else
                 {
                         Chr=hex2dec(tok);
-                        font[Addr-0x8400]=(BYTE)Chr;
-
-                        if (machine.colour == COLOURCHROMA)
-                        {
-                                memory[Addr] = (BYTE)Chr;
-                                memory[Addr + 0x4000] = (BYTE)Chr;
-                                memory[Addr - 0x6000] = (BYTE)Chr;
-                        }
-                        Addr++;
+                        Addr = SnapChrPut(Addr, 1, Chr);
                 }
         }
 }
@@ -498,11 +513,11 @@ void load_snap_colour(FILE *f)
                 {
                         Count=hex2dec(tok+1);
                         Chr=hex2dec(get_token(f));
-                        while(Count--) memory[Addr++]=(BYTE)Chr;
+                        Addr = SnapPut(memory + 0xC000, 0xC000, 0xFFFF, Addr, Count, Chr);
                 }
                 else if (chroma)
                 {
-                        memory[Addr++]=(BYTE)hex2dec(tok);
+                        Addr = SnapPut(memory + 0xC000, 0xC000, 0xFFFF, Addr, 1, hex2dec(tok));
                 }
         }
 }
@@ -643,11 +658,11 @@ void load_snap_mem(FILE *f)
                 {
                         Count=hex2dec(tok+1);
                         Chr=hex2dec(get_token(f));
-                        while(Count--) memory[Addr++]=(BYTE)Chr;
+                        Addr = SnapPut(memory, 0, 0xFFFF, Addr, Count, Chr);
                 }
                 else
                 {
-                        memory[Addr++]=(BYTE)hex2dec(tok);
+                        Addr = SnapPut(memory, 0, 0xFFFF, Addr, 1, hex2dec(tok));
                 }
         }
 }
@@ -719,7 +734,15 @@ void load_snap_drives(FILE* f)
 }
 
 void ProcessTag(char* tok, FILE* f)
-{             
+{
+        // Each section reads up to the next one and calls back here, so a
+        // file of very many sections would go too deep: a real one has only
+        // a few. (Going back up, the rest is read from load_ZX81_snapshot.)
+        static int depth = 0;
+
+        if (depth >= 256) return;
+        depth++;
+
         if (!strcmp(tok, "[CPU]")) load_snap_cpu(f);
         else if (!strcmp(tok, "[MACHINE]")) load_snap_machine(f);
         else if (!strcmp(tok, "[MEMORY]")) load_snap_mem(f);
@@ -734,34 +757,33 @@ void ProcessTag(char* tok, FILE* f)
         else if (!strcmp(tok, "[INTERFACES]")) load_snap_interfaces(f);
         else if (!strcmp(tok, "[ADVANCED]")) load_snap_advanced(f);
         else if (!strcmp(tok, "[DRIVES]")) load_snap_drives(f);
+
+        depth--;
 }
 
 void load_snap_ace(FILE *f)
 {
         int memptr=0x2000;
-        unsigned char c;
-        int len, eof;
+        int c, len;
 
-        eof=0;
-
-        while(!eof)
+        // Bytes, and runs of ED <count> <byte>, up to ED 00 or the end of
+        // the file (and no further than the top of memory)
+        for(;;)
         {
-                c=(unsigned char)fgetc(f);
+                c=fgetc(f);
+                if (c==EOF) break;
 
-                if (c!=0xED) memory[memptr++]=c;
+                if (c!=0xED) memptr=SnapPut(memory, 0, 0xFFFF, memptr, 1, c);
                 else
                 {
                         len=fgetc(f);
+                        if (len==EOF || len==0) break;
 
-                        if (!len) eof=1;
-                        else
-                        {
-                                c=(unsigned char)fgetc(f);
-                                while(len--) memory[memptr++]=c;
-                        }
+                        c=fgetc(f);
+                        if (c==EOF) break;
+
+                        memptr=SnapPut(memory, 0, 0xFFFF, memptr, len, c);
                 }
-
-                if (feof(f)) eof=1;
         }
 
         int ramTop = memory[0x2081]*256;
@@ -785,7 +807,7 @@ void load_snap_ace(FILE *f)
         z80.sp.b.l = memory[memptr]; z80.sp.b.h = memory[memptr+1]; memptr+=4;
         z80.pc.b.l = memory[memptr]; z80.pc.b.h = memory[memptr+1]; memptr+=4;
         z80.af_.b.l = memory[memptr]; z80.af_.b.h = memory[memptr+1]; memptr+=4;
-        z80.bc_.b.l = memory[memptr]; z80.bc.b.h = memory[memptr+1]; memptr+=4;
+        z80.bc_.b.l = memory[memptr]; z80.bc_.b.h = memory[memptr+1]; memptr+=4;
         z80.de_.b.l = memory[memptr]; z80.de_.b.h = memory[memptr+1]; memptr+=4;
         z80.hl_.b.l = memory[memptr]; z80.hl_.b.h = memory[memptr+1]; memptr+=4;
 
@@ -831,6 +853,8 @@ int load_ACE_snapshot(char* filename)
 
 int do_load_snap(char *filename)
 {
+        if (strlen(filename) < 4) return(0);
+
         char* p=filename+strlen(filename)-4;
 
         if (strcmp(p,".Z81") && strcmp(p,".z81")
@@ -1025,12 +1049,12 @@ int save_snap_zx81(char *filename)
 
 		Addr = 0x8400;
 
-                while (Addr <= 0x8800)
+                while (Addr < 0x8800)
 		{
                         Chr=font[Addr-0x8400];
 			Count=1;
 
-			while((font[Addr-0x8400+Count]==Chr) && ((Addr+Count)<=0x8800))
+			while(((Addr+Count)<0x8800) && (font[Addr-0x8400+Count]==Chr))
 			        Count++;
 
 			if (Count>1) fprintf(f,"*%04X %02X ",Count, Chr);
@@ -1096,31 +1120,31 @@ int save_snap_ace(char *filename)
 	memory[memptr]=0x00; memory[memptr+1]=(BYTE)((zx81.RAMTOP+1)/256);
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr=0x0284;
+	memptr=0x2084;
 	memory[memptr]=0x00; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr=0x0288;
+	memptr=0x2088;
 	memory[memptr]=0x00; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr=0x028c;
+	memptr=0x208c;
 	memory[memptr]=0x03; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr=0x0290;
+	memptr=0x2090;
 	memory[memptr]=0x03; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr=0x0294;
+	memptr=0x2094;
 	memory[memptr]=0xfd; memory[memptr+1]=0xfd;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr+=0x0298;
+	memptr=0x2098;
 	memory[memptr]=0x01; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
-	memptr+=0x029c;
+	memptr=0x209c;
 	memory[memptr]=0x00; memory[memptr+1]=0x00;
 	memory[memptr+2]=0x00; memory[memptr+3]=0x00;
 
@@ -1135,7 +1159,7 @@ int save_snap_ace(char *filename)
 	memory[memptr] = z80.sp.b.l; memory[memptr+1] = z80.sp.b.h; memptr+=4;
 	memory[memptr] = z80.pc.b.l; memory[memptr+1] = z80.pc.b.h; memptr+=4;
 	memory[memptr] = z80.af_.b.l; memory[memptr+1] = z80.af_.b.h; memptr+=4;
-	memory[memptr] = z80.bc_.b.l; memory[memptr+1] = z80.bc.b.h ; memptr+=4;
+	memory[memptr] = z80.bc_.b.l; memory[memptr+1] = z80.bc_.b.h; memptr+=4;
 	memory[memptr] = z80.de_.b.l; memory[memptr+1] = z80.de_.b.h; memptr+=4;
 	memory[memptr] = z80.hl_.b.l; memory[memptr+1] = z80.hl_.b.h; memptr+=4;
 
@@ -1180,21 +1204,19 @@ int save_snap_ace(char *filename)
 int memoryLoadToAddress(char *filename, void* destAddress, int length)
 {
         int fptr;
-        char file[256];
+        AnsiString file;
         int len;
 
         if (strchr(filename, '\\') || strchr(filename, '/'))
         {
-                strcpy(file, filename);
+                file = filename;
         }
         else
         {
-                strcpy(file, emulator.cwd);
-                strcat(file, romsFolder);
-                strcat(file, filename);
+                file = AnsiString(emulator.cwd) + romsFolder + filename;
         }
 
-        fptr=open(file, O_RDONLY | O_BINARY);
+        fptr=open(file.c_str(), O_RDONLY | O_BINARY);
         if (fptr<0)
         {
                 int err=errno;
@@ -1264,33 +1286,27 @@ int memory_device_rom_load(char *filename, int address, int length)
 
 int memory_load(char *filename, int address, int length, int secondBank)
 {
-        char file[256];
+        AnsiString file;
 
         if (FileExists(filename))
         {
-                strcpy(file, filename);
+                file = filename;
         }
         else
         {
-                strcpy(file, emulator.cwd);
-                strcat(file, romsFolder);
-                strcat(file, filename);
+                file = AnsiString(emulator.cwd) + romsFolder + filename;
         }
 
-        return do_memory_load(file, address, length, secondBank);
+        return do_memory_load(file.c_str(), address, length, secondBank);
 }
 
 int font_load(const char *filename, char *address, int length)
 {
         int fptr;
-        char file[256];
+        AnsiString file = AnsiString(emulator.cwd) + romsFolder + filename;
         int len;
 
-        strcpy(file, emulator.cwd);
-        strcat(file, romsFolder);
-        strcat(file, filename);
-
-        fptr=open(file, O_RDONLY | O_BINARY);
+        fptr=open(file.c_str(), O_RDONLY | O_BINARY);
         if (fptr<0) return(errno);
 
         if ((len=read(fptr, address, length))==-1)

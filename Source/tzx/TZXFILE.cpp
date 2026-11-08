@@ -180,9 +180,11 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
         switch(BlockID)
         {
         case 0x10:
+                // (the length first: a block may be shorter than a header)
                 data=(char*)Tape[BlockNo].Data.Data;
-                if ((data[0]==0) && (Tape[BlockNo].Head.ROM.DataLen==19
-                                        || Tape[BlockNo].Head.ROM.DataLen==20))
+                if (!data) return("");
+                if ((Tape[BlockNo].Head.ROM.DataLen==19
+                        || Tape[BlockNo].Head.ROM.DataLen==20) && (data[0]==0))
                 {
                         switch(data[1])
                         {
@@ -219,7 +221,7 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
                         text += "\" ";
                         text += parameters;
                 }
-                else if (data[0]==0 && Tape[BlockNo].Head.ROM.DataLen==27)
+                else if (Tape[BlockNo].Head.ROM.DataLen==27 && data[0]==0)
                 {
                         switch(data[1])
                         {
@@ -258,7 +260,9 @@ AnsiString TTZXFile::GetBlockName(int BlockNo)
 
         case 0x33:
                 text=Tr("Hardware - ");
-                text += HWName[Tape[BlockNo].Data.HWTypes[0].ID];
+                if (Tape[BlockNo].Head.HWType.NoTypes > 0 && Tape[BlockNo].Data.HWTypes
+                        && Tape[BlockNo].Data.HWTypes[0].ID < sizeof(HWName)/sizeof(HWName[0]))
+                        text += HWName[Tape[BlockNo].Data.HWTypes[0].ID];
                 return(text);
 
         case 0x19:
@@ -303,7 +307,7 @@ void TTZXFile::DeleteBlock(int Block)
 {
         int i;
 
-        if (Block>=Blocks) return;
+        if (Block<0 || Block>=Blocks) return;
         EraseBlock(Block);
 
         for(i=Block; i<Blocks; i++)
@@ -315,6 +319,8 @@ void TTZXFile::DeleteBlock(int Block)
 void TTZXFile::InsertBlock(int Position)
 {
         int i;
+
+        if (Full() || Position<0 || Position>Blocks) return;
         i=Blocks;
 
         while(i>=Position)
@@ -329,6 +335,9 @@ void TTZXFile::InsertBlock(int Position)
 
 void TTZXFile::MoveBlock(int from, int to)
 {
+        // (an Add...Block() gives -1 when the tape is full)
+        if (from<0 || to<0 || from>=Blocks || to>=Blocks) return;
+
         while(from!=to)
         {
                 if (from==to) return;
@@ -472,7 +481,10 @@ AnsiString TTZXFile::GetFName(int BlockNo)
 
         if (Tape[BlockNo].BlockID != TZX_BLOCK_GENERAL) return("");
 
+        // (no further than the block goes)
         p=(char*)Tape[BlockNo].Data.Data;
+        if (Tape[BlockNo].Head.General.DataLen < i) i=Tape[BlockNo].Head.General.DataLen;
+        if (!p || i<=0) return("");
 
         do
         {

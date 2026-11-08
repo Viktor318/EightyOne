@@ -754,6 +754,8 @@ void __fastcall TP3Drive::HD0HUDClick(TObject *Sender, TUDBtnType Button)
 
         h = HD0HUD->Position;
         s = HD0SUD->Position;
+        if (h < 1) h = 1;
+        if (s < 1) s = 1;
         c = size / (h * s);
         if (c > 65535) c = 65535;
 
@@ -770,8 +772,10 @@ void __fastcall TP3Drive::HD1HUDClick(TObject *Sender, TUDBtnType Button)
 
         ATA_GetCHS(1, &c, &h, &s, &size);
 
-        h = HD0HUD->Position;
-        s = HD0SUD->Position;
+        h = HD1HUD->Position;
+        s = HD1SUD->Position;
+        if (h < 1) h = 1;
+        if (s < 1) s = 1;
         c = size / (h * s);
         if (c > 65535) c = 65535;
 

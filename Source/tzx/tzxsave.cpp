@@ -502,8 +502,15 @@ bool TTZXFile::SavePFile(AnsiString FileName)
         i=0;
         while(i<Blocks && Tape[i].BlockID != TZX_BLOCK_GENERAL) i++;
 
+        // (no program on the tape: nothing to save)
         p=(char*)Tape[i].Data.Data;
-        namelen=ZX81Strlen((unsigned char*)p);
+        if (i>=Blocks || !p)
+        {
+                fclose(f);
+                return(false);
+        }
+
+        namelen=ZX81Strlen((unsigned char*)p, Tape[i].Head.General.DataLen);
         p+=namelen;
 
         WriteBytes(f, Tape[i].Head.General.DataLen-namelen,p);

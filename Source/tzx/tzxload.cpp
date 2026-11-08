@@ -68,12 +68,59 @@ void TTZXFile::ReadBytes(FILE *f, int len, void *buf)
         fread(buf, 1, len, f);
 }
 
+// The bytes left in the file
+
+long TTZXFile::BytesLeft(FILE *f)
+{
+        long pos, end;
+
+        pos=ftell(f);
+        fseek(f, 0, SEEK_END);
+        end=ftell(f);
+        fseek(f, pos, SEEK_SET);
+        return end > pos ? end-pos : 0;
+}
+
+// `len' bytes of the file in a new buffer, with two zero bytes after them
+// (playback reads a little ahead); NULL if the file has not got that many
+// (the lengths in a broken file can be anything)
+
+unsigned char *TTZXFile::ReadData(FILE *f, int len)
+{
+        unsigned char *data;
+
+        if (len < 0 || len > BytesLeft(f)) return NULL;
+
+        data=(unsigned char *)malloc(len+2);
+        if (!data) return NULL;
+        data[len]=data[len+1]=0;
+
+        if (len && fread(data, 1, len, f) != (size_t)len)
+        {
+                free(data);
+                return NULL;
+        }
+        return data;
+}
+
+// A table of symbol definitions of `entries' entries each, zeroed, for as
+// many symbols as the bits of a symbol can give (a power of 2, as playback
+// reads any of those), and one entry more (playback looks one ahead)
+
+unsigned short *TTZXFile::SymbolTable(int symbols, int entries)
+{
+        int all=1;
+
+        while (all < symbols) all<<=1;
+        return (unsigned short *)calloc(all*entries + 1, sizeof(unsigned short));
+}
+
 bool TTZXFile::LoadOldGeneralBlock(FILE *f)
 {
         int bl, flags, pl, pp, ns, np, as, pause;
         int datalen;
-        unsigned short *sp, *at;
-        char *data;
+        unsigned short *at;
+        unsigned char *data;
         int i;
 
         unsigned short SymDef[]=
@@ -82,34 +129,24 @@ bool TTZXFile::LoadOldGeneralBlock(FILE *f)
           3, 530, 520, 530, 520, 530, 520, 530, 520, 530,
           520, 530, 520, 530, 520, 530, 520, 530, 4689 }, *SymDefD;
 
-
-        SymDefD=(unsigned short *)malloc(2*19*sizeof(short));
-        memcpy(SymDefD, SymDef, 2*19*sizeof(short));
-
         bl=ReadDWord(f);
         flags=ReadByte(f);
         pl=ReadWord(f);
         pp=ReadWord(f);
         ns=ReadByte(f);
 
-        if ((flags!=0) && (flags!=1)) { free(SymDefD); return(true); }
-        if (pl!=0) { free(SymDefD); return(true); }
-        if (pp!=0) { free(SymDefD); return(true); }
-        if (ns!=0) { free(SymDefD); return(true); }
-
-        if (ns)
-        {
-                sp=(unsigned short *) malloc(ns * sizeof(short));
-                for(i=0;i<pp;i++) sp[i]=ReadWord(f);
-        } else  sp=NULL;
+        // Only the one kind of block this old format was used for
+        if ((flags!=0) && (flags!=1)) return(true);
+        if (pl!=0 || pp!=0 || ns!=0) return(true);
 
         np=ReadByte(f);
         as=ReadByte(f);
+        if (as!=2) return(true);
 
-        if (as!=2) { free(SymDefD); if (sp) free(sp); return(true); }
-
-        at=(unsigned short *) malloc(np * as * sizeof(short));
+        at=(unsigned short *) calloc(np * as + 1, sizeof(short));
+        if (!at) return(true);
         for(i=0; i< (np*as); i++) at[i]=ReadWord(f);
+        free(at);
 
         //usedbits=ReadByte(f);
         ReadByte(f);
@@ -117,8 +154,16 @@ bool TTZXFile::LoadOldGeneralBlock(FILE *f)
         pause=ReadWord(f);
 
         datalen=bl-(11+2*(ns+np*as));
-        data=(char *) malloc(datalen);
-        ReadBytes(f, datalen, data);
+        data=ReadData(f, datalen);
+        if (!data) return(true);
+
+        SymDefD=SymbolTable(2, 19);
+        if (!SymDefD)
+        {
+                free(data);
+                return(true);
+        }
+        memcpy(SymDefD, SymDef, 2*19*sizeof(short));
 
         Tape[CurBlock].BlockID=TZX_BLOCK_GENERAL;
         Tape[CurBlock].Pause=pause;
@@ -131,12 +176,9 @@ bool TTZXFile::LoadOldGeneralBlock(FILE *f)
         Tape[CurBlock].Head.General.DataLen=datalen;
 
         Tape[CurBlock].SymDefD=SymDefD;
-        Tape[CurBlock].Data.Data=(unsigned char*)data;
+        Tape[CurBlock].Data.Data=data;
         Tape[CurBlock].SymDefP=NULL;
         Tape[CurBlock].PRLE=NULL;
-
-        free(sp);
-        free(at);
 
         return(false);
 }
@@ -146,17 +188,22 @@ bool TTZXFile::LoadGeneralBlock(FILE *f)
         unsigned short *SymDefP, *SymDefD, *PRLE;
         unsigned char *Data;
         long Pause;
-        int TOTP, NPP, ASP, TOTD, NPD,ASD;
+        unsigned int TOTP, TOTD;
+        int NPP, ASP, NPD, ASD;
         int bits, bytes;
         int i,j,k;
-
-        long pos;
+        __int64 allbits;
+        long pos, left;
 
         pos=ftell(f);
 
         if (!LoadOldGeneralBlock(f)) return(false);
 
         fseek(f,pos,SEEK_SET);
+
+        SymDefP=SymDefD=PRLE=NULL;
+        Data=NULL;
+        bits=bytes=0;
 
         //DataLen=ReadDWord(f);
         ReadDWord(f);
@@ -170,14 +217,20 @@ bool TTZXFile::LoadGeneralBlock(FILE *f)
 
         TOTD=ReadDWord(f);
         NPD=ReadByte(f)+1;
-        ASD=ReadByte(f); if (ASD==0 && TOTP>0) ASD=256;
+        ASD=ReadByte(f); if (ASD==0 && TOTD>0) ASD=256;
 
         if (TOTD==0) { NPD=0; ASD=0; }
 
+        // What the lengths ask for must be in the file
+        left=BytesLeft(f);
+
         if (TOTP>0)
         {
-                SymDefP=(unsigned short *)malloc(ASP*(NPP*sizeof(short)));
-                PRLE=(unsigned short *)malloc(2*TOTP*sizeof(short));
+                if ((__int64)TOTP*3 > left) goto error;
+
+                SymDefP=SymbolTable(ASP, NPP);
+                PRLE=(unsigned short *)calloc(2*TOTP + 2, sizeof(short));
+                if (!SymDefP || !PRLE) goto error;
 
                 for(i=0;i<(ASP);i++)
                 {
@@ -189,33 +242,32 @@ bool TTZXFile::LoadGeneralBlock(FILE *f)
                                 //if (k==0) j=NPP;
                         }
                 }
-                for(i=0;i<TOTP;i++)
+                for(i=0;i<(int)TOTP;i++)
                 {
                         PRLE[i*2]=ReadByte(f);
                         PRLE[i*2+1]=ReadWord(f);
+
+                        // A symbol that is defined, played at least once
+                        if (PRLE[i*2] >= ASP) goto error;
+                        if (PRLE[i*2+1] == 0) PRLE[i*2+1]=1;
                 }
-        }
-        else
-        {
-                SymDefP=NULL;
-                PRLE=NULL;
         }
 
         if (TOTD>0)
         {
                 i=1;
-                bits=0;
                 while(i<ASD)
                 {
                         i<<=1;
                         bits++;
                 }
 
-                bits = bits*TOTD;
-                bytes = bits/8;
-                if ((bytes*8)<bits) bytes++;
+                allbits = (__int64)bits*TOTD;
+                if ((allbits+7)/8 > left) goto error;
+                bytes = (int)((allbits+7)/8);
 
-                SymDefD=(unsigned short *)malloc(ASD*(NPD*sizeof(short)));
+                SymDefD=SymbolTable(ASD, NPD);
+                if (!SymDefD) goto error;
 
                 for(i=0;i<(ASD);i++)
                 {
@@ -228,13 +280,8 @@ bool TTZXFile::LoadGeneralBlock(FILE *f)
                         }
                 }
 
-
-                Data=(unsigned char *)malloc(bytes);
-                ReadBytes(f,bytes, Data);
-        }
-        else
-        {
-            Data=NULL;
+                Data=ReadData(f, bytes);
+                if (!Data) goto error;
         }
 
         Tape[CurBlock].BlockID=TZX_BLOCK_GENERAL;
@@ -253,6 +300,13 @@ bool TTZXFile::LoadGeneralBlock(FILE *f)
         Tape[CurBlock].PRLE=PRLE;
 
         return(false);
+
+error:
+        if (SymDefP) free(SymDefP);
+        if (SymDefD) free(SymDefD);
+        if (PRLE) free(PRLE);
+        if (Data) free(Data);
+        return(true);
 }
 
 
@@ -264,8 +318,8 @@ bool TTZXFile::LoadROMBlock(FILE *f)
 
         pause=ReadWord(f);
         length=ReadWord(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_ROM;
         Tape[CurBlock].Data.Data=data;
@@ -273,6 +327,13 @@ bool TTZXFile::LoadROMBlock(FILE *f)
         Tape[CurBlock].Pause=pause;
 
         return(false);
+}
+
+// The bits used of the last byte: 1-8
+
+static int UsedBits(int bits)
+{
+        return (bits < 1 || bits > 8) ? 8 : bits;
 }
 
 bool TTZXFile::LoadTurboBlock(FILE *f)
@@ -286,12 +347,12 @@ bool TTZXFile::LoadTurboBlock(FILE *f)
         l0=ReadWord(f);
         l1=ReadWord(f);
         lpt=ReadWord(f);
-        usedbits=ReadByte(f);
+        usedbits=UsedBits(ReadByte(f));
         pause=ReadWord(f);
         datalen=Read3Bytes(f);
 
-        data=(unsigned char *) malloc(datalen);
-        ReadBytes(f,datalen,data);
+        data=ReadData(f, datalen);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_TURBO;
         Tape[CurBlock].Data.Data=data;
@@ -326,8 +387,8 @@ bool TTZXFile::LoadPulseBlock(FILE *f)
         unsigned short *pulses;
 
         nopulses=ReadByte(f);
-        pulses=(unsigned short *) malloc(nopulses*2);
-        ReadBytes(f,nopulses*2,pulses);
+        pulses=(unsigned short *) ReadData(f, nopulses*2);
+        if (!pulses) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_PULSE;
         Tape[CurBlock].Data.Pulses=pulses;
@@ -342,11 +403,11 @@ bool TTZXFile::LoadDataBlock(FILE *f)
 
         len0=ReadWord(f);
         len1=ReadWord(f);
-        usedbits=ReadByte(f);
+        usedbits=UsedBits(ReadByte(f));
         pause=ReadWord(f);
         datalen=Read3Bytes(f);
-        data=(unsigned char *) malloc(datalen);
-        ReadBytes(f,datalen,data);
+        data=ReadData(f, datalen);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_DATA;
         Tape[CurBlock].Data.Data=data;
@@ -368,8 +429,8 @@ bool TTZXFile::LoadDRecBlock(FILE *f)
         usedbits=ReadByte(f);
         datalen=Read3Bytes(f);
 
-        data=(unsigned char *) malloc(datalen);
-        ReadBytes(f,datalen,data);
+        data=ReadData(f, datalen);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_DREC;
         Tape[CurBlock].Data.Data=data;
@@ -385,15 +446,18 @@ bool TTZXFile::LoadCSWBlock(FILE *f)
         int datalen, pause, samplerate, compression, flags, nopulses;
         unsigned char *data;
 
-        datalen=ReadDWord(f)-11;
+        // (the length includes the 11 bytes of the header)
+        datalen=ReadDWord(f);
+        if (datalen < 11) return(true);
+        datalen-=11;
         pause=ReadWord(f);
         samplerate=Read3Bytes(f);
         compression=ReadByte(f);
         flags=ReadByte(f);
         nopulses=ReadDWord(f);
 
-        data=(unsigned char *) malloc(datalen);
-        ReadBytes(f,datalen,data);
+        data=ReadData(f, datalen);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_CSW;
         Tape[CurBlock].Data.Data=data;
@@ -423,8 +487,8 @@ bool TTZXFile::LoadGStartBlock(FILE *f)
         unsigned char *data;
 
         length=ReadByte(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_GSTART;
         Tape[CurBlock].Data.Data=data;
@@ -468,10 +532,12 @@ bool TTZXFile::LoadSBlock(FILE *f)
         int length, selections;
         unsigned char *data;
 
+        // (the length includes the count of selections)
         length=ReadWord(f)-1;
+        if (length < 0) return(true);
         selections=ReadByte(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_SBLOCK;
         Tape[CurBlock].Data.Data=data;
@@ -505,8 +571,8 @@ bool TTZXFile::LoadTextBlock(FILE *f)
         unsigned char *data;
 
         length=ReadByte(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_TEXT;
         Tape[CurBlock].Data.Data=data;
@@ -521,8 +587,8 @@ bool TTZXFile::LoadMessageBlock(FILE *f)
 
         time=ReadByte(f);
         length=ReadByte(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_MESSAGE;
         Tape[CurBlock].Data.Data=data;
@@ -536,10 +602,12 @@ bool TTZXFile::LoadArchiveBlock(FILE *f)
         int length,strings;
         unsigned char *data;
 
+        // (the length includes the count of strings)
         length=ReadWord(f)-1;
-        data=(unsigned char *) malloc(length);
+        if (length < 0) return(true);
         strings=ReadByte(f);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=TZX_BLOCK_ARCHIVE;
         Tape[CurBlock].Data.Data=data;
@@ -554,7 +622,11 @@ bool TTZXFile::LoadHWTypeBlock(FILE *f)
         struct TZXHWInfo *data, *p;
 
         blocks=ReadByte(f);
-        data=(struct TZXHWInfo *) malloc(blocks * sizeof(struct TZXHWInfo));
+        if (blocks*3 > BytesLeft(f)) return(true);
+
+        // (one at least: its name is shown)
+        data=(struct TZXHWInfo *) calloc(blocks ? blocks : 1, sizeof(struct TZXHWInfo));
+        if (!data) return(true);
         p=data;
 
         for(i=0;i<blocks;i++)
@@ -576,15 +648,19 @@ bool TTZXFile::LoadCustomBlock(FILE *f)
         char *data, id[17];
         int len;
 
+        memset(id, 0, sizeof(id));
         ReadBytes(f, 16, id);
         id[16]='\0';
 
         len=ReadDWord(f);
-        data=(char *)malloc(len);
-        ReadBytes(f, len, data);
+        data=(char *)ReadData(f, len);
+        if (!data) return(true);
 
+        // The block's name: the start of its ID (it was copied from the
+        // data)
         Tape[CurBlock].BlockID=TZX_BLOCK_CUSTOM;
-        memcpy(Tape[CurBlock].Head.Custom.IDString, data, 11);
+        memcpy(Tape[CurBlock].Head.Custom.IDString, id, 10);
+        Tape[CurBlock].Head.Custom.IDString[10]='\0';
         Tape[CurBlock].Data.Data=(unsigned char*)data;
         Tape[CurBlock].Head.Custom.Length=len;
 
@@ -603,8 +679,8 @@ bool TTZXFile::LoadUnknownBlock(FILE *f, int BlockID)
         unsigned char *data;
 
         length=ReadDWord(f);
-        data=(unsigned char *) malloc(length);
-        ReadBytes(f,length,data);
+        data=ReadData(f, length);
+        if (!data) return(true);
 
         Tape[CurBlock].BlockID=0;
         Tape[CurBlock].Data.Data=data;
@@ -621,7 +697,7 @@ bool TTZXFile::LoadTAPFile(AnsiString FileName, bool Insert)
         int HeaderLen;
         int len;
         bool FirstBlock, AddSync, AddChecksum;
-        unsigned char data[65536];
+        unsigned char data[65536+2];
 
         f=fopen(FileName.c_str(), "rb");
         if (!f) return(false);
@@ -633,7 +709,7 @@ bool TTZXFile::LoadTAPFile(AnsiString FileName, bool Insert)
         if (!Insert) EraseAll();
         error=false;
 
-        while(!feof(f) && !error)
+        while(!feof(f) && !error && !Full())
         {
                 len=ReadWord(f);
 
@@ -645,10 +721,13 @@ bool TTZXFile::LoadTAPFile(AnsiString FileName, bool Insert)
                 }
                 FirstBlock=false;
 
-                if (len<1 || len>65536) error=true;
+                // (with the sync byte and checksum added, it must still be
+                // a ROM block: 65535 bytes at most; a block cut short ends
+                // the file)
+                if (len<1 || len>65535-AddSync-AddChecksum) error=true;
+                else if (fread(data+AddSync, 1, len, f) != (size_t)len) error=true;
                 else
                 {
-                        ReadBytes(f, len, data+AddSync);
                         if (AddSync)
                         {
                                 if (len==HeaderLen) data[0]=0;
@@ -692,16 +771,23 @@ bool TTZXFile::LoadPFile(AnsiString FileName, bool Insert)
         this->FileName=FileName;
 
         if (!Insert) NewTZX();
+        if (Full())
+        {
+                fclose(f);
+                return(false);
+        }
+
+        memset(tempdata, 0, sizeof(tempdata));
 
         if (FileNameGetExt(FileName)==".P"
                 || FileNameGetExt(FileName)==".81")
         {
                 ConvertASCIIZX81(RemoveExt(RemovePath(FileName)), (unsigned char*)tempdata);
-                fnamelen=ZX81Strlen((unsigned char*)tempdata);
+                fnamelen=ZX81Strlen((unsigned char*)tempdata, 256);
         }
         else    fnamelen=0;
 
-        len=fread(tempdata+fnamelen, 1, 65536, f);
+        len=fread(tempdata+fnamelen, 1, sizeof(tempdata)-fnamelen < 65536 ? sizeof(tempdata)-fnamelen : 65536, f);
 
         ValidateFile(FileName, tempdata, len);
 
@@ -747,9 +833,12 @@ void TTZXFile::LoadPFileData(AnsiString FileName, unsigned char* programData, in
 
         int fnamelen;
         char tempdata[65536+256];
-        
+
+        if (Full() || length < 0 || length > 65536) return;
+
+        memset(tempdata, 0, sizeof(tempdata));
         ConvertASCIIZX81(RemoveExt(RemovePath(FileName)), (unsigned char*)tempdata);
-        fnamelen = ZX81Strlen((unsigned char*)tempdata);
+        fnamelen = ZX81Strlen((unsigned char*)tempdata, 256);
 
         memcpy(tempdata+fnamelen, (char*)programData, length);
 
@@ -762,6 +851,7 @@ void TTZXFile::LoadPFileData(AnsiString FileName, unsigned char* programData, in
 void TTZXFile::LoadTapFileData(AnsiString FileName, unsigned char* programData, int length, bool Insert)
 {
         if (!Insert) EraseAll();
+        if (Blocks > TZX_MAX_BLOCKS-4) return;
 
         int headerOffset = 0;
         int headerLength = programData[headerOffset] + (programData[headerOffset+1] << 8);
@@ -820,7 +910,10 @@ void TTZXFile::ValidateFile(AnsiString FileName, char* tempdata, int len)
         {
                 startSystemVariables = 0x4000;
                 elineOffset = 0x400A - startSystemVariables;
+
+                if (length < (elineOffset + 2)) return;
         }
+        else return;
 
         unsigned char lowByte = program[elineOffset];
         unsigned char highByte = program[elineOffset + 1];
@@ -863,7 +956,7 @@ bool TTZXFile::LoadT81File(AnsiString FileName, bool Insert)
 
         char header[5];
         char fname[33], flen[17];
-        unsigned char buffer1[65536+256], buffer2[65535+256];
+        unsigned char buffer1[65536+256], buffer2[65536+256];
 
         FILE *fptr;
         int length, zxnamelen,i;
@@ -891,7 +984,7 @@ bool TTZXFile::LoadT81File(AnsiString FileName, bool Insert)
                 length = atoi(flen);
 
                 int fnameLen = strlen(fname);
-                if ( (fnameLen>32) || (length < 1) || (length > 65535) )
+                if ( (fnameLen>32) || (length < 1) || (length > 65535) || Full())
                         break;
 
                 if ((fname[0] == '<') && fname[fnameLen - 1] == '>')
@@ -908,13 +1001,15 @@ bool TTZXFile::LoadT81File(AnsiString FileName, bool Insert)
                 }
                 else
                 {
-                        fread(buffer1, length, 1, fptr);
+                        // (a block cut short ends the file)
+                        if (fread(buffer1, 1, length, fptr) != (size_t)length) break;
+                        memset(buffer2, 0, 256);
                         if ( (*buffer1==0x00) || (*buffer1==255) || (*buffer1==1) ) // If buffer doesn't include the filename, add one
                         {
                                 if (*fname != '\0')
                                 {
                                         ConvertASCIIZX81(fname, buffer2);
-                                        zxnamelen = ZX81Strlen(buffer2);
+                                        zxnamelen = ZX81Strlen(buffer2, 256);
                                 }
                                 else
                                 {
@@ -966,6 +1061,7 @@ bool TTZXFile::LoadFile(AnsiString FileName, bool Insert)
         if (!f) return(false);
         this->FileName=FileName;
 
+        memset(&head, 0, sizeof(head));
         fread(&head, sizeof(head),1, f);
         if (strncmp(head.id, TZX_ID, 8))
         {
@@ -976,7 +1072,7 @@ bool TTZXFile::LoadFile(AnsiString FileName, bool Insert)
         if (!Insert) EraseAll();
         error=false;
 
-        while(!feof(f) && !error)
+        while(!feof(f) && !error && !Full())
         {
                 BlockID=ReadByte(f);
 

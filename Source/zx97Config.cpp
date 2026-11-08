@@ -55,15 +55,12 @@ void TZX97Dialog::UpdateMachine(ZX97& settings)
 void TZX97Dialog::SaveSettings(TIniFile *ini)
 {
         FILE *f;
-        char filename[256];
 
         if (SaveRAM->Checked)
         {
-                strcpy(filename, emulator.cwd);
-                strcat(filename, nvMemoryFolder);
-                strcat(filename, "zx97.nv");
+                AnsiString filename = AnsiString(emulator.cwd) + nvMemoryFolder + "zx97.nv";
 
-                f=fopen(filename,"wb");
+                f=fopen(filename.c_str(),"wb");
                 if (f)
                 {
                         fwrite(zx97bankmem, 16384, 16, f);
@@ -77,13 +74,9 @@ void TZX97Dialog::SaveSettings(TIniFile *ini)
 void TZX97Dialog::LoadSettings(TIniFile *ini)
 {
         FILE *f;
-        char filename[256];
+        AnsiString filename = AnsiString(emulator.cwd) + nvMemoryFolder + "zx97.nv";
 
-        strcpy(filename, emulator.cwd);
-        strcat(filename, nvMemoryFolder);
-        strcat(filename, "zx97.nv");
-
-        f=fopen(filename,"rb");
+        f=fopen(filename.c_str(),"rb");
         if (f)
         {
                 fread(zx97bankmem, 16384, 16, f);

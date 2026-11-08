@@ -58,109 +58,218 @@ bool TWavFile::SaveCSW(AnsiString FName)
         return true;
 }
 
+// The length of a file
+
+static long FileLength(FILE *f)
+{
+        long pos, end;
+
+        pos=ftell(f);
+        fseek(f, 0, SEEK_END);
+        end=ftell(f);
+        fseek(f, pos, SEEK_SET);
+        return end;
+}
+
+// The next pulse of a CSW file (how many samples): 0 at the end
+
+static unsigned int CSWPulse(FILE *f)
+{
+        int c;
+        unsigned char b[4];
+
+        c=fgetc(f);
+        if (c==EOF) return 0;
+        if (c) return (unsigned int)c;
+
+        // 0: the length follows in 4 bytes
+        if (fread(b, 1, 4, f) != 4) return 0;
+        return b[0] | (b[1]<<8) | (b[2]<<16) | ((unsigned int)b[3]<<24);
+}
+
+// A CSW (version 1.01) file: each pulse is turned into its samples. The
+// file is only taken if it is all right; otherwise what was loaded stays.
+
 bool TWavFile::LoadCSW(AnsiString FName)
 {
         FILE *f;
         struct CSW csw;
-        unsigned int size;
-        int i,c,current;
+        unsigned int size, pulse, i, rate;
+        unsigned char *buffer;
+        int current;
 
         f=fopen(FName.c_str(), "rb");
+        if (!f) return(false);
 
-        fread(&csw,0x20,1,f);
-
-        if (csw.MajVer!=1 || csw.MinVer!=1)
+        memset(&csw, 0, sizeof(csw));
+        if (fread(&csw,0x20,1,f) != 1
+                || strncmp(csw.Sig, "Compressed Square Wave", 22)
+                || csw.MajVer!=1 || csw.MinVer!=1)
         {
                 fclose(f);
                 return(false);
         }
 
-        size=0;
-        c=0;
-
-        while(!feof(f))
+        rate=(unsigned char)csw.SampleRateHi * 256 + (unsigned char)csw.SampleRateLo;
+        if (rate==0)
         {
-                c=fgetc(f);
-                if (!c) fread(&c,4,1,f);
-                size+=c;
+                fclose(f);
+                return(false);
         }
-        //return(true);
 
-        SampleRate = csw.SampleRateHi * 256 + csw.SampleRateLo;
+        // How many samples: no more than a sample a byte can be (2 GB)
+        size=0;
+        while((pulse=CSWPulse(f)) != 0)
+        {
+                if (pulse > 0x7FFFFFFF - size) pulse = 0x7FFFFFFF - size;
+                size+=pulse;
+                if (size==0x7FFFFFFF) break;
+        }
+
+        try
+        {
+                buffer=new unsigned char[size ? size : 1];
+        }
+        catch(...)
+        {
+                buffer=NULL;
+        }
+        if (!buffer)
+        {
+                fclose(f);
+                return(false);
+        }
+
+        // The samples
+        fseek(f, 0x20, SEEK_SET);
+        current=csw.Flags&1;
+        i=0;
+        while(i<size && (pulse=CSWPulse(f)) != 0)
+        {
+                if (pulse > size-i) pulse=size-i;
+                memset(buffer+i, current ? 255 : 0, pulse);
+                i+=pulse;
+                current=1-current;
+        }
+        fclose(f);
+
+        SampleRate = rate;
         Stereo=false;
         Signed=false;
         NoSamples=size;
         Bits=8;
         Format.BytesSample=1;
         Format.NoChannels=1;
+        Format.SampleRate=rate;
+        Format.BitsSample=8;
         Data.DataLen=NoSamples;
         if (Data.Data!=NULL) delete[] Data.Data;
-        Data.Data=new unsigned char[Data.DataLen];
-        MemAllocated=Data.DataLen;
-
-        fclose(f);
-        f=fopen(FName.c_str(), "rb");
-        fread(&csw,0x20,1,f);
-
-        size=0;
-
-        current=csw.Flags&1;
-
-        while(size<NoSamples)
-        {
-                c=fgetc(f);
-                if (c==0) fread(&c,4,1,f);
-
-                for(i=0;i<c;i++) Data.Data[size++]=(unsigned char)(current? 255:0);
-                current=1-current;
-        }
-
-        fclose(f);
+        Data.Data=buffer;
+        MemAllocated=size ? size : 1;
+        FileName=FName;
 
         return(true);
 }
 
+// A WAV file. Its chunks are looked through for "fmt " and "data"; the file
+// is only taken if they make sense, otherwise what was loaded stays. Data
+// cut short is taken as far as it goes.
+
 bool TWavFile::LoadFile(AnsiString FName)
 {
         FILE *f;
+        struct RIFFHeader head;
+        struct RIFFFormat format;
+        char blkname[4];
+        unsigned int blklen, datalen;
+        long length, left;
+        bool haveHead, haveFormat, haveData;
+        unsigned char *buffer;
 
         if (FileNameGetExt(FName)==".CSW") return(LoadCSW(FName));
 
         f=fopen(FName.c_str(), "rb");
+        if (!f) return(false);
+        length=FileLength(f);
 
-        Head.Head[0]='\0';
-        Format.Head[0]='\0';
-        Data.Head[0]='\0';
-        do
+        memset(&head, 0, sizeof(head));
+        memset(&format, 0, sizeof(format));
+        haveHead=haveFormat=haveData=false;
+        datalen=0;
+
+        // Each chunk read moves on, or ends the search
+        while(!haveData)
         {
-                char blkname[4];
-                unsigned int blklen;
+                long pos=ftell(f);
 
-                fread(blkname, 4,1,f);
-                fread(&blklen, 4,1,f);
+                if (fread(blkname, 4,1,f) != 1 || fread(&blklen, 4,1,f) != 1) break;
 
                 if (!strncmp(blkname,"RIFF",4))
                 {
-                        fseek(f,-8,SEEK_CUR);
-                        fread(&Head,sizeof(struct RIFFHeader),1,f);
+                        fseek(f, pos, SEEK_SET);
+                        if (fread(&head,sizeof(struct RIFFHeader),1,f) != 1) break;
+                        haveHead=true;
                 }
                 else if (!strncmp(blkname,"fmt",3))
                 {
-                        fseek(f,-8,SEEK_CUR);
-                        fread(&Format,sizeof(struct RIFFFormat),1,f);
-                        if (Format.BlkLen>16) fseek(f, Format.BlkLen-16, SEEK_CUR);
+                        fseek(f, pos, SEEK_SET);
+                        if (fread(&format,sizeof(struct RIFFFormat),1,f) != 1) break;
+                        haveFormat=true;
+                        if (format.BlkLen>16)
+                        {
+                                if (format.BlkLen-16 > (unsigned long)(length-ftell(f))) break;
+                                fseek(f, format.BlkLen-16, SEEK_CUR);
+                        }
                 }
                 else if (!strncmp(blkname,"data",4))
                 {
-                        fseek(f,-8,SEEK_CUR);
-                        fread(&Data, /*sizeof(struct RIFFData)*/ 8,1,f);
+                        datalen=blklen;
+                        haveData=true;
                 }
-                else fseek(f, blklen, SEEK_CUR);
-        } while(!feof(f) && strncmp(Data.Head, "data",4));
+                else
+                {
+                        if (blklen > (unsigned long)(length-ftell(f))) break;
+                        fseek(f, blklen, SEEK_CUR);
+                }
+        }
 
-        if (strncmp(Head.Head, "RIFF",4)) { fclose(f); return false; }
-        if (strncmp(Format.Head,"fmt",3)) { fclose(f); return false; }
-        if (strncmp(Data.Head,"data",4)) { fclose(f); return false; }
+        if (!haveHead || !haveFormat || !haveData
+                || format.NoChannels < 1 || format.BytesSample < 1
+                || format.SampleRate == 0)
+        {
+                fclose(f);
+                return false;
+        }
+
+        // A recording cut short: as far as it goes
+        left=length-ftell(f);
+        if (left < 0) left=0;
+        if (datalen > (unsigned long)left) datalen=left;
+
+        try
+        {
+                buffer=new unsigned char[datalen ? datalen : 1];
+        }
+        catch(...)
+        {
+                buffer=NULL;
+        }
+        if (!buffer)
+        {
+                fclose(f);
+                return false;
+        }
+
+        fread(buffer, 1, datalen, f);
+        fclose(f);
+
+        Head=head;
+        Format=format;
+        strncpy(Data.Head, "data", 4);
+        Data.DataLen=datalen;
+        if (Data.Data!=NULL) delete[] Data.Data;
+        Data.Data=buffer;
+        MemAllocated=datalen ? datalen : 1;
 
         SampleRate = Format.SampleRate;
         NoSamples = Data.DataLen /  Format.BytesSample;
@@ -169,13 +278,6 @@ bool TWavFile::LoadFile(AnsiString FName)
 
         if (Format.NoChannels == 1) Stereo=false;
         else Stereo=true;
-
-        if (Data.Data!=NULL) delete[] Data.Data;
-        Data.Data=new unsigned char[Data.DataLen];
-        MemAllocated=Data.DataLen;
-
-        fread(Data.Data, Data.DataLen, 1, f);
-        fclose(f);
 
         FileName=FName;
         if (Format.BitsSample>8) Signed=true;
@@ -209,7 +311,7 @@ unsigned char TWavFile::Sample(unsigned int SampleNo, int Channel)
         unsigned char data;
         int val;
 
-        if (SampleNo>=NoSamples) return(128);
+        if (SampleNo>=NoSamples || Format.NoChannels<1) return(128);
 
         SampleSize = Format.BytesSample / Format.NoChannels;
 

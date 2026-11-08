@@ -29,6 +29,7 @@
 
 int TTZXFile::AddGroupStartBlock(char *str)
 {
+        if (Full()) return(-1);
         unsigned char *data;
 
         data=(unsigned char *)malloc(strlen(str)+1);
@@ -42,12 +43,14 @@ int TTZXFile::AddGroupStartBlock(char *str)
 
 int TTZXFile::AddGroupEndBlock(void)
 {
+        if (Full()) return(-1);
         Tape[Blocks].BlockID=TZX_BLOCK_GEND;
         return(Blocks++);
 }
 
 int TTZXFile::AddTextBlock(char *str)
 {
+        if (Full()) return(-1);
         unsigned char *data;
 
         data=(unsigned char *)malloc(strlen(str)+1);
@@ -61,6 +64,7 @@ int TTZXFile::AddTextBlock(char *str)
 
 int TTZXFile::AddHWTypeBlock(unsigned char type, unsigned char id)
 {
+        if (Full()) return(-1);
         struct TZXHWInfo *data;
 
         data=(struct TZXHWInfo *) malloc(sizeof(struct TZXHWInfo));
@@ -77,6 +81,7 @@ int TTZXFile::AddHWTypeBlock(unsigned char type, unsigned char id)
 
 int TTZXFile::AddPauseBlock(int len)
 {
+        if (Full()) return(-1);
         if (len>65535)
         {
                 AddPauseBlock(65535);
@@ -89,6 +94,7 @@ int TTZXFile::AddPauseBlock(int len)
 }
 int TTZXFile::AddROMBlock(char *data, int len)
 {
+        if (Full()) return(-1);
         char *DataBuf;
 
         DataBuf=(char *)malloc(len);
@@ -103,6 +109,7 @@ int TTZXFile::AddROMBlock(char *data, int len)
 
 int TTZXFile::AddGeneralBlock(char *data, int len)
 {
+        if (Full()) return(-1);
         char *DataBuf;
  
         unsigned short SymDef[]=
@@ -138,6 +145,7 @@ int TTZXFile::AddGeneralBlock(char *data, int len)
 
 int TTZXFile::AddArchiveBlock(char *str)
 {
+        if (Full()) return(-1);
         char *p;
 
         p=(char *)malloc(strlen(str)+2);

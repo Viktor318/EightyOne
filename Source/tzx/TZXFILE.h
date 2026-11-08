@@ -378,6 +378,9 @@ private:
         unsigned int ReadDWord(FILE *f);
         unsigned int Read3Bytes(FILE *f);
         void ReadBytes(FILE *f, int len, void *buf);
+        long BytesLeft(FILE *f);
+        unsigned char *ReadData(FILE *f, int len);
+        unsigned short *SymbolTable(int symbols, int entries);
 
         void LoadOFileData(unsigned char* programData, int length, bool Insert);
         void LoadPFileData(AnsiString FileName, unsigned char* programData, int length, bool Insert);
@@ -393,6 +396,10 @@ public:
         bool AutoStart;
         bool Playing;
         bool Stopping;
+
+        // No more blocks can be added (two are kept free: inserting and
+        // deleting move the blocks one past the last)
+        bool Full(void) { return Blocks >= TZX_MAX_BLOCKS-2; }
 
         void LoadFileData(AnsiString FileName, unsigned char* programData, int length, bool Insert);
         bool LoadFile(AnsiString FileName, bool Insert);

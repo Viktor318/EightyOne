@@ -801,3 +801,4 @@ code	AccDraw_.cpp	Count not initialise DirectDraw.\nPlease ensure DirectX 7 or g
 code	main_.cpp; SoundForm.cpp	Automatic	Automatikus
 code	SoundForm.cpp	Output:	Kimenet:
 code	SoundForm.cpp	no sound device	nincs hangeszköz
+code	wavload_.cpp	The file could not be loaded.	A fájlt nem sikerült betölteni.

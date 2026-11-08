@@ -61,7 +61,8 @@ AnsiString TZipFile::ExpandZIP(AnsiString Path, AnsiString DialogueFilter)
         Orig=FileName;
         Dest=Filter;
         Filter[0]='\0';
-        strcpy(FileName, DialogueFilter.c_str());
+        strncpy(FileName, DialogueFilter.c_str(), sizeof(FileName)-1);
+        FileName[sizeof(FileName)-1]='\0';
 
         // Now search the text for a * or a , indicating the start of an extension
         // eg *.TZX or .t81
@@ -112,8 +113,11 @@ AnsiString TZipFile::ExpandZIP(AnsiString Path, AnsiString DialogueFilter)
 
         while(error==UNZ_OK)
         {
-                // Get filename of archive member
+                // Get filename of archive member (a name too long for the
+                // buffer comes without its terminating 0)
+                FileName[0]='\0';
                 unzGetCurrentFileInfo(ZFile, NULL, FileName, 256, NULL, 0, NULL, 0);
+                FileName[256]='\0';
 
                 File=FileName;
                 Ext=FileNameGetExt(File);
@@ -185,6 +189,15 @@ AnsiString TZipFile::ExpandZIP(AnsiString Path, AnsiString DialogueFilter)
                 {
                         File = File.SubString(position + 1, 256);
                 }
+
+                // Only characters a Windows file name can have (a ':' would
+                // make it a stream of another file)
+                for (int i = 1; i <= File.Length(); i++)
+                {
+                        if ((unsigned char)File[i] < 32 || strchr(":*?\"<>|", File[i]))
+                                File[i] = '_';
+                }
+
                 strcat(FileName, File.c_str());
 
                 // Open file for writing, then extract the contents.
@@ -203,11 +216,17 @@ AnsiString TZipFile::ExpandZIP(AnsiString Path, AnsiString DialogueFilter)
                                         fwrite(buf, 1, len, F);
                                         len=unzReadCurrentFile(ZFile, buf, 256);
                                 }
-                                unzCloseCurrentFile(ZFile);
+
+                                // A broken archive: what came out is not right
+                                // (it reports a bad checksum when closing)
+                                int closed=unzCloseCurrentFile(ZFile);
+                                if (len<0) error=len;
+                                else error=closed;
                         }
 
                         fclose(F);
                 }
+                else    error=UNZ_ERRNO;
         }
 
         unzClose(ZFile);

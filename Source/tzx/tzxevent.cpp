@@ -47,6 +47,8 @@ bool TTZXFile::Start(void)
 
         Playing=true;
         BlockInProgress=false;
+        LoopBlockStart=-1;
+        LoopBlockCounter=0;
         TZXFile.FlashLoadable=0;
         TZXEventCounter=machine.clockspeed /4;
         //TZXEventCounter=100;
@@ -87,14 +89,28 @@ void TTZXFile::StopNow(bool Error)
         //if (Error) kbBreak=256;
 }
 
+// So many changes with no time passing: the tape goes round in circles
+// (jumps or loops of blocks that take no time); it is stopped
+#define TZX_MAX_CHANGES         1000000
+
 bool TTZXFile::ClockTick(int Tstates)
 {
         bool NewBlock=false;
+        int changes=0;
+
         if (!Playing) return(false);
 
         TZXEventCounter-=Tstates;
         while(Playing && (TZXEventCounter<=0))
+        {
                 if (StateChange()) NewBlock=true;
+
+                if (++changes > TZX_MAX_CHANGES)
+                {
+                        StopNow(true);
+                        break;
+                }
+        }
 
         return(NewBlock);
 }
@@ -192,7 +208,12 @@ bool TTZXFile::EventStop48k(void)
 
 bool TTZXFile::EventJump(void)
 {
-        CurBlock = (CurBlock + (short)Tape[CurBlock].Head.Jump.JumpRel) -1;
+        int to = CurBlock + (short)Tape[CurBlock].Head.Jump.JumpRel;
+
+        // Only to another block of the tape; otherwise on to the next
+        if (to != CurBlock && to >= 0 && to < Blocks)
+                CurBlock = to - 1;
+
         EventNextBlock();
         return(true);
 }
@@ -208,7 +229,9 @@ bool TTZXFile::EventLStart(void)
 
 bool TTZXFile::EventLEnd(void)
 {
-        if (--LoopBlockCounter>1) CurBlock=LoopBlockStart;
+        // (not without a loop start before it)
+        if (LoopBlockStart>=0 && LoopBlockStart<Blocks && --LoopBlockCounter>1)
+                CurBlock=LoopBlockStart;
         EventNextBlock();
         return(true);
 }

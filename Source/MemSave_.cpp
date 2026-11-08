@@ -36,7 +36,7 @@ TMemSave *MemSave;
 extern char memory[];
 extern BYTE spec48_getbyte(int Address);
 extern void spec48_setbyte(int Address, int Data);
-extern int TIMEXMode;
+extern int TIMEXByte, TIMEXMode, TIMEXColour;
 
 //---------------------------------------------------------------------------
 __fastcall TMemSave::TMemSave(TComponent* Owner)
@@ -142,28 +142,38 @@ void __fastcall TMemSave::SaveClick(TObject *Sender)
                 if (f)
                 {
                         int len,i;
-                        char *p = memory+addr;
+                        BYTE *p = (BYTE *)memory+addr;
 
-                        len=fread(p, 1, 65536, f);
+                        // No further than the top of memory
+                        len=fread(p, 1, 65536-addr, f);
+                        fclose(f);
 
                         if (emulator.machine==MACHINESPECTRUM)
                         {
-                                if (Ext==".SCR" && (len==12288 || len==12289))
+                                // A Timex screen: two halves of 6144 bytes, at
+                                // the start of the screen and 8K on; hi-colour,
+                                // or hi-res with its colour in one more byte
+                                // (as Fuse loads it)
+                                if (Ext==".SCR" && (len==12288 || len==12289) && addr+8192+6144<=65536)
                                 {
                                         for(i=0;i<6144;i++)
                                                 spec48_setbyte(addr+i, p[i]);
                                         for(i=6144;i<12288;i++)
-                                                spec48_setbyte(addr+8192+i, p[i]);
-                                        TIMEXMode=4;
+                                                spec48_setbyte(addr+8192+(i-6144), p[i]);
 
-                                        if (len==12289) TIMEXMode=p[12289]&63;
+                                        if (len==12289)
+                                        {
+                                                TIMEXMode=6;
+                                                TIMEXColour=(p[12288]>>3)&7;
+                                        }
+                                        else    TIMEXMode=2;
+
+                                        TIMEXByte=(TIMEXByte&0xC0) | (TIMEXColour<<3) | TIMEXMode;
                                 }
                                 else
                                         for(i=0;i<len;i++)
                                                 spec48_setbyte(addr+i, p[i]);
                         }
-                        else
-                        fclose(f);
                 }
                 else
                 {

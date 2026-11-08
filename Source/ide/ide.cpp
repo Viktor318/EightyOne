@@ -652,6 +652,7 @@ int ATA_LoadHDF(int drive, char *FileName)
 
         ATA_EjectHDF(drive);
         if (!FileName) return(1);
+        if (strlen(FileName) >= sizeof(Drv->filename)) return(1);
 
         if (FileName[0]=='\\' && FileName[1]=='\\')
         {
@@ -715,8 +716,8 @@ int ATA_LoadHDF(int drive, char *FileName)
         }
 
         len=strlen(FileName);
-        if ( (!strcmp(FileName+len-4,".vhd"))
-                || (!strcmp(FileName+len-4,".VHD")) )
+        if ( len>=4 && ((!strcmp(FileName+len-4,".vhd"))
+                || (!strcmp(FileName+len-4,".VHD"))) )
         {
                 char ModelName[]="iEhgtynO eiVtrauPl C                    ";
                 f=fopen(FileName,"rb+");
@@ -742,9 +743,10 @@ int ATA_LoadHDF(int drive, char *FileName)
                 Drv->data = 0;
                 Drv->sector_size = 512;
 
-                Drv->cylinders = Drv->vhd.cyl_h * 256 + Drv->vhd.cyl_l;
-                Drv->heads = Drv->vhd.heads;
-                Drv->sectors = Drv->vhd.sectors;
+                // (the fields are bytes from 0 to 255)
+                Drv->cylinders = (unsigned char)Drv->vhd.cyl_h * 256 + (unsigned char)Drv->vhd.cyl_l;
+                Drv->heads = (unsigned char)Drv->vhd.heads;
+                Drv->sectors = (unsigned char)Drv->vhd.sectors;
                 Drv->size = Drv->cylinders * Drv->heads * Drv->sectors;
 
                 //sectors=Drv->size;
@@ -795,9 +797,13 @@ int ATA_LoadHDF(int drive, char *FileName)
                 Drv->data = (Drv->hdf.data_high << 8) | Drv->hdf.data_low;
                 Drv->sector_size = Drv->hdf.flags & 0x01 ? 256 : 512;
 
-                idlen=(Drv->data)-sizeof(HDF_HEADER);
+                // The drive's identity follows the header, up to the data
+                // (which, in a broken file, may even start before it)
+                idlen=(int)(Drv->data)-(int)sizeof(HDF_HEADER);
+                if (idlen<0) idlen=0;
                 if (idlen>512) idlen=512;
 
+                memset(Drv->drive_id, 0, 512);
                 fread(Drv->drive_id, idlen, 1, f);
 
                 Drv->cylinders = (Drv->drive_id[ 3]<<8) | Drv->drive_id[2];

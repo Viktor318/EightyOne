@@ -42,7 +42,7 @@ extern "C" {
 
 int CRC32Block(BYTE *block, int len);
 void ASCIIZX81(BYTE *in, BYTE *Output);
-int ZX81Strlen(BYTE *str);
+int ZX81Strlen(BYTE *str, int max = 0x7FFFFFFF);
 
 #ifdef __cplusplus
 }
