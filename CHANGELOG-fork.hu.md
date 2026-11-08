@@ -10,6 +10,14 @@ eredetihez képest.
 
 ### Hang
 
+- **Sávkorlátozott AY** is: folytonos időben fut, és a kimenetének minden
+  változása (a hangok élei, a zaj, a burkológörbe lépései, a
+  regiszterírások, mind a minta azon a részén, ahol történnek)
+  sávkorlátozott lépcső. A magas hangok és a burkológörbés „buzzer”
+  basszusok mellett nem szólnak fémes, nem harmonikus mellékhangok:
+  4 kHz-en ezek −20 dB-en voltak (együtt −13 dB-en), most −100 dB alatt.
+  Az AY hangzása egyébként változatlan: a hangerők, a sztereó módok, a
+  burkológörbék és a hangerő-regiszterrel lejátszott minták is.
 - **Sávkorlátozott csipogó:** minden él a mintavételi frekvencia fele
   alá szűrt lépcsőként kerül a hangba (BLEP), így a magas hangok mellett
   nem szólnak sípoló, nem harmonikus mellékhangok (eddig −22…−43 dB-en

@@ -139,7 +139,8 @@ extern const int AYStereoPlaces[AY_STEREO_MODES][3];
 
 struct AYChangeTag
 {
-        unsigned short ofs;
+        unsigned short ofs;             // the sample of the buffer...
+        unsigned short sub;             // ...and where in it (1/65536ths)
         unsigned char reg,val;
 };
 
@@ -221,7 +222,14 @@ private:
         void BeeperFill(int upto);
         double BeeperFade(double level, double samples);
         static void BlepInit(void);
+        static double BlepStepAt(double x);
+        void BlepAdd(double *buffer, double at, double jump);
         int SampleOffset(int frametstates);
+        double SamplePosition(int frametstates);
+
+        void AYApplyChange(int reg);
+        void AYEnvCompute(void);
+        void AYEmit(double at);
 
         int SelectAYReg;
         int FrameSize;
@@ -255,16 +263,28 @@ private:
         // the buffer goes into the next one.
         int OffsetTStates;
 
-	// tick/incr/periods are all fixed-point with low 16 bits as
-	// fractional part, except ay_env_{tick,period} which count as the chip does.
-
-        unsigned int AYToneTick[3],AYNoiseTick;
-        unsigned int AYEnvTick,AYEnvSubCycles;
-        unsigned int AYTickIncr;
+        // The AY, run in continuous time (see AYOverlay()). Ticks and
+        // periods are in AY clock cycles; the envelope's tick and period
+        // count as the chip does.
         int AYClock;                    // 0: no AY
-        unsigned int AYTonePeriod[3],AYNoisePeriod,AYEnvPeriod;
-
+        double AYCyclesPerSample;
+        double AYToneTick[3];           // 0 ... twice the half period
+        double AYToneHalf[3];           // half a period: 8 * the period set
+        double AYNoiseTick, AYNoisePeriod;
+        double AYEnvSubCycles;          // the envelope steps every 256
+        unsigned int AYEnvTick, AYEnvPeriod;
         int EnvHeld,EnvAlternating;
+        int AYEnvStep;                  // 0-15, as last worked out
+        double AYEnvLevel;
+        int AYRng, AYNoiseToggle;
+
+        // What the AY gives out (left, right), and the band limited steps
+        // of its changes (BLEP_HALF samples late like the beeper): the
+        // differences, added up as they are mixed
+        double AYOut[2];
+        double AYAcc[2];
+        double *AYDelta;                // two of AYDeltaLen
+        int AYDeltaLen;
 
 	// AY registers
 	// we have 16 so we can fake an 8910 if needed

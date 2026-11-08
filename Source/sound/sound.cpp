@@ -108,6 +108,15 @@ CSound::CSound()
         BeeperLevel = 0;
         BeeperLevelTime = 0;
         BeeperSlope = 0;
+        AYDelta = NULL;
+        AYDeltaLen = 0;
+        AYOut[0] = AYOut[1] = 0;
+        AYAcc[0] = AYAcc[1] = 0;
+        AYCyclesPerSample = 0;
+        AYRng = 1;
+        AYNoiseToggle = 1;
+        AYEnvStep = 0;
+        AYEnvLevel = 0;
         BlepInit();
 }
 
@@ -195,6 +204,7 @@ int CSound::StartOutput(bool resetDevices)
                 if (Buffer) delete []Buffer;
                 if (Mix) delete []Mix;
                 if (BeeperOut) delete []BeeperOut;
+                if (AYDelta) delete []AYDelta;
                 Buffer = new short[FrameSize*m_Channels];
                 Mix = new int[FrameSize*m_Channels];
 
@@ -203,7 +213,11 @@ int CSound::StartOutput(bool resetDevices)
                 BeeperLen = 2*FrameSize + 2*BLEP_HALF + 2;
                 BeeperOut = new float[BeeperLen];
 
-                if(Buffer==NULL || Mix==NULL || BeeperOut==NULL)
+                // The AY: a frame, and what its last steps add after it
+                AYDeltaLen = FrameSize + 2*BLEP_HALF + 2;
+                AYDelta = new double[2*AYDeltaLen];
+
+                if(Buffer==NULL || Mix==NULL || BeeperOut==NULL || AYDelta==NULL)
                 {
                         End();
                         return(-1); // Oh dear, malloc failed
@@ -220,7 +234,10 @@ int CSound::StartOutput(bool resetDevices)
                 SpecDrumChangeCount=0;
 
                 BeeperSlope=AMPL_BEEPER*150.0/m_SampleRate;
-                if (AYClock) AYTickIncr=(int)(65536.*AYClock/m_SampleRate);
+                if (AYClock) AYCyclesPerSample=(double)AYClock/m_SampleRate;
+                memset(AYDelta, 0, 2*AYDeltaLen*sizeof(double));
+                AYOut[0]=AYOut[1]=0;
+                AYAcc[0]=AYAcc[1]=0;
 
                 sp0256_AL2.SetSamplingFreq(m_SampleRate);
                 Digitalker.SetSamplingFreq(m_SampleRate);
@@ -307,6 +324,8 @@ void CSound::End(void)
         Mix=NULL;
         if(BeeperOut) delete []BeeperOut;
         BeeperOut=NULL;
+        if(AYDelta) delete []AYDelta;
+        AYDelta=NULL;
 }
 
 void CSound::InitDevices()
@@ -335,11 +354,20 @@ void CSound::AYInit(void)
         AYToneLevels[0]=0;
 
         AYClock=0;
+        AYCyclesPerSample=0;
         AYNoiseTick=AYNoisePeriod=0;
         AYEnvTick=AYEnvPeriod=0;
+        AYEnvSubCycles=0;
+        AYEnvStep=0;
+        AYEnvLevel=0;
 
         for(f=0;f<3;f++)
-                AYToneTick[f]=AYTonePeriod[f]=0;
+                AYToneTick[f]=AYToneHalf[f]=0;
+
+        // What was still to come out of the AY is dropped
+        if (AYDelta) memset(AYDelta, 0, 2*AYDeltaLen*sizeof(double));
+        AYOut[0]=AYOut[1]=0;
+        AYAcc[0]=AYAcc[1]=0;
 
         switch(machine.aytype)
         {
@@ -368,227 +396,300 @@ void CSound::AYInit(void)
         }
 
         AYClock=clock;
-        AYTickIncr=(int)(65536.*clock/m_SampleRate);
+        AYCyclesPerSample=m_SampleRate>0 ? (double)clock/m_SampleRate : 0;
         AYChangeCount=0;
         AYReset();
 }
 
-// not great having this as a macro to inline it, but it's only
-// a fairly short routine, and it saves messing about.
-// (XXX ummm, possibly not so true any more :-))
+// The AY is run in continuous time: from one event to the next - a tone
+// edge, a noise change, an envelope step, a register written (at the
+// fraction of a sample where it was) - and each change of what it gives out
+// is a band limited step (BlepAdd()), like the beeper's edges. It used to
+// be worked out sample by sample, the edges and changes falling on whole
+// samples (the tone edges only roughly in between), so high notes brought
+// whistling, inharmonic tones with them.
+//
+// What it gives out is as before: a tone is +-its level, the noise 0 or its
+// level, and a tone above half the sample rate (period 0 too) its level
+// (sample playing code uses that). The envelope works as before.
 
-#define AY_GET_SUBVAL(tick,period) \
-  (level*2*(tick-period)/AYTickIncr)
+// A register written: what it changes
 
-#define AY_OVERLAY_TONE(val,chan,level) { \
-  was_high=0;								\
-  if(level)								\
-    {									\
-    if(AYToneTick[chan]>=AYTonePeriod[chan])			\
-      { (val)+=(level); was_high=1; }					\
-    else								\
-      (val)-=(level);						\
-    }									\
-  									\
-  AYToneTick[chan]+=AYTickIncr;					\
-  if(level && !was_high && AYToneTick[chan]>=AYTonePeriod[chan])	\
-    (val)+=AY_GET_SUBVAL(AYToneTick[chan],AYTonePeriod[chan]);	\
-  									\
-  if(AYToneTick[chan]>=AYTonePeriod[chan]*2)			\
-    {									\
-    AYToneTick[chan]-=AYTonePeriod[chan]*2;				\
-    /* sanity check needed to avoid making samples sound terrible */ 	\
-    if(level && AYToneTick[chan]<AYTonePeriod[chan]) 		\
-      (val)-=AY_GET_SUBVAL(AYToneTick[chan],0);			\
-    }                                                           \
-  }
+void CSound::AYApplyChange(int reg)
+{
+        unsigned int fine, coarse;
+        int r;
 
+        switch(reg)
+        {
+        case 0: case 1: case 2: case 3: case 4: case 5:
+                fine   = AYRegisters[reg & ~1];
+                coarse = AYRegisters[reg |  1] & 15;
+
+                r = reg >> 1;
+                AYToneHalf[r] = 8.0 * (fine | (coarse << 8));
+
+                // important to get this right, otherwise e.g. Ghouls 'n'
+                // Ghosts has really scratchy, horrible-sounding vibrato.
+                if (AYToneHalf[r] > 0 && AYToneTick[r] >= 2*AYToneHalf[r])
+                        AYToneTick[r] = fmod(AYToneTick[r], 2*AYToneHalf[r]);
+                break;
+
+        case 6:
+                AYNoiseTick=0;
+                AYNoisePeriod=16.0*(AYRegisters[6]&31);
+                break;
+
+        case 11: case 12:
+                // this one counts as the chip does
+                AYEnvPeriod=AYRegisters[11]|(AYRegisters[12]<<8);
+                AYEnvCompute();
+                break;
+
+        case 13:
+                AYEnvTick=0;
+                AYEnvSubCycles=0;
+                EnvHeld=EnvAlternating=0;
+                AYEnvLevel=0;
+                AYEnvCompute();
+                break;
+        }
+}
+
+// The envelope's level, from its tick (unless it is held)
+
+void CSound::AYEnvCompute(void)
+{
+        int v, envshape=AYRegisters[13];
+
+        if (!AYEnvPeriod || EnvHeld) return;
+
+        v=((int)AYEnvTick*15)/(int)AYEnvPeriod;
+        if(v<0) v=0;
+        if(v>15) v=15;
+        if((envshape&4)==0) v=15-v;
+        if(EnvAlternating) v=15-v;
+
+        AYEnvStep=v;
+        AYEnvLevel=AYToneLevels[v];
+}
+
+// What the AY gives out now: if it is not what it gave out, a step at `at'
+// (samples into the frame)
+
+void CSound::AYEmit(double at)
+{
+        double chv[3], out[2], level;
+        int g, c, mixer=AYRegisters[7];
+
+        for(g=0;g<3;g++)
+        {
+                level=(AYRegisters[8+g]&16) ? AYEnvLevel : AYToneLevels[AYRegisters[8+g]&15];
+                level=level*VolumeLevel[g]/VOLUME_MAX;
+
+                chv[g]=0;
+                if((mixer&(1<<g))==0)
+                {
+                        if (AYToneHalf[g] < AYCyclesPerSample || AYToneTick[g] >= AYToneHalf[g])
+                                chv[g]+=level;
+                        else
+                                chv[g]-=level;
+                }
+                if((mixer&(8<<g))==0 && AYNoiseToggle)
+                        chv[g]+=level;
+
+                PEAK(g, (int)chv[g]);
+        }
+
+        // place them: left, centre (on both sides, but not at full
+        // volume) and right, or all together in mono
+        if((m_Channels==2) && AYStereo!=AY_STEREO_MONO
+                && AYStereo>=0 && AYStereo<AY_STEREO_MODES)
+        {
+                const int *place = AYStereoPlaces[AYStereo];
+                double centre = chv[place[1]] * 3/4;
+                out[0] = chv[place[0]] + centre;
+                out[1] = chv[place[2]] + centre;
+        }
+        else
+        {
+                out[0] = out[1] = chv[0] + chv[1] + chv[2];
+        }
+
+        for(c=0; c<m_Channels && c<2; c++)
+        {
+                if (out[c] != AYOut[c])
+                {
+                        BlepAdd(AYDelta + c*AYDeltaLen, at + BLEP_HALF, out[c]-AYOut[c]);
+                        AYOut[c] = out[c];
+                }
+        }
+}
+
+#define AY_EVENT_END            0
+#define AY_EVENT_REGISTER       1
+#define AY_EVENT_ENVELOPE       2
+#define AY_EVENT_TONE           3
+#define AY_EVENT_NOISE          4
 
 void CSound::AYOverlay(void)
 {       
-        static int rng=1;
-        static int noise_toggle=1;
-        static double env_level=0;
-        double tone_level[3];
-        int mixer,envshape;
-        int f,g,level;
-        int v=0;
         struct AYChangeTag *change_ptr;
         int changes_left;
-        int reg,r;
-        int was_high;
-        unsigned int FineValue, CoarseValue, TonePeriod;
+        double t, next, when, dt, cps, threshold;
+        int f, g, c, event, which, envshape;
+
+        if (!AYDelta || AYCyclesPerSample <= 0) return;
 
         change_ptr=AYChange;
         changes_left=AYChangeCount;
-        bool stereo = (m_Channels==2) && AYStereo!=AY_STEREO_MONO
-                        && AYStereo>=0 && AYStereo<AY_STEREO_MODES;
+        cps=AYCyclesPerSample;
 
-        // If no AY chip, don't produce any AY sound (!)
-        //if(!sound_ay) return;
+        // The volumes or the stereo mode may have changed since the last
+        // frame
+        AYEmit(0);
 
-        for(f=0;f<FrameSize;f++)
+        t=0;
+        while(1)
         {
+                // The next event: the first of them
+                next=FrameSize;
+                event=AY_EVENT_END;
+                which=0;
+
                 // update ay registers. All this sub-frame change stuff
                 // is pretty hairy, but how else would you handle the
                 // samples in Robocop? :-) It also clears up some other
-                // glitches.
-                //
-                // Ok, maybe that's no big deal on the ZX81, but even so. :-)
-                // (Though, due to tstate-changing games in z80.c, we can
-                // rarely `lose' one this way - hence "f==.." bit below
-                // to catch any that slip through.)
-
-                while(changes_left && (f>=change_ptr->ofs
-                        || (f==FrameSize-1 && change_ptr->ofs<FrameSize)))
+                // glitches. (Changes after the end of the buffer are
+                // kept for the next one.)
+                if (changes_left && change_ptr->ofs < FrameSize)
                 {
-                        reg=change_ptr->reg;
-                        AYRegisters[reg]=change_ptr->val;
+                        when=change_ptr->ofs + change_ptr->sub/65536.0;
+                        if (when < next) { next=when; event=AY_EVENT_REGISTER; }
+                }
+
+                // envelope gets incr'd every 256 AY cycles
+                if (AYEnvPeriod)
+                {
+                        when=t + (256-AYEnvSubCycles)/cps;
+                        if (when < next) { next=when; event=AY_EVENT_ENVELOPE; }
+                }
+
+                // the tones' edges (above half the sample rate they are
+                // steady)
+                for(g=0;g<3;g++)
+                {
+                        if (AYToneHalf[g] < cps) continue;
+
+                        threshold=AYToneTick[g] < AYToneHalf[g] ? AYToneHalf[g] : 2*AYToneHalf[g];
+                        when=t + (threshold-AYToneTick[g])/cps;
+                        if (when < next) { next=when; event=AY_EVENT_TONE; which=g; }
+                }
+
+                // the noise: once a sample at most, as it used to be (at
+                // the end of each sample, the last one's too)
+                if (AYNoisePeriod >= cps)
+                        when=t + (AYNoisePeriod-AYNoiseTick)/cps;
+                else
+                        when=floor(t)+1;
+                if (when < next || (event==AY_EVENT_END && when <= next))
+                {
+                        next=when;
+                        event=AY_EVENT_NOISE;
+                }
+
+                // Everything moves on to then
+                if (next < t) next=t;
+                dt=(next-t)*cps;
+                t=next;
+
+                for(g=0;g<3;g++)
+                {
+                        AYToneTick[g]+=dt;
+
+                        // steady: kept within a period
+                        if (AYToneHalf[g] < cps)
+                                AYToneTick[g]=AYToneHalf[g] > 0 ? fmod(AYToneTick[g], 2*AYToneHalf[g]) : 0;
+                }
+                if (AYNoisePeriod >= cps) AYNoiseTick+=dt;
+                if (AYEnvPeriod) AYEnvSubCycles+=dt;
+
+                if (event==AY_EVENT_END) break;
+
+                switch(event)
+                {
+                case AY_EVENT_REGISTER:
+                        AYRegisters[change_ptr->reg]=change_ptr->val;
+                        AYApplyChange(change_ptr->reg);
                         change_ptr++;
                         changes_left--;
+                        break;
 
-                        // fix things as needed for some register changes
-                        switch(reg)
+                case AY_EVENT_ENVELOPE:
+                        AYEnvSubCycles-=256;
+                        if (AYEnvSubCycles < 0) AYEnvSubCycles=0;
+
+                        envshape=AYRegisters[13];
+                        AYEnvTick++;
+                        if(AYEnvTick>=AYEnvPeriod)
                         {
-
-                        case 0: case 1: case 2: case 3: case 4: case 5:
-                                FineValue   = AYRegisters[reg & ~1];
-                                CoarseValue = AYRegisters[reg |  1] & 15;
-                                TonePeriod = (8 * (FineValue | (CoarseValue << 8))) << 16;
-
-                                r = reg >> 1;
-                                AYTonePeriod[r] = TonePeriod;
-
-                                // important to get this right, otherwise e.g. Ghouls 'n' Ghosts
-                                // has really scratchy, horrible-sounding vibrato.
-
-                                if(AYTonePeriod[r] && AYToneTick[r]>=AYTonePeriod[r]*2)
-                                        AYToneTick[r]%=AYTonePeriod[r]*2;
-                                break;
-                        case 6:
-                                AYNoiseTick=0;
-                                AYNoisePeriod=(16*(AYRegisters[reg]&31))<<16;
-                                break;
-                        case 11: case 12:
-                                // this one *isn't* fixed-point
-                                AYEnvPeriod=AYRegisters[11]|(AYRegisters[12]<<8);
-                                break;
-
-                        case 13:
-                                AYEnvTick=AYEnvSubCycles=0;
-                                EnvHeld=EnvAlternating=0;
-                                env_level=0;
-                                break;
-                        }    
-                }
-
-                // the tone level if no enveloping is being used
-                for(g=0;g<3;g++)
-                        tone_level[g]=AYToneLevels[AYRegisters[8+g]&15];
-
-                // envelope
-                envshape=AYRegisters[13];
-                if(AYEnvPeriod)
-                {
-                        if(!EnvHeld)
-                        {
-                                v=((int)AYEnvTick*15)/AYEnvPeriod;
-                                if(v<0) v=0;
-                                if(v>15) v=15;
-                                if((envshape&4)==0) v=15-v;
-                                if(EnvAlternating) v=15-v;
-                                env_level=AYToneLevels[v];
-                        }
-                }
-
-                for(g=0;g<3;g++)
-                        if(AYRegisters[8+g]&16)
-                                tone_level[g]=env_level;
-
-                if(AYEnvPeriod)
-                {
-                        // envelope gets incr'd every 256 AY cycles
-                        AYEnvSubCycles+=AYTickIncr;
-                        if(AYEnvSubCycles>=(256<<16))
-                        {
-                                AYEnvSubCycles-=(256<<16);
-
-                                AYEnvTick++;
-                                if(AYEnvTick>=AYEnvPeriod)
+                                AYEnvTick-=AYEnvPeriod;
+                                if(!EnvHeld && ((envshape&1) || (envshape&8)==0))
                                 {
-                                        AYEnvTick-=AYEnvPeriod;
-                                        if(!EnvHeld && ((envshape&1) || (envshape&8)==0))
-                                        {
-                                                EnvHeld=1;
-                                                if((envshape&2) || (envshape&0xc)==4)
-                                                        env_level=AYToneLevels[15-v];
-                                        }
-                                        if(!EnvHeld && (envshape&2))
-                                                EnvAlternating=!EnvAlternating;
+                                        EnvHeld=1;
+                                        if((envshape&2) || (envshape&0xc)==4)
+                                                AYEnvLevel=AYToneLevels[15-AYEnvStep];
                                 }
+                                if(!EnvHeld && (envshape&2))
+                                        EnvAlternating=!EnvAlternating;
                         }
-                }
+                        AYEnvCompute();
+                        break;
 
-                // generate tone and noise, each channel on its own
-                int chv[3]={0,0,0};
-                mixer=AYRegisters[7];
+                case AY_EVENT_TONE:
+                        if (AYToneTick[which] < AYToneHalf[which])
+                                AYToneTick[which]=AYToneHalf[which];            // up
+                        else if (AYToneTick[which] >= 2*AYToneHalf[which])
+                                AYToneTick[which]-=2*AYToneHalf[which];         // down
+                        else if (AYToneTick[which] > 2*AYToneHalf[which]-1e-6)
+                                AYToneTick[which]=0;
+                        break;
 
-                for(g=0;g<3;g++)
-                {
-                        if((mixer&(1<<g))==0)
+                case AY_EVENT_NOISE:
+                        if (AYNoisePeriod >= cps)
                         {
-                                level=(tone_level[g]*VolumeLevel[g])/VOLUME_MAX;
-                                AY_OVERLAY_TONE(chv[g],g,level);
+                                AYNoiseTick-=AYNoisePeriod;
+                                if (AYNoiseTick < 0) AYNoiseTick=0;
                         }
-                }
 
-                for(g=0;g<3;g++)
-                {
-                        if((mixer&(8<<g))==0)
-                        {
-                                level=noise_toggle?tone_level[g]:0;
-                                level=(level*VolumeLevel[g])/VOLUME_MAX;
-                                chv[g]+=level;
-                        }
-                }
-
-                for(g=0;g<3;g++)
-                        PEAK(g, chv[g]);
-
-                // place them: left, centre (on both sides, but not at full
-                // volume) and right, or all together in mono
-                int ch1, ch2;
-                if(stereo)
-                {
-                        const int *place = AYStereoPlaces[AYStereo];
-                        int centre = chv[place[1]] * 3/4;
-                        ch1 = chv[place[0]] + centre;
-                        ch2 = chv[place[2]] + centre;
-                }
-                else
-                {
-                        ch1 = ch2 = chv[0] + chv[1] + chv[2];
-                }
-
-                Mix[f*m_Channels]+=ch1;
-                if (m_Channels==2)
-                        Mix[f*m_Channels+1]+=ch2;
-
-                // update noise RNG/filter
-                AYNoiseTick+=AYTickIncr;
-                if(AYNoiseTick>=AYNoisePeriod)
-                {
-                        if((rng&1)^((rng&2)?1:0))
-                                noise_toggle=!noise_toggle;
+                        // update noise RNG/filter
+                        if((AYRng&1)^((AYRng&2)?1:0))
+                                AYNoiseToggle=!AYNoiseToggle;
 
                         // rng is 17-bit shift reg, bit 0 is output.
                         // input is bit 0 xor bit 2.
-
-                        rng|=((rng&1)^((rng&4)?1:0))?0x20000:0;
-                        rng>>=1;
-
-                        AYNoiseTick-=AYNoisePeriod;
+                        AYRng|=((AYRng&1)^((AYRng&4)?1:0))?0x20000:0;
+                        AYRng>>=1;
+                        break;
                 }
+
+                AYEmit(t);
+        }
+
+        // The steps added up into the mix, and what comes after this frame
+        // moved to the start
+        for(c=0; c<m_Channels && c<2; c++)
+        {
+                double *delta = AYDelta + c*AYDeltaLen;
+
+                for(f=0;f<FrameSize;f++)
+                {
+                        AYAcc[c]+=delta[f];
+                        Mix[f*m_Channels+c]+=(int)(AYAcc[c]<0 ? AYAcc[c]-0.5 : AYAcc[c]+0.5);
+                }
+
+                memmove(delta, delta+FrameSize, (AYDeltaLen-FrameSize)*sizeof(double));
+                memset(delta+AYDeltaLen-FrameSize, 0, FrameSize*sizeof(double));
         }
 
         // Changes after the end of this buffer go into the next one
@@ -639,7 +740,11 @@ void CSound::AYWrite(int reg, int val, int frametstates)
 
         if (AYChangeCount < AY_CHANGE_MAX)
         {
-                AYChange[AYChangeCount].ofs = (unsigned short)SampleOffset(frametstates);
+                double pos = SamplePosition(frametstates);
+                int ofs = (int)pos;
+
+                AYChange[AYChangeCount].ofs = (unsigned short)ofs;
+                AYChange[AYChangeCount].sub = (unsigned short)((pos - ofs) * 65536);
                 AYChange[AYChangeCount].reg = (unsigned char)reg;
                 AYChange[AYChangeCount].val = (unsigned char)val;
                 AYChangeCount++;
@@ -815,14 +920,21 @@ void CSound::SpecDrumOverlay(void)
 
 int CSound::SampleOffset(int frametstates)
 {
-        int ofs;
+        return (int)SamplePosition(frametstates);
+}
+
+// The same, with the fraction of the sample
+
+double CSound::SamplePosition(int frametstates)
+{
+        double pos;
 
         if (machine.tperframe <= 0) return 0;
 
-        ofs = (int)(((__int64)(frametstates + OffsetTStates) * FrameSize) / machine.tperframe);
-        if (ofs < 0) ofs = 0;
-        if (ofs > 65535) ofs = 65535;
-        return ofs;
+        pos = (double)(frametstates + OffsetTStates) * FrameSize / machine.tperframe;
+        if (pos < 0) pos = 0;
+        if (pos > 65535) pos = 65535;
+        return pos;
 }
 
 
@@ -1093,6 +1205,44 @@ void CSound::BlepInit(void)
         for(j=0; j<BLEP_POINTS; j++)
                 BlepStep[j]=(float)(step[j]/sum);
         BlepStep[BLEP_POINTS]=1.0f;
+}
+
+// The band limited step at x samples from it: 0 ... 1
+
+double CSound::BlepStepAt(double x)
+{
+        double i;
+        int k;
+
+        if (x <= -BLEP_HALF) return 0;
+        if (x >= BLEP_HALF) return 1;
+
+        i=(x+BLEP_HALF)*BLEP_PHASES;
+        k=(int)i;
+        if (k >= BLEP_POINTS-1) return 1;
+        return BlepStep[k]+(i-k)*(BlepStep[k+1]-BlepStep[k]);
+}
+
+// A band limited step of `jump' at `at' samples into `buffer', which holds
+// the differences from one sample to the next (they are added up as they
+// are mixed): it goes from 0 to 1 within BLEP_HALF samples either side
+
+void CSound::BlepAdd(double *buffer, double at, double jump)
+{
+        int f, first, last;
+        double previous=0, step;
+
+        first=(int)ceil(at-BLEP_HALF);
+        last=(int)floor(at+BLEP_HALF)+1;
+        if (first < 0) first = 0;
+        if (last > AYDeltaLen-1) last = AYDeltaLen-1;
+
+        for(f=first; f<=last; f++)
+        {
+                step=BlepStepAt(f-at);
+                buffer[f]+=jump*(step-previous);
+                previous=step;
+        }
 }
 
 

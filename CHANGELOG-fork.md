@@ -9,6 +9,14 @@ The changes of the `hungarian-windows` branch, compared with
 
 ### Sound
 
+- The **AY is band limited** as well: it is run in continuous time, and
+  every change of its output (tone edges, noise, envelope steps, register
+  writes, each at the fraction of a sample where it happens) is a band
+  limited step. High notes and envelope "buzzer" basses no longer bring
+  metallic, inharmonic tones with them: at 4 kHz these were at -20 dB
+  (-13 dB all together), now below -100 dB. How the AY sounds is otherwise
+  the same: the levels, the stereo modes, the envelopes and sample playing
+  through the volume registers.
 - The **beeper is band limited**: each edge is a step filtered to below
   half the sample rate (BLEP), so high notes no longer bring whistling,
   inharmonic tones with them (they were at -22 to -43 dB, now below
