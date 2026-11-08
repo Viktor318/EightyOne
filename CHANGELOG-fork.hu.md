@@ -171,10 +171,11 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
 - A 100%, 200%, 300% vagy 400% nagyításnál az ablak húzással is
   átméretezhető, de csak ezek között a méretek között ugrik (a bejelölt
   nagyítás követi). A *User Defined* továbbra is bármilyen méretet enged.
-- Az állapotsor az ablak alján marad. Ha a menüsor sorainak száma úgy
-  változott, hogy az ablak erről nem értesült (100%-nál, a magyar
-  menükkel, amelyek épphogy kiférnek), egy sorral feljebb maradt, a kép
-  alatt, és üresnek látszott.
+- Az állapotsor az ablak alján marad. 100%-nál a menüsor két sorba
+  törik (a magyar menüvel mindig, Windows 11-en az angollal is), és az
+  ablak átméretezésekor az állapotsor lemaradhatott: induláskor feljebb, a
+  kép alatt maradt (ezért üresnek látszott), 300%-ra vagy 400%-ra váltva
+  pedig az ablak alá került, amíg a nagyítást újra át nem állították.
 
 ### ZX Printer
 

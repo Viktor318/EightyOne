@@ -161,10 +161,12 @@ could not be loaded.
 - With 100%, 200%, 300% or 400% chosen, the window can be resized too, but
   it jumps between these sizes (the zoom ticked follows). *User Defined*
   still allows any size.
-- The status bar stays at the bottom of the window. When the menu bar
-  changed its number of lines without the window being told (seen at 100%
-  with the Hungarian menus, which only just fit), it was left one line
-  higher, under the picture, and looked empty.
+- The status bar stays at the bottom of the window. At 100% the menu bar
+  takes two lines (always with the Hungarian menus, on Windows 11 with the
+  English ones too), and as the window changed size the status bar could
+  be left behind: at start higher up, under the picture (so it looked
+  empty), or after switching to 300% or 400% below the window, until the
+  zoom was changed again.
 
 ### ZX Printer
 

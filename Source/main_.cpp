@@ -345,6 +345,40 @@ void TForm1::GatherWindowsIfRequired()
 
 //---------------------------------------------------------------------------
 
+// The status bar belongs at the bottom of the window. When the menu bar
+// takes another number of lines (a narrow window, a long language: the
+// Hungarian menus need two lines at 100%), the client area moves under the
+// status bar while the window changes size, and the bar can be left where
+// it was, higher up under the picture (painted over, so it looks empty) or
+// below the window, with the VCL's idea of where it is not matching the
+// window (seen on Windows and under Wine). Then it is put back: the window
+// itself first, then the VCL is told.
+static void StatusBarToBottom(TForm1 *form)
+{
+        TStatusBar *bar = form->StatusBar1;
+
+        if (!bar->Visible || !form->HandleAllocated() || !bar->HandleAllocated()) return;
+
+        int top = form->ClientHeight - bar->Height;
+        int width = form->ClientWidth;
+        RECT r;
+        POINT p;
+
+        GetWindowRect(bar->Handle, &r);
+        p.x = r.left;
+        p.y = r.top;
+        ScreenToClient(form->Handle, &p);
+
+        if (p.x != 0 || p.y != top || r.right - r.left != width
+                || bar->Left != 0 || bar->Top != top || bar->Width != width)
+        {
+                SetWindowPos(bar->Handle, NULL, 0, top, width, bar->Height,
+                             SWP_NOZORDER | SWP_NOACTIVATE);
+                form->Realign();
+                bar->Invalidate();
+        }
+}
+
 void __fastcall TForm1::FormResize(TObject *Sender)
 {
         extern void RecalcWinSize(void);
@@ -369,6 +403,8 @@ void __fastcall TForm1::FormResize(TObject *Sender)
                         (StatusBar1->Panels->Items[0]->Width
                          +StatusBar1->Panels->Items[1]->Width
                          +StatusBar1->Panels->Items[2]->Width);
+
+        StatusBarToBottom(this);
 
         StatusBar1->Refresh();
         StatusBar1->Invalidate();
@@ -476,6 +512,8 @@ void TForm1::SetZoom(int factor)
                 StatusBar1->Refresh();
                 StatusBar1->Invalidate();
         }
+
+        StatusBarToBottom(this);
 }
 //---------------------------------------------------------------------------
 
@@ -583,6 +621,8 @@ void TForm1::FixZoomHeight(void)
                 ClientHeight = height;
                 NoZoomSnap = false;
         }
+
+        StatusBarToBottom(this);
 }
 //---------------------------------------------------------------------------
 
@@ -1030,12 +1070,8 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
                 return;
         }
 
-        // The status bar belongs at the bottom of the window. When the menu
-        // bar takes another number of lines (a narrow window, a longer
-        // language), the client area can change without the controls being
-        // aligned again, and the bar is left higher up, under the picture
-        if (StatusBar1->Visible && StatusBar1->Top + StatusBar1->Height != ClientHeight)
-                Realign();
+        // (whatever else may have moved the window or the menu bar)
+        StatusBarToBottom(this);
 
         AnsiString text="";
 
