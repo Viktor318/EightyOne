@@ -260,3 +260,9 @@ could not be loaded.
   SHIFT on the Spectrum: EDIT, AND, THEN, cursors, GRAPHICS, RUBOUT,
   DELETE...), which Shift+number can't give with the Windows layout. Other
   keys with Alt still go to Windows (menus).
+
+### BASIC Listing
+
+- The *Output line numbers above 9999 using 5 digits* setting is kept
+  after a restart: it was saved under a misspelt name, so it was always
+  read back as off.

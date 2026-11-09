@@ -270,3 +270,9 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
   Spectrumon CAPS SHIFT-et: EDIT, AND, THEN, kurzorok, GRAPHICS, RUBOUT,
   DELETE...), amit a Windows-kiosztással a Shift+szám nem tud. A többi
   billentyűvel az Alt továbbra is a Windowsé (menük).
+
+### BASIC lista
+
+- A *9999 feletti sorszámok 5 számjeggyel* beállítás újraindítás után is
+  megmarad: elírt néven mentődött, így visszaolvasva mindig kikapcsolt
+  volt.

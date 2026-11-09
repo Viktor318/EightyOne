@@ -78,7 +78,9 @@ void TSaveBasicListingOptionsForm::SaveSettings(TIniFile *ini)
         ini->WriteBool("BASICLISTING", "OutputNonAsciiAsCharacterCodes", cboOutputNonAsciiAsCharacterCodes->Checked);
         ini->WriteBool("BASICLISTING", "OutputVariableNamesInLowercase", cboOutputVariableNamesInLowercase->Checked);
         ini->WriteBool("BASICLISTING", "LimitLineLengths", cboLimitLineLengths->Checked);
-        ini->WriteBool("BASICLISTING", "OutputFullSidthLineNumbers", cboOutputFullWidthLineNumbers->Checked);
+        ini->WriteBool("BASICLISTING", "OutputFullWidthLineNumbers", cboOutputFullWidthLineNumbers->Checked);
+        // The key was misspelt here before, so the setting was never read back
+        ini->DeleteKey("BASICLISTING", "OutputFullSidthLineNumbers");
         ini->WriteString("BASICLISTING", "TextScaling", cboTextScaling->Text);
 }
 
