@@ -4,7 +4,7 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Saving a BASIC Listing as Text'
-  ClientHeight = 495
+  ClientHeight = 527
   ClientWidth = 422
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -56,13 +56,13 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
   object Label26: TLabel
     Left = 9
     Top = 44
-    Width = 407
+    Width = 406
     Height = 42
     Caption = 
-      'ZX80 and ZX81 inverse characters and ZX80, ZX81 and Spectrum blo' +
-      'ck graphic symbols are encoded in accordance with the scheme. No' +
-      'n-displayable character codes are output as \nn where nn is the ' +
-      'character code expressed'
+      'Inverse characters and block graphic symbols are encoded in acco' +
+      'rdance with the scheme. Non-displayable character codes are outp' +
+      'ut as \nn where nn is the character code expressed as a 2 digit ' +
+      'hexadecimal number. On the'
     WordWrap = True
   end
   object Label27: TLabel
@@ -73,17 +73,6 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     Caption = 
       'The BASIC listing format is based upon that used by the ZXText2P' +
       ' utility, with extensions to handle a wider range of scenarios.'
-    WordWrap = True
-  end
-  object Label28: TLabel
-    Left = 9
-    Top = 87
-    Width = 402
-    Height = 29
-    Caption = 
-      'as a 2 digit hexadecimal number. On the Spectrum UDGs are encode' +
-      'd as \_n where n is the UDG letter, and a standard \ character i' +
-      's encoded as \\.'
     WordWrap = True
   end
   object Label25: TLabel
@@ -134,9 +123,9 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
   end
   object Label32: TLabel
     Left = 9
-    Top = 338
+    Top = 373
     Width = 377
-    Height = 29
+    Height = 28
     Caption = 
       'A configuration option allows variable names to be output in low' +
       'ercase to ensure there is no ambiguity with BASIC keywords.'
@@ -144,24 +133,25 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
   end
   object Label33: TLabel
     Left = 9
-    Top = 375
+    Top = 410
     Width = 409
     Height = 29
     Caption = 
       'BASIC listing files are saved with extension B80 for the ZX80, B' +
-      '81 for the ZX81 and B82 for the Spectrum.'
+      '81 for the ZX81, A83 for the Lambda 8300, and B82 for the Spectr' +
+      'um.'
     WordWrap = True
   end
   object Label34: TLabel
     Left = 9
-    Top = 411
+    Top = 446
     Width = 311
     Height = 15
     Caption = 'Details of the ZXText2P encoding format can be found here:'
   end
   object Label35: TLabel
     Left = 9
-    Top = 429
+    Top = 464
     Width = 239
     Height = 15
     Caption = 'http://freestuff.grok.co.uk/zxtext2p/index.html'
@@ -185,9 +175,29 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
       'r code format instead.'
     WordWrap = True
   end
+  object Label28: TLabel
+    Left = 9
+    Top = 87
+    Width = 362
+    Height = 29
+    Caption = 
+      'Spectrum, UDGs are encoded as \_n where n is the UDG letter, and' +
+      ' a standard \ character is encoded as \\.'
+    WordWrap = True
+  end
+  object Label1: TLabel
+    Left = 9
+    Top = 340
+    Width = 402
+    Height = 28
+    Caption = 
+      'The Lambda 8300 special graphics characters are mapped to the ZX' +
+      '81 characters £, ?, and :.'
+    WordWrap = True
+  end
   object btnOK: TButton
     Left = 175
-    Top = 456
+    Top = 491
     Width = 74
     Height = 27
     Caption = 'OK'

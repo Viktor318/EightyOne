@@ -19,6 +19,7 @@
 #ifndef IBASICLISTER
 #define IBASICLISTER
 
+#include <vcl4.h>
 #include <Classes.hpp>
 #include <vector>
 #include <string>
@@ -41,7 +42,7 @@ struct LineInfo
 
 class IBasicLister
 {
-private:
+protected:
         static const int DisplayColumns = 32;
         static const int EmbeddedNumberSize = 5;
 
@@ -54,39 +55,18 @@ private:
         bool mSupportEmbeddedControlCodes;
         AnsiString mEscapeCharacter;
         int mScaling;
+        Graphics::TBitmap *mCset;
+        COLORREF mInk;
+        COLORREF mPaper;
 
-        void RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo);
-        void RenderLineNumber(HDC hdc, HDC cshdc, int& x, int& y, int lineNumber);
-        void RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y, int& lengthRemaining, bool& lastKeywordEndedWithSpace);
-        void RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned char c);
+        bool RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo);
+        bool RenderLineNumber(HDC hdc, HDC cshdc, int& x, int& y, int lineNumber);
+        bool RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y, int& lengthRemaining, bool& lastKeywordEndedWithSpace);
+        bool RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned char c);
         bool RenderTokenAsText(int& address, int& lengthRemaining, bool& lastKeywordEndedWithSpace, AnsiString& zxCharacter, bool& outputLineAsControlCodes, bool outputRemTokensAsCharacterCodes, bool outputStringTokensAsCharacterCodes, bool outputNonAsciiAsCharacterCodes, bool outputVariableNamesInLowercase, bool outputInZxTokenFormat, bool& withinQuotes, bool& withinRem);
         AnsiString FormatLineNumber(int lineNumber, bool outputFullWidthLineNumbers = false);
         COLORREF GetBackgroundColour();
         unsigned char GetEscapeCharacter() { return '\\'; }
-
-public:
-        IBasicLister();
-        virtual ~IBasicLister();
-        void PopulateKeywords();
-        void ExtractProgramDetails();
-        int GetProgramRows();
-        void ClearRenderedListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds);
-        void RenderListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds, int scaling);
-        AnsiString RenderLineAsText(LineInfo& lineInfo, bool outputRemTokensAsCharacterCodes, bool outputStringTokensAsCharacterCodes, bool outputNonAsciiAsCharacterCodes, bool outputVariableNamesInLowercase, bool outputInZxTokenFormat, bool limitLineLengths, bool outputFullWidthLineNumbers);
-        void SetLines(std::vector<LineInfo>* linesInfo);
-
-        virtual int GetDisplayColumns() { return DisplayColumns; };
-        virtual COLORREF GetInkColour() { return RGB(0, 0, 0); }
-        virtual COLORREF GetPaperColour() { return RGB(255, 255, 255); }
-        virtual AnsiString GetMachineName() { return ""; }
-        virtual AnsiString GetBasicFileExtension() { return "txt"; }
-        virtual bool ZxTokenSupported() { return false; }
-        virtual int GetProgramStartAddress() { return 65535; }
-        virtual int GetProgramEndAddress() { return 65535; }
-
-protected:
-        COLORREF mInk;
-        COLORREF mPaper;
 
         virtual std::string GetKeywords() { return std::string(""); }
         virtual inline unsigned char ConvertToZXCode(unsigned char code) { return code; }
@@ -105,10 +85,34 @@ protected:
         virtual bool RemContainsMachineCode(int address, int lengthRemaining, bool outputRemTokensAsCharacterCodes) { return false; }
         virtual bool RequiresInitialSpace() { return true; }
         virtual AnsiString TranslateToZxToken(AnsiString chr) { return chr; }
-        
+        virtual unsigned char ReadByte(int address) { return getbyte(address); }
+
         int GetKeywordLength(unsigned char code);
 
         std::string mKeyword[256];
+
+public:
+        IBasicLister();
+        virtual ~IBasicLister();
+        void PopulateKeywords();
+        void ExtractProgramDetails();
+        int GetProgramRows();
+        void ClearRenderedListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds);
+        bool RenderListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds, int scaling);
+        AnsiString RenderLineAsText(LineInfo& lineInfo, bool outputRemTokensAsCharacterCodes, bool outputStringTokensAsCharacterCodes, bool outputNonAsciiAsCharacterCodes, bool outputVariableNamesInLowercase, bool outputInZxTokenFormat, bool limitLineLengths, bool outputFullWidthLineNumbers);
+        void SetLines(std::vector<LineInfo>* linesInfo);
+        void CopyCsetImage();
+        static void StopRefresh();
+        static void GoRefresh();
+
+        virtual int GetDisplayColumns() { return DisplayColumns; };
+        virtual COLORREF GetInkColour() { return RGB(0, 0, 0); }
+        virtual COLORREF GetPaperColour() { return RGB(255, 255, 255); }
+        virtual AnsiString GetMachineName() { return ""; }
+        virtual AnsiString GetBasicFileExtension() { return "txt"; }
+        virtual bool ZxTokenSupported() { return false; }
+        virtual int GetProgramStartAddress() { return 65535; }
+        virtual int GetProgramEndAddress() { return 65535; }
 };
 
 #endif

@@ -64,6 +64,7 @@
 #include "symbolstore.h"
 #include "SymBrowse.h"
 #include "Spectra\Spectra.h"
+#include "spec48.h"
 #include "Chroma\Chroma.h"
 #include "MemoryWindow.h"
 #include "Hist.h"
@@ -100,7 +101,6 @@ extern bool ShowSplash;
 extern int frametstates;
 
 extern "C" void z80_reset();
-extern "C" int z80_nmi();
 extern char **CommandLine;
 extern void spec_load_z80(char *fname);
 extern void spec_load_sna(char *fname);
@@ -114,8 +114,13 @@ int VKRSHIFT=VK_RSHIFT, VKLSHIFT=VK_LSHIFT;
 int AutoLoadCount=0;
 
 SCANLINE *BuildLine, Video;
+HANDLE SoundDXReady;
 
 static bool iniFileExists = false;
+static HWND OldhWnd=NULL;
+static int lastRZXFrameCount=0;
+static int Drive=0;
+static bool restartNeeded = false;
 
 const int bufferLength = 255;
 char webBuffer[bufferLength];
@@ -147,13 +152,6 @@ void __fastcall TForm1::WndProc(TMessage &Message)
 {
         switch(Message.Msg)
         {
-        case WM_USER:
-                // Sent by the audio thread for each frame of sound it needs;
-                // not while the sound is being stopped
-                if (RunFrameEnable && !Sound.Stopping())
-                        Form1->RunFrame();
-                break;
-
         case WM_KILLFOCUS:
                 PCAllKeysUp();
                 break;
@@ -194,15 +192,31 @@ void __fastcall TForm1::WndProc(TMessage &Message)
 	TForm::WndProc(Message);
 }
 
+void __fastcall TForm1::WMEraseBkgnd(TWMEraseBkgnd &Message)
+{
+    Message.Result = 1; // Indicate background is handled
+}
+
+// A new window (at start, or made again by the VCL): the display is set up
+// for it
+void __fastcall TForm1::CreateWnd()
+{
+    RenderEnd();
+    TForm::CreateWnd();
+    RenderInit();
+    AccurateInit(true);
+}
+
 //---------------------------------------------------------------------------
 __fastcall TForm1::TForm1(TComponent* Owner)
-        : TForm(Owner)
+        : TForm(Owner), ThreadPool(THREADPOOLSIZE)
 {
         AnsiString IniPath;
         char path[256];
         int i;
 
-        RunFrameEnable=false;
+        RunFrameEnable=FrameIsRunning=false;
+        mWindowHandle=NULL;
 
         AnsiString exePath = FileNameGetPath(Application->ExeName);
         if (exePath.Length() && exePath[exePath.Length()] != '\\') exePath += "\\";
@@ -276,19 +290,10 @@ void __fastcall TForm1::DoCreate(void)
         }
 }
 
-// The window the display was last set up for (by the status timer, which
-// sets it up again when the window is made again)
-static HWND RenderedWindow = NULL;
-
-// The display set up for the window, then the size the window was left at
-// (or 100%), and the keyboard settings
+// The size the window was left at (or 100%), and the keyboard settings
+// (the display is set up for the window by CreateWnd)
 void TForm1::SetStartUpSize(void)
 {
-        RenderEnd();
-        RenderInit();
-        AccurateInit(true);
-        RenderedWindow = Handle;
-
         if (StartUpWidth==0 || StartUpHeight==0) N1001Click(NULL);
         else
         {
@@ -320,9 +325,8 @@ void TForm1::LoadCommandLineFiles(void)
                 }
 
                 if (Ext==".WAV") WavLoad->LoadFile(Filename);
-                else if (Ext==".Z81" || Ext==".ACE") load_snap(Filename.c_str());
-                else if (Ext==".Z80") spec_load_z80(Filename.c_str());
-                else if (Ext==".SNA") spec_load_sna(Filename.c_str());
+                else if (Ext==".Z81" || Ext==".ACE" || Ext==".Z80" || Ext==".SNA")
+                        LoadSnapshotFile(Filename, Ext);
                 else if (Ext==".TZX" || Ext==".TAP" || Ext==".T81"
                           || Ext==".P" || Ext==".O" || Ext==".A83"
                           || Ext==".81" || Ext==".80" || Ext==".P81")
@@ -344,7 +348,9 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 {
         TIniFile *ini;
 
-        RunFrameEnable=false;
+        AccDrawInit();
+
+	SoundDXReady = CreateEvent(NULL, FALSE, FALSE, "SoundDX_Ready");
 
         Application->OnMessage = AppMessage;
 
@@ -370,7 +376,6 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         OnCanResize = FormCanResize;
 
         iniFileExists = FileExists(emulator.inipath);
-        LoadSettings(ini);
 
         // The sound output chosen (the sound settings window is made later)
         Sound.SetOutputChoice(CSound::OutputChoiceOf(ini->ReadString("MIDI","Output","").c_str()));
@@ -384,8 +389,6 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         }
 
         delete ini;
-
-        Timer2->Interval=1000;
 
         LEDGreenOn = new Graphics::TBitmap;
         LEDGreenOff = new Graphics::TBitmap;
@@ -404,7 +407,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
         BuildZX81ExamplesMenu();
         BuildSpectrumExamplesMenu();
 
-        if (Sound.Initialise(Form1->Handle, machine.fps, 16, 44100, 2)) MessageBox(NULL, "", Tr("Sound Error").c_str(), 0);
+        if (Sound.Initialise(Form1->Handle, SoundDXReady, machine.fps, 16, 44100, 2)) MessageBox(NULL, "", Tr("Sound Error").c_str(), 0);
 
         if (emulator.checkInstallationPathLength && strlen(emulator.cwd) >= 180)
         {
@@ -551,24 +554,28 @@ void __fastcall TForm1::KeyboardMap1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::N1001Click(TObject *Sender)
 {
+        if (FullScreen) SwitchFullScreen();
         SetZoom(1);
 }
 //-----------------------------------------------------------------------
 
 void __fastcall TForm1::N2001Click(TObject *Sender)
 {
+        if (FullScreen) SwitchFullScreen();
         SetZoom(2);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::N4001Click(TObject *Sender)
 {
+        if (FullScreen) SwitchFullScreen();
         SetZoom(4);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TForm1::N3001Click(TObject *Sender)
 {
+        if (FullScreen) SwitchFullScreen();
         SetZoom(3);
 }
 //---------------------------------------------------------------------------
@@ -589,22 +596,28 @@ void TForm1::SetZoom(int factor)
 
         ClientWidth=BaseWidth*factor;
         ClientHeight=BaseHeight*factor;
-        if (StatusBar1->Visible)
+        if (StatusBar2->Checked)
         {
+                StatusBar1->Visible = true;
                 ClientHeight += StatusBar1->Height;
                 StatusBar1->Refresh();
                 StatusBar1->Invalidate();
         }
 
         StatusBarToBottom(this);
+
+        if (Form1->Handle != OldhWnd)
+        {
+                OldhWnd = Form1->Handle;
+                Sound.ReInitialise(Form1->Handle, NULL, NULL, NULL, NULL);
+        }
 }
 //---------------------------------------------------------------------------
 
 // A resizable frame, with or without the minimize and maximize buttons.
 // Once the window exists, the style is changed directly: changing
 // BorderStyle or BorderIcons would make the VCL create the window again,
-// and the sound thread (which sends its messages to the window) and the
-// display would lose it
+// and the sound output and the display would have to be set up again
 void TForm1::SetWindowFrame(bool minimizeMaximize)
 {
         StatusBar1->SizeGrip = true;
@@ -711,6 +724,7 @@ void TForm1::FixZoomHeight(void)
 
 void __fastcall TForm1::UserDefined1Click(TObject *Sender)
 {
+        if (FullScreen) SwitchFullScreen();
         N1001->Checked=false;
         N2001->Checked=false;
         N3001->Checked=false;
@@ -728,11 +742,18 @@ void __fastcall TForm1::UserDefined1Click(TObject *Sender)
 
         ClientWidth=baseWidth;
         ClientHeight=baseHeight;
-        if (StatusBar1->Visible)
+        if (StatusBar2->Checked)
         {
+                StatusBar1->Visible = true;
                 ClientHeight += StatusBar1->Height;
                 StatusBar1->Refresh();
                 StatusBar1->Invalidate();
+        }
+
+        if (Form1->Handle != OldhWnd)
+        {
+                OldhWnd = Form1->Handle;
+                Sound.ReInitialise(Form1->Handle, NULL, NULL, NULL, NULL);
         }
 }
 //---------------------------------------------------------------------------
@@ -792,15 +813,10 @@ void __fastcall TForm1::Keyboard1Click(TObject *Sender)
 void __fastcall TForm1::InsertTape1Click(TObject *Sender)
 {
         AnsiString Extension, Filename;
-        int stopped;
-
-        stopped=emulation_stop;
-        emulation_stop=true;
 
         PCAllKeysUp();
         if (!OpenTape1->Execute())
         {
-                emulation_stop=stopped;
                 return;
         }
 
@@ -846,8 +862,6 @@ void __fastcall TForm1::InsertTape1Click(TObject *Sender)
 
                         loadFileSymbolsProxy(Filename.c_str());
         }
-
-        emulation_stop=stopped;
 }
 //---------------------------------------------------------------------------
 
@@ -927,20 +941,20 @@ void __fastcall TForm1::LoadSnapshot1Click(TObject *Sender)
         emulation_stop=1;
         Sound.InitDevices();
 
-        if (BasicLister->ListerAvailable())
-        {
-                BasicLister->Clear();
-        }
-
         if (HistoryBox->Visible)
         {
                 HistoryBox->ToolButtonClearClick(NULL);
         }
 
-        if ((Ext == ".Z81") || (Ext == ".ACE")) load_snap(Path.c_str());
-        if (Ext == ".Z80") spec_load_z80(Path.c_str());
-        if (Ext == ".SNA") spec_load_sna(Path.c_str());
+        rzx_close();
+
+        LoadSnapshotFile(Path, Ext);
         emulation_stop=stopped;
+
+        if (BasicLister->ListerAvailable())
+        {
+                BasicLister->Refresh(false);
+        }
 
         Dbg->UpdateVals();
 }
@@ -1002,10 +1016,9 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 
         struct dirent *ent;
 
-        Dbg->DisableMemoryWindowAutoUpdates();
+        MemoryWindow->MemoryWindowTimerEnable(false);
 
-        char escKey = VK_ESCAPE;
-        if (FullScreen) FormKeyPress(NULL, escKey);
+        if (FullScreen) SwitchFullScreen();
         
         if (!Restart)
         {
@@ -1017,13 +1030,14 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
         if (machine.exit) machine.exit();
 
         emulation_stop=true;
-        RunFrameEnable=false;
+        StopFrames();
 
         PCAllKeysUp();
 
         Sound.End();
 
         RenderEnd();
+        AccDrawClose();
 
         if ((dir = opendir(emulator.temppath)) != NULL)
         {
@@ -1053,22 +1067,67 @@ void __fastcall TForm1::ViewPrinterClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+// Allow/disallow automatic frame resumption after hardware changes.
+void TForm1::RunFramesAllow(void)
+{
+        mDisallowFrames=false;
+        RunFrames();
+}
+
+void TForm1::StopFramesDisallow(void)
+{
+        mDisallowFrames=true;
+        StopFrames();
+}
+
+// Waiting for the frame thread, the messages it sends to this thread's
+// windows (the status bar, the ZX Printer) are handled: it may be waiting
+// for one of them to be done
+
+void TForm1::WaitFrameThread(bool running)
+{
+        MSG msg;
+
+        while ((FrameIsRunning != 0) != running)
+        {
+                PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+                Sleep(1);
+        }
+}
+
+void TForm1::RunFrames(void)
+{
+        if (mDisallowFrames || RunFrameEnable) return;
+        WaitFrameThread(false);
+        RunFrameEnable=true;
+        ThreadPool.EnqueueTask(new TTask(HandleRunFrameThreadProc, (void *)this));
+}
+
+void TForm1::StopFrames(void)
+{
+        // This gives a new frame a chance to start before stopping it, preventing
+        //   the possibility of more than one frame task from running simultaneously.
+        if (RunFrameEnable) WaitFrameThread(true);
+
+        RunFrameEnable=false;
+        WaitFrameThread(false);
+}
+
 void __fastcall TForm1::Timer2Timer(TObject *Sender)
 {
         int targetfps;
 
-        if (Form1->Handle != RenderedWindow)
-        {
-                RenderedWindow=Form1->Handle;
-
-                RenderEnd();
-                RenderInit();
-                AccurateInit(true);
-        }
-
-
         // (The size the window was left at, and the files on the command
         // line, are set up by WinMain before the window is shown)
+
+        if (restartNeeded)
+        {
+                restartNeeded = false;
+                const bool disableResetStatus = false;
+                HW->UpdateHardwareSettings(disableResetStatus);
+
+                HardReset1Click(NULL);
+        }
 
         if (P3Drive->Height<80)
         {
@@ -1119,16 +1178,44 @@ void __fastcall TForm1::Timer2Timer(TObject *Sender)
                 }
         }
 
-        AnsiString scanlinesInfo = "";
-        if (emulator.scanlinesPerFrame > 0)
+        if (RZXModePlay())
         {
-                AnsiString count;
-                count += emulator.scanlinesPerFrame;
-                scanlinesInfo = "     " + TrF("{0} Scanlines", count);
+                AnsiString RZXInfo = "    ";
+
+                if (emulator.machine!=MACHINESPECTRUM) rzx_close();
+                if (lastRZXFrameCount>RZXFrameCount) lastRZXFrameCount=0;
+                RZXInfo += RZXFrameCount;
+                RZXInfo += "/";
+                RZXInfo += RZXFramesTotal;
+                RZXInfo += " > ";
+                RZXInfo += RZXFrameCount-lastRZXFrameCount;
+                RZXInfo += "fps ";
+                if (RZXErrorFrame>0)
+                {
+                        RZXInfo += TrF("(Error at {0})", AnsiString(RZXErrorFrame));
+                }
+                StatusBar1->Panels->Items[3]->Text = RZXInfo;
+                lastRZXFrameCount=RZXFrameCount;
         }
-        StatusBar1->Panels->Items[3]->Text = scanlinesInfo;
+        else
+        {
+                AnsiString scanlinesInfo = "";
+                if (emulator.scanlinesPerFrame > 0)
+                {
+                        AnsiString count;
+                        count += emulator.scanlinesPerFrame;
+                        scanlinesInfo = "     " + TrF("{0} Scanlines", count);
+                }
+                StatusBar1->Panels->Items[3]->Text = scanlinesInfo;
+        }
         
         StatusBar1->Panels->Items[1]->Text = text;
+        if (machine.drivebusy==0 && machine.drivebusy == Drive)
+        {
+                // make sure drive light turns off
+                StatusBar1->Refresh();
+                StatusBar1->Invalidate();
+        }
         fps=0;
 
         zx81.vsyncsound=Sound1->Checked;
@@ -1152,127 +1239,124 @@ void __fastcall TForm1::WavLoadBtnClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TForm1::FormKeyPress(TObject *Sender, char& Key)
+void TForm1::SwitchFullScreen(void)
 {
-        extern void RecalcWinSize(void);
-        if (Key == ' ') rzx_close();
+        FullScreen = !FullScreen;
 
-        // CTRL + [ generates the same key code as ESC and so an additional check is made to see if the right control key is being pressed
-        if (Key == VK_ESCAPE && !IsAsyncKeyPressed(VK_RCONTROL))
+        if (FullScreen)
         {
-                FullScreen = !FullScreen;
+                SaveX=Left;
+                SaveY=Top;
+                SaveW=ClientWidth;
+                SaveH=ClientHeight;
+                SaveWinW=Width;
+                SaveWinH=Height;
+                SaveStyle=GetWindowLongPtr(Form1->Handle, GWL_STYLE);
+                SaveExStyle=GetWindowLongPtr(Form1->Handle, GWL_EXSTYLE);
+                FileMenu1->Visible=false;
+                View1->Visible=false;
+                Control1->Visible=false;
+                Options1->Visible=false;
+                Tools1->Visible=false;
+                Help1->Visible=false;
 
-                if (FullScreen)
+                Screen->Cursor = crNone;
+                RenderInit();
+                RecalcPalette();
+                RecalcWinSize();
+                AccurateInit(true);
+                Artifacts->TrackBarChange(NULL);
+                SetWindowLongPtr(Form1->Handle, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
+                SetWindowLongPtr(Form1->Handle, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+                if (RenderMode==RENDERGDI)
                 {
-                        SaveX=Left;
-                        SaveY=Top;
-                        SaveW=ClientWidth;
-                        SaveH=ClientHeight;
-                        SaveWinW=Width;
-                        SaveWinH=Height;
-                        SaveStyle=GetWindowLongPtr(Form1->Handle, GWL_STYLE);
-                        SaveExStyle=GetWindowLongPtr(Form1->Handle, GWL_EXSTYLE);
-                        FileMenu1->Visible=false;
-                        View1->Visible=false;
-                        Control1->Visible=false;
-                        Options1->Visible=false;
-                        Tools1->Visible=false;
-                        Help1->Visible=false;
+                        DEVMODE Mode;
+                        int i, retval;
 
-                        Screen->Cursor = crNone;
-                        RenderInit();
-                        RecalcPalette();
-                        RecalcWinSize();
-                        AccurateInit(true);
-                        Artifacts->TrackBarChange(NULL);
-                        SetWindowLongPtr(Form1->Handle, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-                        SetWindowLongPtr(Form1->Handle, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-                        if (RenderMode==RENDERGDI)
+                        SaveScrW = GetSystemMetrics(SM_CXSCREEN);
+                        SaveScrH = GetSystemMetrics(SM_CYSCREEN);
+                        SaveScrBpp = GetDeviceCaps(Form1->Canvas->Handle, BITSPIXEL)
+                                * GetDeviceCaps(Form1->Canvas->Handle, PLANES);
+
+                        i=0;
+                        memset(&Mode, 0, sizeof(DEVMODE));
+                        do
                         {
-                                DEVMODE Mode;
-                                int i, retval;
+                                retval=EnumDisplaySettings(NULL,i, &Mode);
 
-                                SaveScrW = GetSystemMetrics(SM_CXSCREEN);
-                                SaveScrH = GetSystemMetrics(SM_CYSCREEN);
-                                SaveScrBpp = GetDeviceCaps(Form1->Canvas->Handle, BITSPIXEL)
-                                                * GetDeviceCaps(Form1->Canvas->Handle, PLANES);
-
-                                i=0;
-                                memset(&Mode, 0, sizeof(DEVMODE));
-                                do
+                                if ((unsigned short)Mode.dmPelsWidth == FScreen.Width
+                                        && (unsigned short)Mode.dmPelsHeight == FScreen.Height
+                                        && (unsigned short)Mode.dmBitsPerPel == FScreen.Bpp)
                                 {
-                                        retval=EnumDisplaySettings(NULL,i, &Mode);
+                                        ChangeDisplaySettings(&Mode, CDS_FULLSCREEN);
+                                        retval=0;
+                                }
 
-                                        if ((unsigned short)Mode.dmPelsWidth == FScreen.Width
-                                                && (unsigned short)Mode.dmPelsHeight == FScreen.Height
-                                                && (unsigned short)Mode.dmBitsPerPel == FScreen.Bpp)
-                                        {
-                                                ChangeDisplaySettings(&Mode, CDS_FULLSCREEN);
-                                                retval=0;
-                                        }
+                                i++;
+                        } while(retval);
 
-                                        i++;
-                                } while(retval);
-
-                                SetWindowPos(Form1->Handle, HWND_TOPMOST, 0, 0, FScreen.Width, FScreen.Height, SWP_SHOWWINDOW);
-                                ChangeDisplaySettings(&Mode, CDS_FULLSCREEN);
-                                ShowWindow(Form1->Handle, SW_MAXIMIZE);
-                        }
+                        SetWindowPos(Form1->Handle, HWND_TOPMOST, 0, 0, FScreen.Width, FScreen.Height, SWP_SHOWWINDOW);
+                        ChangeDisplaySettings(&Mode, CDS_FULLSCREEN);
+                        ShowWindow(Form1->Handle, SW_MAXIMIZE);
                 }
+        }
+        else
+        {
+                if (RenderMode==RENDERGDI)
+                {
+                        ChangeDisplaySettings(NULL, 0);
+                }
+                // The window is still borderless and without its menu while
+                // its size is put back: no jumping to the zoom sizes until it
+                // has its frame again
+                NoZoomSnap = true;
+
+                RenderInit();
+                Screen->Cursor = crDefault;
+                AccurateInit(true);
+                ClientWidth=SaveW;
+                ClientHeight=SaveH;
+                Width=SaveWinW;
+                Height=SaveWinH;
+                Left=SaveX;
+                Top=SaveY;
+                StatusBar1->Visible = StatusBar2->Checked;
+                FileMenu1->Visible=true;
+                View1->Visible=true;
+                Control1->Visible=true;
+                Options1->Visible=true;
+                Tools1->Visible=true;
+                Help1->Visible=true;
+                SetWindowLongPtr(Form1->Handle, GWL_EXSTYLE, SaveExStyle);
+                SetWindowLongPtr(Form1->Handle, GWL_STYLE, SaveStyle);
+                SetWindowPos(Form1->Handle, HWND_NOTOPMOST,
+                                Left,Top,
+                                Width,
+                                Height, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+
+                // The client area as it was, with the frame and the menu back
+                NoZoomSnap = false;
+                if (N1001->Checked) SetZoom(1);
+                else if (N2001->Checked) SetZoom(2);
+                else if (N3001->Checked) SetZoom(3);
+                else if (N4001->Checked) SetZoom(4);
                 else
                 {
-                        if (RenderMode==RENDERGDI)
-                        {
-                                ChangeDisplaySettings(NULL, 0);
-                        }
-                        // The window is still borderless and without its
-                        // menu while its size is put back: no jumping to
-                        // the zoom sizes until it has its frame again
-                        NoZoomSnap = true;
-
-                        RenderInit();
-                        Screen->Cursor = crDefault;
-                        AccurateInit(true);
                         ClientWidth=SaveW;
                         ClientHeight=SaveH;
-                        Width=SaveWinW;
-                        Height=SaveWinH;
-                        Left=SaveX;
-                        Top=SaveY;
-                        FileMenu1->Visible=true;
-                        View1->Visible=true;
-                        Control1->Visible=true;
-                        Options1->Visible=true;
-                        Tools1->Visible=true;
-                        Help1->Visible=true;
-                        SetWindowLongPtr(Form1->Handle, GWL_EXSTYLE, SaveExStyle);
-                        SetWindowLongPtr(Form1->Handle, GWL_STYLE, SaveStyle);
-                        SetWindowPos(Form1->Handle, HWND_NOTOPMOST,
-                                        Left,Top,
-                                        Width,
-                                        Height, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-
-                        // The client area as it was, with the frame and the
-                        // menu back
-                        NoZoomSnap = false;
-                        if (N1001->Checked) SetZoom(1);
-                        else if (N2001->Checked) SetZoom(2);
-                        else if (N3001->Checked) SetZoom(3);
-                        else if (N4001->Checked) SetZoom(4);
-                        else
-                        {
-                                ClientWidth=SaveW;
-                                ClientHeight=SaveH;
-                        }
-                        Left=SaveX;
-                        Top=SaveY;
-
-                        RecalcPalette();
-                        RecalcWinSize();
-                        Artifacts->TrackBarChange(NULL);
                 }
+                Left=SaveX;
+                Top=SaveY;
 
+                RecalcPalette();
+                RecalcWinSize();
+                Artifacts->TrackBarChange(NULL);
         }
+}
+
+void __fastcall TForm1::FormKeyPress(TObject *Sender, char& Key)
+{
+        if (Key == ' ') rzx_close();
 }
 //---------------------------------------------------------------------------
 
@@ -1331,9 +1415,8 @@ void __fastcall TForm1::AppMessage(TMsg &Msg, bool &Handled)
                         }
 
                         if (Ext==".WAV") WavLoad->LoadFile(Filename);
-                        else if (Ext==".Z81" || Ext==".ACE") load_snap(Filename.c_str());
-                        else if (Ext==".Z80") spec_load_z80(Filename.c_str());
-                        else if (Ext==".SNA") spec_load_sna(Filename.c_str());
+                        else if (Ext==".Z81" || Ext==".ACE" || Ext==".Z80" || Ext==".SNA")
+                                LoadSnapshotFile(Filename, Ext);
                         else if (Ext==".TZX" || Ext==".TAP" || Ext==".T81"
                                   || Ext==".P" || Ext==".O" || Ext==".A83"
                                   || Ext==".81" || Ext==".80" || Ext==".P81"
@@ -1382,8 +1465,7 @@ void __fastcall TForm1::InverseVideoClick(TObject *Sender)
 
 void __fastcall TForm1::FormDeactivate(TObject *Sender)
 {
-        char escKey = VK_ESCAPE;
-        if (FullScreen) FormKeyPress(NULL, escKey);
+        if (FullScreen) SwitchFullScreen();
 }
 //---------------------------------------------------------------------------
 
@@ -1427,6 +1509,7 @@ void TForm1::LoadSettings(TIniFile *ini)
 
         SpectraColourEnable->Checked      = ini->ReadBool("MAIN", "SpectraColourEnable",      SpectraColourEnable->Checked);
         ChromaColourEnable->Checked       = ini->ReadBool("MAIN", "ChromaColourEnable",       ChromaColourEnable->Checked);
+        ConnectLambdaColour->Checked      = ini->ReadBool("MAIN", "ConnectLambdaColour",      ConnectLambdaColour->Checked);
         ConnectSpectrum128Keypad->Checked = ini->ReadBool("MAIN", "ConnectSpectrum128Keypad", ConnectSpectrum128Keypad->Checked);
         ConnectJoystick1->Checked         = ini->ReadBool("MAIN", "ConnectJoystick1",         ConnectJoystick1->Checked);
         ConnectJoystick2->Checked         = ini->ReadBool("MAIN", "ConnectJoystick2",         ConnectJoystick2->Checked);
@@ -1476,6 +1559,7 @@ void TForm1::LoadSettings(TIniFile *ini)
         spectrum.spectrum128Keypad       = (CFGBYTE)(ConnectSpectrum128Keypad->Checked ? 1 : 0);
         spectrum.spectraColourSwitchOn   = (CFGBYTE)(SpectraColourEnable->Checked      ? 1 : 0);
         zx81.chromaColourSwitchOn        = (CFGBYTE)(ChromaColourEnable->Checked       ? 1 : 0);
+        zx81.lambdaColourConnected       = (CFGBYTE)(ConnectLambdaColour->Checked      ? 1 : 0);
 
         machine.joystick1Connected       = (CFGBYTE)(ConnectJoystick1->Checked         ? 1 : 0);
         machine.joystick2Connected       = (CFGBYTE)(ConnectJoystick2->Checked         ? 1 : 0);
@@ -1555,6 +1639,7 @@ void TForm1::SaveSettings(TIniFile *ini)
 
         ini->WriteBool("MAIN", "SpectraColourEnable",      SpectraColourEnable->Checked);
         ini->WriteBool("MAIN", "ChromaColourEnable",       ChromaColourEnable->Checked);
+        ini->WriteBool("MAIN", "ConnectLambdaColour",      ConnectLambdaColour->Checked);
         ini->WriteBool("MAIN", "ConnectSpectrum128Keypad", ConnectSpectrum128Keypad->Checked);
         ini->WriteBool("MAIN", "ConnectJoystick1",         ConnectJoystick1->Checked);
         ini->WriteBool("MAIN", "ConnectJoystick2",         ConnectJoystick2->Checked);
@@ -1900,12 +1985,11 @@ void __fastcall TForm1::None1Click(TObject *Sender)
 
 void __fastcall TForm1::StatusBar2Click(TObject *Sender)
 {
-        StatusBar1->Visible = !StatusBar1->Visible;
+        StatusBar2->Checked = !StatusBar2->Checked;
+        StatusBar1->Visible = StatusBar2->Checked;
 
         if (StatusBar1->Visible) Height += StatusBar1->Height;
         else Height -= StatusBar1->Height;
-
-        StatusBar2->Checked = StatusBar1->Visible;
 }
 
 //---------------------------------------------------------------------------
@@ -2017,7 +2101,7 @@ void __fastcall TForm1::FormMouseUp(TObject *Sender, TMouseButton Button,
 
 void __fastcall TForm1::GenerateNMI1Click(TObject *Sender)
 {
-        nmiOccurred = 1;
+        if (machine.nmiInterrupt) machine.nmiInterrupt();
 }
 //---------------------------------------------------------------------------
 void FetchFolderList(vector<AnsiString>* pEntries, AnsiString path)
@@ -2363,6 +2447,25 @@ void __fastcall TForm1::ConfigItem1Click(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+// A snapshot changes the machine and fills its memory: no frame is run
+// meanwhile (the hardware changes on the way do not start them again)
+void TForm1::LoadSnapshotFile(AnsiString Filename, AnsiString Ext)
+{
+        StopFramesDisallow();
+
+        if (Ext == ".Z81" || Ext == ".ACE") load_snap(Filename.c_str());
+        else if (Ext == ".Z80") spec_load_z80(Filename.c_str());
+        else if (Ext == ".SNA") spec_load_sna(Filename.c_str());
+
+        RunFramesAllow();
+}
+
+// (The window is shown by WinMain, once it has its size)
+void TForm1::LoadAtStartup(void)
+{
+        LoadIniFile(emulator.inipath);
+}
+
 void TForm1::LoadIniFile(AnsiString FileName)
 {                      
         TIniFile *ini;
@@ -2388,9 +2491,9 @@ void TForm1::LoadIniFile(AnsiString FileName)
         ParallelPort->LoadSettings(ini);
         MidiForm->LoadSettings(ini);
         ZipFile->LoadSettings(ini);
-        BasicLister->LoadSettings(ini);
         LoadBasicListingOptionsForm->LoadSettings(ini);
         SaveBasicListingOptionsForm->LoadSettings(ini);
+        BasicLister->LoadSettings(ini);
 
         delete ini;
 
@@ -2538,6 +2641,20 @@ void __fastcall TForm1::ChromaColourEnableClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TForm1::ConnectLambdaColourClick(TObject *Sender)
+{
+        bool previousConnectLambdaColour = ConnectLambdaColour->Checked;
+
+        ConnectLambdaColour->Checked = !ConnectLambdaColour->Checked;
+        zx81.lambdaColourConnected = ConnectLambdaColour->Checked;
+
+        if (previousConnectLambdaColour)
+        {
+                DisableLambda();
+        }
+}
+//---------------------------------------------------------------------------
+
 void MoveWindow(TForm* form, int& x, int& y)
 {
         if (x != -1 && y != -1)
@@ -2647,88 +2764,109 @@ void __fastcall TForm1::FormShow(TObject *Sender)
         StatusBar1->Invalidate();
 }
 //---------------------------------------------------------------------------
-void __fastcall TForm1::RunFrame()
+
+int TForm1::HandleRunFrameThreadProc(void *param)
 {
-        static int j, borrow, Drive;
+        TForm1* self = static_cast<TForm1*>(param);
+
+        if(!self) return -1;
+
+        try {
+                self->HandleRunFrame();
+        }
+        catch (...) {
+                self->FrameIsRunning = false;
+                self->RunFrameEnable = false;
+                ZXDB("Unknown Internal Error Occurred. Executing hard reset.");
+                restartNeeded = true;
+        }
+        return 0;
+}
+
+void TForm1::HandleRunFrame(void)
+{
+        int j;
+        int borrow=0;
         unsigned short rshift = VK_RSHIFT;
         unsigned short lshift = VK_LSHIFT;
 
-        if (emulator.UseRShift)
+        while(RunFrameEnable)
         {
-                bool L=IsAsyncKeyPressed(VK_LSHIFT);
-                bool R=IsAsyncKeyPressed(VK_RSHIFT);
-                TShiftState z;
+                FrameIsRunning = true;
+                WaitForSingleObject(SoundDXReady,1000);
+                ResetEvent(SoundDXReady);
 
-                if (R != RShift)
+                Sound.Frame(emulation_stop || emulator.single_step);
+                if (!emulation_stop && !emulator.single_step) LiveMemoryWindow->Update();
+
+                if (emulator.UseRShift)
                 {
-                        RShift=R;
-                        if (R) FormKeyDown(NULL, rshift, z);
-                        else FormKeyUp(NULL, rshift,z);
+                        bool L=IsAsyncKeyPressed(VK_LSHIFT);
+                        bool R=IsAsyncKeyPressed(VK_RSHIFT);
+                        TShiftState z;
+
+                        if (R != RShift)
+                        {
+                                RShift=R;
+                                if (R) FormKeyDown(NULL, rshift, z);
+                                else FormKeyUp(NULL, rshift,z);
+                        }
+
+                        if (L != LShift)
+                        {
+                                LShift=L;
+                                if (L) FormKeyDown(NULL, lshift,z);
+                                else FormKeyUp(NULL, lshift,z);
+                        }
                 }
 
-                if (L != LShift)
+                if (emulation_stop)
                 {
-                        LShift=L;
-                        if (L) FormKeyDown(NULL, lshift,z);
-                        else FormKeyUp(NULL, lshift,z);
+                        AccurateUpdateDisplay(false);
+                        continue;
+                }
+                if (AutoLoadCount) DoAutoLoad();
+
+                PCKeyFrame();
+
+                if (machine.drivebusy != Drive)
+                {
+                        StatusBar1->Refresh();
+                        StatusBar1->Invalidate();
+                        Drive=machine.drivebusy;
+                }
+
+                if (spectrum.kmouse)
+                {
+                        mouse.x = Controls::Mouse->CursorPos.x;
+                        mouse.y = Screen->Height - Controls::Mouse->CursorPos.y;
+                }
+
+                fps++;
+                frametstates=0;
+
+                j=emulator.single_step?1:(machine.tperframe + borrow);
+
+                if (j!=1 && !AutoLoadCount)
+                {
+                        j *= emulator.speedup;
+                }
+
+                while (j>0 && !emulation_stop)
+                {
+                        j-= machine.do_scanline(BuildLine);
+                        AccurateDraw(BuildLine);
+                }
+
+                if (!emulation_stop) borrow=j;
+                else borrow=0;
+
+                if (romcartridge.type == ROMCARTRIDGEZXC1)
+                {
+                        RomCartridgeZXC1TimerTick();
                 }
         }
-
-        Sound.Frame(emulation_stop || emulator.single_step);
-
-        if (emulation_stop)
-        {
-                AccurateUpdateDisplay(false);
-                return;
-        }
-        if (AutoLoadCount) DoAutoLoad();
-        PCKeyFrame();
-
-        if (machine.drivebusy != Drive)
-        {
-                StatusBar1->Refresh();
-                StatusBar1->Invalidate();
-                Drive=machine.drivebusy;
-        }
-
-        if (spectrum.kmouse)
-        {
-                mouse.x = Controls::Mouse->CursorPos.x;
-                mouse.y = Screen->Height - Controls::Mouse->CursorPos.y;
-        }
-
-        fps++;
-        frametstates=0;
-
-        j=emulator.single_step?1:(machine.tperframe + borrow);
-
-        if (emulator.machine != MACHINESPECTRUM && j!=1 && !AutoLoadCount)
-        {
-                j += (emulator.speedup * machine.tperframe) / machine.tperscanline;
-        }
-
-        while (j>0 && !emulation_stop)
-        {
-                j-= machine.do_scanline(BuildLine);
-                AccurateDraw(BuildLine);
-                //WaitForSingleObject(Mutex,INFINITE);
-                //templine=BuildLine;
-                //BuildLine=DisplayLine;
-                //DisplayLine=templine;
-                //BuildLine->sync_len=DisplayLine->sync_len;
-                //BuildLine->sync_valid=DisplayLine->sync_valid;
-                //ReleaseMutex(Mutex);
-                //SwitchToThread();
-                //Sleep(0);
-                //AccurateDraw(DisplayLine);
-        }
-
-        if (!emulation_stop) borrow=j;
-
-        if (romcartridge.type == ROMCARTRIDGEZXC1)
-        {
-                RomCartridgeZXC1TimerTick();
-        }
+        FrameIsRunning = false;
 }
 
 //---------------------------------------------------------------------------
@@ -3207,8 +3345,7 @@ void __fastcall TForm1::ConnectJoystick2Click(TObject *Sender)
 
 void __fastcall TForm1::ZoomFullScreenClick(TObject *Sender)
 {
-        char escKey = VK_ESCAPE;
-        FormKeyPress(Sender, escKey);
+        SwitchFullScreen();
 }
 //---------------------------------------------------------------------------
 
@@ -3357,6 +3494,12 @@ void __fastcall TForm1::SwitchOnZ80AssemblerClick(TObject *Sender)
 {
         SwitchOnZ80Assembler->Checked = !SwitchOnZ80Assembler->Checked;
         zx81.z80AssemblerOn = (CFGBYTE)(SwitchOnZ80Assembler->Checked ?  1 : 0);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormPaint(TObject *Sender)
+{
+        AccPaint();
 }
 //---------------------------------------------------------------------------
 

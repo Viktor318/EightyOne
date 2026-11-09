@@ -34,6 +34,8 @@ extern BYTE ZXCFMem[];  // ZXCF has 1024k arranged as 64 x 16k pages
 extern int SPECNextBorder;
 extern BYTE memory[];
 extern void spec48_initialise();
+extern void spec48_nmi(void);
+extern void spec48_interruptack(void);
 extern int spec48_do_scanline(SCANLINE *CurScanLine);
 extern void spec48_writebyte(int Address, int Data);
 extern void spec48_setbyte(int Address, int Data);
@@ -53,5 +55,10 @@ extern int spec48_contend(int Address, int states, int time);
 extern int spec48_contendio(int Address, int states, int time);
 extern void spec48_reset(void);
 extern void spec48_exit(void);
+
+extern int RZXFramesTotal;
+extern int RZXErrorFrame;
+extern int RZXFrameCount;
+extern bool RZXModePlay();
 
 #endif

@@ -126,36 +126,81 @@ int LoadDock(char *Filename)
         f=fopen(Filename, "rb");
         if (!f) return(0);
 
-        bank=fgetc(f);
-        if (feof(f) || (bank > 0 && bank < 254))
+        while (1)
         {
-                fclose(f);
-                return 0;
-        }
+                bank=fgetc(f);
+                if (feof(f)) break;
 
-        for(i=0;i<8;i++)
-        {
-                int b = fgetc(f);
-                if (feof(f))
+                if (bank > 0 && bank < 254)
                 {
                         fclose(f);
-                        return 0;
+                        return(0);
                 }
-                chunks[i]=b;
-                if ((bank==0) && (chunks[i]&1))
-                        TimexWritable[i]=1;
-                if ((bank==254) && (chunks[i]&1))
-                        TimexWritable[i+8]=1;
+
+                for(i=0;i<8;i++)
+                {
+                        int b = fgetc(f);
+                        if (feof(f))
+                        {
+                                fclose(f);
+                                return 0;
+                        }
+                        chunks[i]=b;
+                        if ((bank==0) && (chunks[i]&1))
+                                TimexWritable[i]=1;
+                        if ((bank==254) && (chunks[i]&1))
+                                TimexWritable[i+8]=1;
+                }
+
+                for(i=0;i<8;i++)
+                {
+                        if (bank==0) ptr=TimexMem;  // Dock chunk
+                        else if (bank==254) ptr=TimexMem+65536;  //ExROM chunk
+                        else if (bank==255) ptr=SpectrumMem;  // Home chunk
+
+                        if (ptr == NULL)
+                        {
+                                fclose(f);
+                                return 0;
+                        }
+
+                        ptr += i*8192;
+                        if (chunks[i]&2) fread(ptr,1,8192,f);
+                }
         }
+        fclose(f);
+        strncpy(emulator.ROMDock, Filename, sizeof(emulator.ROMDock)-1);
+        emulator.ROMDock[sizeof(emulator.ROMDock)-1]='\0';
+        return(1);
+}
+
+int LoadExROM(char *Filename)
+{
+        FILE *f;
+        int i;
+        BYTE *ptr;
+
+        if (spectrum.model!=SPECCYTC2048 && spectrum.model!=SPECCYTS2068 && spectrum.model!=SPECCYTC2068)
+                return(0);
+
+        if (!strlen(Filename))
+        {
+                for(i=0;i<((64+64)*1024);i++) TimexMem[i]=255;
+                emulator.ROMDock[0]='\0';
+                return(1);
+        }
+
+        f=fopen(Filename, "rb");
+        if (!f) return(0);
 
         for(i=0;i<8;i++)
         {
-                if (bank==0) ptr=TimexMem;  // Dock chunk
-                else if (bank==254) ptr=TimexMem+65536;  //ExROM chunk
-                else if (bank==255) ptr=SpectrumMem;  // Home chunk
+                TimexWritable[i+8]=0;
+                ptr=TimexMem+65536;  //ExROM chunk
 
                 ptr += i*8192;
-                if (chunks[i]&2) fread(ptr,1,8192,f);
+                fread(ptr,1,8192,f);
+                rewind(f);
         }
         fclose(f);
         strncpy(emulator.ROMDock, Filename, sizeof(emulator.ROMDock)-1);
@@ -209,6 +254,7 @@ void spec_load_z80(char *fname)
         unsigned char *buf;
         int z80version;
         int speccy;
+        int headerSize=0;
 
         InitialiseSpectra();
         HW->ColourBox->ItemIndex = COLOURDISABLED;
@@ -233,7 +279,8 @@ void spec_load_z80(char *fname)
         if (buf[12]==255) buf[12]=1;
         if ((buf[6]==0) && (buf[7]==0))
         {
-                if (buf[30]==23) z80version=2;
+                headerSize=buf[30]+256*buf[31];
+                if (headerSize==23) z80version=2;
                 else z80version=3;
         }
 
@@ -252,8 +299,8 @@ void spec_load_z80(char *fname)
                 case 1: speccy=SPECCY48; if1 = true; break;
                 case 3: speccy=SPECCY128; break;
                 case 4: speccy=SPECCY128; if1 = true; break;
-                case 7: speccy=SPECCYPLUS2A; break;
-                case 8: speccy=SPECCYPLUS2A; break;
+                case 7: speccy=SPECCYPLUS3; break;
+                case 8: speccy=SPECCYPLUS3; break;
                 case 9: speccy=SPECCY128; break;
                 case 10: speccy=SPECCY128; break;
                 case 11: speccy=SPECCY128; break;
@@ -275,8 +322,8 @@ void spec_load_z80(char *fname)
                 case 4: speccy=SPECCY128; break;
                 case 5: speccy=SPECCY128; if1 = true; break;
                 case 6: speccy=SPECCY128; mgt = true; break;
-                case 7: speccy=SPECCYPLUS2A; break;
-                case 8: speccy=SPECCYPLUS2A; break;
+                case 7: speccy=SPECCYPLUS3; break;
+                case 8: speccy=SPECCYPLUS3; break;
                 case 9: speccy=SPECCY128; break;
                 case 10: speccy=SPECCY128; break;
                 case 11: speccy=SPECCY128; break;
@@ -299,11 +346,12 @@ void spec_load_z80(char *fname)
                 }
         }
         HWSetMachine(MACHINESPECTRUM, speccy);
+        HW->DefaultsButtonClick(NULL);
 
         if (if1)
         {
                 HW->FDCBox->ItemIndex = HW->SelectEntry(HW->FDCBox, "ZX Interface 1");
-                IF1->MDVNoDrives = 8;
+                IF1->MDVNoDrives = MDVDRIVECOUNT;
                 HW->FDCBoxChange(HW->FDCBox);
         }    
         else if (mgt)
@@ -357,7 +405,6 @@ void spec_load_z80(char *fname)
         }
 
         HWSetMachine(MACHINESPECTRUM, speccy);
-        machine.initialise();
 
         z80.af.b.h = buf[0]; z80.af.b.l = buf[1];
         z80.bc.w = (WORD)(buf[2] + 256*buf[3]);
@@ -405,8 +452,7 @@ void spec_load_z80(char *fname)
               
                 ptr = buf+32;
                 end = buf+FileLen;
-                int h2len = buf[30] + (buf[31] << 8);
-                ptr += h2len;
+                ptr += headerSize;
 
                 // Each block: a header of 3 bytes, then its 16K
                 while(ptr+3 <= end)
@@ -502,7 +548,7 @@ void spec_load_z80(char *fname)
                         Sound.AYRegisterStore[i] = buf[39 + i]; // AY registers
                 }
 
-                SPECLast1ffd = buf[86];
+                if (headerSize==55) SPECLast1ffd = buf[86];
 
                 bool spectraPresent = (buf[37] & 0x08);
                 if (spectraPresent)
@@ -544,7 +590,7 @@ void spec_load_z80(char *fname)
         z80.pc.w=(WORD)(buf[32]+ 256*buf[33]);
         if (speccy==SPECCYTC2048 || speccy==SPECCYTS2068 || speccy==SPECCYTC2068)
                 spec48_writeport(0xff,buf[36], &i);
-        spec48_writeport(0x7ffd,buf[35], &i);
+        if (speccy>=SPECCY128) spec48_writeport(0x7ffd,buf[35], &i);
 
         fts=17471 - (buf[55] | (buf[56]<<8));
         fts = (((buf[57]+1)&3)<<16) | fts;
@@ -916,7 +962,8 @@ void spec_save_z80(char *fname)
         switch (spectrum.model)
         {
         case SPECCY16:     mode=0;   flags=128; break;
-        case SPECCY48:     mode=0;   flags=0;   break;
+        case SPECCY48:
+        case SPECCYPLUS:   mode=0;   flags=0;   break;
         case SPECCYTC2048: mode=14;  flags=0;   break;
         case SPECCYTC2068: mode=15;  flags=0;   break;
         case SPECCYTS2068: mode=128; flags=0;   break;

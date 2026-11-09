@@ -37,6 +37,7 @@
 #include "SoundForm.h"
 #include "kb_.h"
 #include "Language.h"
+#include "Debug.h"
 
 extern int lineCounter;
 extern int MemotechMode;
@@ -62,7 +63,6 @@ void load_snap_drives(FILE* f);
 void ProcessTag(char* tok, FILE* f);
 
 extern void HWSetMachine(int machine, int speccy);
-extern void DebugUpdate();
 
 AnsiString ReplaceSpaces(AnsiString text)
 {
@@ -193,7 +193,7 @@ void load_snap_cpu(FILE *f)
                         a=hex2dec(get_token(f));
 
                         z80.i = (BYTE)((a>>8) & 255);
-                        z80.r = (WORD)(a & 255);
+                        z80.r = (WORD)(a & 127);
                         z80.r7 = (BYTE)(a & 128);
                 }
         }
@@ -471,6 +471,7 @@ void load_snap_colour(FILE *f)
         int Addr, Count, Chr;
         char *tok;
         bool chroma = false;
+        bool lambda = false;
 
         Addr=0xC000;
 
@@ -488,7 +489,7 @@ void load_snap_colour(FILE *f)
                         tok = get_token(f);
                         SetComboBox(HW->ColourBox, tok);
                         chroma = (HW->ColourBox->Text == "Chroma");
-                        bool lambda = (HW->ColourBox->Text == "Lambda");
+                        lambda = (HW->ColourBox->Text == "Lambda");
                         if (chroma)
                         {
                                 Form1->ChromaColourEnable->Visible = true;
@@ -497,6 +498,8 @@ void load_snap_colour(FILE *f)
                         }
                         else if (lambda)
                         {
+                                Form1->ConnectLambdaColour->Visible = true;
+                                Form1->ConnectLambdaColour->Enabled = true;
                                 machine.colour = COLOURLAMBDA;
                         }
                 }
@@ -508,6 +511,15 @@ void load_snap_colour(FILE *f)
                 {
                         zx81.chromaColourSwitchOn = (CFGBYTE)hex2dec(get_token(f));
                         Form1->ChromaColourEnable->Checked = zx81.chromaColourSwitchOn;
+                }
+                else if (lambda && !strcmp(tok,"COLOUR_CONNECTED"))
+                {
+                        zx81.lambdaColourConnected = (CFGBYTE)hex2dec(get_token(f));
+                        Form1->ConnectLambdaColour->Checked = zx81.lambdaColourConnected;
+                }
+                else if (lambda && !strcmp(tok,"COLOUR_ENABLED"))
+                {
+                        zx81.lambdaColourEnabled = (CFGBYTE)hex2dec(get_token(f));
                 }
                 else if (chroma && *tok=='*')
                 {
@@ -815,7 +827,8 @@ void load_snap_ace(FILE *f)
         z80.iff1 = memory[memptr]; memptr+=4;
         z80.iff2 = memory[memptr]; memptr+=4;
         z80.i = memory[memptr]; memptr+=4;
-        z80.r = memory[memptr];
+        z80.r7 = (BYTE)(memory[memptr]&128);
+        z80.r = (WORD)(memory[memptr]&127);
 }
 
 int load_ZX81_snapshot(char* filename)
@@ -857,10 +870,9 @@ int do_load_snap(char *filename)
 
         char* p=filename+strlen(filename)-4;
 
-        if (strcmp(p,".Z81") && strcmp(p,".z81")
-                && strcmp(p,".ace") && strcmp(p,".ACE") ) return(0);
+        if (stricmp(p,".z81") && stricmp(p,".ace")) return(0);
 
-        if (!strcmp(p,".ace") || !strcmp(p,".ACE"))
+        if (!stricmp(p,".ace"))
         {
                 if (!load_ACE_snapshot(filename))
                 {
@@ -906,10 +918,9 @@ int save_snap(char *filename)
 
         p=filename+strlen(filename)-4;
 
-        if (strcmp(p,".Z81") && strcmp(p,".z81")
-                && strcmp(p,".ace") && strcmp(p,".ACE") ) return(0);
+        if (stricmp(p,".z81") && stricmp(p,".ace")) return(0);
 
-        if (!strcmp(p,".ace") || !strcmp(p,".ACE"))
+        if (!stricmp(p,".ace"))
         {
                 f = save_snap_ace(filename);
         }
@@ -947,7 +958,7 @@ int save_snap_zx81(char *filename)
 	fprintf(f,"BC %04X    BC_ %04X\n", z80.bc.w,z80.bc_.w);
 	fprintf(f,"AF %04X    AF_ %04X\n", z80.af.w,z80.af_.w);
 	fprintf(f,"IX %04X    IY  %04X\n", z80.ix.w,z80.iy.w);
-	fprintf(f,"IR %04X\n", (z80.i<<8) | (z80.r7 & 128) | ((z80.r) & 127));
+	fprintf(f,"IR %04X\n", (z80.i<<8) | (z80.r7 & 128) | (z80.r & 127));
 
 	fprintf(f,"IM %02X      IF1 %02X\n", z80.im, z80.iff1);
 	fprintf(f,"HT %02X      IF2 %02X\n", z80.halted, z80.iff2);
@@ -1039,6 +1050,11 @@ int save_snap_zx81(char *filename)
 		fprintf(f,"\nCHROMA_MODE %02X\n", zx81.chromaMode);
 		fprintf(f,"COLOUR_ENABLED %02X\n", zx81.chromaColourSwitchOn);
 	}
+	else if (machine.colour == COLOURLAMBDA)
+	{
+		fprintf(f,"COLOUR_CONNECTED %02X\n", zx81.lambdaColourConnected);
+		fprintf(f,"COLOUR_ENABLED %02X\n", zx81.lambdaColourEnabled);
+        }
 
 	fprintf(f,"\n[CHR$_GENERATOR]\n");
 	fprintf(f,"TYPE %s\n", LanguageEnglish(HW->ChrGenBox->Text).c_str());
@@ -1167,7 +1183,7 @@ int save_snap_ace(char *filename)
 	memory[memptr] = z80.iff1; memptr+=4;
 	memory[memptr] = z80.iff2; memptr+=4;
 	memory[memptr] = z80.i; memptr+=4;
-	memory[memptr] = z80.r; memptr+=4;
+	memory[memptr] = (WORD)((z80.r7 & 128) | (z80.r & 127)); memptr+=4;
 	memory[memptr] = 0x80; memory[memptr+1] = 0x00; memory[memptr+2] = 0x00; memory[memptr+3] = 0x00;
 
 	Addr=0x2000;

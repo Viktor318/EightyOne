@@ -47,6 +47,7 @@ public:
         // True while End() is waiting for the audio thread to finish: a
         // frame the thread asked for just before must not be run then
         bool Stopping() { return m_Stopping; }
+        void SetFrameEvent(HANDLE event) { m_FrameEvent = event; }
 
         int SampleRate() { return m_SampleRate; }
         const char *Name() { return "DirectSound"; }
@@ -70,7 +71,9 @@ private:
         HANDLE m_ThreadHandle;
         HANDLE m_StopEvent;
         volatile bool m_Stopping;
-        bool m_SendErrorShown;
+        HANDLE m_FrameEvent;            // the emulator's (not ours)
+        HANDLE m_FrameDone;             // set by Frame()
+        bool RunEmulatorFrame(void);
 
         // DirectSound
 	WAVEFORMATEX m_WFE;

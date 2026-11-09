@@ -44,21 +44,15 @@ enum StatusBarIndex
 //---------------------------------------------------------------------------
 __fastcall TBasicLister::TBasicLister(TComponent* Owner)
         : TForm(Owner), mBitmap(NULL), mHWND(this->Handle),
-          mLastHighlightedEntryIndex(-1), mLastFilterIndex(1), mBasicLister(NULL)
+          mLastHighlightedEntryIndex(-1), mLastFilterIndex(1), mBasicLister(NULL),
+          mRelativePos(0)
 {
+        mRefreshLock = new TCriticalSection();
         mLines = new std::vector<LineInfo>();
-
-        TIniFile* ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
-
-        SizeWindow();
 }
 
 void TBasicLister::SizeWindow()
 {
-        mScaling = SaveBasicListingOptionsForm->GetScalingFator();
-
         int displayAreaWidth = ListingAreaWidth(DisplayableColumns * PixelsPerCharacterHeight * mScaling);
         int displayAreaHeight = (DisplayableRows * PixelsPerCharacterHeight * mScaling);
 
@@ -90,24 +84,32 @@ __fastcall TBasicLister::~TBasicLister()
         ::DeleteObject(mBitmap);
         SetBasicLister(NULL);
         delete mLines;
+        delete mRefreshLock;
 }
 
 void TBasicLister::SetBasicLister(IBasicLister* basicLister)
 {
+        IBasicLister::StopRefresh();
+        mRefreshLock->Acquire();
         mLines->clear();
-        
+
         if (mBasicLister != NULL)
         {
                 delete mBasicLister;
         }
 
         mBasicLister = basicLister;
-        
+
         if (mBasicLister != NULL)
         {
+                mBasicLister->CopyCsetImage();
                 mBasicLister->PopulateKeywords();
                 mBasicLister->SetLines(mLines);
+                SizeWindow();
         }
+
+        mRefreshLock->Release();
+        IBasicLister::GoRefresh();
 }
 
 bool TBasicLister::ListerAvailable()
@@ -117,7 +119,12 @@ bool TBasicLister::ListerAvailable()
 
 void TBasicLister::ClearBitmap()
 {
-        HDC hdc = (HDC)Canvas->Handle;
+        if (mBitmap)
+        {
+            ::DeleteObject(mBitmap);
+        }
+
+        HDC hdc = GetDC(mHWND);
         HDC chdc = CreateCompatibleDC(hdc);
 
         mBitmap = ::CreateCompatibleBitmap(hdc, mBMWidth, mBMHeight);
@@ -130,10 +137,11 @@ void TBasicLister::ClearBitmap()
         rect.right = mBMWidth;
         rect.bottom = mBMHeight;
 
-        mBasicLister->ClearRenderedListing(chdc, mBitmap, rect, ToolButtonLineEnds->Down);
+        if (mBasicLister) mBasicLister->ClearRenderedListing(chdc, mBitmap, rect, ToolButtonLineEnds->Down);
 
         SelectObject(chdc, oldbm);
         DeleteDC(chdc);
+        ReleaseDC(mHWND,hdc);
 }
 
 void TBasicLister::ExtractProgramDetails()
@@ -156,7 +164,7 @@ void TBasicLister::ConstructBitmap()
 
         ClientWidth = mBMWidth + ScrollBar->Width + 1;
 
-        HDC hdc = (HDC)Canvas->Handle;
+        HDC hdc = GetDC(mHWND);
         HDC chdc = CreateCompatibleDC(hdc);
 
         mBitmap = ::CreateCompatibleBitmap(hdc, mBMWidth, mBMHeight);
@@ -173,6 +181,7 @@ void TBasicLister::ConstructBitmap()
 
         SelectObject(chdc, oldbm);
         DeleteDC(chdc);
+        ReleaseDC(mHWND,hdc);
 }
 
 //---------------------------------------------------------------------------
@@ -191,12 +200,7 @@ void TBasicLister::HighlightRows(int startRow, int endRow)
 
 void TBasicLister::ColourRows(int startRow, int endRow, bool highlight)
 {
-        if (endRow - startRow > 20)
-        {
-                Screen->Cursor = crHourGlass;
-        }
-
-        HDC hdc = (HDC)Canvas->Handle;
+        HDC hdc = GetDC(mHWND);
         HDC chdc = CreateCompatibleDC(hdc);
         HGDIOBJ oldbm = SelectObject(chdc, mBitmap);
 
@@ -232,8 +236,7 @@ void TBasicLister::ColourRows(int startRow, int endRow, bool highlight)
 
         SelectObject(chdc, oldbm);
         DeleteDC(chdc);
-
-        Screen->Cursor = crDefault;
+        ReleaseDC(mHWND,hdc);
 }
 
 void TBasicLister::HighlightLine(int lineNumber)
@@ -350,7 +353,9 @@ void __fastcall TBasicLister::FormPaint(TObject *Sender)
 
 void __fastcall TBasicLister::FormShow(TObject *Sender)
 {
-        LoadProgram();
+        GetSaveOptions();
+        SizeWindow();
+        Refresh(false);
 }
 //---------------------------------------------------------------------------
 
@@ -362,48 +367,78 @@ void __fastcall TBasicLister::ScrollBarChange(TObject *Sender)
 
 void __fastcall TBasicLister::ToolButtonRefreshClick(TObject *Sender)
 {
-        const bool keepScrollbarPosition = false;
+        const bool keepScrollbarPosition = true;
         Refresh(keepScrollbarPosition);
 }
 //---------------------------------------------------------------------------
+
+int TBasicLister::HandleRefreshThreadProc(void *param)
+{
+        TBasicLister* self = static_cast<TBasicLister*>(param);
+        self->mRefreshLock->Acquire();
+        try {
+
+                self->HandleRefresh();
+        } __finally {
+                self->mRefreshLock->Release();
+        }
+        return 0;
+}
+
+void TBasicLister::HandleRefresh(void)
+{
+        LoadProgram(false);
+
+        PostMessage(mHWND, WM_SCROLLBAR, mRelativePos, 0);
+}
 
 void TBasicLister::Refresh(bool keepScrollbarPosition)
 {
         double relativePos = ScrollBar->Max > 0 ? (double)ScrollBar->Position / ScrollBar->Max : 0;
 
+        mRelativePos = (keepScrollbarPosition ? relativePos : 0)*1000;
+
+        DisableButtons();
+        Form1->ThreadPool.EnqueueTask(new TTask(HandleRefreshThreadProc, (void *)this));
+}
+//---------------------------------------------------------------------------
+
+int TBasicLister::HandleClearThreadProc(void *param)
+{
+        TBasicLister* self = static_cast<TBasicLister*>(param);
+
+        self->HandleClear();
+        return 0;
+}
+
+void TBasicLister::HandleClear(void)
+{
+        IBasicLister::StopRefresh();
+        mRefreshLock->Acquire();
+        mLines->clear();
+
         ClearBitmap();
-        Invalidate();
+        PostMessage(mHWND, WM_STATUSBAR, 0, 0);
+        PostMessage(mHWND, WM_SCROLLBAR, 0, 0);
 
-        LoadProgram();
+        mRefreshLock->Release();
+        IBasicLister::GoRefresh();
+}
 
-        if (keepScrollbarPosition)
+void TBasicLister::Clear()
+{
+        // Only clear if there are lines to clear
+        if (mLines->size()>0)
         {
-                ScrollBar->Position = (int)(ceil(relativePos * ScrollBar->Max));
+                DisableButtons();
+                Form1->ThreadPool.EnqueueTask(new TTask(HandleClearThreadProc, (void *)this));
         }
 }
 //---------------------------------------------------------------------------
 
-void TBasicLister::Clear()
+void TBasicLister::LoadProgram(bool keepEntries)
 {
-        mLines->clear();
-
-        ClearBitmap();
-        ConfigureStatusBar();
-        ConfigureScrollBar();
-        Invalidate();
-
-        EnableButtons();
-}
-//---------------------------------------------------------------------------
-
-void TBasicLister::LoadProgram()
-{
-        TCursor oldCursor = Screen->Cursor;
-        Screen->Cursor = crHourGlass;
-
-        DisableButtons();
-
-        mLastHighlightedEntryIndex = -1;
+        if (!keepEntries) mLastHighlightedEntryIndex = -1;
         
         if (mBasicLister != NULL)
         {
@@ -411,49 +446,44 @@ void TBasicLister::LoadProgram()
                 ConstructBitmap();
         }
 
-        ConfigureStatusBar();
-        ConfigureScrollBar();
-
-        Invalidate();
-
-        EnableButtons();
-
-        Screen->Cursor = oldCursor;
+        PostMessage(mHWND, WM_STATUSBAR, 0, 0);
 }
 
-void TBasicLister::ConfigureScrollBar()
+void __fastcall TBasicLister::WMUpdateScrollBar(TMessage &Message)
 {
-        ScrollBar->Min = 0;
-        mProgramDisplayRows = mBasicLister != NULL ? mBasicLister->GetProgramRows() : 0;
-        bool scrollable = (mProgramDisplayRows > DisplayableRows);
-        if (scrollable)
+        if (Message.WParam==0)
         {
-                ScrollBar->Max = mProgramDisplayRows - DisplayableRows;
+                ScrollBar->Min = 0;
+                mProgramDisplayRows = mBasicLister != NULL ? mBasicLister->GetProgramRows() : 0;
+                bool scrollable = (mProgramDisplayRows > DisplayableRows);
+                if (scrollable)
+                        ScrollBar->Max = mProgramDisplayRows - DisplayableRows;
+                else
+                        ScrollBar->Max = mProgramDisplayRows;
+
+                ScrollBar->SmallChange = 1;
+                ScrollBar->LargeChange = DisplayableRows;
+                ScrollBar->Position = 1;
+                ScrollBar->Position = 0;     // This forces the scroll bar to be disabled
+                ScrollBar->Enabled = scrollable;
         }
         else
-        {
-                ScrollBar->Max = mProgramDisplayRows;
-        }
+                ScrollBar->Position = (int)(ceil((Message.WParam/1000.0) * ScrollBar->Max));
 
-        ScrollBar->SmallChange = 1;
-        ScrollBar->LargeChange = DisplayableRows;
-        ScrollBar->Position = 1;
-        ScrollBar->Position = 0;     // This forces the scroll bar to be disabled
-        ScrollBar->Enabled = scrollable;
+        Invalidate();
+        EnableButtons();
 }
 
-// After a change of language: the program's details in the status bar
+// After a change of language: the program's details in the status bar, and
+// the listing again, as wide as the tool bar's new captions need
 
 void TBasicLister::LanguageChanged()
 {
-        ConfigureStatusBar();
-
-        // The tool bar's buttons have new captions: the listing is made again,
-        // as wide as they need now
-        if (Visible) LoadProgram();
+        if (Visible) Refresh(true);
+        else PostMessage(mHWND, WM_STATUSBAR, 0, 0);
 }
 
-void TBasicLister::ConfigureStatusBar()
+void __fastcall TBasicLister::WMUpdateStatusBar(TMessage &Message)
 {
         AnsiString programDetails;
 
@@ -474,6 +504,9 @@ void TBasicLister::ConfigureStatusBar()
 
         StatusBar->Panels->Items[PanelLines]->Text = programDetails;
         StatusBar->Panels->Items[PanelLineInfo]->Text = "";
+
+        Invalidate();
+        EnableButtons();
 }
 
 void TBasicLister::DisableButtons()
@@ -534,6 +567,26 @@ int TBasicLister::FindLineDisplayedOnRow(int row)
         return index;
 }
 
+int TBasicLister::HandleMouseDownThreadProc(void *param)
+{
+        TBasicLister* self = static_cast<TBasicLister*>(param);
+
+        self->HandleMouseDown();
+        return 0;
+}
+
+void TBasicLister::HandleMouseDown(void)
+{
+        if (mIndex != -1 && mIndex != mLastHighlightedEntryIndex)
+        {
+                HighlightEntry(mIndex);
+        }
+        else
+        {
+                UnhighlightEntry(mIndex);
+        }
+}
+
 //---------------------------------------------------------------------------
 
 void __fastcall TBasicLister::FormMouseDown(TObject *Sender,
@@ -547,17 +600,9 @@ void __fastcall TBasicLister::FormMouseDown(TObject *Sender,
         int rowWithinClientArea = (Y - ToolBar->Height) / (PixelsPerCharacterHeight * mScaling);
         int row = rowWithinClientArea + ScrollBar->Position;
 
-        int index = FindLineDisplayedOnRow(row);
-        if (index != -1 && index != mLastHighlightedEntryIndex)
-        {
-                HighlightEntry(index);
-        }
-        else
-        {
-                UnhighlightEntry(index);
-        }
+        mIndex = FindLineDisplayedOnRow(row);
 
-        EnableButtons();
+        Form1->ThreadPool.EnqueueTask(new TTask(HandleMouseDownThreadProc, (void *)this));
 }
 
 //---------------------------------------------------------------------------
@@ -594,12 +639,22 @@ void __fastcall TBasicLister::FormClose(TObject *Sender,
         Form1->BasicListerOption->Checked = false;        
 }
 //---------------------------------------------------------------------------
-                    
+
 void __fastcall TBasicLister::ToolButtonSaveClick(TObject *Sender)
 {
-        SaveListingToFile();
+        DisableButtons();
+        Form1->ThreadPool.EnqueueTask(new TTask(HandleSaveListingToFileThreadProc, (void *)this));
 }
 //---------------------------------------------------------------------------
+
+int TBasicLister::HandleSaveListingToFileThreadProc(void *param)
+{
+        TBasicLister* self = static_cast<TBasicLister*>(param);
+
+        self->SaveListingToFile();
+        PostMessage(self->mHWND, WM_STATUSBAR, 0, 0);
+        return 0;
+}
 
 void TBasicLister::SaveListingToFile()
 {
@@ -608,7 +663,7 @@ void TBasicLister::SaveListingToFile()
                 return;
         }
 
-        LoadProgram();
+        LoadProgram(true);
 
         bool programLoaded = (ProgramSize() > 0);
         if (!programLoaded)
@@ -689,24 +744,29 @@ void TBasicLister::LoadSettings(TIniFile *ini)
         if (Form1->BasicListerOption->Checked) Show();
 }
 
+int TBasicLister::HandleLineEndsThreadProc(void *param)
+{
+        TBasicLister* self = static_cast<TBasicLister*>(param);
+
+        self->HandleLineEnds();
+        return 0;
+}
+
+void TBasicLister::HandleLineEnds(void)
+{
+        LoadProgram(true);
+        
+        HighlightEntry(mLastHighlightedEntryIndex);
+
+        PostMessage(mHWND, WM_STATUSBAR, 0, 0);
+}
+
 void __fastcall TBasicLister::ToolButtonLineEndsClick(TObject *Sender)
 {
-        int scrollPos = ScrollBar->Position;
-
         ToolButtonLineEnds->Down = !ToolButtonLineEnds->Down;
 
-        int highlightIndex = mLastHighlightedEntryIndex;
-
-        LoadProgram();
-
-        HighlightEntry(highlightIndex);
-
-        EnableButtons();
-        
-        if (scrollPos <= ScrollBar->Max)
-        {
-                ScrollBar->Position = scrollPos;
-        }
+        DisableButtons();
+        Form1->ThreadPool.EnqueueTask(new TTask(HandleLineEndsThreadProc, (void *)this));
 }
 //---------------------------------------------------------------------------
 
@@ -736,28 +796,12 @@ void TBasicLister::GetSaveOptions()
         mOutputVariableNamesInLowercase = SaveBasicListingOptionsForm->GetOutputVariableNamesInLowercase();
         mLimitLineLengths = SaveBasicListingOptionsForm->GetLimitLineLengths();
         mOutputFullWidthLineNumbers = SaveBasicListingOptionsForm->GetOutputFullWidthLineNumbers();
+        mScaling = SaveBasicListingOptionsForm->GetScalingFator();
 }
 
 void __fastcall TBasicLister::ToolButtonInfoClick(TObject *Sender)
 {
-        AnsiString machine = mBasicLister->GetMachineName();
-        if (machine == "ZX80")
-        {
-                BasicListingFormatInfoForm->SetActivePage(0);
-        }
-        else if (machine == "ZX81")
-        {
-                BasicListingFormatInfoForm->SetActivePage(1);
-        }
-        else if (machine == "Spectrum")
-        {
-                BasicListingFormatInfoForm->SetActivePage(2);
-        }
-        else
-        {
-                return;
-        }
-
+        BasicListingFormatInfoForm->LayOut();
         BasicListingFormatInfoForm->Left = BasicLister->Left + (BasicLister->Width - BasicListingFormatInfoForm->Width) / 2;
         BasicListingFormatInfoForm->Top = BasicLister->Top + (BasicLister->Height - BasicListingFormatInfoForm->Height) / 2;
 

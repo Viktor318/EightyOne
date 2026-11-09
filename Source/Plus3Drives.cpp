@@ -18,6 +18,7 @@
 
 #include <vcl4.h>
 #include <io.h>
+#include <sys/stat.h>
 #pragma hdrstop
 
 #include "zx81config.h"
@@ -50,10 +51,6 @@ __fastcall TP3Drive::TP3Drive(TComponent* Owner)
         DetectPhysDrives();
         BuildHDList(HD0List);
         BuildHDList(HD1List);
-
-        TIniFile* ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 
         FormShow(Owner);
 }
@@ -203,8 +200,8 @@ void TP3Drive::ConfigureOpenFloppyDiskImageDialog()
                 break;
 
         case FLOPPYZX1541:
-                OpenDialogFloppyDiskImage->DefaultExt = ".dsk";
-                OpenDialogFloppyDiskImage->Filter = LanguageFilter("DSK Disk Images (*dsk)|*.dsk|Compressed Disk Images (*.zip)|All Disk Images (*dsk;*.zip)|*.dsk;*.zip");
+                OpenDialogFloppyDiskImage->DefaultExt = ".d64";
+                OpenDialogFloppyDiskImage->Filter = LanguageFilter("D64 Disk Images (*.d64)|*.d64|Compressed Disk Images (*.zip)|*.zip|All Disk Images (*.d64;*.zip)|*.d64;*.zip");
                 OpenDialogFloppyDiskImage->FilterIndex = 1;
                 OpenDialogFloppyDiskImage->Title = Tr("Select ZX1541 Disk");
                 break;
@@ -231,6 +228,7 @@ void __fastcall TP3Drive::DriveAFSBtnClick(TObject *Sender)
         {
                 Filename = ZipFile->ExpandZIP(Filename, OpenDialogFloppyDiskImage->Filter);
                 if (Filename == "") return;
+                chmod(Filename.c_str(), 0444);
                 Ext = FileNameGetExt(Filename);
                 readonly = 1;
         }
@@ -239,7 +237,7 @@ void __fastcall TP3Drive::DriveAFSBtnClick(TObject *Sender)
         DriveAText->SelStart = DriveAText->Text.Length() - 1;
         DriveAText->SelLength = 0;
 
-        OpenFloppyDriveImage(0, machine.driveaimg, DriveAText, readonly);
+        OpenFloppyDriveImage(0, DriveAText->Text, readonly);
 }
 //---------------------------------------------------------------------------
 
@@ -258,6 +256,7 @@ void __fastcall TP3Drive::DriveBFSBtnClick(TObject *Sender)
         {
                 Filename = ZipFile->ExpandZIP(Filename, OpenDialogFloppyDiskImage->Filter);
                 if (Filename == "") return;
+                chmod(Filename.c_str(), 0444);
                 Ext = FileNameGetExt(Filename);
                 readonly = 1;
         }
@@ -266,36 +265,36 @@ void __fastcall TP3Drive::DriveBFSBtnClick(TObject *Sender)
         DriveBText->SelStart = DriveBText->Text.Length() - 1;
         DriveBText->SelLength = 0;
 
-        OpenFloppyDriveImage(1, machine.drivebimg, DriveBText, readonly);
+        OpenFloppyDriveImage(1, DriveBText->Text, readonly);
 }
 //---------------------------------------------------------------------------
 
-void TP3Drive::OpenFloppyDriveImage(int driveNumber, char* driveimg, TEdit* driveText, int readonly)
+void TP3Drive::OpenFloppyDriveImage(int driveNumber, AnsiString driveText, int readonly)
 {
-        strcpy(driveimg, driveText->Text.c_str());
+        strcpy(machine.driveimg[driveNumber], driveText.c_str());
 
-        if (machine.floppytype!=FLOPPYPLUS3 && access(driveimg, F_OK) && !readonly)
+        if (machine.floppytype!=FLOPPYPLUS3 && access(machine.driveimg[driveNumber], F_OK) && !readonly)
         {
                 FILE *f;
-                if ((f = fopen(driveimg, "w")) != NULL)
+                if ((f = fopen(machine.driveimg[driveNumber], "w")) != NULL)
                 {
                         fclose(f);
                 }
         }
 
-        floppy_setimage(driveNumber, driveimg, readonly);
+        floppy_setimage(driveNumber, machine.driveimg[driveNumber], readonly);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TP3Drive::DriveAEjectBtnClick(TObject *Sender)
 {
-        FloppyDiskEject(0, DriveAText, machine.driveaimg);
+        FloppyDiskEject(0, DriveAText, machine.driveimg[0]);
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TP3Drive::DriveBEjectBtnClick(TObject *Sender)
 {
-        FloppyDiskEject(1, DriveBText, machine.drivebimg);
+        FloppyDiskEject(1, DriveBText, machine.driveimg[1]);
 }
 //---------------------------------------------------------------------------
 
@@ -341,8 +340,8 @@ void __fastcall TP3Drive::FormShow(TObject *Sender)
 
 void TP3Drive::ConfigureFloppyDriveGroup()
 {
-        if (strlen(machine.driveaimg)) DriveAText->Text = machine.driveaimg;
-        if (strlen(machine.drivebimg)) DriveBText->Text = machine.drivebimg;
+        if (strlen(machine.driveimg[0])) DriveAText->Text = machine.driveimg[0];
+        if (strlen(machine.driveimg[1])) DriveBText->Text = machine.driveimg[1];
 
         DriveAText->SelStart = DriveAText->Text.Length() - 1;
         DriveAText->SelLength = 0;
@@ -825,10 +824,10 @@ void TP3Drive::InsertFile(AnsiString Filename)
 void P3DriveMachineHasInitialised(void)
 {
         if (P3Drive->DriveAText->Text != "< Empty >")
-                floppy_setimage(0, P3Drive->DriveAText->Text.c_str(), 0);
+                P3Drive->OpenFloppyDriveImage(0, P3Drive->DriveAText->Text, 0);
 
         if (P3Drive->DriveBText->Text != "< Empty >")
-                floppy_setimage(1, P3Drive->DriveBText->Text.c_str(), 0);
+                P3Drive->OpenFloppyDriveImage(1, P3Drive->DriveBText->Text, 0);
 }
 //---------------------------------------------------------------------------
 
@@ -842,8 +841,7 @@ void __fastcall TP3Drive::DriveANewBtnClick(TObject *Sender)
                 DriveAText->SelStart = DriveAText->Text.Length() - 1;
                 DriveAText->SelLength = 0;
 
-                int readonly = 0;
-                OpenFloppyDriveImage(0, machine.driveaimg, DriveAText, readonly);
+                OpenFloppyDriveImage(0, filePath, 0);
         }
 }
 //---------------------------------------------------------------------------
@@ -858,8 +856,7 @@ void __fastcall TP3Drive::DriveBNewBtnClick(TObject *Sender)
                 DriveBText->SelStart = DriveBText->Text.Length() - 1;
                 DriveBText->SelLength = 0;
 
-                int readonly = 0;
-                OpenFloppyDriveImage(1, machine.drivebimg, DriveBText, readonly);
+                OpenFloppyDriveImage(1, filePath, 0);
         }
 }
 //---------------------------------------------------------------------------
@@ -895,7 +892,7 @@ bool TP3Drive::NewFloppyDisk(AnsiString& filePath)
                 break;
 
         case FLOPPYZX1541:
-                success = CreateFloppyDiskImage("Create New ZX1541 Floppy Disk", "DSK Disk Images (*.dsk)|*.dsk", ".dsk", filePath);
+                success = CreateFloppyDiskImage("Create New ZX1541 Floppy Disk", "D64 Disk Images (*.d64)|*.d64", ".d64", filePath);
                 break;
 
         default:

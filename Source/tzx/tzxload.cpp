@@ -815,6 +815,10 @@ void TTZXFile::LoadFileData(AnsiString FileName, unsigned char* programData, int
         {
                 LoadTapFileData(FileName.c_str(), programData, length, Insert);
         }
+        else if (Extension == ".A83" || ((Extension == ".TXT" || Extension == ".BAS") && emulator.machine == MACHINELAMBDA))
+        {
+                LoadPFileData(FileName.c_str(), programData, length, Insert);
+        }
 }
 
 void TTZXFile::LoadOFileData(unsigned char* programData, int length, bool Insert)
@@ -876,8 +880,6 @@ void TTZXFile::ValidateFile(AnsiString FileName, char* tempdata, int len)
 {
         AnsiString Extension = FileNameGetExt(FileName);
 
-        if (Extension == ".A83") return;        // TO DO - Add support for this format
-
         char* program = tempdata;
         int startSystemVariables;
         int elineOffset;
@@ -885,7 +887,7 @@ void TTZXFile::ValidateFile(AnsiString FileName, char* tempdata, int len)
 
         int length = len;
 
-        if (Extension == ".P" || Extension == ".P81" || Extension == ".81")
+        if (Extension == ".P" || Extension == ".P81" || Extension == ".81" || Extension == ".A83")
         {
                 while ((length > 0) && ((unsigned char)(program[0]) & 128) == 0)
                 {

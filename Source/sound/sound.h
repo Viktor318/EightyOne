@@ -153,12 +153,22 @@ struct SpecDrumChangeTag
         unsigned char val;
 };
 
+// Holds a lock for as long as it exists
+class CSoundLock
+{
+public:
+        CSoundLock(CRITICAL_SECTION *cs) : m_cs(cs) { EnterCriticalSection(m_cs); }
+        ~CSoundLock() { LeaveCriticalSection(m_cs); }
+private:
+        CRITICAL_SECTION *m_cs;
+};
+
 class CSound
 {
 public:
         CSound();
 	void InitDevices(void);
-        int Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
+        int Initialise(HWND hWnd, HANDLE readyEvent, int FPS, int BitsPerSample, int SampleRate, int Channels);
         int ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels);
 
         void End(void);
@@ -205,6 +215,15 @@ private:
         CSoundOutput *Output;
         int OpenOutput(void);
         int StartOutput(bool resetDevices);
+
+        // Set by the output's audio thread for each frame of sound it needs:
+        // the emulator's frame thread then runs a frame (TForm1::HandleRunFrame)
+        HANDLE m_FrameEvent;
+
+        // Between the frame thread (Frame()) and the window's thread (setting
+        // the sound up)
+        CRITICAL_SECTION m_Lock;
+        void FrameLocked(bool pause);
 
         HWND m_hWnd;
         int m_BitsPerSample;

@@ -43,6 +43,7 @@
 #include "interface1.h"
 #include "debug.h"
 #include "symbolstore.h"
+#include "memoryWindow.h"
 #include "SymBrowse.h"
 #include "Chroma\Chroma.h"
 #include "Spectra\Spectra.h"
@@ -51,14 +52,15 @@
 #include "BasicLister\IBasicLister.h"
 #include "zx81\zx81BasicLister.h"
 #include "zx81\zx80BasicLister.h"
+#include "Lambda\lambdaBasicLister.h"
 #include "spectrum\spec48BasicLister.h"
 #include "spectrum\spec128BasicLister.h"
+#include "spectrum\timexBasicLister.h"
 #include "zx97config.h"
 #include "SoundForm.h"
 #include "Language.h"
 
 #include <set>
-extern std::set<int> dirtyBird;
 
 extern "C" BYTE ZX1541Mem[];
 
@@ -69,6 +71,7 @@ extern void InitPatches(int machineType);
 extern bool LoadRomCartridgeFile(char *filename);
 extern int RomCartridgeCapacity;
 extern int LoadDock(char *Filename);
+extern int LoadExROM(char *Filename);
 
 static AnsiString programmableJoystickLeft;
 static AnsiString programmableJoystickRight;
@@ -87,6 +90,7 @@ THW *HW;
 //---------------------------------------------------------------------------
 void HWSetMachine(int machine, int speccy)
 {
+        Form1->StopFrames();
         switch(machine)
         {
         case MACHINEZX80:   HW->ZX80BtnClick(NULL);   break;
@@ -139,9 +143,6 @@ __fastcall THW::THW(TComponent* Owner)
         ZX81BtnClick(NULL);
 
         SaveToInternalSettings(); // save in case there is no INI file
-        TIniFile* ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 
         SetUpRomCartridges();
 
@@ -214,19 +215,19 @@ void THW::SetUpRomCartridges()
 void zx81_writebyteProxy(int address, int data)
 {
         zx81_writebyte(address, data);
-        dirtyBird.insert(address);
+        MemoryWindow->WriteToAddress(address);
 }
 
 void spec48_writebyteProxy(int address, int data)
 {
         spec48_writebyte(address, data);
-        dirtyBird.insert(address);
+        MemoryWindow->WriteToAddress(address);
 }
 
 void ace_writebyteProxy(int address, int data)
 {
         ace_writebyte(address, data);
-        dirtyBird.insert(address);
+        MemoryWindow->WriteToAddress(address);
 }
 
 void __fastcall THW::OKClick(TObject *Sender)
@@ -244,6 +245,8 @@ void __fastcall THW::ApplyClick(TObject *Sender)
 
 void THW::UpdateHardwareSettings(bool disableReset)
 {
+        Form1->StopFrames();
+        if (machine.exit) machine.exit();
         bool machineChanged = (NewMachine != emulator.machine);
         emulator.machine = (CFGBYTE)NewMachine;
         spectrum.model = NewSpec;
@@ -257,8 +260,8 @@ void THW::UpdateHardwareSettings(bool disableReset)
         ConfigureCharacterBitmapFile(romBase);
 
         ConfigureMachineSettings();
-        ConfigureRamTop();
         ConfigureDefaultRamSettings();
+        ConfigureRamTop();
         DetermineRamSizeLabel(NewMachineName);
         ConfigureRom();
         ConfigureColour();
@@ -302,23 +305,19 @@ void THW::UpdateHardwareSettings(bool disableReset)
         Form1->ConnectSpectrum128Keypad->Hint = StringReplace(Form1->ConnectSpectrum128Keypad->Hint, "#", GetKeypadMultiplyKey(), TReplaceFlags() << rfReplaceAll);
         Kb->UpdateCursors();
 
-        if (disableReset)
-        {
-                ResetRequired = false;
-        }
-        else if (ResetRequired)
+        machine.drivebusy = -1;
+
+        if (!disableReset && ResetRequired)
         {
                 machine.initialise();
-                ResetRequired = false;
         }
+        ResetRequired = false;
 
         Keyboard->KbChange();
 
         InitialiseSound(machineChanged);
 
         Form1->EnableAnnotationOptions();
-
-        machine.drivebusy = -1;
 
         InitPatches(NewMachine);
 
@@ -332,6 +331,8 @@ void THW::UpdateHardwareSettings(bool disableReset)
         ZX97Dialog->UpdateMachine(Hwform.ZX97Form);
 
         UpdateApplyButton();
+
+        Form1->RunFrames();
 }
                              
 void THW::LoadFromInternalSettings()
@@ -931,7 +932,14 @@ void THW::ConfigureBasicLister()
                 BasicLister->SetBasicLister(new zx81BasicLister(zx81.zxpand));
                 Form1->BasicListerOption->Enabled = true;
         }
-        else if (!strcmp(machine.CurRom, "spectrum48.rom") ||
+        else if (!strcmp(machine.CurRom, "lambda8300.rom") ||
+                 !strcmp(machine.CurRom, "lambda8300colour.rom"))
+        {
+                BasicLister->SetBasicLister(new lambdaBasicLister(!strcmp(machine.CurRom, "lambda8300colour.rom")));
+                Form1->BasicListerOption->Enabled = true;
+        }
+        else if (!strcmp(machine.CurRom, "tc2048.rom") ||
+                 !strcmp(machine.CurRom, "spectrum48.rom") ||
                  !strcmp(machine.CurRom, "spectrum48.spanish.rom"))
         {
                 BasicLister->SetBasicLister(new spec48BasicLister());
@@ -950,7 +958,12 @@ void THW::ConfigureBasicLister()
                 BasicLister->SetBasicLister(new spec128BasicLister());
                 Form1->BasicListerOption->Enabled = true;
         }
-        
+        else if (!strcmp(machine.CurRom, "ts2068.rom"))
+        {
+                BasicLister->SetBasicLister(new timexBasicLister());
+                Form1->BasicListerOption->Enabled = true;
+        }
+
         if (!BasicLister->ListerAvailable() && BasicLister->Visible)
         {
                 BasicLister->Close();
@@ -974,6 +987,10 @@ void THW::ConfigureColour()
                 machine.colour = (CFGBYTE)ColourBox->ItemIndex;
                 break;
         }
+
+        zx81.lambdaColourConnected = (machine.colour == COLOURLAMBDA);
+        Form1->ConnectLambdaColour->Checked = zx81.lambdaColourConnected;
+        Form1->ConnectLambdaColour->Enabled = zx81.lambdaColourConnected;
 
         Artifacts->SelectRGBOutput(machine.colour == COLOURSPECTRA);
         Artifacts->ForceVibrantColours(machine.colour == COLOURCHROMA);
@@ -1118,28 +1135,36 @@ void THW::ConfigureRomCartridge()
                         romcartridge.zxc1Configuration = (ZXC1TYPE)ZXC1ConfigurationBox->ItemIndex;
                 }
 
-                int loadSuccessful;
+                LoadRomCartridge(romCartridgeFilePath);
+        }
+}
 
-                if (emulator.machine == MACHINESPECTRUM && (spectrum.model == SPECCYTS2068 || spectrum.model == SPECCYTC2068))
-                {
-                        loadSuccessful = LoadDock(romCartridgeFilePath.c_str());
-                }
+void THW::LoadRomCartridge(AnsiString filePath)
+{
+        int loadSuccessful;
+
+        if (emulator.machine == MACHINESPECTRUM && (spectrum.model == SPECCYTS2068 || spectrum.model == SPECCYTC2068))
+        {
+                if (ExtractFileExt(filePath).LowerCase()!=".dck")
+                        loadSuccessful = LoadExROM(filePath.c_str());
                 else
-                {
-                        LoadDock((char *)"");
-                        loadSuccessful = LoadRomCartridgeFile(romCartridgeFilePath.c_str());
-                }
+                        loadSuccessful = LoadDock(filePath.c_str());
+        }
+        else
+        {
+                LoadDock((char *)"");
+                loadSuccessful = LoadRomCartridgeFile(filePath.c_str());
+        }
 
-                strcpy(emulator.romcartridgefilepath, romCartridgeFilePath.c_str());
+        strcpy(emulator.romcartridgefilepath, filePath.c_str());
 
-                if (!loadSuccessful)
-                {
-                        AnsiString msg;
-                        msg = TrF("Failed to load cartridge file:\n\n{0}", romCartridgeFilePath);
-                        Application->MessageBox(msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
+        if (!loadSuccessful)
+        {
+                AnsiString msg;
+                msg = TrF("Failed to load cartridge file:\n\n{0}", filePath);
+                Application->MessageBox(msg.c_str(), Tr("Error").c_str(), MB_OK | MB_ICONERROR);
 
-                        LoadDock((char *)"");
-                }
+                LoadDock((char *)"");
         }
 }
 
@@ -1721,6 +1746,8 @@ void THW::ConfigureMachineSettings()
         {
         case MACHINEACE:
                 machine.initialise = ace_initialise;
+                machine.nmiInterrupt = NULL;
+                machine.interruptAckCb = ace_interruptack;
                 machine.do_scanline = ace_do_scanline;
                 machine.writebyte = ace_writebyteProxy;
                 machine.setbyte = ace_writebyte;
@@ -1738,6 +1765,8 @@ void THW::ConfigureMachineSettings()
 
         case MACHINESPECTRUM:
                 machine.initialise = spec48_initialise;
+                machine.nmiInterrupt = spec48_nmi;
+                machine.interruptAckCb = spec48_interruptack;
                 machine.do_scanline = spec48_do_scanline;
                 machine.writebyte = spec48_writebyteProxy;
                 machine.setbyte = spec48_setbyte;
@@ -1783,7 +1812,7 @@ void THW::ConfigureMachineSettings()
                 {
                         machine.clockspeed = 3546900;
                         machine.tperscanline = 228;
-                        spectrum.interruptPosition = 14336-228+32;
+                        spectrum.interruptPosition = 14336+22;
                         machine.scanlines = 311;
                         machine.fps = 50;
                         machine.tperframe = machine.tperscanline * machine.scanlines;
@@ -1791,6 +1820,8 @@ void THW::ConfigureMachineSettings()
                 break;
         default:
                 machine.initialise = zx81_initialise;
+                machine.nmiInterrupt = NULL;
+                machine.interruptAckCb = zx81_interruptack;
                 machine.do_scanline = (emulator.machine == MACHINEZX80) ? zx80_do_scanline : zx81_do_scanline;
                 machine.writebyte = zx81_writebyteProxy;
                 machine.setbyte = zx81_setbyte;
@@ -1804,7 +1835,7 @@ void THW::ConfigureMachineSettings()
                 machine.contendio = zx81_contend;
                 machine.fps = machine.NTSC ? 60 : 50; // may be overwritten later
                 machine.reset = zx81_reset;
-                machine.exit = NULL;
+                machine.exit = zx81_exit;
                 break;
         }
 }
@@ -2061,6 +2092,7 @@ void THW::SetupForZX81(void)
         Form1->ResetQuicksilvaHiRes->Visible = true;
         Form1->QSChrEnable->Visible = true;
         Form1->ChromaColourEnable->Visible = true;
+        Form1->ConnectLambdaColour->Visible = true;
         Form1->SwitchOnMemocalc->Visible = true;
 //        Form1->SwitchOnMemotext->Visible = true;
         Form1->SwitchOnZ80Assembler->Visible = true;
@@ -2306,6 +2338,7 @@ void THW::SetupForSpectrum(void)
         Form1->ResetQuicksilvaHiRes->Visible = false;
         Form1->QSChrEnable->Visible = false;
         Form1->ChromaColourEnable->Visible = false;
+        Form1->ConnectLambdaColour->Visible = false;
         Form1->SwitchOnMemocalc->Visible = false;
 //        Form1->SwitchOnMemotext->Visible = false;
         Form1->SwitchOnZ80Assembler->Visible = false;
@@ -2461,15 +2494,16 @@ void THW::SetupForSpectrum(void)
 
         ColourLabel->Caption = Tr("Colour:");
 
+        ColourBox->Items->Strings[0] = "Sinclair";
+        ColourBox->ItemIndex = 0;
+        ColourBox->Enabled = true;
+        ColourLabel->Enabled = true;
+        
         bool spectraAlreadyAvailable = (ColourBox->Items->Strings[1] == "Spectra");
         if (!spectraAlreadyAvailable)
         {
                 while(ColourBox->Items->Count>1) ColourBox->Items->Delete(ColourBox->Items->Count-1);
-                ColourBox->Items->Strings[0] = "Sinclair";
                 ColourBox->Items->Add("Spectra");
-                ColourBox->ItemIndex = 0;
-                ColourBox->Enabled = true;
-                ColourLabel->Enabled = true;
         }
 
         ProtectROM->Enabled = true;
@@ -3428,6 +3462,7 @@ void __fastcall THW::AceBtnClick(TObject *Sender)
         Form1->ResetQuicksilvaHiRes->Visible = false;
         Form1->QSChrEnable->Visible = false;
         Form1->ChromaColourEnable->Visible = false;
+        Form1->ConnectLambdaColour->Visible = false;
         Form1->SwitchOnMemocalc->Visible = false;
 //        Form1->SwitchOnMemotext->Visible = false;
         Form1->SwitchOnZ80Assembler->Visible = false;
@@ -4601,20 +4636,6 @@ bool THW::NewKey(TEdit* textBox, char key)
 void THW::SetCharacter(TEdit* textBox, KeyInfo& keyInfo)
 {
         char c = *(textBox->Text.c_str());
-
-        if (keyInfo.Character == '^')
-        {
-                c = VK_SHIFT;
-        }
-        else if (keyInfo.Character == '.')
-        {
-                c = VK_CONTROL;
-        }
-        else if (keyInfo.Character == '#')
-        {
-                c = VK_RETURN;
-        }
-
         keyInfo.Character = c;
         DetermineKeyMatrixPosition(NewMachine, keyInfo);
 }

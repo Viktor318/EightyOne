@@ -35,7 +35,6 @@ int lastMemoryReadAddrLo, lastMemoryWriteAddrLo;
 int lastMemoryReadValueLo, lastMemoryWriteValueLo;
 int lastMemoryReadAddrHi, lastMemoryWriteAddrHi;
 int lastMemoryReadValueHi, lastMemoryWriteValueHi;
-bool directMemoryAccess;
 
 const char* iniFolder                     = "EightyOne\\";
 const char* temporaryFolder               = "EightyOne\\";
@@ -231,8 +230,8 @@ void load_config(void)
         spectrum.kbissue=SPECKBISS3;
         machine.driveatype=DRIVE3INCHSS;
         machine.drivebtype=DRIVE3INCHSS;
-        machine.driveaimg[0]='\0';
-        machine.drivebimg[0]='\0';
+        for (int i=0; i<FLOPPYDRIVES; i++)
+                strcpy(machine.driveimg[i],"");
         machine.drivebusy=-1;
         machine.HDType=HDNONE;
         machine.divIDEJumperEClosed=0;

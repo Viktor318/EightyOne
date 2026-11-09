@@ -19,13 +19,18 @@
 // What CSound needs of a sound output (DirectSound, WASAPI).
 //
 // The output's audio thread is also the emulator's clock: for each frame of
-// sound it needs, it asks the main window (WM_USER) to run one frame, which
-// hands its sound back through Frame().
+// sound it needs, it sets the frame event, on which the emulator's frame
+// thread runs one frame (TForm1::HandleRunFrame), handing its sound back
+// through Frame(); the audio thread waits for it (not long: the frame
+// thread is stopped while the hardware is being changed).
 
 #ifndef _SOUNDOUTPUT_H
 #define _SOUNDOUTPUT_H
 
 #include <windows.h>
+
+// How long the audio thread waits for a frame it asked for
+#define SOUND_FRAME_WAIT_MS 100
 
 class CSoundOutput
 {
@@ -39,9 +44,11 @@ public:
         virtual int End() = 0;
         virtual void Frame(unsigned char *data, unsigned int len) = 0;
 
-        // True while End() is waiting for the audio thread to finish: a
-        // frame the thread asked for just before must not be run then
+        // True while End() is waiting for the audio thread to finish
         virtual bool Stopping() = 0;
+
+        // The event that makes the emulator's frame thread run a frame
+        virtual void SetFrameEvent(HANDLE event) = 0;
 
         virtual int SampleRate() = 0;
 

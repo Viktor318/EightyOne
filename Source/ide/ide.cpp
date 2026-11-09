@@ -716,8 +716,7 @@ int ATA_LoadHDF(int drive, char *FileName)
         }
 
         len=strlen(FileName);
-        if ( len>=4 && ((!strcmp(FileName+len-4,".vhd"))
-                || (!strcmp(FileName+len-4,".VHD"))) )
+        if ( len>=4 && !stricmp(FileName+len-4,".vhd") )
         {
                 char ModelName[]="iEhgtynO eiVtrauPl C                    ";
                 f=fopen(FileName,"rb+");

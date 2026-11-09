@@ -53,15 +53,16 @@ form	BasicLister_.dfm zxprinter.dfm	Save	Mentés
 form	BasicLister_.dfm	Line Ends	Sorvégek
 form	BasicLister_.dfm	Info	Infó
 form	BasicListingFormatInfo_.dfm	Saving a BASIC Listing as Text	BASIC lista mentése szövegként
-form	BasicListingFormatInfo_.dfm	ZX80 and ZX81 inverse characters and ZX80, ZX81 and Spectrum block graphic symbols are encoded in accordance with the scheme. Non-displayable character codes are output as \\nn where nn is the character code expressed	A ZX80 és ZX81 inverz karaktereit, valamint a ZX80, ZX81 és Spectrum blokkgrafikus jeleit a séma szerint kódolja. A nem megjeleníthető karakterkódok \\nn alakban kerülnek ki, ahol nn a karakterkód
+form	BasicListingFormatInfo_.dfm	Inverse characters and block graphic symbols are encoded in accordance with the scheme. Non-displayable character codes are output as \\nn where nn is the character code expressed as a 2 digit hexadecimal number. On the	Az inverz karaktereket és a blokkgrafikus jeleket a séma szerint kódolja. A nem megjeleníthető karakterkódok \\nn alakban kerülnek ki, ahol nn a karakterkód kétjegyű hexadecimális számként. A
 form	BasicListingFormatInfo_.dfm	The BASIC listing format is based upon that used by the ZXText2P utility, with extensions to handle a wider range of scenarios.	A BASIC lista formátuma a ZXText2P segédprogramén alapul, több esetet kezelő bővítésekkel.
-form	BasicListingFormatInfo_.dfm	as a 2 digit hexadecimal number. On the Spectrum UDGs are encoded as \\_n where n is the UDG letter, and a standard \\ character is encoded as \\\\.	kétjegyű hexadecimális számként. A Spectrumon az UDG-k \\_n alakúak, ahol n az UDG betűje, a \\ karakter pedig \\\\ lesz.
+form	BasicListingFormatInfo_.dfm	Spectrum, UDGs are encoded as \\_n where n is the UDG letter, and a standard \\ character is encoded as \\\\.	Spectrumon az UDG-k \\_n alakúak, ahol n az UDG betűje, a \\ karakter pedig \\\\ lesz.
 form	BasicListingFormatInfo_.dfm	Space suppression between consecutive keywords is replicated in the text output, and additional spaces within a line are retained if present.	Az egymást követő kulcsszavak közti szóközök elhagyását a szöveg is követi, a soron belüli további szóközök megmaradnak.
 form	BasicListingFormatInfo_.dfm	The content of a REM statement is by default output as text if all characters are displayable, and as \\nn character codes if any non-displayable characters exist (on the assumption that the REM holds machine code). A configuration	A REM utasítás tartalma alapból szövegként kerül ki, ha minden karaktere megjeleníthető, különben \\nn karakterkódokként (feltételezve, hogy a REM gépi kódot tartalmaz). Egy beállítással
 form	BasicListingFormatInfo_.dfm	option allows the contents to always be output in \\nn character code format irrespective of whether all characters are displayable.	a tartalom mindig \\nn karakterkódokként kerülhet ki, attól függetlenül, hogy minden karakter megjeleníthető-e.
 form	BasicListingFormatInfo_.dfm	The pound symbol is by default output as £, but this is not part of the ASCII character set (it has code $A3). A configuration option allows it to be output in \\nn character code format instead. 	A fontjel alapból jelként kerül ki, de ez nem része az ASCII karakterkészletnek (kódja $A3). Egy beállítással helyette \\nn karakterkódként is kiírható. 
 form	BasicListingFormatInfo_.dfm	A configuration option allows variable names to be output in lowercase to ensure there is no ambiguity with BASIC keywords.	Egy beállítással a változónevek kisbetűvel írhatók ki, hogy ne legyenek összetéveszthetők a BASIC kulcsszavakkal.
-form	BasicListingFormatInfo_.dfm	BASIC listing files are saved with extension B80 for the ZX80, B81 for the ZX81 and B82 for the Spectrum.	A BASIC listafájlok kiterjesztése ZX80-nál B80, ZX81-nél B81, Spectrumnál B82.
+form	BasicListingFormatInfo_.dfm	BASIC listing files are saved with extension B80 for the ZX80, B81 for the ZX81, A83 for the Lambda 8300, and B82 for the Spectrum.	A BASIC listafájlok kiterjesztése ZX80-nál B80, ZX81-nél B81, Lambda 8300-nál A83, Spectrumnál B82.
+form	BasicListingFormatInfo_.dfm	The Lambda 8300 special graphics characters are mapped to the ZX81 characters £, ?, and :.	A Lambda 8300 különleges grafikus jelei a ZX81 fontjel, ? és : karakterei lesznek.
 form	BasicListingFormatInfo_.dfm	Details of the ZXText2P encoding format can be found here:	A ZXText2P kódolási formátum leírása itt található:
 form	BasicListingFormatInfo_.dfm	On the Spectrum the copyright symbol is by default output as ©, but this is not part of the ASCII character set (it has code $A9). A configuration option allows it to be output in \\nn character code format instead.	A Spectrumon a szerzői jog jele alapból © alakban kerül ki, de ez nem része az ASCII karakterkészletnek (kódja $A9). Egy beállítással helyette \\nn karakterkódként is kiírható.
 form	BasicLoaderOptions_.dfm	Load BASIC Listing Options	BASIC lista betöltésének beállításai
@@ -389,6 +390,7 @@ form	main_.dfm	Reset Speech Output	Beszédkimenet alaphelyzetbe
 form	main_.dfm	Enable Quicksilva Character Board	Quicksilva karakterkártya bekapcsolása
 form	main_.dfm	Enable Chroma Colour	Chroma szín bekapcsolása
 form	main_.dfm	Enable Spectra Colour	Spectra szín bekapcsolása
+form	main_.dfm	Connect Lambda Colour to TV	Lambda szín csatlakoztatása a tévéhez
 form	main_.dfm	Switch On Memotech Memocalc	Memotech Memocalc bekapcsolása
 form	main_.dfm	Switch On Memotech Memotext	Memotech Memotext bekapcsolása
 form	main_.dfm	Switch On Memotech Z80 Assembler	Memotech Z80 Assembler bekapcsolása
@@ -452,6 +454,9 @@ form	main_.dfm	Windows Bitmap (.bmp)	Windows bitkép (.bmp)
 code	main_.cpp	PNG Image (.png)	PNG-kép (.png)
 form	main_.dfm	Spectrum Screen (.scr)	Spectrum képernyő (.scr)
 form	main_.dfm	RZX Recording (.rzx)	RZX felvétel (.rzx)
+code	main_.cpp	(Error at {0})	(hiba itt: {0})
+code	spec48.cpp	Only Z80 embedded snapshots are supported.	Csak a beágyazott Z80 pillanatképek támogatottak.
+code	spec48.cpp	RZX Playback Error	RZX lejátszási hiba
 form	memoryWindow.dfm	View Hex Bytes and Characters	Hexa bájtok és karakterek
 form	memoryWindow.dfm	View Hex Bytes	Hexa bájtok
 form	memoryWindow.dfm	View Hex Words	Hexa szavak
@@ -754,6 +759,7 @@ code	Plus3Drives.cpp	Microdrive Cartridge	Microdrive-kazetta
 code	Plus3Drives.cpp	DSK Disk Images	DSK lemezképek
 code	Plus3Drives.cpp	Compressed Disk Images	Tömörített lemezképek
 code	Plus3Drives.cpp	All Disk Images	Minden lemezkép
+code	Plus3Drives.cpp	D64 Disk Images	D64 lemezképek
 code	Plus3Drives.cpp	Plus D Disk Images	Plus D lemezképek
 code	Plus3Drives.cpp	DISCiPLE Disk Images	DISCiPLE lemezképek
 code	Plus3Drives.cpp	TR-DOS Disk Images	TR-DOS lemezképek

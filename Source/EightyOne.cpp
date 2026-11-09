@@ -142,6 +142,10 @@ USEUNIT("Joystick\Joystick.cpp");
 USEUNIT("sound\midi.cpp");
 USEFORM("Keypad_.cpp", Keypad128);
 USEUNIT("Keypad\keypad.cpp");
+USEUNIT("Lambda\lambdaBasicLoader.cpp");
+USEUNIT("Lambda\lambdaBasicLister.cpp");
+USEUNIT("ThreadPool.cpp");
+USEUNIT("Spectrum\timexBasicLister.cpp");
 //---------------------------------------------------------------------------
 #include "SplashScreen.h"
 #include "main_.h"
@@ -228,7 +232,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdline, int)
                 Form1->Caption = "EightyOne";
                 Form1->Show();
                 Form1->Timer2->Enabled=true;
-                Form1->RunFrameEnable=1;
                 Form1->SetFocus();
                 Form1->LoadCommandLineFiles();
 
@@ -245,6 +248,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdline, int)
                  Application->ShowException(&exception);
         }
 
+        // (CommandLine points into CmdLineRaw: both are freed only here)
+        free(CommandLine);
+        free(CmdLineRaw);
         return 0;
 }
 //---------------------------------------------------------------------------

@@ -36,8 +36,6 @@ TParallelPort *ParallelPort;
 __fastcall TParallelPort::TParallelPort(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
         ComPortList->Items->Add(Tr("Nothing"));
         ComPortList->Items->Add(Tr("FILE..."));
         ComPortList->Items->Add("TCP/IP...");
@@ -50,10 +48,6 @@ __fastcall TParallelPort::TParallelPort(TComponent* Owner)
         Parity->ItemIndex=0;
 
         ComPortListChange(NULL);
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 }
 //---------------------------------------------------------------------------
 void __fastcall TParallelPort::OKClick(TObject *Sender)

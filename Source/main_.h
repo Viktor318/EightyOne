@@ -33,10 +33,12 @@
 #include <ImgList.hpp>
 #include <IniFiles.hpp>
 #include "ThemeMgr.hpp"
+#include "ThreadPool.h"
 
 
 #define RENDERGDI 0
 #define RENDERDDRAW 1
+#define THREADPOOLSIZE 4
 
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
@@ -193,6 +195,7 @@ __published:	// IDE-managed Components
 //        TMenuItem *SwitchOnMemotext;
         TMenuItem *N17;
         TMenuItem *SwitchOnZ80Assembler;
+        TMenuItem *ConnectLambdaColour;
         void __fastcall FormCreate(TObject *Sender);
         void __fastcall FormResize(TObject *Sender);
         void __fastcall FormKeyDown(TObject *Sender, WORD &Key,
@@ -316,6 +319,8 @@ __published:	// IDE-managed Components
 //        void __fastcall SwitchOnMemotextClick(TObject *Sender);
         void __fastcall SwitchOnMemocalcClick(TObject *Sender);
         void __fastcall SwitchOnZ80AssemblerClick(TObject *Sender);
+        void __fastcall ConnectLambdaColourClick(TObject *Sender);
+        void __fastcall FormPaint(TObject *Sender);
 private:	// User declarations
         int fps;
         bool startup;
@@ -329,6 +334,9 @@ private:	// User declarations
         void AddSpectrumExampleFolders(TMenuItem* CategorySubMenu, AnsiString path);
         bool DrivesChanged;
         bool LShift, RShift;
+        bool mDisallowFrames;
+        int RunFrameEnable,FrameIsRunning;
+        HANDLE mWindowHandle;
         Graphics::TBitmap *LEDGreenOn;
         Graphics::TBitmap *LEDGreenOff;
         Graphics::TBitmap *LEDRedOn;
@@ -340,6 +348,9 @@ private:	// User declarations
         void __fastcall SelectJoystick1Click(TObject *Sender);
         void __fastcall SelectJoystick2Click(TObject *Sender);
         void UpdateJoystickMenuOptions();
+        void SwitchFullScreen();
+        static int HandleRunFrameThreadProc(void *param);
+        void HandleRunFrame(void);
 
 protected:
         virtual void __fastcall DoCreate(void);
@@ -349,6 +360,13 @@ public:		// User declarations
         virtual void __fastcall WndProc(TMessage &Msg);
         void SetStartUpSize(void);
         void LoadCommandLineFiles(void);
+        virtual void __fastcall CreateWnd(void);
+        void __fastcall WMEraseBkgnd(TWMEraseBkgnd &Message);
+
+ BEGIN_MESSAGE_MAP
+   MESSAGE_HANDLER(WM_ERASEBKGND, TWMEraseBkgnd, WMEraseBkgnd)
+ END_MESSAGE_MAP(TForm)
+
 
         int BaseWidth;
         int BaseHeight;
@@ -357,6 +375,7 @@ public:		// User declarations
         int SaveX, SaveY, SaveW, SaveH, SaveWinW, SaveWinH;
         int SaveScrW, SaveScrH, SaveScrBpp;
         LONG_PTR SaveStyle, SaveExStyle;
+        TThreadPool ThreadPool;
         void __fastcall AppMessage(TMsg &Msg, bool &Handled);
         void __fastcall LanguageClick(TObject *Sender);
         // View > Zoom: 100%, 200%, 300%, 400%; the window can be resized
@@ -374,12 +393,17 @@ public:		// User declarations
                                       int &NewHeight, bool &Resize);
         void BuildLanguageMenu();
         TMenuItem *LanguageItems[3];
+        void RunFrames(void);
+        void RunFramesAllow(void);
+        void StopFrames(void);
+        void StopFramesDisallow(void);
+        void WaitFrameThread(bool running);
+        void LoadSnapshotFile(AnsiString Filename, AnsiString Ext);
+        void LoadAtStartup(void);
         void LoadSettings(TIniFile *ini);
         void SaveSettings(TIniFile *ini);
         void DoAutoLoad(void);
         void GatherWindowsIfRequired();
-        void __fastcall RunFrame();
-        int RunFrameEnable;
         void EnableAnnotationOptions();
         void BuildMenuJoystickSelection();
         void BuildMemotechInterfaceSelection();

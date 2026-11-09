@@ -644,7 +644,7 @@ void TIF1::MDVSetFileName(int Drive, char *FileName)
                 if (Drives[Drive].data) free(Drives[Drive].data);
                 Drives[Drive].length=0;
                 Drives[Drive].position=0;
-                Drives[Drive].data=NULL; 
+                Drives[Drive].data=NULL;
         }
         else    MDVLoadFile(Drive, FileName);
 }
@@ -653,7 +653,6 @@ void TIF1::MDVSetFileName(int Drive, char *FileName)
 __fastcall TIF1::TIF1(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
         int i;
 
         ComPortList->Items->Add(Tr("Nothing"));
@@ -671,11 +670,7 @@ __fastcall TIF1::TIF1(TComponent* Owner)
         
         ComPortListChange(NULL);
 
-        for(i=0;i<8;i++) Drives[i].FileName[0]='\0';
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
+        for(i=0;i<MDVDRIVECOUNT;i++) Drives[i].FileName[0]='\0';
 }
 //---------------------------------------------------------------------------
 
@@ -878,7 +873,7 @@ void TIF1::LoadSettings(TIniFile *ini)
 
 void __fastcall TIF1::FormDestroy(TObject *Sender)
 {
-        for (int i = 0; i < MDVNoDrives; i++)
+        for (int i = 0; i < MDVDRIVECOUNT; i++)
         {
                 MDVSetFileName(i, NULL);
         }

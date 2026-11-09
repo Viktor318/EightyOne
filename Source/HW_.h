@@ -413,6 +413,7 @@ public:		// User declarations
         void LoadSettings(TIniFile* ini);
         void SetZXpandState(bool checked, bool enabled);
         void UpdateSinclairJoystickKeys();
+        void LoadRomCartridge(AnsiString filePath);
         int SelectEntry(TComboBox* comboBox, AnsiString text);
 };
 //---------------------------------------------------------------------------

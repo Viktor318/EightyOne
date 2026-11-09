@@ -25,7 +25,7 @@
 // As with DirectSound, the audio thread is the emulator's clock: it keeps a
 // little sound (WASAPI_MARGIN_MS) waiting for the audio engine, running one
 // emulated frame for each frame of sound it writes. If the engine runs out
-// (the main window was held up), it plays silence by itself; old sound is
+// (the emulator was held up), it plays silence by itself; old sound is
 // never repeated.
 //
 // If the device stops working (unplugged, or the audio service stopped), or
@@ -166,7 +166,8 @@ CWasapiSnd::CWasapiSnd(void)
         m_Stopping=false;
         m_OpenOK=false;
         m_DeviceOpen=false;
-        m_SendErrorShown=false;
+        m_FrameEvent=NULL;
+        m_FrameDone=CreateEvent(NULL, FALSE, FALSE, NULL);
 
         m_Enumerator=NULL;
         m_Client=NULL;
@@ -281,11 +282,9 @@ int CWasapiSnd::End()
 {
         if (m_ThreadHandle)
         {
-                // Ask the audio thread to stop. It may be waiting for the
-                // main window to run a frame (SendMessage), and this is
-                // usually called from the main window's thread, so let sent
-                // messages through while waiting. Stopping() makes the main
-                // window skip that frame.
+                // Ask the audio thread to stop (the stop event also ends its
+                // waiting for a frame), letting messages sent to this
+                // thread through while waiting
 
                 m_Stopping = true;
                 SetEvent(m_StopEvent);
@@ -578,24 +577,22 @@ bool CWasapiSnd::WriteDevice(const short *data, UINT32 frames)
 //---------------------------------------------------------------------------
 // The audio thread
 
-// Run one frame of the emulator. It puts its sound in the queue (Frame()).
+// Ask the emulator's frame thread to run one frame, and wait until it has
+// put its sound in the queue (Frame()). False if it did not come: the
+// emulator is not running (the hardware is being changed), or we stop.
 
-void CWasapiSnd::RunEmulatorFrame(void)
+bool CWasapiSnd::RunEmulatorFrame(void)
 {
-        if (IsWindow(m_hWnd))
-        {
-                SendMessage(m_hWnd, WM_USER, 0, 0);
-        }
-        else if (!m_SendErrorShown)
-        {
-                char buf[256];
+        HANDLE events[2];
 
-                m_SendErrorShown = true;
-                FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                        NULL, ERROR_INVALID_WINDOW_HANDLE, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                        buf, sizeof(buf), NULL);
-                MessageBox(NULL, buf, Tr("Message Sending Error").c_str(), 2);
-        }
+        if (!m_FrameEvent || !m_FrameDone) return false;
+
+        ResetEvent(m_FrameDone);
+        SetEvent(m_FrameEvent);
+
+        events[0] = m_FrameDone;
+        events[1] = m_StopEvent;
+        return WaitForMultipleObjects(2, events, FALSE, SOUND_FRAME_WAIT_MS) == WAIT_OBJECT_0;
 }
 
 // Keep a little sound waiting for the audio engine. False if the device
@@ -614,7 +611,7 @@ bool CWasapiSnd::FillDevice(void)
                 // Enough waiting (or enough frames in one go)
                 if (padding >= m_TargetFrames || count >= 8) return true;
 
-                RunEmulatorFrame();
+                bool ran = RunEmulatorFrame();
                 if (m_Stopping) return true;
 
                 n = TakeFromQueue(m_lpFrameBuf, m_QueueLen);
@@ -629,6 +626,9 @@ bool CWasapiSnd::FillDevice(void)
 
                 if (!WriteDevice(n ? (const short *)m_lpFrameBuf : NULL, frames)) return false;
                 count++;
+
+                // The emulator is not running: no more for now
+                if (!ran) return true;
         }
 }
 
@@ -654,7 +654,12 @@ void CWasapiSnd::RunByClock(void)
 
         while (m_ClockFrames < due)
         {
-                RunEmulatorFrame();
+                if (!RunEmulatorFrame())
+                {
+                        // The emulator is not running: no catching up
+                        m_ClockFrames = due;
+                        return;
+                }
                 if (m_Stopping) return;
 
                 TakeFromQueue(m_lpFrameBuf, m_QueueLen);
@@ -817,4 +822,6 @@ void CWasapiSnd::Frame(unsigned char *data, unsigned int len)
         m_QueueSize += len;
 
         LeaveCriticalSection(&m_QueueLock);
+
+        if (m_FrameDone) SetEvent(m_FrameDone);
 }

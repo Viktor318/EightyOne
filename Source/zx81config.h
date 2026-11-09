@@ -137,6 +137,8 @@
 #define FLOPPYZX1541    7
 #define FLOPPYLARKEN81  8
 
+#define FLOPPYDRIVES    2
+
 #define DRIVENONE       0
 #define DRIVE3INCHSS    1
 #define DRIVE3INCHDS    2
@@ -184,6 +186,8 @@ typedef struct
         CFGBYTE beeperExcludeHSyncs;
         CFGBYTE chromaMode;
         CFGBYTE chromaColourSwitchOn;
+        CFGBYTE lambdaColourEnabled;
+        CFGBYTE lambdaColourConnected;
         CFGBYTE FloatingPointHardwareFix;
         CFGBYTE z80Assembler;
         CFGBYTE memocalc;
@@ -241,6 +245,8 @@ typedef struct
 typedef struct
 {
         void (*initialise)();
+        void (*nmiInterrupt)();
+        void (*interruptAckCb)();
         int (*do_scanline)(SCANLINE *line);
         void (*writebyte)(int Address, int Data);
         void (*setbyte)(int Address, int Data);
@@ -260,8 +266,7 @@ typedef struct
         int floppytype;
         int driveatype;
         int drivebtype;
-        char driveaimg[256];
-        char drivebimg[256];
+        char driveimg[FLOPPYDRIVES][512];
         int drivebusy;
         int HDType;
         int divIDEJumperEClosed;
@@ -309,7 +314,7 @@ typedef struct
 
         CFGBYTE single_step;
         int frameskip;
-        int speedup;
+        float speedup;
         int romcrc;
         int stop;
         CFGBYTE UseRShift;
@@ -449,7 +454,6 @@ extern const char* speechRomsFolder;
 
 extern void load_config();
 
-#define readbyte_internal(Addr) (machine.opcode_fetch(Addr))
 #define readbyte(Addr) (machine.readbyte(Addr))
 #define readoperandbyte(Addr) (machine.readoperandbyte(Addr))
 #define getbyte(Addr) (machine.getbyte(Addr))

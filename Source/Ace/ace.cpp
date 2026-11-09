@@ -67,8 +67,13 @@ extern BYTE ZXKeyboard[8];
 int ACEMICState, ACETopBorder, ACELeftBorder;
 BYTE acecolour[1024], acelatch=4;
 
+static int loop;
+static int fts,sts, chars;
+static int Sy;
+
 static BYTE ReadInputPort(int Address, int *tstates);
 static BYTE idleDataBus = 0x20;
+static bool interruptAck=false;
 
 extern void ZXPrinterReset();
 extern void ZXPrinterWritePort(unsigned char Data);
@@ -116,9 +121,17 @@ void ace_initialise()
 
 void ace_reset()
 {
+        loop=machine.tperscanline;
+        fts=sts=chars=0;
+        Sy=0;
         z80_reset();
         InitialiseJoysticks();
         Form1->BuildMenuJoystickSelection();
+}
+
+void ace_interruptack(void)
+{
+        interruptAck = true;
 }
 
 void ace_writebyte(int Address, int Data)
@@ -159,7 +172,7 @@ void ace_writebyte(int Address, int Data)
                 return;
         }
 
-        if (machine.ace96k && z80.r7 && Address>=16384)
+        if (machine.ace96k && (z80_refreshAddr()&0x0080) && Address>=16384)
                 Address+=65536;
         memory[Address]=(BYTE)Data;
 }
@@ -178,7 +191,7 @@ BYTE ace_ReadByte(int Address)
 
         if (Address>=0x2800 && Address<=0x2fff) return(255);
 
-        if (machine.ace96k && z80.r7 && Address>=16384) Address+=65536;
+        if (machine.ace96k && (z80_refreshAddr()&0x0080) && Address>=16384) Address+=65536;
         data=memory[Address];
         noise = (noise<<8) | data;
         return data;
@@ -289,11 +302,14 @@ BYTE ace_readport(int Address, int *tstates)
 
 BYTE ReadInputPort(int Address, int *tstates)
 {
+        BYTE data=idleDataBus;
+
         if (!(Address&1))
         {
-                BYTE keyb, data=0xC0;
+                BYTE keyb;
                 int i;
 
+                data=0xC0;
                 if (GetEarState()) data |= 32;
 
                 keyb=(BYTE)(Address/256);
@@ -312,38 +328,36 @@ BYTE ReadInputPort(int Address, int *tstates)
                         if (!(Address & JoystickDown1.AddressMask))  data &= ReadJoystick1_Down();
                         if (!(Address & JoystickFire1.AddressMask))  data &= ReadJoystick1_Fire();
                 }
-
-                return data;
         }
 
         if ((machine.HDType==HDACECF) && ((Address&128) == 0))
-                return (BYTE)(ATA_ReadRegister((Address>>8)&0x07));
+                data = (BYTE)(ATA_ReadRegister((Address>>8)&0x07));
 
         if (machine.joystick1Connected && (Address & 0x0001) == 0x0001)
-                return (BYTE)~ReadJoystick1();
+                data = (BYTE)~ReadJoystick1();
 
         switch(Address&255)
         {
         case 0x73:
-                if (machine.ts2050) return(d8251readDATA());
+                if (machine.ts2050) data = d8251readDATA();
 
         case 0x77:
-                if (machine.ts2050) return(d8251readCTRL());
+                if (machine.ts2050) data = d8251readCTRL();
 
         case 0xdd:
-                if (machine.aytype==AY_TYPE_ACE_USER) return (BYTE)(Sound.AYRead(SelectAYReg));
+                if (machine.aytype==AY_TYPE_ACE_USER) data = (BYTE)(Sound.AYRead(SelectAYReg));
 
         case 0xfb:
-                if (machine.zxprinter) return(ZXPrinterReadPort(idleDataBus));
+                if (machine.zxprinter) data = ZXPrinterReadPort(idleDataBus);
 
         case 0xff:
-                if (machine.aytype==AY_TYPE_BOLDFIELD) return (BYTE)(Sound.AYRead(SelectAYReg));
+                if (machine.aytype==AY_TYPE_BOLDFIELD) data = (BYTE)(Sound.AYRead(SelectAYReg));
 
         default:
                 break;
         }
 
-        return(idleDataBus);
+        return(data);
 }
 
 int ace_contend(int Address, int tstates, int time)
@@ -355,11 +369,11 @@ int ace_do_scanline(SCANLINE *CurScanLine)
 {
         int ts,i;
         static int ink,paper;
-        static int Sy=0, loop=207;
         static int borrow=0;
-        static int fts=0, sts=0, chars=0, delay=0;
+        static int delay=0;
         static int shift_register;
         static int clean_exit=1;
+        static int IntDue=0, IntPending=0;
         int inv,bitmap,chr, attr;
         int MaxScanLen;
         int PrevBit=0, PrevGhost=0;
@@ -392,13 +406,20 @@ int ace_do_scanline(SCANLINE *CurScanLine)
 
                 if (z80.pc.w==0x1820) WavStartRec();
 
-                ts=z80_do_opcode();
-                if (!fts)
+                if (fts>0 && IntDue)
                 {
-                        int intlen=z80_interrupt(idleDataBus);
-                        ts+=intlen;
-                        if (intlen) WavStop();
+                        IntDue=0;
+                        IntPending=1664-fts;
                 }
+                z80_interrupt(!(IntPending>=0),0);
+
+                z80_databus(idleDataBus);
+                ts=z80_do_opcode();
+                if (interruptAck) WavStop();
+                interruptAck = false;
+
+                if (IntPending>=0)
+                        IntPending-=ts;
 
                 i=70;
                 while(FlashLoading && IsFlashLoadable() && i)
@@ -406,6 +427,7 @@ int ace_do_scanline(SCANLINE *CurScanLine)
                         ts=z80_do_opcode();
                         WavClockTick(ts,0);
                         i--;
+                        if (!WavPlaying()) break;
                 }
                 if (!WavPlaying()) FlashLoading=0;
 
@@ -477,14 +499,14 @@ int ace_do_scanline(SCANLINE *CurScanLine)
                 loop += machine.tperscanline;
 
                 Sy++;
-                if (Sy==311)
+                if (Sy>=machine.scanlines)
                 {
-                        fts=0;
+                        fts -= machine.tperframe;
+                        IntDue = 1;
                         CurScanLine->sync_len=414;
                         CurScanLine->sync_type = SYNCTYPEV;
+                        emulator.scanlinesPerFrame = Sy;
                         Sy=0;
-                        borrow=0;
-                        loop=machine.tperscanline;
                 }
 
                 clean_exit=1;

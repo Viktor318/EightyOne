@@ -25,6 +25,7 @@ extern BYTE memory[];
 extern BYTE acecolour[];
 extern void zx81_initialise();
 extern void zx81_reset();
+extern void zx81_interruptack(void);
 extern void zx81_writebyte(int Address, int Data);
 extern void zx81_setbyte(int Address, int Data);
 extern BYTE zx81_readbyte(int Address);
@@ -33,6 +34,7 @@ extern BYTE zx81_getbyte(int Address);
 extern BYTE zx81_opcode_fetch(int Address);
 extern void zx81_writeport(int Address, int Data, int *tstates);
 extern BYTE zx81_readport(int Address, int *tstates);
+extern void zx81_exit(void);
 extern int zx81_contend(int Address, int states, int time);
 extern int tstates, event_next_event;
 extern int framepos, frametstates;
@@ -45,5 +47,6 @@ extern BOOL IsAnnotatableROM();
 extern void CreateZXpand();
 extern BOOL memotechResetPressed;
 extern BOOL insertWaitsWhileSP0256Busy;
+extern void DisableLambda();
 
 #endif

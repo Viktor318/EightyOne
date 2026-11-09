@@ -29,6 +29,7 @@
 #include "snap.h"
 #include "zx81config.h"
 #include "WavCInterface.h"
+#include "Debug.h"
 #include "sound.h"
 #include "dev8255.h"
 #include "serialport.h"
@@ -37,6 +38,7 @@
 #include "tzxman.h"
 #include "interface1.h"
 #include "spec48.h"
+#include "Language.h"
 #include "floppy.h"
 #include "wd1770.h"
 #include "ide.h"
@@ -50,6 +52,7 @@
 #include "Digitalkdrv.h"
 #include "Joystick.h"
 #include "main_.h"
+#include "HW_.h"
 
 #define VBLANKCOLOUR    (0*16)     
 #define HSYNCCOLOUR     VBLANKCOLOUR
@@ -73,7 +76,6 @@ extern void SpectraRAMWrite(int Address, BYTE Data);
 extern void DetermineSpectraDisplayBank();
 extern BYTE SpectraRAMRead(int bankOffset);
 
-extern bool directMemoryAccess;
 extern int lastMemoryReadAddrLo, lastMemoryWriteAddrLo;
 extern int lastMemoryReadAddrHi, lastMemoryWriteAddrHi;
 extern int lastMemoryReadValueLo, lastMemoryWriteValueLo;
@@ -81,17 +83,12 @@ extern int lastMemoryReadValueHi, lastMemoryWriteValueHi;
 
 extern void add_blank(SCANLINE *line, int borrow, BYTE colour);
 
-extern void LogOutAccess(int address, BYTE data);
-extern void LogInAccess(int address, BYTE data);
-extern void ResetLastIOAccesses();
-extern void DebugUpdate(void);
 extern void add_blank(SCANLINE *line, int tstates, BYTE colour);
-extern void LoadDock(char *filename);
+extern int LoadDock(char *filename);
+extern int LoadExROM(char *Filename);
 
 extern long noise;
 extern int SelectAYReg;
-extern int emulation_stop;
-extern BYTE ZXKeyboard[8];
 
 static BYTE ReadPort(int Address, int *tstates);
 
@@ -139,6 +136,7 @@ int InteruptPosition;
 int SPECFlashLoading=0;
 int fts=0;
 int flash=0;
+static bool interruptAck=false;
 
 bool rom48;
 bool rom128;
@@ -146,11 +144,21 @@ bool romSp128;
 bool romPlus2;
 bool romPlus3;
 
+static int loop;
+static int sts, chars;
+static int Sy;
+static int DCCount;
+
+int RZXFramesTotal=0;
+int RZXFrameCount=0;
+int RZXErrorFrame=0;
+bool RZXModePlay() { return rzx.mode==RZX_PLAYBACK; }
+
 BOOL insertWaitsWhileSP0256Busy;
 
 extern AnsiString AdjustPathIfReplacementRom(char* curRom);
 
-extern unsigned short RZXCounter;
+int RZXCounter;
 extern RZX_INFO rzx;
 
 int TIMEXByte, TIMEXMode, TIMEXColour;
@@ -189,6 +197,10 @@ void spec48_reset(void)
         SPECLast7ffd=0;
         SPECLast1ffd=0;
         SPECLastfffd=0;
+        loop=machine.tperscanline;
+        fts=sts=chars=0;
+        Sy=0;
+        DCCount=0;
 
         if (spectrum.model==SPECCYTS2068 || spectrum.model==SPECCYTC2068) SPECBankEnable=0;
         else if (spectrum.model>=SPECCY128) SPECBankEnable=1;
@@ -213,9 +225,6 @@ void spec48_reset(void)
                 else ZXCFPort=192;
         }
 
-        MFActive=0;
-        MFLockout=0;
-
         PlusDPaged=PlusDMemSwap=0;
         PlusDCur= &PlusDDrives[0];
         PlusDCur->side=0;
@@ -224,18 +233,6 @@ void spec48_reset(void)
                 PlusDPaged=1;
         }
 
-        z80_reset();
-        d8255_reset();
-        d8251reset();
-        z80_reset();
-        floppy_init();
-        ATA_Reset();
-        if (machine.HDType==HDSIMPLE3E) ATA_SetMode(ATA_MODE_8BIT);
-        if (machine.HDType==HDDIVIDE) ATA_SetMode(ATA_MODE_16BIT);
-        if (machine.HDType==HDZXCF) ATA_SetMode(ATA_MODE_16BIT);
-        if (machine.HDType==HDSIMPLECF) ATA_SetMode(ATA_MODE_16BIT);
-        if (machine.HDType==HDSIMPLE16BIT) ATA_SetMode(ATA_MODE_16BIT_WRSWAP);
-        if (machine.HDType==HDSIMPLE8BIT) ATA_SetMode(ATA_MODE_8BIT);
         mouse.buttons=255;
 
         ResetRomCartridge();
@@ -268,7 +265,6 @@ void spec48_initialise()
         divIDEPage1WP=0;
         divIDEAllRamMode=0;
 
-        directMemoryAccess = false;
         ResetLastIOAccesses();
         InitialiseRomCartridge();
         InitialiseSpectra();
@@ -384,7 +380,7 @@ void spec48_initialise()
                 memcpy(MultifaceMem,memory,romlen);
         }
 
-        if (strlen(emulator.ROMDock)) LoadDock(emulator.ROMDock);
+        if (strlen(emulator.ROMDock)) HW->LoadRomCartridge(emulator.ROMDock);
 
         SPECTopBorder = (machine.NTSC) ? 32:56;
         SPECLeftBorder = 1+37*2;
@@ -408,6 +404,19 @@ void spec48_initialise()
                 pos += machine.tperscanline;
         }
 
+        z80_reset();
+        d8255_reset();
+        d8251reset();
+        z80_reset();
+        floppy_init();
+        ATA_Reset();
+        if (machine.HDType==HDSIMPLE3E) ATA_SetMode(ATA_MODE_8BIT);
+        if (machine.HDType==HDDIVIDE) ATA_SetMode(ATA_MODE_16BIT);
+        if (machine.HDType==HDZXCF) ATA_SetMode(ATA_MODE_16BIT);
+        if (machine.HDType==HDSIMPLECF) ATA_SetMode(ATA_MODE_16BIT);
+        if (machine.HDType==HDSIMPLE16BIT) ATA_SetMode(ATA_MODE_16BIT_WRSWAP);
+        if (machine.HDType==HDSIMPLE8BIT) ATA_SetMode(ATA_MODE_8BIT);
+        
         spec48_reset();
         P3DriveMachineHasInitialised();
 
@@ -461,38 +470,57 @@ void spec48_initialise()
         }
 }
 
+void spec48_interruptack(void)
+{
+        interruptAck = true;
+}
+
 void spec48_LoadRZX(char *FileName)
 {
-        rzx_playback(FileName);
-        RZXCounter=0;
+        Form1->StopFramesDisallow();
+        rzx_close();
+        emulation_stop=0;
+        RZXFramesTotal=RZXErrorFrame=0;
+        int playReturn=rzx_playback(FileName);
+        if (playReturn!=RZX_OK)
+        {
+                // (The frames start again when the recording is found)
+                Form1->RunFramesAllow();
+                spec48_reset();
+                if (playReturn==RZX_UNSUPPORTED)
+                        MessageBox(NULL, Tr("Only Z80 embedded snapshots are supported.").c_str(), Tr("RZX Playback Error").c_str(), MB_OK);
+        }
 }
 
 rzx_u32 RZXcallback(int Msg, void *data)
 {
-        int a;
-        //int b,c,d;
-
         switch(Msg)
         {
         case RZXMSG_CREATOR:
                 break;
         case RZXMSG_LOADSNAP:
-                spec_load_z80( ((RZX_SNAPINFO *) data)->filename);
+                {
+                char *filename=((RZX_SNAPINFO *) data)->filename;
+                String extension=ExtractFileExt(filename);
+
+                if (!CompareText(extension,".z80"))
+                        spec_load_z80( filename );
+                else
+                        return RZX_UNSUPPORTED;
+                        
+                RZXCounter=0;
+                }
                 break;
         case RZXMSG_IRBNOTIFY:
-                a=((RZX_IRBINFO *) data)->framecount;
-                //b=((RZX_IRBINFO *) data)->tstates;
-                //c=((RZX_IRBINFO *) data)->options;
-                //d=0;
-
-                fts=a;
-                RZXCounter=0;
+                RZXFramesTotal=((RZX_IRBINFO *) data)->framecount;
+                RZXFrameCount=0;
+                Form1->RunFramesAllow();
                 break;
         default:
-                break;
+                return RZX_INVALID;
         }
 
-        return(0);
+        return RZX_OK;
 }
 
 extern bool GetVersionNumber(int& versionNumberMajor, int& versionNumberMinor, int& versionNumberPart3, int& versionNumberPart4);
@@ -560,6 +588,7 @@ static void divIDEPage(void)
 
 void spec48_exit(void)
 {
+        if (RZXFramesTotal>0) rzx_close();
         floppy_shutdown();
 }
 
@@ -657,7 +686,7 @@ void SPECLoadCheck(void)
         return;
 }
 
-void spec48_WriteByte(int Address, int Data)
+void spec48_WriteByte(int Address, int Data, bool directMemoryAccess=false)
 {
         LiveMemoryWindow->Write((unsigned short)Address);
 
@@ -730,7 +759,7 @@ void spec48_WriteByte(int Address, int Data)
                 if ((romcartridge.type != ROMCARTRIDGENONE) && (romcartridge.type != ROMCARTRIDGETC2068) && (romcartridge.type != ROMCARTRIDGETS2068) && (RomCartridgeCapacity != 0))
                 {
                         BYTE data;
-                        if (ReadRomCartridge(Address, (BYTE*)&data))
+                        if (ReadRomCartridge(Address, (BYTE*)&data, directMemoryAccess))
                         {
                                 return;
                         }
@@ -759,9 +788,7 @@ void spec48_WriteByte(int Address, int Data)
 // Write to memory without accidentally invoking the ZXC ROM cartridge paging mechanism
 void spec48_setbyte(int Address, int Data)
 {
-        directMemoryAccess = true;
-        spec48_WriteByte(Address, Data);
-        directMemoryAccess = false;
+        spec48_WriteByte(Address, Data, true);
 }
 
 void spec48_writebyte(int Address, int Data)
@@ -776,7 +803,7 @@ void spec48_writebyte(int Address, int Data)
         spec48_WriteByte(Address, Data);
 }
 
-BYTE spec48_ReadByte(int Address)
+BYTE spec48_ReadByte(int Address, bool directMemoryAccess=false)
 {
         BYTE data;
 
@@ -866,7 +893,7 @@ BYTE spec48_ReadByte(int Address)
 
                 if ((romcartridge.type != ROMCARTRIDGENONE) && (romcartridge.type != ROMCARTRIDGETC2068) && (romcartridge.type != ROMCARTRIDGETS2068)  && (RomCartridgeCapacity != 0))
                 {
-                        if (ReadRomCartridge(Address, (BYTE*)&data))
+                        if (ReadRomCartridge(Address, (BYTE*)&data, directMemoryAccess))
                         {
                                 return data;
                         }
@@ -898,11 +925,7 @@ BYTE spec48_ReadByte(int Address)
 // Called by debugger routines
 BYTE spec48_getbyte(int Address)
 {
-        directMemoryAccess = true;
-        BYTE b = spec48_ReadByte(Address);
-        directMemoryAccess = false;
-
-        return b;
+        return spec48_ReadByte(Address, true);
 }
 
 // Called by emulated program
@@ -928,6 +951,7 @@ BYTE spec48_readoperandbyte(int Address)
 // Called by Z80 instruction opcode fetches
 BYTE spec48_opcode_fetch(int Address)
 {
+        RZXCounter--;
         return(spec48_ReadByte(Address));
 }
 
@@ -1218,23 +1242,23 @@ void spec48_writeport(int Address, int Data, int *tstates)
                 if (machine.zxprinter) ZXPrinterWritePort((unsigned char)Data);
                 break;
         case 0xfd:
-                switch(Address>>8)
+                switch ((Address>>8)&0xf0)
                 {
-                case 0x0f:
-                        if ((emulator.machine == MACHINESPECTRUM) && (spectrum.model >= SPECCYPLUS2A))
+                case 0x00:
+                        if ((emulator.machine == MACHINESPECTRUM) && (spectrum.model >= SPECCYPLUS2A) && ParallelPort->PortConnected())
                         {
                                 PrinterWriteData((unsigned char)Data);
                         }
                         break;
 
-                case 0x3f:
+                case 0x30:
                         if ((emulator.machine == MACHINESPECTRUM) && (spectrum.model >= SPECCYPLUS2A))
                         {
                                 floppy_write_datareg((BYTE)Data);
                         }
                         break;
 
-                case 0x7f:
+                case 0x70:
                         if (emulator.machine == MACHINESPECTRUM && spectrum.model >= SPECCY128)
                         {
                                 if (!SPECBankEnable) break;
@@ -1250,7 +1274,7 @@ void spec48_writeport(int Address, int Data, int *tstates)
                         }
                         break;
 
-                case 0x1f:
+                case 0x10:
                         if ((emulator.machine == MACHINESPECTRUM) && (spectrum.model >= SPECCYPLUS2A))
                         {
                                 machine.drivebusy = (Data&8) ? 1:0;
@@ -1280,7 +1304,7 @@ void spec48_writeport(int Address, int Data, int *tstates)
                                 }
                         }
                         break;
-                case 0xbf:
+                case 0xb0:
                         if (emulator.machine == MACHINESPECTRUM && machine.aytype == AY_TYPE_SINCLAIR &&
                             ((spectrum.model >= SPECCY16 && spectrum.model <= SPECCYPLUS) || (spectrum.model >= SPECCY128)))
                         {
@@ -1288,7 +1312,7 @@ void spec48_writeport(int Address, int Data, int *tstates)
                         }
                         break;
 
-                case 0xff:
+                case 0xf0:
                         if (emulator.machine == MACHINESPECTRUM && machine.aytype == AY_TYPE_SINCLAIR &&
                             ((spectrum.model >= SPECCY16 && spectrum.model <= SPECCYPLUS) || (spectrum.model >= SPECCY128)))
                         {
@@ -1392,13 +1416,14 @@ BYTE spec48_readport(int Address, int *tstates)
 
 BYTE ReadPort(int Address, int *tstates)
 {
-        int RZXPortVal;
-        
-        if (rzx.mode==RZX_PLAYBACK)
+        if (RZXModePlay())
         {
-                RZXPortVal = rzx_get_input();
+                int RZXPortVal = rzx_get_input();
                 if (RZXPortVal>=0) return (BYTE)RZXPortVal;
-                //rzx_close();
+                //Should not get past here unless there is a playback error
+                //What to do in this case? Some files still play well, but many don't.
+                RZXErrorFrame=RZXFrameCount;
+                return 0xb4;
         }
 
         if (machine.HDType==HDDIVIDE && ((Address&0xe3)==0xa3))
@@ -1417,8 +1442,8 @@ BYTE ReadPort(int Address, int *tstates)
                 break;
 
         case 0x1f:
-                if (machine.joystick1Connected && machine.joystickInterfaceType == JOYSTICK_KEMPSTON) return (BYTE)~ReadJoystick1();
                 if (machine.floppytype==FLOPPYBETA && PlusDPaged) return(floppy_read_statusreg());
+                if (machine.joystick1Connected && machine.joystickInterfaceType == JOYSTICK_KEMPSTON) return (BYTE)~ReadJoystick1();
                 if (machine.floppytype==FLOPPYDISCIPLE) return (BYTE)(PrinterBusy()<<6);
                 break;
 
@@ -1464,8 +1489,8 @@ BYTE ReadPort(int Address, int *tstates)
                 break;
 
         case 0x7f:
-                if (machine.joystick1Connected && machine.joystickInterfaceType == JOYSTICK_FULLER) return ReadJoystick1();
                 if (machine.floppytype==FLOPPYBETA && PlusDPaged) return(floppy_read_datareg());
+                if (machine.joystick1Connected && machine.joystickInterfaceType == JOYSTICK_FULLER) return ReadJoystick1();
                 if (machine.speech == SPEECH_TYPE_DKTRONICS) return sp0256_AL2.Busy() ? idleDataBus : (BYTE)(idleDataBus & 0x7F);
                 break;
 
@@ -1613,15 +1638,15 @@ BYTE ReadPort(int Address, int *tstates)
                 break;
 
         case 0xfd:
-                switch((Address>>8)&255)
+                switch((Address>>8)&0xf0)
                 {
-                case 0x0f:
-                        if (emulator.machine == MACHINESPECTRUM && spectrum.model >= SPECCYPLUS2A)
+                case 0x00:
+                        if (emulator.machine == MACHINESPECTRUM && spectrum.model >= SPECCYPLUS2A && ParallelPort->PortConnected())
                         {
                                 return (BYTE)PrinterBusy();
                         }
                         break;
-                case 0xff:
+                case 0xf0:
                         if (emulator.machine == MACHINESPECTRUM && machine.aytype == AY_TYPE_SINCLAIR)
                         {
                                 if ((spectrum.model >= SPECCY16 && spectrum.model <= SPECCYPLUS) || (spectrum.model >= SPECCYPLUS2A))
@@ -1634,13 +1659,13 @@ BYTE ReadPort(int Address, int *tstates)
                                 }
                         }
                         break;
-                case 0x3f:
+                case 0x30:
                         if (emulator.machine == MACHINESPECTRUM && spectrum.model >= SPECCYPLUS2A)
                         {
                                 return(floppy_read_datareg());
                         }
                         break;
-                case 0x2f:
+                case 0x20:
                         if (emulator.machine == MACHINESPECTRUM && spectrum.model >= SPECCYPLUS2A)
                         {
                                 return(floppy_read_statusreg());
@@ -1702,13 +1727,15 @@ BYTE ReadPort(int Address, int *tstates)
                 break;
         }
 
-        if (spectrum.model<=SPECCY128) return (BYTE)FloatingBus;
+        if (spectrum.model<=SPECCYPLUS2) return (BYTE)FloatingBus;
 
         return(idleDataBus);
 }
 
 void spec48_nmi(void)
 {
+        rzx_close();
+
         uSpeechPaged=0;
         uSourcePaged=0;
 
@@ -1731,27 +1758,23 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
 {
         int ts,i;
         static int ink, paper, ink2, paper2;
-        static int Sy=0, loop=207;
         static int borrow=0;
-        static int sts=0, chars=0, delay=0, IntDue=0;
-        static int DrawingBorder=1, DCCount=0;
+        static int delay=0, IntDue=0;
+        static int DrawingBorder=1;
         static int BaseColour, PBaseColour;
         static int shift_register;
         static int clean_exit=1;
+        static int IntPending=0;
+        static int rzxInterruptRetrig=0;
         int attr, attr2, b1, b2;
         int MaxScanLen;
         int PrevBit=0, PrevGhost=0;
         int scale= (tv.AdvancedEffects ? 2:1);
         int LastPC;
-        int SpeedUp, SpeedUpCount;
-        int InteruptTime;
         int shiftCount;
 
         int HSyncDuration = spectrum.model >= SPECCY128 ? 31 : 27;
         const int BackPorchDuration = 5;
-
-        SpeedUpCount=0;
-        SpeedUp=(emulator.speedup*machine.tperscanline)/100;
 
         CurScanLine->scanline_len=0;
 
@@ -1775,8 +1798,6 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
                 delay=SPECLeftBorder - borrow*2;
                 chars=0;
         }
-
-        if (fts<=0) IntDue=1;
 
         MaxScanLen = scale * emulator.single_step? 1:500;
         do
@@ -1818,17 +1839,87 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
 
                         if ((machine.speech == SPEECH_TYPE_USPEECH) && LastPC==56) uSpeechPaged = !uSpeechPaged;
                         if (spectrum.usource && LastPC==0x2BAE) uSourcePaged = !uSourcePaged;
-                }                 
+                }
+                else if ((TIMEXPage&1) && SPECBlk[0]==0 && (spectrum.model==SPECCYTC2068 || spectrum.model==SPECCYTS2068))
+                {
+                        if (IsFlashSaveable() && !RomCartridgePagedIn())
+                        {
+                                if (LastPC==0x0076) z80.hl.w=0x0102;
+                                if (LastPC==0x00CB)
+                                {
+                                        WavRecordByte(z80.hl.b.l);
+                                        z80.pc.w=0x00D0;
+                                }
+                        }
+                }
+
+                if (IntDue && (RZXModePlay() ? RZXCounter<=0 : fts>InteruptPosition))
+                {
+                        if (++flash >32) flash=0;
+                        DrawingBorder=1;
+                        DCCount = (++DCCount)&3;
+                        IntDue=0;
+                        IntPending=RZXModePlay() ? -1 : 32-(fts-InteruptPosition);
+                        ContendCounter=RZXModePlay() ? 0 : (fts-InteruptPosition);
+                        ContendCounter= (ContendCounter+1)&~3;
+
+                        if (RZXModePlay())
+                        {
+                                rzx_u16 rzx_counter;
+                                int rzx_update_result;
+                                do
+                                {
+                                        rzx_update_result=rzx_update(&rzx_counter);
+                                        RZXFrameCount++;
+                                } while (rzx_counter==0 && rzx_update_result==RZX_OK);
+
+                                if (rzx_update_result==RZX_OK)
+                                {
+                                        RZXCounter=rzx_counter;
+                                        IntPending=4;
+                                        if (!z80.iff1 || RZXFrameCount==1)
+                                                IntPending=-1;
+                                        if (RZXCounter<=4)
+                                                rzxInterruptRetrig=1;
+                                }
+                                else
+                                        emulation_stop=1;
+                        }
+                }
 
                 if (!insertWaitsWhileSP0256Busy)
                 {
-                        ts=z80_do_opcode();
+                        z80_databus(idleDataBus);
+                        if (!RZXModePlay())
+                        {
+                                if (!(TIMEXByte&64)) z80_interrupt(!(IntPending>=0),0);
+                                ts=z80_do_opcode();
+                        }
+                        else if (RZXCounter>0)
+                        {
+                                if (!(TIMEXByte&64)) z80_interrupt(!(IntPending>=0),1);
+                                ts=z80_do_opcode();
+                        }
+                        else if (rzxInterruptRetrig)
+                        {
+                                IntDue=1;
+                                rzxInterruptRetrig=0;
+                                ts=loop;
+                        }
+                        else
+                        {
+                                ts = loop; // finish drawing the frame during RZX playback
+                        }
+                        if (interruptAck && !WavInGroup()) WavStop();
+                        interruptAck = false;
                 }
                 else
                 {
                         ts = 1;
                         insertWaitsWhileSP0256Busy = (sp0256_AL2.Busy() && !emulator.single_step) ? true : false;
                 }
+                if (IntPending>=0)
+                        IntPending-=ts;
 
                 if (BasicLister->Visible &&
                     ((spectrumBasicRomPagedIn && (z80.pc.w == 0x15AB || (z80.pc.w == 0x0805 && FLAG_C) || z80.pc.w == 0x08F0)) ||
@@ -1860,6 +1951,7 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
                         ts=z80_do_opcode();
                         WavClockTick(ts,0);
                         i--;
+                        if (!WavPlaying()) break;
                 }
                 if (!WavPlaying()) SPECFlashLoading=0;
 
@@ -1900,216 +1992,186 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
                         }
                 }
 
-                if (!SpeedUpCount)
+                loop-=ts;
+                fts+=ts;
+                sts+=ts;
+                frametstates+=ts;
+                tStatesCount += ts;
+                ContendCounter+=ts;
+
+                ts*=2;
+                while(ts--)
                 {
-                        if (fts>InteruptPosition && IntDue)
+                        int colour, altcolour;
+                        delay--;
+
+                        if (TIMEXMode&4) SPECBorder=8+((~TIMEXColour)&7);
+                        else if (((CurScanLine->scanline_len-10)%16)==0)
+                                SPECBorder=SPECNextBorder;
+
+                        if (!(Sy<SPECTopBorder || Sy>SPECTopBorder+191 || delay))
                         {
-                                InteruptTime=(TIMEXByte&64)?0:z80_interrupt(idleDataBus);
-                                if (rzx.mode==RZX_PLAYBACK)
+                                if (chars>31)
                                 {
-                                        rzx_update(&RZXCounter);
+                                        delay=258;
+                                        DrawingBorder=1;
+                                        FloatingBus=255;
                                 }
-
-                                if (InteruptTime && !WavInGroup()) WavStop();
-                                ts+=InteruptTime;
-                                if (++flash >32) flash=0;
-                                DrawingBorder=1;
-                                DCCount = (++DCCount)&3;
-                                IntDue=0;
-                                ContendCounter=(fts-InteruptPosition);
-                                ContendCounter= (ContendCounter+1)&~3;
-                        }
-
-                        loop-=ts;
-                        fts+=ts;
-                        sts+=ts;
-                        frametstates+=ts;
-                        tStatesCount += ts;
-                        ContendCounter+=ts;
-
-                        ts*=2;
-                        while(ts--)
-                        {
-                                int colour, altcolour;
-                                delay--;
-
-                                if (TIMEXMode&4) SPECBorder=8+((~TIMEXColour)&7);
-                                else if (((CurScanLine->scanline_len-10)%16)==0)
-                                        SPECBorder=SPECNextBorder;
-
-                                if (!(Sy<SPECTopBorder || Sy>SPECTopBorder+191 || delay))
+                                else
                                 {
-                                        if (chars>31)
-                                        {
-                                                delay=258;
-                                                DrawingBorder=1;
-                                                FloatingBus=255;
-                                        }
-                                        else
-                                        {
-                                                DrawingBorder=0;
-                                                int y = Sy-SPECTopBorder;
-                                                int area = (y & 0xC0);
-                                                int line = ((y & 0x7) << 3);
-                                                int row = ((y >> 3) & 0x7);
-                                                int lineOffset = ((area | line | row) << 5);
-                                                int cellOffset = lineOffset + chars;
-                                                
-                                                switch(TIMEXMode)
-                                                {
-                                                case 0:
-                                                case 1:
-                                                        if (machine.colour != COLOURSPECTRA)
-                                                        {
-                                                                shift_register=RAMRead(SPECVideoBank, (TIMEXMode<<13)+cellOffset);
-                                                                attr=RAMRead(SPECVideoBank, (TIMEXMode<<13)+6144+chars+((y>>3)<<5));
-                                                        }
-                                                        else
-                                                        {
-                                                                shift_register = SpectraRAMRead(cellOffset);
-                                                                FetchSpectraAttributeFileBytes(y, chars, &attr, &attr2);
-                                                                shiftCount = 0;
-                                                        }
-                                                        break;
-                                                case 2:
-                                                case 3:
-                                                        attr=RAMRead(SPECVideoBank, 8192+cellOffset);
-                                                        shift_register=RAMRead(SPECVideoBank, cellOffset);
-                                                        break;
-                                                case 4:
-                                                case 5:
-                                                case 6:
-                                                case 7:
-                                                        attr=(((~TIMEXColour)&7)<<3) | TIMEXColour | 64;
-                                                        b1=RAMRead(SPECVideoBank, cellOffset);
-                                                        b2=RAMRead(SPECVideoBank, 8192+cellOffset);
-
-                                                        if (tv.AdvancedEffects)
-                                                                shift_register=(b1<<8)|b2;
-                                                        else
-                                                                shift_register=SPECShrink((b1<<8)|b2);
-
-                                                        break;
-                                                }
-
-                                                FloatingBus=attr;
-
-                                                int flashSwap = (flash & 0x10);
-
-                                                if (machine.colour == COLOURSPECTRA)
-                                                {
-                                                        DetermineSpectraInkPaper(attr, attr2, flashSwap, &ink, &ink2, &paper, &paper2);
-                                                        SPECNextBorder = DetermineSpectraBorderColour(SPECKb, flashSwap);
-                                                }
-                                                else
-                                                {
-                                                        int inkMask = 0x07;
-                                                        int paperMask = 0x38;
-                                                        int brightMask = 0x40;
-                                                        int flashMask = 0x80;
-                                                        int brightColour = 0x08;
-
-                                                        if ((attr &  flashMask) && flashSwap) shift_register = ~shift_register;
-                                                        ink = (attr & inkMask);
-                                                        paper = ((attr & paperMask) >> 3);
-                                                        if (attr & brightMask) { ink += brightColour; paper += brightColour; }
-                                                }
-
-                                                chars++;
-                                                noise=(noise<<8) | attr;
-                                                delay=8;
-                                        }
-                                }
-
-                                if (DrawingBorder)
-                                    paper=paper2=SPECBorder;
-
-                                i=(tv.AdvancedEffects && (TIMEXMode&4)) ? 2:1;
-
-                                while(i--)
-                                {
-                                        if (tv.AdvancedEffects && (TIMEXMode&4))
-                                                colour = ((shift_register&32768)?ink:paper) << 4;
-                                        else if (machine.colour != COLOURSPECTRA)
-                                                colour = ((shift_register&128)?ink:paper) << 4;
-                                        else
-                                        {
-                                                // SPECTRA
-                                                if (shiftCount < 4)
-                                                        colour = ((shift_register&128)?ink:paper);
-                                                else
-                                                        colour = ((shift_register&128)?ink2:paper2);
-                                        }
+                                        DrawingBorder=0;
+                                        int y = Sy-SPECTopBorder;
+                                        int area = (y & 0xC0);
+                                        int line = ((y & 0x7) << 3);
+                                        int row = ((y >> 3) & 0x7);
+                                        int lineOffset = ((area | line | row) << 5);
+                                        int cellOffset = lineOffset + chars;
                                         
-                                        if (fts >= (machine.scanlines-4)*machine.tperscanline)
-                                                colour=VSYNCCOLOUR;
-
-                                        altcolour=colour;
-                                        BaseColour=colour>>4;
-
-                                        if (emulator.dirtydisplay)
+                                        switch(TIMEXMode)
                                         {
-                                                if (PrevGhost) { colour|=4; PrevGhost=0; }
-                                                if (BaseColour!=PrevBit &&
-                                                        !( (BaseColour==0 && PrevBit==8)
-                                                        ||(BaseColour==8 && PrevBit==0)))
-                                                                { colour|=2; PrevGhost=1; }
-
-                                                if (noise&1) colour|=1;
-                                                noise>>=1;
-                                                PrevBit= BaseColour;
-                                        }
-                                        if (tv.DotCrawl)
-                                        {
-                                                if ((BaseColour&7) == (PBaseColour&7)) PBaseColour=BaseColour;
-
-                                                if (BaseColour!=PBaseColour)
+                                        case 0:
+                                        case 1:
+                                                if (machine.colour != COLOURSPECTRA)
                                                 {
-                                                        if (((Sy&3)==DCCount) || ((Sy&3)==((DCCount+1)&3)))
-                                                                altcolour=(PBaseColour+1)<<4;
-                                                        else    altcolour=(BaseColour+1)<<4;
+                                                        shift_register=RAMRead(SPECVideoBank, (TIMEXMode<<13)+cellOffset);
+                                                        attr=RAMRead(SPECVideoBank, (TIMEXMode<<13)+6144+chars+((y>>3)<<5));
                                                 }
+                                                else
+                                                {
+                                                        shift_register = SpectraRAMRead(cellOffset);
+                                                        FetchSpectraAttributeFileBytes(y, chars, &attr, &attr2);
+                                                        shiftCount = 0;
+                                                }
+                                                break;
+                                        case 2:
+                                        case 3:
+                                                attr=RAMRead(SPECVideoBank, 8192+cellOffset);
+                                                shift_register=RAMRead(SPECVideoBank, cellOffset);
+                                                break;
+                                        case 4:
+                                        case 5:
+                                        case 6:
+                                        case 7:
+                                                attr=(((~TIMEXColour)&7)<<3) | TIMEXColour | 64;
+                                                b1=RAMRead(SPECVideoBank, cellOffset);
+                                                b2=RAMRead(SPECVideoBank, 8192+cellOffset);
+
+                                                if (tv.AdvancedEffects)
+                                                        shift_register=(b1<<8)|b2;
+                                                else
+                                                        shift_register=SPECShrink((b1<<8)|b2);
+
+                                                break;
                                         }
 
-                                        bool HSyncPeriod = (CurScanLine->scanline_len >= ((machine.tperscanline-HSyncDuration)*2*scale));
-                                        bool BackporchPeriod = (CurScanLine->scanline_len < (BackPorchDuration*2*scale));
-                                        if (HSyncPeriod)
+                                        FloatingBus=attr;
+
+                                        int flashSwap = (flash & 0x10);
+
+                                        if (machine.colour == COLOURSPECTRA)
                                         {
-                                                if (tv.AdvancedEffects && !(TIMEXMode&4))
-                                                        CurScanLine->scanline[CurScanLine->scanline_len++]=HSYNCCOLOUR;
-                                                CurScanLine->scanline[CurScanLine->scanline_len++]=HSYNCCOLOUR;
-                                        }
-                                        else if (BackporchPeriod)
-                                        {
-                                                if (tv.AdvancedEffects && !(TIMEXMode&4))
-                                                        CurScanLine->scanline[CurScanLine->scanline_len++]=BACKPORCHCOLOUR;
-                                                CurScanLine->scanline[CurScanLine->scanline_len++]=BACKPORCHCOLOUR;
+                                                DetermineSpectraInkPaper(attr, attr2, flashSwap, &ink, &ink2, &paper, &paper2);
+                                                SPECNextBorder = DetermineSpectraBorderColour(SPECKb, flashSwap);
                                         }
                                         else
                                         {
-                                                if (tv.AdvancedEffects && !(TIMEXMode&4))
-                                                        CurScanLine->scanline[CurScanLine->scanline_len++]=(BYTE)altcolour;
-                                                CurScanLine->scanline[CurScanLine->scanline_len++]=(BYTE)colour;
+                                                int inkMask = 0x07;
+                                                int paperMask = 0x38;
+                                                int brightMask = 0x40;
+                                                int flashMask = 0x80;
+                                                int brightColour = 0x08;
+
+                                                if ((attr &  flashMask) && flashSwap) shift_register = ~shift_register;
+                                                ink = (attr & inkMask);
+                                                paper = ((attr & paperMask) >> 3);
+                                                if (attr & brightMask) { ink += brightColour; paper += brightColour; }
                                         }
-                                        PBaseColour=BaseColour;
-                                        shift_register <<= 1;
-                                        ++shiftCount;
+
+                                        chars++;
+                                        noise=(noise<<8) | attr;
+                                        delay=8;
                                 }
                         }
-                        if (loop<0) SpeedUpCount=SpeedUp;
-                }
-                else
-                        SpeedUpCount -=ts;
 
-                if (nmiOccurred)
-                {
-                        rzx_close();
-                        spec48_nmi();
+                        if (DrawingBorder)
+                            paper=paper2=SPECBorder;
+
+                        i=(tv.AdvancedEffects && (TIMEXMode&4)) ? 2:1;
+
+                        while(i--)
+                        {
+                                if (tv.AdvancedEffects && (TIMEXMode&4))
+                                        colour = ((shift_register&32768)?ink:paper) << 4;
+                                else if (machine.colour != COLOURSPECTRA)
+                                        colour = ((shift_register&128)?ink:paper) << 4;
+                                else
+                                {
+                                        // SPECTRA
+                                        if (shiftCount < 4)
+                                                colour = ((shift_register&128)?ink:paper);
+                                        else
+                                                colour = ((shift_register&128)?ink2:paper2);
+                                }
+                                
+                                if (fts >= (machine.scanlines-4)*machine.tperscanline)
+                                        colour=VSYNCCOLOUR;
+
+                                altcolour=colour;
+                                BaseColour=colour>>4;
+
+                                if (emulator.dirtydisplay)
+                                {
+                                        if (PrevGhost) { colour|=4; PrevGhost=0; }
+                                        if (BaseColour!=PrevBit &&
+                                                !( (BaseColour==0 && PrevBit==8)
+                                                ||(BaseColour==8 && PrevBit==0)))
+                                                        { colour|=2; PrevGhost=1; }
+
+                                        if (noise&1) colour|=1;
+                                        noise>>=1;
+                                        PrevBit= BaseColour;
+                                }
+                                if (tv.DotCrawl)
+                                {
+                                        if ((BaseColour&7) == (PBaseColour&7)) PBaseColour=BaseColour;
+
+                                        if (BaseColour!=PBaseColour)
+                                        {
+                                                if (((Sy&3)==DCCount) || ((Sy&3)==((DCCount+1)&3)))
+                                                        altcolour=(PBaseColour+1)<<4;
+                                                else    altcolour=(BaseColour+1)<<4;
+                                        }
+                                }
+
+                                bool HSyncPeriod = (CurScanLine->scanline_len >= ((machine.tperscanline-HSyncDuration)*2*scale));
+                                bool BackporchPeriod = (CurScanLine->scanline_len < (BackPorchDuration*2*scale));
+                                if (HSyncPeriod)
+                                {
+                                        if (tv.AdvancedEffects && !(TIMEXMode&4))
+                                                CurScanLine->scanline[CurScanLine->scanline_len++]=HSYNCCOLOUR;
+                                        CurScanLine->scanline[CurScanLine->scanline_len++]=HSYNCCOLOUR;
+                                }
+                                else if (BackporchPeriod)
+                                {
+                                        if (tv.AdvancedEffects && !(TIMEXMode&4))
+                                                CurScanLine->scanline[CurScanLine->scanline_len++]=BACKPORCHCOLOUR;
+                                        CurScanLine->scanline[CurScanLine->scanline_len++]=BACKPORCHCOLOUR;
+                                }
+                                else
+                                {
+                                        if (tv.AdvancedEffects && !(TIMEXMode&4))
+                                                CurScanLine->scanline[CurScanLine->scanline_len++]=(BYTE)altcolour;
+                                        CurScanLine->scanline[CurScanLine->scanline_len++]=(BYTE)colour;
+                                }
+                                PBaseColour=BaseColour;
+                                shift_register <<= 1;
+                                ++shiftCount;
+                        }
                 }
 
                 DebugUpdate();
         }
-        while ((loop>0 || SpeedUpCount>0) && !emulation_stop && sts<MaxScanLen);
+        while (loop>0 && !emulation_stop && sts<MaxScanLen);
 
         if (loop<=0)
         {
@@ -2118,18 +2180,30 @@ int spec48_do_scanline(SCANLINE *CurScanLine)
                 if (CurScanLine->scanline_len > (machine.tperscanline*scale))
                         CurScanLine->scanline_len=(machine.tperscanline*2*scale);
 
-                borrow = -loop;
-                loop += machine.tperscanline;
+                if (RZXModePlay())
+                {
+                        borrow = 0;
+                        loop = machine.tperscanline;
+                }
+                else
+                {
+                        borrow = -loop;
+                        loop += machine.tperscanline;
+                }
 
                 Sy++;
                 if (Sy>=machine.scanlines)
                 {
-                        fts = 0;
+                        if (RZXModePlay())
+                                fts = 0;
+                        else
+                                fts -= machine.tperframe;
+
+                        IntDue = 1;
                         CurScanLine->sync_len=414;
                         CurScanLine->sync_type = SYNCTYPEV;
                         emulator.scanlinesPerFrame = Sy;
                         Sy=0;
-                        loop=machine.tperscanline;
                 }
 
                 clean_exit=1;

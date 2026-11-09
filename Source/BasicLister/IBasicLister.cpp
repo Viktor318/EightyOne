@@ -27,9 +27,28 @@
 
 using namespace std;
 
+static bool RefreshEnabled = true;
+
 IBasicLister::IBasicLister() :
-        mProgramDisplayRows(0)
+        mProgramDisplayRows(0), mCset(NULL)
 {
+}
+
+void IBasicLister::StopRefresh()
+{
+        RefreshEnabled = false;
+}
+
+void IBasicLister::GoRefresh()
+{
+        RefreshEnabled = true;
+}
+
+void IBasicLister::CopyCsetImage()
+{
+        if (mCset) delete mCset;
+        mCset = new Graphics::TBitmap();
+        mCset->Assign((Graphics::TBitmap*)machine.cset);
 }
 
 void IBasicLister::PopulateKeywords()
@@ -58,6 +77,7 @@ void IBasicLister::PopulateKeywords()
 
 IBasicLister::~IBasicLister()
 {
+        if (mCset) delete mCset;
 }
 
 int IBasicLister::GetKeywordLength(unsigned char code)
@@ -130,16 +150,16 @@ bool IBasicLister::ExtractLineDetails(int* address, LineInfo& lineInfo)
         lineInfo.addressContent = lineHeaderLength + lineInfo.address;
 
         const int EndOfBasicMarker = 0x40;
-        int lineNumber = getbyte((*address)++);
+        int lineNumber = ReadByte((*address)++);
         if (lineNumber >= EndOfBasicMarker)
         {
                 return false;
         }
 
-        lineNumber = (lineNumber << 8) + getbyte((*address)++);
+        lineNumber = (lineNumber << 8) + ReadByte((*address)++);
         lineInfo.lineNumber = lineNumber;
 
-        int length = getbyte((*address)++) + (getbyte((*address)++) << 8);
+        int length = ReadByte((*address)++) + (ReadByte((*address)++) << 8);
         if (length < 1)
         {
                 return false;
@@ -157,13 +177,22 @@ bool IBasicLister::ExtractLineDetails(int* address, LineInfo& lineInfo)
         {
                 bool endOfLine = (c == (length - 1));
 
-                unsigned char b = (unsigned char)getbyte((*address)++);
+                unsigned char b = (unsigned char)ReadByte((*address)++);
 
-                if (mSupportsFloatingPointNumbers && (b == mFloatingPointNumberCode) && ((length - c) >= mEmbeddedNumberSize))
+                if (mSupportsFloatingPointNumbers && (b == mFloatingPointNumberCode))
                 {
-                        c += mEmbeddedNumberSize;
-                        (*address) += mEmbeddedNumberSize;
-                        
+                        if ((length - (c + 1)) >= mEmbeddedNumberSize)
+                        {
+                                c += mEmbeddedNumberSize;
+                                (*address) += mEmbeddedNumberSize;
+                        }
+                        else
+                        {
+                                int leftover = length - (c + 1);
+                                c += leftover;
+                                (*address) += leftover;
+                        }
+
                         lastKeywordEndedWithSpace = false;
                         continue;
                 }
@@ -222,9 +251,11 @@ void IBasicLister::ClearRenderedListing(HDC hdc, HBITMAP bitmap, RECT rect, bool
         DeleteObject(hBrush);
 }
 
-void IBasicLister::RenderListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds, int scaling)
+bool IBasicLister::RenderListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLineEnds, int scaling)
 {
+        bool retVal = true;
         mScaling = scaling;
+        if (!mCset) return retVal;
 
         int yOffset = 0;
 
@@ -232,18 +263,23 @@ void IBasicLister::RenderListing(HDC hdc, HBITMAP bitmap, RECT rect, bool showLi
 
         HDC cshdc = CreateCompatibleDC(hdc);
 
-        HGDIOBJ oldBitmap = SelectObject(cshdc, (HGDIOBJ)((Graphics::TBitmap*)machine.cset)->Handle);
+        HGDIOBJ oldBitmap = SelectObject(cshdc, (HGDIOBJ)mCset->Handle);
 
         ClearRenderedListing(hdc, bitmap, rect, showLineEnds);              
 
         for (std::vector<LineInfo>::iterator it = mLines->begin(); it != mLines->end(); it++)
         {
                 LineInfo lineInfo = *it;
-                RenderLine(hdc, cshdc, yOffset, lineInfo);
+                if (!RenderLine(hdc, cshdc, yOffset, lineInfo)) {
+                        retVal = false;
+                        break;
+                }
         }
 
         SelectObject(cshdc, oldBitmap);
         DeleteDC(cshdc);
+
+        return retVal;
 }
 
 COLORREF IBasicLister::GetBackgroundColour()
@@ -251,17 +287,17 @@ COLORREF IBasicLister::GetBackgroundColour()
         return RGB(132, 130, 132);
 }
 
-void IBasicLister::RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo)
+bool IBasicLister::RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo)
 {
         int x = 0;
 
         int lineNumber = lineInfo.lineNumber;
 
-        RenderLineNumber(hdc, cshdc, x, y, lineNumber);
+        if (!RenderLineNumber(hdc, cshdc, x, y, lineNumber)) return false;
         bool requiresInitialSpace = RequiresInitialSpace();
         if (requiresInitialSpace)
         {
-                RenderCharacter(hdc, cshdc, x, y, ConvertToZXCode(' '));
+                if (!RenderCharacter(hdc, cshdc, x, y, ConvertToZXCode(' '))) return false;
         }
 
         int address = lineInfo.addressContent;
@@ -270,7 +306,7 @@ void IBasicLister::RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo)
 
         do
         {
-                RenderToken(hdc, cshdc, address, x, y, lengthRemaining, lastKeywordEndedWithSpace);
+                if (!RenderToken(hdc, cshdc, address, x, y, lengthRemaining, lastKeywordEndedWithSpace)) return false;
         }
         while (lengthRemaining > 0);
 
@@ -279,56 +315,68 @@ void IBasicLister::RenderLine(HDC hdc, HDC cshdc, int& y, LineInfo& lineInfo)
                 x = 0;
                 y++;
         }
+
+        return true;
 }
 
-void IBasicLister::RenderLineNumber(HDC hdc, HDC cshdc, int& x, int& y, int lineNumber)
+bool IBasicLister::RenderLineNumber(HDC hdc, HDC cshdc, int& x, int& y, int lineNumber)
 {
         AnsiString formattedLineNumber = FormatLineNumber(lineNumber);
 
         for (signed int i = 2; i <= formattedLineNumber.Length(); i++)
         {
                 unsigned char c = ConvertToZXCode(formattedLineNumber[i]);
-                RenderCharacter(hdc, cshdc, x, y, c);
+                if (!RenderCharacter(hdc, cshdc, x, y, c)) return false;
         }
+
+        return true;
 }
 
-void IBasicLister::RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y, int& lengthRemaining, bool& lastKeywordEndedWithSpace)
+bool IBasicLister::RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y, int& lengthRemaining, bool& lastKeywordEndedWithSpace)
 {
-        unsigned char c = (unsigned char)getbyte(address);
+        unsigned char c = (unsigned char)ReadByte(address);
         address++;
         lengthRemaining--;
         bool endOfLine = (lengthRemaining <= 0);
 
         if (endOfLine && (c == mLineEndingCode))
         {
-                return;
+                return true;
         }
 
         if (mSupportsFloatingPointNumbers && (c == mFloatingPointNumberCode))
         {
-                address += mEmbeddedNumberSize;
-                lengthRemaining -= mEmbeddedNumberSize;
+                if (lengthRemaining >= mEmbeddedNumberSize)
+                {
+                        address += mEmbeddedNumberSize;
+                        lengthRemaining -= mEmbeddedNumberSize;
+                }
+                else
+                {
+                        address += lengthRemaining;
+                        lengthRemaining = 0;
+                }
                 
-                return;
+                return true;
         }
 
         if (mSupportEmbeddedControlCodes && IsEmbeddedControlCode(c))
         {
-                unsigned char arg1 = (unsigned char)getbyte(address);
+                unsigned char arg1 = (unsigned char)ReadByte(address);
                 address++;
                 lengthRemaining--;
 
                 unsigned char arg2;
                 if (GetEmbeddedControlCodeSize(c) == 2)
                 {
-                        arg2 = (unsigned char)getbyte(address);
+                        arg2 = (unsigned char)ReadByte(address);
                         address++;
                         lengthRemaining--;
                 }
 
                 ProcessControlCode(c, arg1, arg2);
 
-                return;
+                return true;
         }
 
         int length = GetKeywordLength(c);
@@ -349,14 +397,14 @@ void IBasicLister::RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y,
                 {
                         unsigned char code = mKeyword[c].at(i);
                         unsigned char zxCode = ConvertToZXCode(code);
-                        RenderCharacter(hdc, cshdc, x, y, zxCode);
+                        if (!RenderCharacter(hdc, cshdc, x, y, zxCode)) return false;
                 }
 
                 lastKeywordEndedWithSpace = keywordEndsWithSpace;
         }
         else
         {
-                RenderCharacter(hdc, cshdc, x, y, c);
+                if (!RenderCharacter(hdc, cshdc, x, y, c)) return false;
 
                 bool characterIsSpace = (mKeyword[c] == " ");
 
@@ -365,10 +413,17 @@ void IBasicLister::RenderToken(HDC hdc, HDC cshdc, int& address, int& x, int& y,
                         lastKeywordEndedWithSpace = false;
                 }
         }
+
+        return true;
 }
 
-void IBasicLister::RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned char c)
+bool IBasicLister::RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned char c)
 {
+        if (!RefreshEnabled)
+        {
+                RefreshEnabled = true;
+                return false;
+        }
         int charX = (c % 32) << 3;
         int charY = (c / 32) << 3;
         int xpos = (x << 3) * mScaling;
@@ -377,7 +432,8 @@ void IBasicLister::RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned 
         const int srcH = 8;
         int destW = 8 * mScaling;
         int destH = 8 * mScaling;
-        StretchBlt(hdc, xpos, ypos, destW, destH, cshdc, charX, charY, srcW, srcH, SRCCOPY);
+        bool bltresult = StretchBlt(hdc, xpos, ypos, destW, destH, cshdc, charX, charY, srcW, srcH, SRCCOPY);
+        if (!bltresult) return false;
 
         if (CustomColoursSupported())
         {
@@ -429,6 +485,8 @@ void IBasicLister::RenderCharacter(HDC hdc, HDC cshdc, int& x, int& y, unsigned 
                 x = 0;
                 y++;
         }
+
+        return true;
 }
 
 AnsiString IBasicLister::RenderLineAsText(LineInfo& lineInfo, bool outputRemTokensAsCharacterCodes, bool outputStringTokensAsCharacterCodes, bool outputNonAsciiAsCharacterCodes, bool outputVariableNamesInLowercase, bool outputInZxTokenFormat, bool limitLineLengths, bool outputFullWidthLineNumbers)
@@ -487,14 +545,16 @@ AnsiString IBasicLister::RenderLineAsText(LineInfo& lineInfo, bool outputRemToke
 
 bool IBasicLister::RenderTokenAsText(int& address, int& lengthRemaining, bool& lastKeywordEndedWithSpace, AnsiString& zxCharacter, bool& outputLineAsControlCodes, bool outputRemTokensAsCharacterCodes, bool outputStringTokensAsCharacterCodes, bool outputNonAsciiAsCharacterCodes, bool outputVariableNamesInLowercase, bool outputInZxTokenFormat, bool& withinQuotes, bool& withinRem)
 {
-        unsigned char c = (unsigned char)getbyte(address);
+        unsigned char c = (unsigned char)ReadByte(address);
         address++;
         lengthRemaining--;
         bool endOfLine = (lengthRemaining <= 0);
 
-        if (endOfLine && (c == mLineEndingCode))
+        if (c == mLineEndingCode)
         {
-                return false;
+                if (endOfLine)
+                        return false;
+                withinRem = true;
         }
 
         bool remToken = (mKeyword[c] == " REM ");
@@ -584,7 +644,7 @@ bool IBasicLister::RenderTokenAsText(int& address, int& lengthRemaining, bool& l
                 {
                         zxCharacter += mEscapeCharacter;
 /*
-                        unsigned char nc = (unsigned char)getbyte(address);
+                        unsigned char nc = (unsigned char)ReadByte(address);
                         string nextChr = mKeyword[nc].substr(0, 1);
 
                         string validEscapeChars;

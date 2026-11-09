@@ -59,7 +59,6 @@ void __fastcall TLiveMemoryWindow::Write(unsigned short address)
         if (!Writes1->Checked) return;
 
         _writes[address]=255;
-        Update();
 }
 //---------------------------------------------------------------------------
 
@@ -69,7 +68,6 @@ void __fastcall TLiveMemoryWindow::Read(unsigned short address)
         if (!Reads1->Checked) return;
 
         _reads[address]=255;
-        Update();
 }
 //---------------------------------------------------------------------------
 
@@ -77,23 +75,17 @@ void __fastcall TLiveMemoryWindow::Update(void)
 {
         BYTE touchCol = Touches1->Checked ? (BYTE)128 : (BYTE)0;
 
-        // should really be time based, not access count based
-        ++_count;
-        if (_count < 1000) return;
-
-        _count = 0;
-
         for(int i = 0; i < 65536; ++i)
         {
                 if (_writes[i])
                 {
-                        --_writes[i];
+                        _writes[i]-=(BYTE)5;
                         _pbits[i].rgbBlue = _writes[i];
                         _pbits[i].rgbGreen = touchCol;
                 }
                 if (_reads[i])
                 {
-                        --_reads[i];
+                        _reads[i]-=(BYTE)5;
                         _pbits[i].rgbRed = _reads[i];
                         _pbits[i].rgbGreen = touchCol;
                 }
@@ -165,8 +157,8 @@ void __fastcall TLiveMemoryWindow::FormMouseMove(TObject *Sender,
         if (X > 511) X = 511;
         if (Y > 255) Y = 255;
 
-        long my = map(Y, 0, 256, _memStart * 4, _memEnd * 4 - 1);
-        unsigned short addr = (unsigned short)(my * 256 + X);
+        long my = map(Y, 0, 256, _memStart * 4, _memEnd * 4);
+        unsigned short addr = (unsigned short)(my * 256 + X / 2);
 
         StatusBar1->Panels->Items[0]->Text = Format("$%0.4x",
                 ARRAYOFCONST((addr)));

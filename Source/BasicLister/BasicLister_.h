@@ -31,11 +31,16 @@
 #include <ToolWin.hpp>
 #include <Dialogs.hpp>
 #include <IniFiles.hpp>
+#include <SyncObjs.hpp>
 
 #include <string>
 #include <vector>
 
 //---------------------------------------------------------------------------
+
+#define WM_STATUSBAR (WM_USER+1)
+#define WM_SCROLLBAR (WM_USER+2)
+
 class TBasicLister : public TForm
 {
 __published:	// IDE-managed Components
@@ -73,6 +78,7 @@ private:	// User declarations
         HBITMAP mBitmap;
         HWND mHWND;
         int mLastHighlightedEntryIndex;
+        int mIndex;
         int mLastFilterIndex;
         IBasicLister* mBasicLister;
         int mBMWidth;
@@ -86,13 +92,15 @@ private:	// User declarations
         bool mLimitLineLengths;
         bool mOutputFullWidthLineNumbers;
         int mScaling;
+        int mRelativePos;
+        TCriticalSection *mRefreshLock;
 
         void ClearBitmap();
         int ListingAreaWidth(int listingWidth);
         void ConstructBitmap();
         bool ExtractLine(int* basicPos, int* displayLength);
         void ExtractProgramDetails();
-        void LoadProgram();
+        void LoadProgram(bool keepEntries);
         int ProgramSize();
         void UnhighlightRows(int startRow, int endRow);
         void HighlightRows(int startRow, int endRow);
@@ -103,17 +111,32 @@ private:	// User declarations
         void DisableButtons();
         void EnableButtons();
         void SaveListingToFile();
-        void ConfigureScrollBar();
-        void ConfigureStatusBar();
         int FindLineIndex(int lineNumber);
         int FindLineDisplayedOnRow(int row);
         COLORREF GetHighlightColour();
         void GetSaveOptions();
         void SizeWindow();
+        static int HandleMouseDownThreadProc(void *param);
+        void HandleMouseDown(void);
+        static int HandleRefreshThreadProc(void *param);
+        void HandleRefresh(void);
+        static int HandleLineEndsThreadProc(void *param);
+        void HandleLineEnds(void);
+        static int HandleSaveListingToFileThreadProc(void *param);
+        static int HandleClearThreadProc(void *param);
+        void HandleClear(void);
 
 public:		// User declarations
         __fastcall TBasicLister(TComponent* Owner);
         virtual __fastcall ~TBasicLister();
+        void __fastcall WMUpdateStatusBar(TMessage &Message);
+        void __fastcall WMUpdateScrollBar(TMessage &Message);
+
+ BEGIN_MESSAGE_MAP
+   MESSAGE_HANDLER(WM_STATUSBAR, TMessage, WMUpdateStatusBar)
+   MESSAGE_HANDLER(WM_SCROLLBAR, TMessage, WMUpdateScrollBar)
+ END_MESSAGE_MAP(TForm)
+
         void SetBasicLister(IBasicLister* basicLister);
         void LanguageChanged();
         void SaveSettings(TIniFile* ini);

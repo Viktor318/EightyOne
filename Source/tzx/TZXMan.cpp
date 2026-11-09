@@ -37,6 +37,7 @@
 #include "BasicLoaderOptions_.h"
 #include "BasicLister\BasicLister_.h"
 #include "Language.h"
+#include "Lambda\lambdaBasicLoader.h"
 
 #ifndef edt1
 #define edt1 0x480
@@ -187,12 +188,6 @@ void TTZX::UpdateButtons(void)
 __fastcall TTZX::TTZX(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
-
         DragAcceptFiles(Handle, true);
         SetTableHeader();
         FormResize(NULL);
@@ -227,7 +222,7 @@ void TTZX::LoadFile(AnsiString Filename, bool Insert)
                 Extension = FileNameGetExt(Filename);
         }
 
-        if ((Extension == ".B80") || (Extension == ".B81") || (Extension == ".B82") || (Extension == ".TXT") || (Extension == ".BAS"))
+        if ((Extension == ".B80") || (Extension == ".B81") || (Extension == ".B82") || (Extension == ".A83") || (Extension == ".TXT") || (Extension == ".BAS"))
         {
                 IBasicLoader* loader = NULL;
 
@@ -245,6 +240,10 @@ void TTZX::LoadFile(AnsiString Filename, bool Insert)
                         bool if1 = (machine.floppytype == FLOPPYIF1);
                         loader = new specBasicLoader(spec128, if1);
                 }
+                else if (Extension == ".A83" || ((Extension == ".TXT" || Extension == ".BAS") && emulator.machine == MACHINELAMBDA))
+                {
+                        loader = new lambdaBasicLoader(zx81.zxpand);
+                }
 
                 int res = LoadBasicListingOptionsForm->ShowModal();
                 if (res != mrOk)
@@ -252,26 +251,21 @@ void TTZX::LoadFile(AnsiString Filename, bool Insert)
                         return;
                 }
 
-                if (Extension == ".B80" || ((Extension == ".TXT" || Extension == ".BAS") && emulator.machine == MACHINEZX80))
+                if (Extension == ".B80" && emulator.machine != MACHINEZX80)
                 {
-                        if (emulator.machine != MACHINEZX80)
-                        {
                                 HWSetMachine(MACHINEZX80, NULL);
-                        }
                 }
-                else if (Extension == ".B81" || ((Extension == ".TXT" || Extension == ".BAS") && (emulator.machine == MACHINEZX81 || emulator.machine == MACHINETS1000 || emulator.machine == MACHINETS1500 || emulator.machine == MACHINETK85)))
+                else if (Extension == ".B81" && emulator.machine != MACHINEZX81 && emulator.machine != MACHINETS1000 && emulator.machine != MACHINETS1500 && emulator.machine != MACHINETK85)
                 {
-                        if ((emulator.machine != MACHINEZX81 && emulator.machine != MACHINETS1000 && emulator.machine != MACHINETS1500 && emulator.machine != MACHINETK85))
-                        {
                                 HWSetMachine(MACHINEZX81, NULL);
-                        }
                 }
-                else if (Extension == ".B82" || ((Extension == ".TXT" || Extension == ".BAS") && emulator.machine == MACHINESPECTRUM))
+                else if (Extension == ".B82" && emulator.machine != MACHINESPECTRUM)
                 {
-                        if (emulator.machine != MACHINESPECTRUM)
-                        {
                                 HWSetMachine(MACHINESPECTRUM, SPECCY48);
-                        }
+                }
+                else if (Extension == ".A83" && emulator.machine != MACHINELAMBDA)
+                {
+                                HWSetMachine(MACHINELAMBDA, NULL);
                 }
 
                 bool tokeniseRemContents = LoadBasicListingOptionsForm->GetTokeniseRemContents();
@@ -1005,6 +999,9 @@ void __fastcall TTZX::ConvertBlocktoWave1Click(TObject *Sender)
         FlashLoad=FlashLoadBtn->Down;
         AutoStart=AutoStartBtn->Down;
         AutoLoad=AutoLoadBtn->Down;
+
+        if (FlashLoad) FlashLoad1Click(NULL);
+        if (AutoStart) AutoStartStopClick(NULL);
 
         StopBtnClick(NULL);
         //RewEndClick(NULL);

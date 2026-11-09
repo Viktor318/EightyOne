@@ -7,6 +7,46 @@ Changes of this fork on top of EightyOne 1.41: the source of
 of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
 itself are in `Release Files/Release history.txt`.
 
+## Not released yet – the EightyOne 1.42 development version merged
+
+The development version of the next EightyOne (1.42, by John Stroebel and
+Paul Farrow) is merged: the `develop` branch of
+[stroebeljc/EightyOne](https://github.com/stroebeljc/EightyOne) as of
+4 September 2026. Its changes are in `Release Files/Release history.txt`
+(among them: the AY on port $BFFD/$FFFD as the 128K decodes it, a more
+exact Z80, emulation on its own thread, the Speed window from 0x to 8x,
+RZX playback, Beta Disk, Larken and ZX1541 disks, BASIC listings of the
+Lambda 8300, the Timex machines and the Spectrum 128, Memotech and
+Quicksilva hi-res, Lambda colour, joystick POV hats, ZX Printer momentum).
+
+### Merging
+
+- The emulation runs on its own thread, and the **sound is still its
+  clock**: the WASAPI and DirectSound outputs signal it for each frame of
+  sound they need (they used to send the main window a message), and wait
+  for its sound at most 100 ms, playing silence after that. So the sound
+  and the emulation **go on while a menu or a dialog is open**.
+- The settings are read once all the windows exist (as in 1.42); the main
+  window is still shown only once it has its size.
+- The new texts are in Hungarian (ZX1541 disks, RZX playback, the Lambda
+  colour menu item, the BASIC listing format information), the new and
+  changed windows in Segoe UI 9 pt.
+
+### Fixes to the development version
+
+- Files named on the command line, and a settings file named there, were
+  sometimes ignored: the command line was freed right after it was split.
+- Loading a snapshot (from the menu, the command line, or dropped on the
+  window) stops the emulation meanwhile: frames run during loading could
+  end in an "Unknown Internal Error" and a hard reset.
+- A failed RZX playback no longer leaves the emulation stopped.
+- While the main window waits for the emulation thread, it handles the
+  messages that thread sends it (status bar, ZX Printer), so the two
+  cannot wait for each other.
+- The **ZX Printer** draws a line at a time: a message for every dot
+  slowed the emulation to about 43 frames/s while printing. Its scroll
+  bar works at 2x and 3x size too.
+
 ## v1.41-hu.1 – 2026-11-09
 
 ### Sound

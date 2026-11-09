@@ -19,7 +19,7 @@
 // DirectSound output.
 //
 // The audio thread is also the emulator's clock: for each frame of sound
-// it needs, it asks the main window (WM_USER) to run one frame, which hands
+// it needs, it has the emulator's frame thread run one frame, which hands
 // its sound back through Frame().
 //
 // The circular DirectSound buffer is about a second long, but it is only
@@ -30,8 +30,8 @@
 // written. The bytes written and played are counted, so an underrun is
 // noticed and writing continues a little after the write cursor. After
 // each write, the rest of the buffer is filled with the last sample fading
-// to zero: if the main window is held up (a menu, a dialog being opened),
-// the buffer plays silence instead of old sound again.
+// to zero: if the emulator is held up (the hardware being changed), the
+// buffer plays silence instead of old sound again.
 
 #include <dsound.h>
 #include "sound\SoundDX.h"
@@ -49,7 +49,8 @@ CDSnd::CDSnd(void)
         m_ThreadHandle=NULL;
         m_StopEvent=NULL;
         m_Stopping=false;
-        m_SendErrorShown=false;
+        m_FrameEvent=NULL;
+        m_FrameDone=CreateEvent(NULL, FALSE, FALSE, NULL);
 
         ZeroMemory(&m_WFE, sizeof(m_WFE));
         m_lpDS=NULL;
@@ -219,11 +220,9 @@ int CDSnd::End()
 {
         if (m_ThreadHandle)
         {
-                // Ask the audio thread to stop. It may be waiting for the
-                // main window to run a frame (SendMessage), and this is
-                // usually called from the main window's thread, so let sent
-                // messages through while waiting. Stopping() makes the main
-                // window skip that frame.
+                // Ask the audio thread to stop (the stop event also ends its
+                // waiting for a frame), letting messages sent to this
+                // thread through while waiting
 
                 m_Stopping = true;
                 SetEvent(m_StopEvent);
@@ -417,6 +416,24 @@ DWORD CDSnd::TakeFromQueue(BYTE *dest, DWORD max)
         return n;
 }
 
+// Ask the emulator's frame thread to run one frame, and wait until it has
+// put its sound in the queue (Frame()). False if it did not come: the
+// emulator is not running (the hardware is being changed), or we stop.
+
+bool CDSnd::RunEmulatorFrame(void)
+{
+        HANDLE events[2];
+
+        if (!m_FrameEvent || !m_FrameDone) return false;
+
+        ResetEvent(m_FrameDone);
+        SetEvent(m_FrameEvent);
+
+        events[0] = m_FrameDone;
+        events[1] = m_StopEvent;
+        return WaitForMultipleObjects(2, events, FALSE, SOUND_FRAME_WAIT_MS) == WAIT_OBJECT_0;
+}
+
 // Audio thread: keep the DirectSound buffer filled a little beyond the
 // write cursor, running one emulated frame for each frame of sound
 
@@ -469,26 +486,13 @@ void CDSnd::ThreadFN()
                         if (ahead >= (__int64)(lead + margin) || frames >= 8) break;
 
                         // Run one frame of the emulator. It puts its sound
-                        // in the queue (Frame()).
-
-                        if (IsWindow(m_hWnd))
-                        {
-                                SendMessage(m_hWnd, WM_USER, 0, 0);
-                        }
-                        else if (!m_SendErrorShown)
-                        {
-                                char buf[256];
-
-                                m_SendErrorShown = true;
-                                FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                        NULL, ERROR_INVALID_WINDOW_HANDLE, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                                        buf, sizeof(buf), NULL);
-                                MessageBox(NULL, buf, Tr("Message Sending Error").c_str(), 2);
-                        }
+                        // in the queue (Frame()); if it does not come, the
+                        // emulator is not running: silence, and no more now
+                        if (!RunEmulatorFrame()) frames = 8;
 
                         if (m_Stopping) return;
 
-                        // The frame may have taken long (a dialog opened):
+                        // The frame may have taken long (it waited for us):
                         // look at the cursors again before writing
 
                         UpdatePlayed(&play, &write);
@@ -597,4 +601,6 @@ void CDSnd::Frame( unsigned char *data, unsigned int len )
         m_QueueSize += len;
 
         LeaveCriticalSection(&m_QueueLock);
+
+        if (m_FrameDone) SetEvent(m_FrameDone);
 }

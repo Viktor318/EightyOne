@@ -410,7 +410,6 @@ __fastcall TMidiForm::TMidiForm(TComponent* Owner)
 {
         int i,Devices;
         MIDIOUTCAPS moc;
-        TIniFile *ini;
 
         Loading = true;
 
@@ -439,10 +438,6 @@ __fastcall TMidiForm::TMidiForm(TComponent* Owner)
         PlaceAYChannels();
 
         Loading = false;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 }
 
 // The mixer: main volume, AY (3 channels), beeper, speech, SpecDrum
@@ -790,7 +785,6 @@ void __fastcall TMidiForm::FormClose(TObject *Sender, TCloseAction &Action)
 void __fastcall TMidiForm::FormDestroy(TObject *Sender)
 {
         if (MeterTimer) MeterTimer->Enabled = false;
-        Midi.Stop();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMidiForm::MidiChange(TObject *Sender)

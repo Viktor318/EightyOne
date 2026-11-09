@@ -43,18 +43,13 @@ __fastcall TBasicListingFormatInfoForm::TBasicListingFormatInfoForm(TComponent* 
         Label30->Visible = false;
 }
 //---------------------------------------------------------------------------
-void TBasicListingFormatInfoForm::SetActivePage(int index)
-{
-        LayOut();
-}
-//---------------------------------------------------------------------------
 // The paragraphs are word wrapped labels: they are put one under the other
 // from the top, so that they keep apart whatever the font and the language,
 // and the window is made as high as they need.
 void TBasicListingFormatInfoForm::LayOut()
 {
-        TLabel *paragraphs[] = { Label27, Label26, Label25, Label29,
-                                 Label31, Label36, Label32, Label33, Label34, Label35 };
+        TLabel *paragraphs[] = { Label27, Label26, Label25, Label29, Label31,
+                                 Label36, Label1, Label32, Label33, Label34, Label35 };
         int count = sizeof(paragraphs) / sizeof(paragraphs[0]);
         int top = 9;
 

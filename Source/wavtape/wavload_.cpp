@@ -118,8 +118,6 @@ void TWavLoad::UpdateImage()
 __fastcall TWavLoad::TWavLoad(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
         DragAcceptFiles(Handle, true);
 
         ImgW=Volume->Left;
@@ -137,10 +135,6 @@ __fastcall TWavLoad::TWavLoad(TComponent* Owner)
         StatusText=Tr("Stopped");
 
         IgnoreZX81=false;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 
         NewClick(this);
 }

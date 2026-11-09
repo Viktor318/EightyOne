@@ -94,6 +94,7 @@ public:
         int End();
         void Frame(unsigned char *data, unsigned int len);
         bool Stopping() { return m_Stopping; }
+        void SetFrameEvent(HANDLE event) { m_FrameEvent = event; }
         int SampleRate() { return m_SampleRate; }
         const char *Name() { return m_DeviceOpen ? "WASAPI" : NULL; }
 
@@ -111,7 +112,6 @@ private:
         void RunByClock(void);
         void StartClock(void);
         bool WriteDevice(const short *data, UINT32 frames);
-        void RunEmulatorFrame(void);
         DWORD TakeFromQueue(BYTE *dest, DWORD max);
 
         HWND m_hWnd;
@@ -129,7 +129,9 @@ private:
         volatile bool m_Stopping;
         volatile bool m_OpenOK;
         volatile bool m_DeviceOpen;
-        bool m_SendErrorShown;
+        HANDLE m_FrameEvent;            // the emulator's (not ours)
+        HANDLE m_FrameDone;             // set by Frame()
+        bool RunEmulatorFrame(void);
 
         // WASAPI (only used on the audio thread)
         IMMDeviceEnumerator *m_Enumerator;

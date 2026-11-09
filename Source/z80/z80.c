@@ -50,13 +50,20 @@ BYTE sz53_table[0x100]; /* The S, Z, 5 and 3 bits of the lookup value */
 BYTE parity_table[0x100]; /* The parity of the lookup value */
 BYTE sz53p_table[0x100]; /* OR the above two tables together */
 
-int nmiOccurred;
+extern int nmiLatched;
+extern int interruptLatchEnable;
+extern int interruptLine;
+extern int databus;
+extern int refreshAddr;
 
 extern int StackChange;
 extern int StepOutRequested;
 
+extern void InsertMCycle(int cycleLength);
+
 /* This is what everything acts on! */
 processor z80;
+void (*z80_INTACK)(void);
 
 static void z80_init_tables(void);
 
@@ -64,6 +71,7 @@ static void z80_init_tables(void);
 void z80_init(void)
 {
         z80_init_tables();
+        z80_INTACK=machine.interruptAckCb;
 }
 
 /* Initalise the tables used to set flags */
@@ -94,7 +102,7 @@ static void z80_init_tables(void)
 void z80_reset( void )
 {
         AF =BC =DE =HL =0;
-        AF_=BC_=DE_=HL_=0;
+        AF_=BC_=DE_=HL_=WZ_=0;
         IX=IY=0;
         I=R=R7=0;
         SP=PC=0;
@@ -102,48 +110,91 @@ void z80_reset( void )
         z80.halted=0;
         StackChange=0;
         StepOutRequested=0;
-        nmiOccurred = 0;
+        nmiLatched = 0;
+        interruptLine = 1;
+        refreshAddr = 0;
+}
+
+void z80_interrupt(int state, int force)
+{
+        interruptLine = (state != 0);
+        if (force) interruptLatchEnable = 1;
+}
+
+void z80_databus(int bus)
+{
+        databus = bus;
+}
+
+void z80_loopFlags(int inoutLoop)
+{
+        MEMPTR_FLAGS();
+        if (inoutLoop)
+        {
+                if (F & FLAG_C) {
+                        if (F & FLAG_N) {
+                                if ((F & FLAG_P) ^ parity_table[(B - 1) & 0x7] ^ FLAG_P) F |= FLAG_P;
+                                else F &= ~FLAG_P;
+                                if ((B & 0x0F) == 0x00) F |= FLAG_H;
+                                else F &= ~FLAG_H;
+                        } else {
+                                if ((F & FLAG_P) ^ parity_table[(B + 1) & 0x7] ^ FLAG_P) F |= FLAG_P;
+                                else F &= ~FLAG_P;
+                                if ((B & 0x0F) == 0x0F) F |= FLAG_H;
+                                else F &= ~FLAG_H;
+                        }
+                } else {
+                        if ((F & FLAG_P) ^ parity_table[B & 0x7] ^ FLAG_P) F |= FLAG_P;
+                        else F &= ~FLAG_P;
+                }
+        }
 }
 
 /* Process a z80 maskable interrupt */
-int z80_interrupt(int bus)
+int z80_interrupt_internal(void)
 {
-        if (IFF1)
+        if (IFF1 && interruptLatchEnable!=0)
         {
-                if (z80.halted)
-                {
-                        PC++;
-                        z80.halted = 0;
-                }
+                z80.halted = 0;
+
+                InsertMCycle(7);
+                numberOfM1Cycles=1;
+                if (z80_INTACK) z80_INTACK();
+                R++;
+                R = (WORD)(R & 127);
 
                 IFF1 = 0;
                 IFF2 = 0;
 
+                InsertMCycle(3);
                 writebyte(--SP, PCH);
+                InsertMCycle(3);
                 writebyte(--SP, PCL);
-
-                R++;
 
                 switch (IM)
                 {
                         case 0:
                         {
                                 // Assume a RST 38h placed on the data bus
-                                PC = 0x0038;
+                                PC = WZ_ = 0x0038;
                                 StackChange += 2;
                                 return 13;
                         }
                         case 1:
                         {
-                                PC = 0x0038;
+                                PC = WZ_ = 0x0038;
                                 StackChange += 2;
                                 return 13;
                         }
                         case 2:
 	                {
-	                        WORD vectorAddress = (WORD)((I << 8) + bus);
-        	                PCL = readbyte(vectorAddress++);
-                                PCH = readbyte(vectorAddress);
+	                        W_= I;
+                                Z_=(BYTE)databus;
+                                InsertMCycle(3);
+        	                PCL = readbyte(WZ_++);
+                                InsertMCycle(3);
+                                PCH = readbyte(WZ_);
+                                WZ_=PC;
 	                        StackChange += 2;
                                 return 19;
         	        }
@@ -157,26 +208,36 @@ int z80_interrupt(int bus)
         return 0;
 }
 
-/* Process a z80 non-maskable interrupt */
-int z80_nmi()
+/* Trigger a z80 non-maskable interrupt */
+void z80_nmi(void)
 {
+        nmiLatched = 1;
+}
+
+/* Process a z80 non-maskable interrupt */
+int z80_nmi_internal(void)
+{
+    if (nmiLatched!=0)
+    {
         StackChange += 2;
         IFF1 = 0;
+        nmiLatched = 0;
 
-        if (z80.halted)
-        {
-                z80.halted=0;
-                PC++;
-        }
+        z80.halted=0;
 
+        InsertMCycle(5);
+        numberOfM1Cycles=1;
+        R++;
+        R = (WORD)(R & 127);
+
+        InsertMCycle(3);
         writebyte(--SP, PCH);
+        InsertMCycle(3);
         writebyte(--SP, PCL);
 
-        numberOfM1Cycles++;
-        R++;
-        PC = 0x0066;
-
-        nmiOccurred = 0;
+        PC=WZ_=0x0066;
 
         return 11;
+    }
+    return 0;
 }

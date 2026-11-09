@@ -19,6 +19,7 @@
 //---------------------------------------------------------------------------
 
 #include <vcl4.h>
+#include <string.h>
 #pragma hdrstop
 
 #include "zxprinter.h"
@@ -50,15 +51,31 @@ void TZXPrinter::ResetPrinter(void)
         XPos=0;
         Counter2=16;
         StylusActive=false;
+        Momentum=0;
 }
+// The dots are kept by the emulation (its own thread) as the stylus passes,
+// and drawn by the main thread a line at a time: a message for every dot
+// would hold up the emulation
+
 void TZXPrinter::OutputBit(void)
 {
-        if (XPos<1 || XPos>(PrinterOutput->Width)) return;
-        PrinterOutput->Canvas->Pixels[XPos-1][YPos]= StylusActive?Fg:Bg;
+        if (XPos<1 || XPos>256) return;
+        LineDots[XPos-1] = (signed char)(StylusActive ? 1 : 0);
 }
 
+void __fastcall TZXPrinter::WMOutputLine(TMessage &msg)
+{
+        OutputLine();
+}
 void TZXPrinter::OutputLine(void)
 {
+        int x;
+
+        for (x=0; x<256 && x<PrinterOutput->Width; x++)
+                if (LineDots[x] >= 0)
+                        PrinterOutput->Canvas->Pixels[x][YPos] = LineDots[x] ? Fg : Bg;
+        memset(LineDots, -1, sizeof(LineDots));
+
         YPos++;
         if (YPos>=PrinterOutput->Height-1) ScrollOutput();
         DrawImage();
@@ -73,7 +90,16 @@ void TZXPrinter::ScrollOutput()
 
         PrinterOutput->Height += 8;
         ScrollBar->Max = PrinterOutput->Height;
-        ScrollBar->Position += 8;
+        if (ScrollBar->Max - ScrollBar->Position <= 8)
+                ScrollBar->Position = ScrollBar->Max;
+        // (the lines of paper shown are the same at every size)
+        if (ScrollBar->Enabled == false && ScrollBar->Max >= DisplayImage->Height / Zoom)
+        {
+                ScrollBar->Enabled = true;
+                ScrollBar->Visible = true;
+                ScrollBar->Position = ScrollBar->Max;
+        }
+        ScrollBar->Min = ScrollBar->Enabled ? DisplayImage->Height / Zoom : 0;
 
         Bitmap->Canvas->Pen->Color = Bg;
         for(y=Bitmap->Height-8; y < Bitmap->Height; y++)
@@ -87,8 +113,6 @@ void TZXPrinter::ScrollOutput()
 __fastcall TZXPrinter::TZXPrinter(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
         Fg=clBlack;
         Bg=clWhite;
         Zoom=1;
@@ -96,6 +120,8 @@ __fastcall TZXPrinter::TZXPrinter(TComponent* Owner)
         DisplayImage->OnDblClick = DisplayImageDblClick;
         DisplayImage->Hint = "Double click: 1x, 2x or 3x size";
         DisplayImage->ShowHint = true;
+
+        memset(LineDots, -1, sizeof(LineDots));
 
         PrinterOutput= new Graphics::TBitmap;
         PrinterOutput->PixelFormat=pf4bit;
@@ -111,13 +137,11 @@ __fastcall TZXPrinter::TZXPrinter(TComponent* Owner)
         Counter1=25;
         Counter2=16;
 
-        ScrollBar->Position = PrinterOutput->Height;
         ScrollBar->Min=0;
-        ScrollBar->Max=PrinterOutput->Height;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
+        ScrollBar->Max=0;
+        ScrollBar->Position=0;
+        ScrollBar->Enabled=false;
+        ScrollBar->Visible=false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TZXPrinter::DrawImage()
@@ -234,17 +258,32 @@ void __fastcall TZXPrinter::DisplayImageDblClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TZXPrinter::ClockTick(int ts)
 {
-        if (!MotorOn) return;
+        if (!MotorOn && Momentum < 0.001) return;
         Counter1-=ts;
         if (Counter1>0) return;
+
+        if (Momentum < 0.001)
+                Momentum = 0.001;
+
         if (MotorSlow)
         {
-                Counter1 += 4064 - ((100-BitSpeed) * 10);
+                Counter1 += (4064 - ((100-BitSpeed) * 10))/Momentum;
+                if (MotorOn)
+                        Momentum += 0.025;
+                else
+                        Momentum -= 0.0025;
         }
         else
         {
-                Counter1 += 1016 - ((100-BitSpeed) * 10);
+                Counter1 += (1016 - ((100-BitSpeed) * 10))/Momentum;
+                if (MotorOn)
+                        Momentum += 0.1;
+                else
+                        Momentum -= 0.01;
         }
+
+        if (Momentum > 1.0)
+                Momentum = 1.0;
 
         if (Counter2)
         {
@@ -261,7 +300,8 @@ void TZXPrinter::ClockTick(int ts)
 
                 if (XPos==(emulator.machine==MACHINESPECTRUM ? 257:258))
                 {
-                        OutputLine();
+                        if (HandleAllocated())
+                                SendMessage(Handle, WM_ZXPRINTEROUTPUTLINE, 0, 0);
                         OnPaper=false;
                         EncoderWheel=false;
                         XPos=0;
@@ -284,7 +324,8 @@ void TZXPrinter::WritePort(unsigned char Data)
 
         if (Data & (1 << motorOn))
         {
-                ResetPrinter();
+                MotorOn = false;
+                //ResetPrinter();
         }
         else
         {
@@ -383,9 +424,11 @@ void __fastcall TZXPrinter::ClearImageClick(TObject *Sender)
         YPos=0;
         Counter2=16;
 
-        ScrollBar->Min=1;
-        ScrollBar->Max=PrinterOutput->Height;
-        ScrollBar->Position = PrinterOutput->Height;
+        ScrollBar->Min=0;
+        ScrollBar->Max=0;
+        ScrollBar->Position=0;
+        ScrollBar->Enabled=false;
+        ScrollBar->Visible=false;
 }
 //---------------------------------------------------------------------------
 
@@ -582,6 +625,31 @@ void __fastcall TZXPrinter::FeedTimerExpired(TObject *Sender)
 void __fastcall TZXPrinter::FeedClick(TObject *Sender)
 {
         OutputLine();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TZXPrinter::FormMouseWheel(TObject *Sender,
+      TShiftState Shift, int WheelDelta, TPoint &MousePos, bool &Handled)
+{
+        if (ScrollBar->Enabled)
+        {
+                int currentPos = ScrollBar->Position;
+                int newPos = currentPos - (WheelDelta / 20);
+
+                if (newPos < ScrollBar->Min)
+                {
+                        newPos = ScrollBar->Min;
+                }
+
+                if (newPos > ScrollBar->Max)
+                {
+                        newPos = ScrollBar->Max;
+                }
+
+                ScrollBar->Position = newPos;
+        }
+
+        Handled = true;
 }
 //---------------------------------------------------------------------------
 

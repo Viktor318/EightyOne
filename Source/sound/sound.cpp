@@ -96,6 +96,8 @@ CSound::CSound()
         Mix = NULL;
         Buffer = NULL;
         Output = NULL;
+        m_FrameEvent = NULL;
+        InitializeCriticalSection(&m_Lock);
         OutputChoice = SOUND_OUTPUT_AUTO;
         AYClock = 0;
         m_hWnd = NULL;
@@ -144,11 +146,14 @@ int CSound::PeakFullScale(int meter)
 // Each time we're called we store the provided information, and only when everything
 // needed has been provided do we actually do anything.
 
-int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels)
+int CSound::Initialise(HWND hWnd, HANDLE readyEvent, int FPS, int BitsPerSample, int SampleRate, int Channels)
 {
+        CSoundLock lock(&m_Lock);
+
         // If a parameter is not NULL, store the data
 
         if (hWnd) m_hWnd=hWnd;
+        if (readyEvent) m_FrameEvent=readyEvent;
         if (FPS) m_FPS=FPS;
         if (BitsPerSample) m_BitsPerSample=BitsPerSample;
         if (SampleRate) m_RequestedRate=SampleRate;
@@ -165,7 +170,9 @@ int CSound::Initialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, in
         if (Output) Output->End();
         Output=NULL;
 
-        return StartOutput(true);
+        // Only initialise the sound generating devices if sound parameters
+        // have changed
+        return StartOutput(FPS || BitsPerSample || SampleRate || Channels);
 }
 
 // Open the output, and get ready for its sample rate; the sound generating
@@ -276,11 +283,16 @@ int CSound::OpenOutput(void)
         else if (!WasapiSound.InitialiseNoDevice(m_hWnd, m_FPS, m_BitsPerSample, m_RequestedRate, m_Channels, wasapi))
                 Output = &WasapiSound;
 
+        // Its audio thread asks the emulator's frame thread for frames
+        if (Output) Output->SetFrameEvent(m_FrameEvent);
+
         return Output ? 0 : -1;
 }
 
 int CSound::SetOutputChoice(int choice)
 {
+        CSoundLock lock(&m_Lock);
+
         if (choice < 0 || choice >= SOUND_OUTPUTS) choice = SOUND_OUTPUT_AUTO;
         if (choice == OutputChoice) return 0;
 
@@ -303,23 +315,23 @@ int CSound::OutputChoiceOf(const char *name)
 }
 
 // Reinitialise gets called if something changes... we lose the window handle,
-// The user changes the sample rate - that kind of thing.
+// The user changes the sample rate - that kind of thing. What is not given
+// stays as it was; with only a new window handle the sound generating
+// devices go on where they are.
 
 int CSound::ReInitialise(HWND hWnd, int FPS, int BitsPerSample, int SampleRate, int Channels)
 {
-        if (!hWnd) hWnd = m_hWnd;
-        if (!FPS) FPS = m_FPS;
-        if (!BitsPerSample) BitsPerSample = m_BitsPerSample;
-        if (!SampleRate) SampleRate = m_RequestedRate;
-        if (!Channels) Channels = m_Channels;
+        CSoundLock lock(&m_Lock);
 
         End();
-        return Initialise(hWnd,FPS,BitsPerSample,SampleRate,Channels);
+        return Initialise(hWnd,NULL,FPS,BitsPerSample,SampleRate,Channels);
 }
 
 // End() - free the sound buffer and tell DirectSould it's all over.
 void CSound::End(void)
 {
+        CSoundLock lock(&m_Lock);
+
         if (Output) Output->End();
         Output = NULL;
         if(Buffer) delete []Buffer;
@@ -996,7 +1008,17 @@ void CSound::DigiTalkOverlay(void)
 // jumps are band limited (they were filtered only by giving the sample
 // with the edge in it a level between the two): see BeeperEdge().
 
+// Called by the emulator's frame thread; the window's thread may be setting
+// the sound up again meanwhile, hence the lock
+
 void CSound::Frame(bool pause)
+{
+        CSoundLock lock(&m_Lock);
+
+        FrameLocked(pause);
+}
+
+void CSound::FrameLocked(bool pause)
 {                  
         int f;
 

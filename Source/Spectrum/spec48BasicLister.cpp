@@ -77,13 +77,13 @@ void spec48BasicLister::InitialiseColours()
 
 int spec48BasicLister::GetProgramStartAddress()
 {
-        return getbyte(23635) + (getbyte(23636) << 8);
+        return ReadByte(23635) + (ReadByte(23636) << 8);
 }
 
 int spec48BasicLister::GetProgramEndAddress()
 {
         const int vars = 23627;
-        return getbyte(vars) + (getbyte(vars + 1) << 8);
+        return ReadByte(vars) + (ReadByte(vars + 1) << 8);
 }
 
 unsigned char spec48BasicLister::GetFloatingPointNumberCode()
@@ -159,6 +159,7 @@ COLORREF spec48BasicLister::GetInkColour()
 {
         int bright = (mBrightValue != 0) ? 8 : 0;
         COLORREF ink = mInverseValue ? mColours[mPaperValue + bright] : mColours[mInkValue + bright];
+        if (mPaperValue==mInkValue) ink=mColours[(~mPaperValue)&7 + bright];
         return ink;
 }
 

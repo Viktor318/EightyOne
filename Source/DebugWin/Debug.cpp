@@ -90,7 +90,7 @@ int StackChange;
 
 void DebugUpdate(void)
 {
-        static int lastpc;
+        static int lastpc, lastHalted;
         int i;
 
         if (z80.pc.w==0x66 && Dbg->SkipNMIBtn->Checked)
@@ -112,12 +112,16 @@ void DebugUpdate(void)
         }
 
         i=z80.pc.w;
-        if (lastpc!=z80.pc.w)
+        if (lastpc!=i)
         {
+                // Remove prefetched instruction after a HALT opcode
+                if (lastHalted)
+                        recentHistoryPos = (recentHistoryPos - 1) & 3;
+
                 recentHistory[recentHistoryPos] = i;
                 recentHistoryPos = (recentHistoryPos + 1) & 3;
 
-                if (Dbg->EnableHistory->Checked)
+                if (Dbg->EnableHistory->Checked && !z80.halted)
                 {
                         bool show0K8KAddresses = HistoryBox->Show0K8KAddresses();
                         bool show8K16KAddresses = HistoryBox->Show8K16KAddresses();
@@ -151,6 +155,8 @@ void DebugUpdate(void)
 
                 lastpc=z80.pc.w;
         }
+
+        lastHalted=z80.halted;
 
         displayedTStatesCount = tStatesCount;
 
@@ -539,6 +545,7 @@ bool TDbg::BreakPointHit()
                         if (bp->Hits >= bp->HitCount)
                         {
                                 bp->Hits = 0;
+                                tStatesCount = 0;
                                 return true;
                         }
 		}
@@ -549,7 +556,7 @@ bool TDbg::BreakPointHit()
 
 bool TDbg::BPExeHit(int addr, breakpoint* const bp)
 {
-        if (bp->HitExe(BP_EXE, addr))
+        if (bp->HitExe(BP_EXE, addr) && !z80.halted)
 	{
                 breakpoint* lastBP = &Breakpoint[Breakpoints - 1];
 
@@ -759,7 +766,7 @@ int TDbg::getRegisterValue(int registerIndex)
 			break;
 
 		case RegR:
-                        value = z80.r;
+                        value = (z80.r7&128) | (z80.r&127);
 			break;
 
 		case RegIXh:
@@ -1013,7 +1020,7 @@ void TDbg::UpdateVals(void)
         SetLabelInfo(IY, z80.iy.w);
         SetLabelInfo(PC, z80.pc.w);
         SetLabelInfo(SP, z80.sp.w);
-        SetLabelInfo(IR, (z80.i<<8) | (z80.r7 & 128) | ((z80.r) & 127));
+        SetLabelInfo(IR, (z80.i<<8) | (z80.r7 & 128) | (z80.r & 127));
         SetLabelInfo(A, z80.af.b.h, 2);
         SetLabelInfo(A_, z80.af_.b.h, 2);
         F->Caption = Bin8(z80.af.b.l);
@@ -1309,15 +1316,9 @@ void TDbg::EnableVals(void)
 __fastcall TDbg::TDbg(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
         DoNext=false;
         Breakpoints=0;
         NMIRetAddr=INTRetAddr=-1;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 
         ClientHeight=GroupBox2->Top+GroupBox2->Height+4;
         ClientWidth=GroupBox4->Left+GroupBox4->Width+4;
@@ -1325,8 +1326,6 @@ __fastcall TDbg::TDbg(TComponent* Owner)
         BPList->DefaultColWidth = BPList->Width;
 
         ResetLastIOAccesses();
-
-        MemoryWindowTimer->Interval = 50;
 }
 //---------------------------------------------------------------------------
 
@@ -1745,7 +1744,7 @@ void __fastcall TDbg::IRClick(TObject *Sender)
         EditValue->CentreOn(this);
 
         int v;
-        v = (z80.i << 8) | (z80.r7 & 128) | z80.r;
+        v = (z80.i << 8) | (z80.r7 & 128) | (z80.r & 127);
         if (EditValue->Edit2(v, 2))
         {
                 z80.r = (WORD)(v&127);
@@ -2320,25 +2319,7 @@ void __fastcall TDbg::ResetHitCountClick(TObject *Sender)
 
 void __fastcall TDbg::AutoUpdateMemoryClick(TObject *Sender)
 {
-        MemoryWindowTimer->Enabled = AutoUpdateMemory->Checked;
+        MemoryWindow->MemoryWindowTimerEnable(AutoUpdateMemory->Checked);
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TDbg::MemoryWindowTimerExpired(TObject *Sender)
-{
-        if (MemoryWindow && MemoryWindow->Visible)
-        {
-                MemoryWindow->UpdateChanges();
-        }
-}
-//---------------------------------------------------------------------------
-
-void TDbg::DisableMemoryWindowAutoUpdates()
-{
-        if (MemoryWindow->Visible)
-        {
-                MemoryWindowTimer->Enabled = false;
-        }
-}
-
 

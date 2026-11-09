@@ -36,8 +36,6 @@ TKeyboard *Keyboard;
 __fastcall TKeyboard::TKeyboard(TComponent* Owner)
         : TForm(Owner)
 {
-        TIniFile *ini;
-
         // The size of the picture is changed by double clicking it: 1x,
         // 1.25x, 1.5x, 1.75x, 2x and again 1x; it is scaled smoothly. The
         // window can be resized too, but only to these sizes. The pictures
@@ -56,10 +54,6 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
 
         OnCanResize = CanResizeWindow;
         OnResize = ResizeWindow;
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 }
 
 // The sizes, in quarters of the normal size

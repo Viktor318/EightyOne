@@ -31,7 +31,6 @@ __published:	// IDE-managed Components
         TButton *btnOK;
         TLabel *Label26;
         TLabel *Label27;
-        TLabel *Label28;
         TLabel *Label25;
         TLabel *Label29;
         TLabel *Label30;
@@ -41,6 +40,8 @@ __published:	// IDE-managed Components
         TLabel *Label34;
         TLabel *Label35;
         TLabel *Label36;
+        TLabel *Label28;
+        TLabel *Label1;
         void __fastcall Weblink1Click(TObject *Sender);
         void __fastcall Weblink2Click(TObject *Sender);
         void __fastcall Weblink3Click(TObject *Sender);
@@ -49,10 +50,9 @@ private:	// User declarations
         AnsiString mParagraph2a, mParagraph2b, mParagraph6a, mParagraph6b;
 
         void OpenWebsite();
-        void LayOut();
 public:		// User declarations
         __fastcall TBasicListingFormatInfoForm(TComponent* Owner);
-        void SetActivePage(int index);
+        void LayOut();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TBasicListingFormatInfoForm *BasicListingFormatInfoForm;

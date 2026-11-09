@@ -49,8 +49,6 @@ __fastcall TFSSettings::TFSSettings(TComponent* Owner)
         int w,h,modes; //,c,r;
         int x1,x2;
 
-        TIniFile *ini;
-
         nativeSizeW=GetSystemMetrics(SM_CXSCREEN);
         nativeSizeH=GetSystemMetrics(SM_CYSCREEN);
         nativeBpp=GetDeviceCaps(Form1->Canvas->Handle, BITSPIXEL)
@@ -99,10 +97,6 @@ __fastcall TFSSettings::TFSSettings(TComponent* Owner)
                 }
 
         ModeList->ItemIndex=0; // Automatic
-
-        ini = new TIniFile(emulator.inipath);
-        LoadSettings(ini);
-        delete ini;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFSSettings::FormClose(TObject *Sender,

@@ -31,6 +31,10 @@
 #include <IniFiles.hpp>
 #include <ComCtrls.hpp>
 //---------------------------------------------------------------------------
+
+#define WM_ZXPRINTEROUTPUTLINE (WM_USER+1)
+#define WM_ZXPRINTEROUTPUTBIT (WM_USER+2)
+
 class TZXPrinter : public TForm
 {
 __published:	// IDE-managed Components
@@ -64,6 +68,8 @@ __published:	// IDE-managed Components
         void __fastcall FeedMouseUp(TObject *Sender, TMouseButton Button,
           TShiftState Shift, int X, int Y);
         void __fastcall FeedClick(TObject *Sender);
+        void __fastcall FormMouseWheel(TObject *Sender, TShiftState Shift,
+          int WheelDelta, TPoint &MousePos, bool &Handled);
 private:	// User declarations
         int StaticWidth;
         void ScrollOutput(void);
@@ -76,8 +82,16 @@ private:	// User declarations
         int Zoom;                       // the paper shown at 1x or 2x
         void SetZoom(int zoom);
         void __fastcall DisplayImageDblClick(TObject *Sender);
+        float Momentum;
+        signed char LineDots[256];      // of the line being printed: 1 black, 0 paper, -1 not yet
 public:		// User declarations
         __fastcall TZXPrinter(TComponent* Owner);
+        void __fastcall WMOutputLine(TMessage &msg);
+
+ BEGIN_MESSAGE_MAP
+   MESSAGE_HANDLER(WM_ZXPRINTEROUTPUTLINE, TMessage, WMOutputLine)
+ END_MESSAGE_MAP(TForm)
+
         void ResetPrinter(void);
         void WritePort(unsigned char Data);
         unsigned char ReadPort(BYTE idleDataBus);

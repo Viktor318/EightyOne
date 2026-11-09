@@ -8,6 +8,48 @@ Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 készült. Magának az EightyOne-nak a változásai a
 `Release Files/Release history.txt` fájlban vannak (angolul).
 
+## Még nincs kiadva – az EightyOne 1.42 fejlesztői változata beolvasztva
+
+A következő EightyOne (1.42, John Stroebel és Paul Farrow) fejlesztői
+változata be van olvasztva: a
+[stroebeljc/EightyOne](https://github.com/stroebeljc/EightyOne) `develop`
+ága 2026. szeptember 4-i állapotában. A változásai a
+`Release Files/Release history.txt` fájlban vannak (angolul; köztük: az
+AY a $BFFD/$FFFD porton úgy, ahogy a 128K dekódolja, pontosabb Z80, saját
+szálon futó emuláció, 0x és 8x közötti Sebesség ablak, RZX-lejátszás,
+Beta Disk, Larken és ZX1541 lemezek, a Lambda 8300, a Timex gépek és a
+Spectrum 128 BASIC listája, Memotech és Quicksilva nagy felbontás, Lambda
+szín, a joystick POV-kalapja, a ZX Printer lendülete).
+
+### A beolvasztás
+
+- Az emuláció saját szálon fut, és **továbbra is a hang az órája**: a
+  WASAPI- és a DirectSound-kimenet minden hangkockához jelez neki (eddig
+  üzenetet küldött a főablaknak), és legfeljebb 100 ms-ig vár a hangjára,
+  utána csendet játszik. Így **menü vagy párbeszédablak alatt is szól a
+  hang és fut a gép**.
+- A beállítások akkor töltődnek be, amikor már minden ablak megvan (mint
+  az 1.42-ben); a főablak továbbra is csak akkor jelenik meg, amikor már
+  megvan a mérete.
+- Az új szövegek magyarul is megvannak (ZX1541 lemezek, RZX-lejátszás, a
+  Lambda szín menüpontja, a BASIC lista formátumleírása), az új és
+  megváltozott ablakok Segoe UI 9 pontosak.
+
+### Javítások a fejlesztői változathoz képest
+
+- A parancssorban megadott fájlokat, és az ott megadott beállításfájlt,
+  néha figyelmen kívül hagyta: a parancssort a szétbontása után azonnal
+  felszabadította.
+- Pillanatkép betöltése alatt (menüből, parancssorból vagy az ablakra
+  húzva) áll az emuláció: a betöltés közben futó képkockák „Unknown
+  Internal Error” hibával és újraindítással végződhettek.
+- A sikertelen RZX-lejátszás után nem marad állva az emuláció.
+- Amíg a főablak az emuláció szálára vár, kezeli az onnan kapott
+  üzeneteket (állapotsor, ZX Printer), így nem várhatnak egymásra.
+- A **ZX Printer** soronként rajzol: a pontonkénti üzenet nyomtatás
+  közben kb. 43 képkocka/s-ra lassította az emulációt. A görgetősávja 2x
+  és 3x méretben is működik.
+
 ## v1.41-hu.1 – 2026-11-09
 
 ### Hang
