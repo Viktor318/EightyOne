@@ -1,14 +1,14 @@
 object SymbolBrowser: TSymbolBrowser
   Left = 337
   Top = 132
-  Width = 282
-  Height = 429
+  Width = 307
+  Height = 466
   BorderStyle = bsSizeToolWin
   Caption = 'Symbol Browser'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -16,17 +16,17 @@ object SymbolBrowser: TSymbolBrowser
   Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object ListBox1: TListBox
     Left = 0
     Top = 0
-    Width = 274
-    Height = 393
+    Width = 299
+    Height = 429
     Anchors = [akLeft, akTop, akRight, akBottom]
     BiDiMode = bdRightToLeft
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -12
     Font.Name = 'Courier New'
     Font.Style = []
     ItemHeight = 14

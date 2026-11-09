@@ -4,12 +4,12 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Saving a BASIC Listing as Text'
-  ClientHeight = 454
-  ClientWidth = 387
+  ClientHeight = 495
+  ClientWidth = 422
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -50,13 +50,14 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     000000000000000000000000000000000000FFFF0000}
   OldCreateOrder = False
   Scaled = False
+  OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label26: TLabel
-    Left = 8
-    Top = 40
-    Width = 373
-    Height = 39
+    Left = 9
+    Top = 44
+    Width = 407
+    Height = 42
     Caption = 
       'ZX80 and ZX81 inverse characters and ZX80, ZX81 and Spectrum blo' +
       'ck graphic symbols are encoded in accordance with the scheme. No' +
@@ -65,20 +66,20 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label27: TLabel
-    Left = 8
-    Top = 8
-    Width = 367
-    Height = 26
+    Left = 9
+    Top = 9
+    Width = 400
+    Height = 28
     Caption = 
       'The BASIC listing format is based upon that used by the ZXText2P' +
       ' utility, with extensions to handle a wider range of scenarios.'
     WordWrap = True
   end
   object Label28: TLabel
-    Left = 8
-    Top = 80
-    Width = 369
-    Height = 26
+    Left = 9
+    Top = 87
+    Width = 402
+    Height = 29
     Caption = 
       'as a 2 digit hexadecimal number. On the Spectrum UDGs are encode' +
       'd as \_n where n is the UDG letter, and a standard \ character i' +
@@ -86,10 +87,10 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label25: TLabel
-    Left = 8
-    Top = 112
-    Width = 354
-    Height = 26
+    Left = 9
+    Top = 122
+    Width = 386
+    Height = 29
     Caption = 
       'Space suppression between consecutive keywords is replicated in ' +
       'the text output, and additional spaces within a line are retaine' +
@@ -97,10 +98,10 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label29: TLabel
-    Left = 8
-    Top = 145
-    Width = 368
-    Height = 39
+    Left = 9
+    Top = 158
+    Width = 401
+    Height = 43
     Caption = 
       'The content of a REM statement is by default output as text if a' +
       'll characters are displayable, and as \nn character codes if any' +
@@ -109,10 +110,10 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label30: TLabel
-    Left = 8
-    Top = 184
-    Width = 359
-    Height = 26
+    Left = 9
+    Top = 201
+    Width = 391
+    Height = 28
     Caption = 
       'option allows the contents to always be output in \nn character ' +
       'code format irrespective of whether all characters are displayab' +
@@ -120,10 +121,10 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label31: TLabel
-    Left = 8
-    Top = 216
-    Width = 368
-    Height = 39
+    Left = 9
+    Top = 236
+    Width = 401
+    Height = 42
     Caption = 
       'The pound symbol is by default output as £, but this is not part' +
       ' of the ASCII character set (it has code $A3). A configuration o' +
@@ -132,51 +133,51 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object Label32: TLabel
-    Left = 8
-    Top = 310
-    Width = 346
-    Height = 26
+    Left = 9
+    Top = 338
+    Width = 377
+    Height = 29
     Caption = 
       'A configuration option allows variable names to be output in low' +
       'ercase to ensure there is no ambiguity with BASIC keywords.'
     WordWrap = True
   end
   object Label33: TLabel
-    Left = 8
-    Top = 344
-    Width = 375
-    Height = 26
+    Left = 9
+    Top = 375
+    Width = 409
+    Height = 29
     Caption = 
       'BASIC listing files are saved with extension B80 for the ZX80, B' +
       '81 for the ZX81 and B82 for the Spectrum.'
     WordWrap = True
   end
   object Label34: TLabel
-    Left = 8
-    Top = 377
-    Width = 285
-    Height = 13
+    Left = 9
+    Top = 411
+    Width = 311
+    Height = 15
     Caption = 'Details of the ZXText2P encoding format can be found here:'
   end
   object Label35: TLabel
-    Left = 8
-    Top = 393
-    Width = 219
-    Height = 13
+    Left = 9
+    Top = 429
+    Width = 239
+    Height = 15
     Caption = 'http://freestuff.grok.co.uk/zxtext2p/index.html'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = [fsUnderline]
     ParentFont = False
     OnClick = Weblink1Click
   end
   object Label36: TLabel
-    Left = 8
-    Top = 263
-    Width = 368
-    Height = 39
+    Left = 9
+    Top = 287
+    Width = 401
+    Height = 42
     Caption = 
       'On the Spectrum the copyright symbol is by default output as ©, ' +
       'but this is not part of the ASCII character set (it has code $A9' +
@@ -185,10 +186,10 @@ object BasicListingFormatInfoForm: TBasicListingFormatInfoForm
     WordWrap = True
   end
   object btnOK: TButton
-    Left = 160
-    Top = 418
-    Width = 68
-    Height = 25
+    Left = 175
+    Top = 456
+    Width = 74
+    Height = 27
     Caption = 'OK'
     Default = True
     ModalResult = 1

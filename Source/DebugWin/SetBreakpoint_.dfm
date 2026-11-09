@@ -3,12 +3,12 @@ object SetBreakpoint: TSetBreakpoint
   Top = 101
   BorderStyle = bsToolWindow
   Caption = 'Configure Breakpoint'
-  ClientHeight = 90
-  ClientWidth = 422
+  ClientHeight = 98
+  ClientWidth = 507
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -17,63 +17,63 @@ object SetBreakpoint: TSetBreakpoint
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object LabelBreakAddress: TLabel
-    Left = 138
-    Top = 8
-    Width = 41
-    Height = 13
+    Left = 160
+    Top = 9
+    Width = 44
+    Height = 15
     Caption = 'Address:'
   end
   object LabelConditionValue: TLabel
-    Left = 199
-    Top = 8
-    Width = 47
-    Height = 13
+    Left = 229
+    Top = 9
+    Width = 51
+    Height = 15
     Caption = 'Condition:'
   end
   object LabelBreakValue: TLabel
-    Left = 252
-    Top = 8
-    Width = 30
-    Height = 13
+    Left = 294
+    Top = 9
+    Width = 33
+    Height = 15
     Caption = 'Value:'
   end
   object LabelType: TLabel
-    Left = 8
-    Top = 8
-    Width = 27
-    Height = 13
+    Left = 9
+    Top = 9
+    Width = 29
+    Height = 15
     Caption = 'Type:'
   end
   object LabelConditionAddr: TLabel
-    Left = 85
-    Top = 8
-    Width = 47
-    Height = 13
+    Left = 95
+    Top = 9
+    Width = 51
+    Height = 15
     Caption = 'Condition:'
   end
   object LabelBreakEnabled: TLabel
-    Left = 365
-    Top = 8
-    Width = 42
-    Height = 13
+    Left = 428
+    Top = 9
+    Width = 46
+    Height = 15
     Caption = 'Enabled:'
   end
   object LabelBreakHitcount: TLabel
-    Left = 313
-    Top = 8
-    Width = 21
-    Height = 13
+    Left = 363
+    Top = 9
+    Width = 23
+    Height = 15
     Caption = 'Hits:'
   end
   object FlagList: TComboBox
-    Left = 138
-    Top = 24
-    Width = 57
-    Height = 21
+    Left = 160
+    Top = 26
+    Width = 62
+    Height = 23
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 2
     Visible = False
     Items.Strings = (
@@ -87,13 +87,13 @@ object SetBreakpoint: TSetBreakpoint
       '7: S')
   end
   object RegisterList: TComboBox
-    Left = 138
-    Top = 24
-    Width = 57
-    Height = 21
+    Left = 160
+    Top = 26
+    Width = 62
+    Height = 23
     Style = csDropDownList
     DropDownCount = 18
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 1
     Visible = False
     OnChange = RegisterListChange
@@ -130,29 +130,29 @@ object SetBreakpoint: TSetBreakpoint
       'L'#39)
   end
   object OK: TButton
-    Left = 137
-    Top = 56
-    Width = 73
-    Height = 25
+    Left = 168
+    Top = 61
+    Width = 80
+    Height = 27
     Caption = 'OK'
     Default = True
     TabOrder = 7
     OnClick = OKClick
   end
   object Cancel: TButton
-    Left = 220
-    Top = 56
-    Width = 73
-    Height = 25
+    Left = 259
+    Top = 61
+    Width = 80
+    Height = 27
     Caption = 'Cancel'
     TabOrder = 8
     OnClick = CancelClick
   end
   object BreakAddress: TEdit
-    Left = 138
-    Top = 24
-    Width = 57
-    Height = 21
+    Left = 160
+    Top = 26
+    Width = 62
+    Height = 23
     CharCase = ecUpperCase
     MaxLength = 5
     TabOrder = 0
@@ -160,10 +160,10 @@ object SetBreakpoint: TSetBreakpoint
     OnChange = BreakAddressChange
   end
   object BreakValue: TEdit
-    Left = 252
-    Top = 24
-    Width = 57
-    Height = 21
+    Left = 294
+    Top = 26
+    Width = 62
+    Height = 23
     CharCase = ecUpperCase
     MaxLength = 5
     TabOrder = 4
@@ -171,30 +171,30 @@ object SetBreakpoint: TSetBreakpoint
     OnChange = BreakValueChange
   end
   object BreakConditionAddr: TComboBox
-    Left = 85
-    Top = 24
-    Width = 49
-    Height = 21
+    Left = 95
+    Top = 26
+    Width = 58
+    Height = 23
     Style = csDropDownList
     DropDownCount = 5
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
-    ItemHeight = 13
+    ItemHeight = 15
     ParentFont = False
     TabOrder = 10
     OnChange = BreakConditionAddrChange
   end
   object BreakType: TComboBox
-    Left = 8
-    Top = 24
-    Width = 73
-    Height = 21
+    Left = 9
+    Top = 26
+    Width = 79
+    Height = 23
     Style = csDropDownList
     DropDownCount = 13
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 9
     OnChange = BreakTypeChange
     Items.Strings = (
@@ -213,33 +213,33 @@ object SetBreakpoint: TSetBreakpoint
       'Flag')
   end
   object BreakConditionValue: TComboBox
-    Left = 199
-    Top = 24
-    Width = 49
-    Height = 21
+    Left = 229
+    Top = 26
+    Width = 58
+    Height = 23
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 3
   end
   object ComboBoxBreakEnabled: TComboBox
-    Left = 365
-    Top = 24
-    Width = 49
-    Height = 21
+    Left = 428
+    Top = 26
+    Width = 70
+    Height = 23
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 6
     Items.Strings = (
       'Yes'
       'No')
   end
   object BreakHitCount: TComboBox
-    Left = 313
-    Top = 24
-    Width = 48
-    Height = 21
+    Left = 363
+    Top = 26
+    Width = 58
+    Height = 23
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 5
   end
 end

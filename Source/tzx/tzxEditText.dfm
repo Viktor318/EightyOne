@@ -4,38 +4,38 @@ object EditTextForm: TEditTextForm
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Edit Text Block'
-  ClientHeight = 90
-  ClientWidth = 297
+  ClientHeight = 98
+  ClientWidth = 324
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
-    Left = 8
-    Top = 8
-    Width = 24
-    Height = 13
+    Left = 9
+    Top = 9
+    Width = 26
+    Height = 15
     Caption = 'Text:'
   end
   object Edit: TEdit
-    Left = 8
-    Top = 24
-    Width = 281
-    Height = 21
+    Left = 9
+    Top = 26
+    Width = 306
+    Height = 23
     TabOrder = 0
   end
   object OK: TButton
-    Left = 112
-    Top = 56
-    Width = 75
-    Height = 25
+    Left = 122
+    Top = 61
+    Width = 82
+    Height = 27
     Caption = 'OK'
     Default = True
     TabOrder = 1

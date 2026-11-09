@@ -4,153 +4,153 @@ object EditFlag: TEditFlag
   BorderIcons = [biHelp]
   BorderStyle = bsToolWindow
   Caption = 'EditFlag'
-  ClientHeight = 82
-  ClientWidth = 140
+  ClientHeight = 89
+  ClientWidth = 153
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = False
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
-    Left = 10
-    Top = 8
-    Width = 8
-    Height = 16
+    Left = 11
+    Top = 9
+    Width = 9
+    Height = 17
     Caption = 'S'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -14
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
   end
   object Label2: TLabel
-    Left = 26
-    Top = 8
-    Width = 8
-    Height = 16
+    Left = 28
+    Top = 9
+    Width = 9
+    Height = 17
     Caption = 'Z'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -14
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
   end
   object Label4: TLabel
-    Left = 58
-    Top = 8
-    Width = 8
-    Height = 16
+    Left = 63
+    Top = 9
+    Width = 9
+    Height = 17
     Caption = 'H'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -14
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
   end
   object Label6: TLabel
-    Left = 90
-    Top = 8
-    Width = 8
-    Height = 16
+    Left = 98
+    Top = 9
+    Width = 9
+    Height = 17
     Caption = 'V'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -14
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
   end
   object Label7: TLabel
-    Left = 106
-    Top = 8
+    Left = 116
+    Top = 9
     Width = 8
-    Height = 16
+    Height = 17
     Caption = 'N'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -14
     Font.Name = 'Courier New'
     Font.Style = []
     ParentFont = False
   end
   object F7: TCheckBox
-    Left = 8
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 9
+    Top = 26
+    Width = 18
+    Height = 19
     TabOrder = 0
   end
   object F6: TCheckBox
-    Left = 24
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 26
+    Top = 26
+    Width = 19
+    Height = 19
     TabOrder = 1
   end
   object F5: TCheckBox
-    Left = 40
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 44
+    Top = 26
+    Width = 18
+    Height = 19
     TabOrder = 2
   end
   object F4: TCheckBox
-    Left = 56
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 61
+    Top = 26
+    Width = 19
+    Height = 19
     TabOrder = 3
   end
   object F3: TCheckBox
-    Left = 72
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 79
+    Top = 26
+    Width = 18
+    Height = 19
     TabOrder = 4
   end
   object F2: TCheckBox
-    Left = 88
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 96
+    Top = 26
+    Width = 19
+    Height = 19
     TabOrder = 5
   end
   object F1: TCheckBox
-    Left = 104
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 113
+    Top = 26
+    Width = 19
+    Height = 19
     TabOrder = 6
   end
   object F0: TCheckBox
-    Left = 120
-    Top = 24
-    Width = 17
-    Height = 17
+    Left = 131
+    Top = 26
+    Width = 18
+    Height = 19
     TabOrder = 7
   end
   object OK: TButton
-    Left = 8
-    Top = 48
-    Width = 57
-    Height = 25
+    Left = 9
+    Top = 52
+    Width = 62
+    Height = 28
     Caption = 'OK'
     TabOrder = 8
     OnClick = OKClick
   end
   object Cancel: TButton
-    Left = 72
-    Top = 48
-    Width = 61
-    Height = 25
+    Left = 79
+    Top = 52
+    Width = 66
+    Height = 28
     Caption = 'Cancel'
     TabOrder = 9
     OnClick = CancelClick

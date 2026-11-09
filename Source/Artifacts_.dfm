@@ -4,12 +4,12 @@ object Artifacts: TArtifacts
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'TV Emulation'
-  ClientHeight = 328
-  ClientWidth = 238
+  ClientHeight = 358
+  ClientWidth = 336
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -18,12 +18,12 @@ object Artifacts: TArtifacts
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Image1: TImage
-    Left = 86
+    Left = 126
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 30
+    Height = 31
     Hint = 'Colour'
     AutoSize = True
     ParentShowHint = False
@@ -84,10 +84,10 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Image2: TImage
-    Left = 6
+    Left = 13
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 30
+    Height = 31
     Hint = 'Brightness'
     AutoSize = True
     ParentShowHint = False
@@ -148,10 +148,10 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Image3: TImage
-    Left = 46
+    Left = 69
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 31
+    Height = 31
     Hint = 'Contrast'
     AutoSize = True
     ParentShowHint = False
@@ -212,10 +212,10 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Image4: TImage
-    Left = 126
+    Left = 181
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 31
+    Height = 31
     AutoSize = True
     Picture.Data = {
       07544269746D617062060000424D620600000000000042000000280000001C00
@@ -273,10 +273,10 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Image5: TImage
-    Left = 166
+    Left = 238
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 31
+    Height = 31
     AutoSize = True
     Picture.Data = {
       07544269746D617062060000424D620600000000000042000000280000001C00
@@ -334,10 +334,10 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Image6: TImage
-    Left = 206
+    Left = 295
     Top = 2
-    Width = 28
-    Height = 28
+    Width = 30
+    Height = 31
     AutoSize = True
     Picture.Data = {
       07544269746D617062060000424D620600000000000042000000280000001C00
@@ -395,37 +395,38 @@ object Artifacts: TArtifacts
     Transparent = True
   end
   object Label1: TLabel
-    Left = 8
-    Top = 210
-    Width = 72
-    Height = 13
+    Left = 6
+    Top = 229
+    Width = 118
+    Height = 15
+    Alignment = taRightJustify
     AutoSize = False
     Caption = 'Horizontal Hold'
   end
   object Label2: TLabel
-    Left = 8
-    Top = 172
-    Width = 72
-    Height = 13
+    Left = 6
+    Top = 188
+    Width = 118
+    Height = 15
     Alignment = taRightJustify
     AutoSize = False
     Caption = 'Vertical Hold'
   end
   object CloseBtn: TButton
-    Left = 156
-    Top = 296
-    Width = 75
-    Height = 25
+    Left = 246
+    Top = 323
+    Width = 82
+    Height = 27
     Caption = 'OK'
     Default = True
     TabOrder = 14
     OnClick = CloseBtnClick
   end
   object NoiseTrack: TTrackBar
-    Left = 120
-    Top = 32
-    Width = 33
-    Height = 121
+    Left = 175
+    Top = 35
+    Width = 36
+    Height = 132
     Hint = 'Noise'
     Enabled = False
     Max = 20
@@ -443,10 +444,10 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object GhostTrack: TTrackBar
-    Left = 160
-    Top = 32
-    Width = 33
-    Height = 121
+    Left = 232
+    Top = 35
+    Width = 36
+    Height = 132
     Hint = 'Ghosting'
     Enabled = False
     Max = 40
@@ -464,20 +465,20 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object ArtEnabled: TCheckBox
-    Left = 8
-    Top = 236
-    Width = 105
-    Height = 17
+    Left = 9
+    Top = 257
+    Width = 148
+    Height = 19
     Caption = 'Artefacts Enabled'
     Enabled = False
     TabOrder = 8
     OnClick = ArtEnabledClick
   end
   object ScanLineTrack: TTrackBar
-    Left = 200
-    Top = 32
-    Width = 33
-    Height = 121
+    Left = 288
+    Top = 35
+    Width = 36
+    Height = 132
     Hint = 'Scanlines'
     Enabled = False
     Max = 40
@@ -495,10 +496,10 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object BrightTrack: TTrackBar
-    Left = 0
-    Top = 32
-    Width = 45
-    Height = 121
+    Left = 6
+    Top = 35
+    Width = 49
+    Height = 132
     Hint = 'Brightness'
     Max = 255
     Orientation = trVertical
@@ -514,20 +515,20 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object SimpleGhosting: TCheckBox
-    Left = 8
-    Top = 252
-    Width = 97
-    Height = 17
+    Left = 9
+    Top = 275
+    Width = 148
+    Height = 18
     Caption = 'Simple Ghosting'
     Enabled = False
     TabOrder = 9
     OnClick = SimpleGhostingClick
   end
   object ContrastTrack: TTrackBar
-    Left = 40
-    Top = 32
-    Width = 33
-    Height = 121
+    Left = 63
+    Top = 35
+    Width = 36
+    Height = 132
     Hint = 'Contrast'
     Max = 255
     Orientation = trVertical
@@ -543,40 +544,40 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object DotCrawl1: TCheckBox
-    Left = 120
-    Top = 252
-    Width = 81
-    Height = 17
+    Left = 168
+    Top = 275
+    Width = 164
+    Height = 18
     Caption = 'Dot Crawl'
     Enabled = False
     TabOrder = 12
     OnClick = DotCrawl1Click
   end
   object AdvEffects: TCheckBox
-    Left = 120
-    Top = 236
-    Width = 113
-    Height = 17
+    Left = 168
+    Top = 257
+    Width = 164
+    Height = 19
     Caption = 'Advanced Effects'
     Enabled = False
     TabOrder = 11
     OnClick = AdvEffectsClick
   end
   object Interlaced1: TCheckBox
-    Left = 120
-    Top = 268
-    Width = 105
-    Height = 17
+    Left = 168
+    Top = 292
+    Width = 164
+    Height = 19
     Caption = 'Interlaced Display'
     Enabled = False
     TabOrder = 13
     OnClick = Interlaced1Click
   end
   object Vibrant: TCheckBox
-    Left = 8
-    Top = 268
-    Width = 97
-    Height = 17
+    Left = 9
+    Top = 292
+    Width = 148
+    Height = 19
     Caption = 'Vibrant Colour'
     Checked = True
     Enabled = False
@@ -585,10 +586,10 @@ object Artifacts: TArtifacts
     OnClick = TrackBarChange
   end
   object ColourTrack: TTrackBar
-    Left = 80
-    Top = 32
-    Width = 41
-    Height = 121
+    Left = 119
+    Top = 35
+    Width = 45
+    Height = 132
     Hint = 'Colour'
     Max = 255
     Orientation = trVertical
@@ -604,10 +605,10 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object VGain: TTrackBar
-    Left = 88
-    Top = 198
-    Width = 150
-    Height = 33
+    Left = 128
+    Top = 216
+    Width = 208
+    Height = 36
     Hint = 'Horizontal Hold'
     Max = 400
     Min = -400
@@ -624,10 +625,10 @@ object Artifacts: TArtifacts
     OnChange = TrackBarChange
   end
   object VBias: TTrackBar
-    Left = 88
-    Top = 160
-    Width = 150
-    Height = 33
+    Left = 128
+    Top = 175
+    Width = 208
+    Height = 36
     Hint = 'Vertical Hold'
     Max = 50
     Min = -50

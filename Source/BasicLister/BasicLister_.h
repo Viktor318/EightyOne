@@ -88,6 +88,7 @@ private:	// User declarations
         int mScaling;
 
         void ClearBitmap();
+        int ListingAreaWidth(int listingWidth);
         void ConstructBitmap();
         bool ExtractLine(int* basicPos, int* displayLength);
         void ExtractProgramDetails();

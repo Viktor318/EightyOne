@@ -1,16 +1,16 @@
 object WavLoad: TWavLoad
   Left = 329
   Top = 92
-  Width = 344
-  Height = 231
+  Width = 375
+  Height = 250
   BorderStyle = bsSizeToolWin
   Caption = 'Wave Loader'
   Color = clBtnFace
-  Constraints.MinHeight = 200
-  Constraints.MinWidth = 211
+  Constraints.MinHeight = 216
+  Constraints.MinWidth = 229
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -22,53 +22,53 @@ object WavLoad: TWavLoad
   OnPaint = FormPaint
   OnResize = FormResize
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
     Left = 4
-    Top = 33
-    Width = 279
-    Height = 8
+    Top = 36
+    Width = 305
+    Height = 9
     Anchors = [akLeft, akTop, akRight]
     Shape = bsTopLine
   end
   object Bevel2: TBevel
     Left = 4
-    Top = 124
-    Width = 279
-    Height = 10
+    Top = 135
+    Width = 305
+    Height = 11
     Anchors = [akLeft, akRight, akBottom]
     Shape = bsBottomLine
   end
   object Bevel3: TBevel
     Left = 4
-    Top = 34
-    Width = 9
-    Height = 97
+    Top = 37
+    Width = 10
+    Height = 106
     Anchors = [akLeft, akTop, akBottom]
     Shape = bsLeftLine
   end
   object Bevel4: TBevel
-    Left = 274
-    Top = 33
-    Width = 10
-    Height = 99
+    Left = 299
+    Top = 36
+    Width = 11
+    Height = 108
     Anchors = [akTop, akRight, akBottom]
     Shape = bsRightLine
   end
   object Panel3: TPanel
     Left = 0
-    Top = 134
-    Width = 335
-    Height = 51
+    Top = 146
+    Width = 365
+    Height = 56
     Anchors = [akLeft, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 5
   end
   object Bias: TTrackBar
-    Left = 302
-    Top = 24
-    Width = 33
-    Height = 112
+    Left = 329
+    Top = 26
+    Width = 36
+    Height = 122
     Anchors = [akTop, akRight, akBottom]
     Max = 128
     Min = -128
@@ -83,10 +83,10 @@ object WavLoad: TWavLoad
     OnChange = BiasChange
   end
   object Volume: TTrackBar
-    Left = 286
-    Top = 24
-    Width = 21
-    Height = 112
+    Left = 312
+    Top = 26
+    Width = 23
+    Height = 122
     Anchors = [akTop, akRight, akBottom]
     Max = 128
     Min = -128
@@ -101,23 +101,23 @@ object WavLoad: TWavLoad
     OnChange = VolumeChange
   end
   object Panel1: TPanel
-    Left = 66
-    Top = 154
-    Width = 185
-    Height = 25
+    Left = 72
+    Top = 168
+    Width = 202
+    Height = 27
     Anchors = [akBottom]
     BevelOuter = bvNone
     TabOrder = 4
     object RewStart: TOffice97Button
-      Left = 8
+      Left = 9
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 27
+      Height = 25
       Hint = 'Rewind to Start'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -142,15 +142,15 @@ object WavLoad: TWavLoad
       OnClick = RewStartClick
     end
     object Rewind: TOffice97Button
-      Left = 32
+      Left = 35
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 27
+      Height = 25
       Hint = 'Rewind'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -175,15 +175,15 @@ object WavLoad: TWavLoad
       OnClick = RewindClick
     end
     object PlayBtn: TOffice97Button
-      Left = 80
+      Left = 87
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 28
+      Height = 25
       Hint = 'Play'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -209,15 +209,15 @@ object WavLoad: TWavLoad
       OnClick = PlayBtnClick
     end
     object StopBtn: TOffice97Button
-      Left = 56
+      Left = 61
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 27
+      Height = 25
       Hint = 'Stop'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -244,10 +244,10 @@ object WavLoad: TWavLoad
       OnClick = StopBtnClick
     end
     object RecordBtn: TOffice97Button
-      Left = 104
+      Left = 113
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 28
+      Height = 25
       Hint = 'Record'
       Color = 13434879
       DisabledGlyph.Data = {
@@ -261,7 +261,7 @@ object WavLoad: TWavLoad
         1111111111111111111111111111111111111111111111111111}
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -287,15 +287,15 @@ object WavLoad: TWavLoad
       OnClick = RecordBtnClick
     end
     object FastForward: TOffice97Button
-      Left = 128
+      Left = 140
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 27
+      Height = 25
       Hint = 'Fast Forward'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -320,15 +320,15 @@ object WavLoad: TWavLoad
       OnClick = FastForwardClick
     end
     object FFEnd: TOffice97Button
-      Left = 152
+      Left = 166
       Top = 0
-      Width = 25
-      Height = 23
+      Width = 27
+      Height = 25
       Hint = 'Fast Forward to End'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -356,21 +356,21 @@ object WavLoad: TWavLoad
   object Panel2: TPanel
     Left = 0
     Top = 4
-    Width = 335
-    Height = 25
+    Width = 365
+    Height = 28
     Anchors = [akLeft, akTop, akRight]
     BevelOuter = bvNone
     TabOrder = 0
     object NewWav1: TOffice97Button
       Left = 4
       Top = 0
-      Width = 25
-      Height = 25
+      Width = 28
+      Height = 27
       Hint = 'New Wav'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -395,15 +395,15 @@ object WavLoad: TWavLoad
       OnClick = NewWav1Click
     end
     object OpenWav1: TOffice97Button
-      Left = 28
+      Left = 31
       Top = 0
-      Width = 25
-      Height = 25
+      Width = 27
+      Height = 27
       Hint = 'Open Wav File'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -430,15 +430,15 @@ object WavLoad: TWavLoad
       OnClick = OpenWav1Click
     end
     object SavWav1: TOffice97Button
-      Left = 52
+      Left = 57
       Top = 0
-      Width = 25
-      Height = 25
+      Width = 27
+      Height = 27
       Hint = 'Save Wav File'
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -463,16 +463,16 @@ object WavLoad: TWavLoad
       OnClick = SaveWav1Click
     end
     object AutoStartStop1: TOffice97Button
-      Left = 270
+      Left = 295
       Top = 0
-      Width = 25
-      Height = 25
+      Width = 27
+      Height = 27
       Hint = 'Auto Start/Stop'
       Anchors = [akRight, akBottom]
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -498,16 +498,16 @@ object WavLoad: TWavLoad
       OnClick = AutoStartStop1Click
     end
     object AutoloadonInsert1: TOffice97Button
-      Left = 294
+      Left = 321
       Top = 0
-      Width = 41
-      Height = 25
+      Width = 44
+      Height = 27
       Hint = 'Auto LOAD on Insert'
       Anchors = [akRight, akBottom]
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -533,16 +533,16 @@ object WavLoad: TWavLoad
       OnClick = AutoloadonInsert1Click
     end
     object ConvertNextBlock1: TOffice97Button
-      Left = 146
+      Left = 159
       Top = 0
-      Width = 25
-      Height = 25
+      Width = 28
+      Height = 27
       Hint = 'Convert Next Block to TZX'
       Anchors = [akTop]
       Color = 13434879
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -567,10 +567,10 @@ object WavLoad: TWavLoad
       OnClick = ConvertNextBlock1Click
     end
     object SoundOn: TOffice97Button
-      Left = 244
+      Left = 266
       Top = 0
-      Width = 27
-      Height = 25
+      Width = 30
+      Height = 27
       Hint = 'Loading Sounds'
       Anchors = [akTop, akRight]
       Color = 13434879
@@ -591,7 +591,7 @@ object WavLoad: TWavLoad
         050505050505050500000505050505050505050505050505050505050000}
       HoverFont.Charset = DEFAULT_CHARSET
       HoverFont.Color = clWindowText
-      HoverFont.Height = -11
+      HoverFont.Height = -12
       HoverFont.Name = 'Segoe UI'
       HoverFont.Style = []
       InactiveColor = clBtnFace
@@ -622,9 +622,9 @@ object WavLoad: TWavLoad
   end
   object ScrollBar: TScrollBar
     Left = 0
-    Top = 137
-    Width = 333
-    Height = 17
+    Top = 149
+    Width = 363
+    Height = 19
     Anchors = [akLeft, akRight, akBottom]
     LargeChange = 256
     PageSize = 0
@@ -634,27 +634,27 @@ object WavLoad: TWavLoad
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 174
-    Width = 328
-    Height = 19
+    Top = 190
+    Width = 358
+    Height = 21
     BorderWidth = 1
     Panels = <
       item
         Text = '44.1kHz, 8 bit Stereo'
-        Width = 110
+        Width = 120
       end
       item
         Alignment = taCenter
         Text = '999/999s'
-        Width = 70
+        Width = 76
       end
       item
         Alignment = taCenter
         Text = 'Recording'
-        Width = 75
+        Width = 82
       end
       item
-        Width = 50
+        Width = 55
       end>
     SimplePanel = False
   end
@@ -663,12 +663,12 @@ object WavLoad: TWavLoad
     Filter = 
       'All Files|*.wav;*.csw;*.zip|WAV Files|*.wav|CSW Files|*.csw|Comp' +
       'ressed Files|*.zip'
-    Left = 48
-    Top = 40
+    Left = 52
+    Top = 44
   end
   object SaveWavDialog: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Left = 16
-    Top = 40
+    Left = 17
+    Top = 44
   end
 end

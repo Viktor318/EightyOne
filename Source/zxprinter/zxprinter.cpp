@@ -175,7 +175,8 @@ void TZXPrinter::SetZoom(int zoom)
                 int options = Panel1->Height + 4;
 
                 if (SystemParametersInfo(SPI_GETWORKAREA, 0, &area, 0))
-                        while (zoom > 1 && frame + PRINTER_PAPER_HEIGHT * zoom + 7 + 32
+                        while (zoom > 1 && frame + PRINTER_PAPER_HEIGHT * zoom + 7
+                                                + SaveImage->Height + 7
                                                 + options > area.bottom - area.top)
                                 zoom--;
         }
@@ -214,7 +215,9 @@ void TZXPrinter::SetZoom(int zoom)
                 }
         }
 
-        Panel1->SetBounds(PRINTER_MARGIN, y + 32, width - 2 * PRINTER_MARGIN, Panel1->Height);
+        // (the options under the buttons, as far below them as the buttons
+        // are below the paper)
+        Panel1->SetBounds(PRINTER_MARGIN, y + SaveImage->Height + 7, width - 2 * PRINTER_MARGIN, Panel1->Height);
         BitRate->Width = Panel1->Width - 16;
         LineRate->Width = Panel1->Width - 16;
 

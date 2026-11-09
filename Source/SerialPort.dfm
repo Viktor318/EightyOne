@@ -4,64 +4,65 @@ object SerialConfig: TSerialConfig
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'TS2050 Configuration'
-  ClientHeight = 186
-  ClientWidth = 243
+  ClientHeight = 203
+  ClientWidth = 283
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
-    Left = 42
-    Top = 12
-    Width = 55
-    Height = 13
+    Left = 73
+    Top = 13
+    Width = 60
+    Height = 15
     Alignment = taRightJustify
     Caption = 'Connect to:'
   end
   object SerialPanel: TPanel
-    Left = 16
-    Top = 32
-    Width = 217
-    Height = 89
+    Left = 17
+    Top = 35
+    Width = 257
+    Height = 97
     BevelOuter = bvNone
     TabOrder = 5
     object Label2: TLabel
-      Left = 13
-      Top = 12
-      Width = 68
-      Height = 13
+      Left = 42
+      Top = 13
+      Width = 74
+      Height = 15
       Alignment = taRightJustify
       Caption = '/1 Baud Rate:'
     end
     object Label3: TLabel
-      Left = 8
-      Top = 36
-      Width = 74
-      Height = 13
+      Left = 36
+      Top = 39
+      Width = 80
+      Height = 15
       Alignment = taRightJustify
       Caption = '/16 Baud Rate:'
     end
     object Label4: TLabel
-      Left = 8
-      Top = 60
-      Width = 74
-      Height = 13
+      Left = 36
+      Top = 65
+      Width = 80
+      Height = 15
+      Alignment = taRightJustify
       Caption = '/64 Baud Rate:'
     end
     object X1Baud: TComboBox
-      Left = 88
-      Top = 8
-      Width = 121
-      Height = 21
+      Left = 121
+      Top = 9
+      Width = 132
+      Height = 23
       Style = csDropDownList
-      ItemHeight = 13
+      ItemHeight = 15
       TabOrder = 0
       Items.Strings = (
         '110'
@@ -79,12 +80,12 @@ object SerialConfig: TSerialConfig
         '115200')
     end
     object X16Baud: TComboBox
-      Left = 88
-      Top = 32
-      Width = 121
-      Height = 21
+      Left = 121
+      Top = 35
+      Width = 132
+      Height = 23
       Style = csDropDownList
-      ItemHeight = 13
+      ItemHeight = 15
       TabOrder = 1
       Items.Strings = (
         '110'
@@ -102,12 +103,12 @@ object SerialConfig: TSerialConfig
         '115200')
     end
     object X64Baud: TComboBox
-      Left = 88
-      Top = 56
-      Width = 121
-      Height = 21
+      Left = 121
+      Top = 61
+      Width = 132
+      Height = 23
       Style = csDropDownList
-      ItemHeight = 13
+      ItemHeight = 15
       TabOrder = 2
       Items.Strings = (
         '110'
@@ -126,127 +127,127 @@ object SerialConfig: TSerialConfig
     end
   end
   object FilePanel: TPanel
-    Left = 8
-    Top = 32
-    Width = 225
-    Height = 81
+    Left = 9
+    Top = 35
+    Width = 265
+    Height = 88
     BevelOuter = bvNone
     TabOrder = 1
     object Label5: TLabel
-      Left = 8
-      Top = 12
-      Width = 45
-      Height = 13
+      Left = 9
+      Top = 13
+      Width = 49
+      Height = 15
       Caption = 'Filename:'
     end
     object FileNameBox: TEdit
-      Left = 8
-      Top = 28
-      Width = 209
-      Height = 21
+      Left = 9
+      Top = 31
+      Width = 248
+      Height = 23
       TabOrder = 0
       Text = 'FileNameBox'
     end
     object Browse: TButton
-      Left = 142
-      Top = 52
-      Width = 75
-      Height = 17
+      Left = 175
+      Top = 57
+      Width = 82
+      Height = 18
       Caption = 'Browse'
       TabOrder = 1
       OnClick = BrowseClick
     end
   end
   object ComPortList: TComboBox
-    Left = 104
-    Top = 8
-    Width = 121
-    Height = 21
+    Left = 138
+    Top = 9
+    Width = 132
+    Height = 23
     Style = csDropDownList
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 0
     OnChange = ComPortListChange
   end
   object Enabled: TCheckBox
-    Left = 16
-    Top = 160
-    Width = 77
-    Height = 17
+    Left = 17
+    Top = 175
+    Width = 106
+    Height = 18
     Alignment = taLeftJustify
     Caption = 'Connected:'
     TabOrder = 3
   end
   object OK: TButton
-    Left = 152
-    Top = 156
-    Width = 75
-    Height = 25
+    Left = 184
+    Top = 170
+    Width = 82
+    Height = 27
     Caption = 'OK'
     TabOrder = 4
     OnClick = OKClick
   end
   object TCPPanel: TPanel
-    Left = 16
-    Top = 32
-    Width = 209
-    Height = 121
+    Left = 17
+    Top = 35
+    Width = 257
+    Height = 132
     BevelOuter = bvNone
     TabOrder = 2
     object Label6: TLabel
-      Left = 8
-      Top = 52
-      Width = 38
-      Height = 13
+      Left = 9
+      Top = 57
+      Width = 41
+      Height = 15
       Caption = 'Address'
       Enabled = False
     end
     object Label7: TLabel
-      Left = 152
-      Top = 52
-      Width = 19
-      Height = 13
+      Left = 186
+      Top = 57
+      Width = 21
+      Height = 15
       Caption = 'Port'
       Enabled = False
     end
     object TCPOutboundAddress: TEdit
-      Left = 8
-      Top = 28
-      Width = 137
-      Height = 21
+      Left = 9
+      Top = 31
+      Width = 169
+      Height = 23
       TabOrder = 1
     end
     object TCPInboundPort: TEdit
-      Left = 8
-      Top = 92
-      Width = 201
-      Height = 21
+      Left = 9
+      Top = 100
+      Width = 239
+      Height = 23
       Enabled = False
       TabOrder = 4
     end
     object ConnectTo: TRadioButton
-      Left = 8
-      Top = 8
-      Width = 113
-      Height = 17
+      Left = 9
+      Top = 9
+      Width = 123
+      Height = 18
       Caption = 'Connect to:'
       Checked = True
       TabOrder = 0
       TabStop = True
     end
     object ListenOn: TRadioButton
-      Left = 8
-      Top = 72
-      Width = 113
-      Height = 17
+      Left = 9
+      Top = 79
+      Width = 123
+      Height = 18
       Caption = 'Listen on port:'
       Enabled = False
       TabOrder = 3
     end
     object TCPOutboundPort: TEdit
-      Left = 152
-      Top = 28
-      Width = 57
-      Height = 21
+      Left = 186
+      Top = 31
+      Width = 62
+      Height = 23
       TabOrder = 2
     end
   end
@@ -272,13 +273,13 @@ object SerialConfig: TSerialConfig
   end
   object BrowseDialog: TSaveDialog
     Filter = 'All Files (*.*)|*.*'
-    Left = 216
+    Left = 236
   end
   object ClientSocket: TClientSocket
     Active = False
     ClientType = ctNonBlocking
     Port = 0
     OnError = ClientSocketError
-    Top = 24
+    Top = 26
   end
 end

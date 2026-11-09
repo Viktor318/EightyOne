@@ -12,7 +12,7 @@ object Keyboard: TKeyboard
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -23,7 +23,7 @@ object Keyboard: TKeyboard
   OnKeyUp = FormKeyUp
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object tc2068kbTimeWord: TImage
     Left = 0
     Top = 0

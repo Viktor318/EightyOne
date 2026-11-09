@@ -59,11 +59,30 @@ void TBasicLister::SizeWindow()
 {
         mScaling = SaveBasicListingOptionsForm->GetScalingFator();
 
-        int displayAreaWidth = (DisplayableColumns * PixelsPerCharacterHeight * mScaling);
+        int displayAreaWidth = ListingAreaWidth(DisplayableColumns * PixelsPerCharacterHeight * mScaling);
         int displayAreaHeight = (DisplayableRows * PixelsPerCharacterHeight * mScaling);
 
         ClientWidth = displayAreaWidth + ScrollBar->Width + 1;
         ClientHeight = ToolBar->Height + StatusBar->Height + displayAreaHeight;
+}
+
+// The tool bar's buttons can need more room than the listing (a bigger
+// font, a longer translation): the listing area is then made wider, so that
+// the window shows all of them.
+int TBasicLister::ListingAreaWidth(int listingWidth)
+{
+        int toolBarWidth = 0;
+        for (int i = 0; i < ToolBar->ButtonCount; i++)
+        {
+                TToolButton *button = ToolBar->Buttons[i];
+                if (button->Visible && button->Left + button->Width > toolBarWidth)
+                {
+                        toolBarWidth = button->Left + button->Width;
+                }
+        }
+
+        int needed = toolBarWidth + 4 - ScrollBar->Width - 1;
+        return (listingWidth > needed) ? listingWidth : needed;
 }
 
 __fastcall TBasicLister::~TBasicLister()
@@ -132,7 +151,7 @@ void TBasicLister::ConstructBitmap()
         int displayRows = mBasicLister->GetProgramRows();
         int displayColumns = mBasicLister->GetDisplayColumns();
 
-        mBMWidth = displayColumns * PixelsPerCharacterWidth * mScaling;
+        mBMWidth = ListingAreaWidth(displayColumns * PixelsPerCharacterWidth * mScaling);
         mBMHeight = displayRows * PixelsPerCharacterHeight * mScaling;
 
         ClientWidth = mBMWidth + ScrollBar->Width + 1;
@@ -428,6 +447,10 @@ void TBasicLister::ConfigureScrollBar()
 void TBasicLister::LanguageChanged()
 {
         ConfigureStatusBar();
+
+        // The tool bar's buttons have new captions: the listing is made again,
+        // as wide as they need now
+        if (Visible) LoadProgram();
 }
 
 void TBasicLister::ConfigureStatusBar()

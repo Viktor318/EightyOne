@@ -159,11 +159,23 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
   elrendezésük nem változik. Az a négy ablak, amelyet a betűcsere
   felnagyított volna (billentyűzetkép, numerikus billentyűzet,
   billentyűfunkciók, jelzőbitek szerkesztése), megtartja a méretét.
-- A **Hardver** és a **Kazettakezelő** ablak 9 pontos betűt használ, mint a
-  Hangbeállítások. A Hardver ablak elrendezése ehhez arányosan nagyobb
-  (és kicsit szélesebb), így a „Karaktergenerátor:” felirat és a
-  *Speciális beállítások* hosszabb jelölőnégyzetei már nem csonkák; a
-  kazettalista sorai magasabbak.
+- **Minden ablak 9 pontos betűt használ** (eddig 8 pontosat), mint a
+  Hangbeállítások. Az ablakok elrendezése ehhez arányosan nagyobb, és ahol
+  egy felirat így sem fért ki – angolul vagy magyarul –, az ablak
+  szélesebb lett: többek közt a Hibakereső, a TV-emuláció, a Billentyűzet,
+  a Profilozó, a CPU-előzmények, a Meghajtók, a ZX Interface 1 RS232, a
+  Nyomtatóport, a TS2050, a ZX97, a BASIC lista beállításai, a Töréspont
+  és a HDF-fájl ablaka. A korábban csonka feliratok (a Hibakereső gombjai
+  és jelölőnégyzetei, a „Függőleges szinkron”, a „HDF képfájl mérete:”, a
+  „Karaktergenerátor:” és a Hardver ablak *Speciális beállítások*
+  részének hosszabb jelölőnégyzetei és mások) most teljesen látszanak. A
+  képhez vagy a programhoz méretezett ablakok (billentyűzetkép, numerikus
+  billentyűzet, billentyűfunkciók) megtartják a méretüket; a kazettalista
+  sorai magasabbak.
+- A **BASIC lista** ablak legalább olyan széles, mint az eszköztára, így
+  minden gombja látszik. A *BASIC lista mentése szövegként* ablak
+  bekezdései egymás alá kerülnek, így nem csúsznak egymásba, és az ablak
+  olyan magas, amilyet igényelnek.
 
 ### A főablak mérete
 

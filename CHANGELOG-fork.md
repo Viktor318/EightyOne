@@ -149,11 +149,22 @@ could not be loaded.
   was. The four windows that would have been enlarged by the change of
   font (keyboard picture, keypad, keyboard functions, edit flags) keep
   their size.
-- The **Hardware** and **Tape Manager** windows use 9 point text, as the
-  Sound Settings window does. The Hardware window is laid out larger to
-  match (and a little wider), so the Hungarian "Karaktergenerátor:" and
-  the longer check boxes of *Advanced Settings* are no longer cut off; the
-  rows of the tape list are taller.
+- **Every window uses 9 point text** (it was 8 point), as the Sound
+  Settings window does. The windows are laid out larger to match, and
+  where a caption still did not fit, in English or in Hungarian, the
+  window is wider: among others the debugger, TV Emulation, Keyboard,
+  Profiler, CPU History, Drives, ZX Interface 1 RS232, Printer Port,
+  TS2050, ZX97, the BASIC listing options, the breakpoint and the HDF
+  windows. Captions that were cut off (the debugger's buttons and check
+  boxes, "Függőleges szinkron", "HDF képfájl mérete:", the Hungarian
+  "Karaktergenerátor:" and the longer check boxes of the Hardware window's
+  *Advanced Settings*, and others) are shown whole. The windows sized by a
+  picture or by the program (keyboard picture, keypad, keyboard
+  functions) keep their size; the rows of the tape list are taller.
+- The **BASIC Listing** window is at least as wide as its tool bar, so all
+  of its buttons are shown. The paragraphs of *Saving a BASIC Listing as
+  Text* are put one under the other, so they no longer run into each
+  other, and the window is as tall as they need.
 
 ### Main window size
 

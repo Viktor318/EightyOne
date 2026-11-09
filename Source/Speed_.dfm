@@ -4,12 +4,12 @@ object Speed: TSpeed
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'Speed'
-  ClientHeight = 112
-  ClientWidth = 217
+  ClientHeight = 122
+  ClientWidth = 237
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -17,47 +17,47 @@ object Speed: TSpeed
   Scaled = False
   OnClose = FormClose
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object AccuratePanel: TPanel
     Left = 0
     Top = 0
-    Width = 209
-    Height = 73
+    Width = 228
+    Height = 80
     BevelOuter = bvNone
     TabOrder = 1
     object Label9: TLabel
-      Left = 8
+      Left = 9
       Top = 4
-      Width = 34
-      Height = 13
+      Width = 37
+      Height = 15
       Caption = 'Speed:'
     end
     object Label10: TLabel
-      Left = 100
-      Top = 48
-      Width = 17
-      Height = 13
+      Left = 109
+      Top = 52
+      Width = 19
+      Height = 15
       Caption = '16x'
     end
     object Label11: TLabel
-      Left = 16
-      Top = 48
-      Width = 11
-      Height = 13
+      Left = 17
+      Top = 52
+      Width = 12
+      Height = 15
       Caption = '1x'
     end
     object Label12: TLabel
-      Left = 184
-      Top = 48
-      Width = 17
-      Height = 13
+      Left = 201
+      Top = 52
+      Width = 18
+      Height = 15
       Caption = '32x'
     end
     object AccurateSpeed: TTrackBar
-      Left = 8
-      Top = 16
-      Width = 201
-      Height = 25
+      Left = 9
+      Top = 17
+      Width = 219
+      Height = 28
       Max = 100
       Orientation = trHorizontal
       Frequency = 17
@@ -71,20 +71,20 @@ object Speed: TSpeed
     end
   end
   object Button1: TButton
-    Left = 136
-    Top = 80
-    Width = 75
-    Height = 25
+    Left = 151
+    Top = 87
+    Width = 82
+    Height = 28
     Caption = 'OK'
     Default = True
     TabOrder = 2
     OnClick = Button1Click
   end
   object EnableFrameSkip: TCheckBox
-    Left = 8
-    Top = 84
-    Width = 113
-    Height = 17
+    Left = 9
+    Top = 92
+    Width = 140
+    Height = 18
     Caption = 'Enable Frame Skip'
     TabOrder = 0
     OnClick = EnableFrameSkipClick

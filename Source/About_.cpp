@@ -252,7 +252,7 @@ __fastcall TAbout::TAbout(TComponent* Owner)
         // the form was designed
         MaxWidth(Label1,w); MaxWidth(Label21,w);
         MaxWidth(Label8,w); MaxWidth(Label15,w);
-        ClientWidth = w + 8 > 380 ? w + 8 : 380;
+        ClientWidth = w + 8 > 415 ? w + 8 : 415;
 
         Body = new TPaintBox(this);
         Body->Parent = this;

@@ -4,12 +4,12 @@ object About: TAbout
   BorderIcons = [biHelp]
   BorderStyle = bsToolWindow
   Caption = 'About'
-  ClientHeight = 452
-  ClientWidth = 336
+  ClientHeight = 493
+  ClientWidth = 367
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -17,12 +17,12 @@ object About: TAbout
   Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Image1: TImage
-    Left = 8
-    Top = 8
-    Width = 64
-    Height = 58
+    Left = 9
+    Top = 9
+    Width = 70
+    Height = 63
     AutoSize = True
     Picture.Data = {
       07544269746D6170B62B0000424DB62B00000000000036000000280000004000
@@ -378,123 +378,123 @@ object About: TAbout
       0000}
   end
   object Label1: TLabel
-    Left = 81
-    Top = 36
-    Width = 151
-    Height = 13
+    Left = 88
+    Top = 39
+    Width = 165
+    Height = 15
     Caption = '© 2003-2008 Michael D Wynne'
   end
   object Label2: TLabel
-    Left = 8
-    Top = 144
-    Width = 289
-    Height = 13
+    Left = 9
+    Top = 157
+    Width = 315
+    Height = 15
     Caption = 'This program is released under the GNU GPL. Please see the'
   end
   object Label3: TLabel
-    Left = 7
-    Top = 160
-    Width = 320
-    Height = 13
+    Left = 8
+    Top = 175
+    Width = 349
+    Height = 15
     Caption = 
       'attached readme.txt file that should be included with this distr' +
       'ibution.'
   end
   object Label5: TLabel
-    Left = 8
-    Top = 184
-    Width = 300
-    Height = 13
+    Left = 9
+    Top = 201
+    Width = 327
+    Height = 15
     Caption = 'Z80 core and DirectSound code taken from fuse, the free UNIX'
   end
   object Version: TLabel
-    Left = 178
-    Top = 11
-    Width = 84
-    Height = 13
+    Left = 194
+    Top = 12
+    Width = 92
+    Height = 15
     Caption = 'Unknown Version'
   end
   object Label8: TLabel
-    Left = 80
-    Top = 6
-    Width = 84
-    Height = 20
+    Left = 87
+    Top = 7
+    Width = 92
+    Height = 21
     Caption = 'EightyOne'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -16
+    Font.Height = -17
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object Label6: TLabel
-    Left = 8
-    Top = 200
-    Width = 196
-    Height = 13
+    Left = 9
+    Top = 218
+    Width = 214
+    Height = 15
     Caption = 'Spectrum emulator © 2003 Philip Kendall.'
   end
   object Label9: TLabel
-    Left = 8
-    Top = 248
-    Width = 276
-    Height = 13
+    Left = 9
+    Top = 271
+    Width = 301
+    Height = 15
     Caption = 'Many thanks to Wilf Rigter for providing essential technical'
   end
   object Label10: TLabel
-    Left = 8
-    Top = 224
-    Width = 279
-    Height = 13
+    Left = 9
+    Top = 244
+    Width = 304
+    Height = 15
     Caption = 'AY8910 Code taken from Z81 © 1995-2001 Russell Marks.'
   end
   object Label11: TLabel
-    Left = 8
-    Top = 264
+    Left = 9
+    Top = 288
     Width = 3
-    Height = 13
+    Height = 15
   end
   object Label4: TLabel
-    Left = 8
-    Top = 264
-    Width = 295
-    Height = 13
+    Left = 9
+    Top = 288
+    Width = 322
+    Height = 15
     Caption = 
       'information on the internal workings of the ZX81 itself and also' +
       ' '
   end
   object Label12: TLabel
-    Left = 8
-    Top = 280
-    Width = 303
-    Height = 13
+    Left = 9
+    Top = 305
+    Width = 330
+    Height = 15
     Caption = 'various add-ons including the Memotech and G007 Hi-res cards.'
   end
   object Label13: TLabel
-    Left = 8
-    Top = 320
-    Width = 303
-    Height = 13
+    Left = 9
+    Top = 349
+    Width = 330
+    Height = 15
     Caption = 'dk'#39'tronics graphics ROM dump and several bug reports provided'
   end
   object Label14: TLabel
-    Left = 8
-    Top = 336
-    Width = 108
-    Height = 13
+    Left = 9
+    Top = 367
+    Width = 118
+    Height = 15
     Caption = 'by Simon Holdsworth.  '
   end
   object Label15: TLabel
-    Left = 8
-    Top = 80
-    Width = 286
-    Height = 13
+    Left = 9
+    Top = 87
+    Width = 312
+    Height = 15
     Hint = 'Click to visit the EightyOne home page'
     Caption = 'https://sourceforge.net/projects/eightyone-sinclair-emulator/'
     Color = clBtnFace
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clHighlight
-    Font.Height = -11
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = [fsUnderline]
     ParentColor = False
@@ -504,68 +504,68 @@ object About: TAbout
     OnMouseUp = Label15MouseUp
   end
   object Label16: TLabel
-    Left = 8
-    Top = 296
-    Width = 196
-    Height = 13
+    Left = 9
+    Top = 323
+    Width = 214
+    Height = 15
     Caption = 'G007 information also provided by Kryton.'
   end
   object Label17: TLabel
-    Left = 8
-    Top = 406
-    Width = 151
-    Height = 13
+    Left = 9
+    Top = 443
+    Width = 164
+    Height = 15
     Caption = 'Icon designed by Paul E Collins.'
   end
   object Label7: TLabel
-    Left = 8
-    Top = 360
-    Width = 199
-    Height = 13
+    Left = 9
+    Top = 393
+    Width = 217
+    Height = 15
     Caption = 'lib765 and libdsk © 2000-2005 John Elliot.'
   end
   object Label18: TLabel
-    Left = 8
-    Top = 428
-    Width = 185
-    Height = 16
+    Left = 9
+    Top = 467
+    Width = 202
+    Height = 17
     AutoSize = False
     Caption = 'Dedicated to Abbey (1998-2008)'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object Label19: TLabel
-    Left = 8
-    Top = 104
-    Width = 300
-    Height = 13
+    Left = 9
+    Top = 113
+    Width = 327
+    Height = 15
     Caption = 'Releases up to 1.0a were created by Michael D Wynne, with all'
     WordWrap = True
   end
   object Label20: TLabel
-    Left = 8
-    Top = 120
-    Width = 308
-    Height = 13
+    Left = 9
+    Top = 131
+    Width = 336
+    Height = 15
     Caption = 'subsequent releases created by Charlie Robson and Paul Farrow.'
     WordWrap = True
   end
   object Label21: TLabel
-    Left = 81
-    Top = 52
-    Width = 218
-    Height = 13
+    Left = 88
+    Top = 57
+    Width = 238
+    Height = 15
     Caption = '© 2011-2025 Charlie Robson and Paul Farrow'
   end
   object Image2: TImage
-    Left = 200
-    Top = 427
-    Width = 15
-    Height = 15
+    Left = 218
+    Top = 466
+    Width = 17
+    Height = 16
     Hint = 'Michael'#39's daughter'
     AutoSize = True
     ParentShowHint = False
@@ -616,17 +616,17 @@ object About: TAbout
     Transparent = True
   end
   object Label22: TLabel
-    Left = 8
-    Top = 383
-    Width = 251
-    Height = 13
+    Left = 9
+    Top = 418
+    Width = 274
+    Height = 15
     Caption = 'Speech synthesis code from SP0256_CTS256A-AL2.'
   end
   object Button1: TButton
-    Left = 248
-    Top = 419
-    Width = 81
-    Height = 26
+    Left = 271
+    Top = 457
+    Width = 88
+    Height = 28
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True

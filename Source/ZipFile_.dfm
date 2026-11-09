@@ -1,46 +1,46 @@
 object ZipFile: TZipFile
   Left = 432
   Top = 113
-  Width = 192
-  Height = 248
+  Width = 209
+  Height = 268
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
   Caption = 'ZipFile'
   Color = clBtnFace
-  Constraints.MinHeight = 128
-  Constraints.MinWidth = 128
+  Constraints.MinHeight = 137
+  Constraints.MinWidth = 139
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
-    Left = 8
-    Top = 8
-    Width = 68
-    Height = 13
+    Left = 9
+    Top = 9
+    Width = 74
+    Height = 15
     Caption = 'Please Select:'
   end
   object ListBox: TListBox
-    Left = 8
-    Top = 32
-    Width = 168
-    Height = 144
+    Left = 9
+    Top = 35
+    Width = 183
+    Height = 157
     Anchors = [akLeft, akTop, akRight, akBottom]
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 0
     OnDblClick = ListBoxDblClick
   end
   object OK: TButton
-    Left = 103
-    Top = 183
-    Width = 75
-    Height = 25
+    Left = 112
+    Top = 200
+    Width = 82
+    Height = 27
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     TabOrder = 1

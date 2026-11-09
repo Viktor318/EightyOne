@@ -1,17 +1,17 @@
 object EditGeneralForm: TEditGeneralForm
   Left = 238
   Top = 28
-  Width = 647
-  Height = 663
+  Width = 705
+  Height = 721
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
   Caption = 'Edit General Data Block'
   Color = clBtnFace
-  Constraints.MinHeight = 377
-  Constraints.MinWidth = 632
+  Constraints.MinHeight = 409
+  Constraints.MinWidth = 689
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -19,56 +19,56 @@ object EditGeneralForm: TEditGeneralForm
   Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label4: TLabel
-    Left = 143
-    Top = 7
-    Width = 116
-    Height = 13
+    Left = 156
+    Top = 8
+    Width = 127
+    Height = 15
     Caption = 'Pilot/Sync Symbol Table'
   end
   object Label5: TLabel
-    Left = 143
-    Top = 103
-    Width = 90
-    Height = 13
+    Left = 156
+    Top = 112
+    Width = 98
+    Height = 15
     Caption = 'Data Symbol Table'
   end
   object Label7: TLabel
-    Left = 6
-    Top = 604
-    Width = 33
-    Height = 13
+    Left = 7
+    Top = 659
+    Width = 36
+    Height = 15
     Anchors = [akLeft, akBottom]
     Caption = 'Pause:'
   end
   object Label8: TLabel
-    Left = 7
-    Top = 207
-    Width = 23
-    Height = 13
+    Left = 8
+    Top = 226
+    Width = 25
+    Height = 15
     Caption = 'Data'
   end
   object Label9: TLabel
-    Left = 207
-    Top = 604
-    Width = 68
-    Height = 13
+    Left = 230
+    Top = 659
+    Width = 74
+    Height = 15
     Anchors = [akLeft, akBottom]
     Caption = 'Character Set:'
   end
   object Label1: TLabel
-    Left = 7
-    Top = 7
-    Width = 75
-    Height = 13
+    Left = 8
+    Top = 8
+    Width = 81
+    Height = 15
     Caption = 'Pilot/Sync Data'
   end
   object SymDefP: TMemo
-    Left = 143
-    Top = 23
-    Width = 486
-    Height = 73
+    Left = 156
+    Top = 25
+    Width = 530
+    Height = 80
     Anchors = [akLeft, akTop, akRight]
     Lines.Strings = (
       'SyncPulses')
@@ -77,10 +77,10 @@ object EditGeneralForm: TEditGeneralForm
     TabOrder = 1
   end
   object SymDefD: TMemo
-    Left = 143
-    Top = 119
-    Width = 486
-    Height = 81
+    Left = 156
+    Top = 130
+    Width = 530
+    Height = 88
     Anchors = [akLeft, akTop, akRight]
     Lines.Strings = (
       'Alphabet')
@@ -89,19 +89,19 @@ object EditGeneralForm: TEditGeneralForm
     TabOrder = 2
   end
   object Pause: TEdit
-    Left = 46
-    Top = 600
-    Width = 144
-    Height = 21
+    Left = 56
+    Top = 655
+    Width = 157
+    Height = 23
     Anchors = [akLeft, akBottom]
     TabOrder = 4
     Text = 'Pause'
   end
   object OK: TButton
-    Left = 550
-    Top = 597
-    Width = 74
-    Height = 25
+    Left = 600
+    Top = 651
+    Width = 81
+    Height = 28
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True
@@ -109,10 +109,10 @@ object EditGeneralForm: TEditGeneralForm
     OnClick = OKClick
   end
   object Data: TMemo
-    Left = 7
-    Top = 223
-    Width = 623
-    Height = 362
+    Left = 8
+    Top = 243
+    Width = 679
+    Height = 395
     Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -127,13 +127,13 @@ object EditGeneralForm: TEditGeneralForm
     TabOrder = 3
   end
   object CharSet: TComboBox
-    Left = 281
-    Top = 600
-    Width = 88
-    Height = 21
+    Left = 320
+    Top = 655
+    Width = 96
+    Height = 23
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    ItemHeight = 13
+    ItemHeight = 15
     TabOrder = 5
     OnChange = CharSetChange
     Items.Strings = (
@@ -142,27 +142,27 @@ object EditGeneralForm: TEditGeneralForm
       'ASCII')
   end
   object PRLE: TMemo
-    Left = 7
-    Top = 23
-    Width = 128
-    Height = 177
+    Left = 8
+    Top = 25
+    Width = 139
+    Height = 193
     Lines.Strings = (
       'PRLE')
     ScrollBars = ssVertical
     TabOrder = 0
   end
   object ButtonSave: TButton
-    Left = 466
-    Top = 597
-    Width = 75
-    Height = 25
+    Left = 508
+    Top = 651
+    Width = 82
+    Height = 28
     Anchors = [akRight, akBottom]
     Caption = 'Save...'
     TabOrder = 6
     OnClick = ButtonSaveClick
   end
   object SaveDialog1: TSaveDialog
-    Left = 416
-    Top = 592
+    Left = 454
+    Top = 646
   end
 end

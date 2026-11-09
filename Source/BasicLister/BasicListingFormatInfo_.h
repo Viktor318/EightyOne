@@ -44,8 +44,12 @@ __published:	// IDE-managed Components
         void __fastcall Weblink1Click(TObject *Sender);
         void __fastcall Weblink2Click(TObject *Sender);
         void __fastcall Weblink3Click(TObject *Sender);
+        void __fastcall FormShow(TObject *Sender);
 private:	// User declarations
+        AnsiString mParagraph2a, mParagraph2b, mParagraph6a, mParagraph6b;
+
         void OpenWebsite();
+        void LayOut();
 public:		// User declarations
         __fastcall TBasicListingFormatInfoForm(TComponent* Owner);
         void SetActivePage(int index);

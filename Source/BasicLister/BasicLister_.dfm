@@ -4,12 +4,12 @@ object BasicLister: TBasicLister
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'BASIC Listing'
-  ClientHeight = 325
-  ClientWidth = 273
+  ClientHeight = 355
+  ClientWidth = 298
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -56,12 +56,12 @@ object BasicLister: TBasicLister
   OnPaint = FormPaint
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object ScrollBar: TScrollBar
-    Left = 256
-    Top = 30
-    Width = 17
-    Height = 276
+    Left = 279
+    Top = 33
+    Width = 19
+    Height = 301
     Align = alRight
     Kind = sbVertical
     PageSize = 0
@@ -70,15 +70,15 @@ object BasicLister: TBasicLister
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 306
-    Width = 273
-    Height = 19
+    Top = 334
+    Width = 298
+    Height = 21
     Panels = <
       item
-        Width = 140
+        Width = 153
       end
       item
-        Width = 136
+        Width = 148
       end>
     SimplePanel = False
     SizeGrip = False
@@ -86,10 +86,10 @@ object BasicLister: TBasicLister
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 273
-    Height = 30
-    ButtonHeight = 21
-    ButtonWidth = 54
+    Width = 298
+    Height = 33
+    ButtonHeight = 23
+    ButtonWidth = 59
     Caption = 'ToolBar'
     EdgeBorders = [ebTop, ebBottom]
     ShowCaptions = True
@@ -104,15 +104,15 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonRefreshClick
     end
     object ToolButton1: TToolButton
-      Left = 54
+      Left = 59
       Top = 2
-      Width = 8
+      Width = 9
       Caption = 'ToolButton1'
       ImageIndex = 1
       Style = tbsDivider
     end
     object ToolButtonSettings: TToolButton
-      Left = 62
+      Left = 68
       Top = 2
       AutoSize = True
       Caption = 'Settings'
@@ -120,22 +120,23 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonSettingsClick
     end
     object ToolButton3: TToolButton
-      Left = 111
+      Left = 121
       Top = 2
-      Width = 8
+      Width = 9
       Caption = 'ToolButton3'
       ImageIndex = 3
       Style = tbsDivider
     end
     object ToolButtonSave: TToolButton
-      Left = 119
+      Left = 130
       Top = 2
+      AutoSize = True
       Caption = 'Save'
       ImageIndex = 4
       OnClick = ToolButtonSaveClick
     end
     object ToolButton4: TToolButton
-      Left = 173
+      Left = 189
       Top = 2
       Width = 8
       Caption = 'ToolButton4'
@@ -143,7 +144,7 @@ object BasicLister: TBasicLister
       Style = tbsDivider
     end
     object ToolButtonLineEnds: TToolButton
-      Left = 181
+      Left = 197
       Top = 2
       AutoSize = True
       Caption = 'Line Ends'
@@ -152,7 +153,7 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonLineEndsClick
     end
     object ToolButton5: TToolButton
-      Left = 239
+      Left = 261
       Top = 2
       Width = 6
       Caption = 'ToolButton5'
@@ -160,7 +161,7 @@ object BasicLister: TBasicLister
       Style = tbsDivider
     end
     object ToolButtonInfo: TToolButton
-      Left = 245
+      Left = 267
       Top = 2
       AutoSize = True
       Caption = 'Info'
@@ -169,7 +170,7 @@ object BasicLister: TBasicLister
     end
   end
   object SaveDialog: TSaveDialog
-    Left = 8
-    Top = 40
+    Left = 9
+    Top = 44
   end
 end

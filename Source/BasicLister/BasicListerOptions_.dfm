@@ -4,12 +4,12 @@ object SaveBasicListingOptionsForm: TSaveBasicListingOptionsForm
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = 'BASIC Listing Settings'
-  ClientHeight = 278
-  ClientWidth = 280
+  ClientHeight = 303
+  ClientWidth = 315
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -51,99 +51,99 @@ object SaveBasicListingOptionsForm: TSaveBasicListingOptionsForm
   OldCreateOrder = False
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object btnOK: TButton
-    Left = 106
-    Top = 244
-    Width = 68
-    Height = 25
+    Left = 120
+    Top = 266
+    Width = 74
+    Height = 27
     Caption = 'OK'
     ModalResult = 1
     TabOrder = 0
   end
   object GroupBoxSaveOptions: TGroupBox
-    Left = 8
-    Top = 8
-    Width = 264
-    Height = 169
+    Left = 9
+    Top = 9
+    Width = 298
+    Height = 184
     Caption = 'Save Options'
     TabOrder = 1
     object cboOutputFullWidthLineNumbers: TCheckBox
-      Left = 8
-      Top = 144
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 157
+      Width = 280
+      Height = 19
       Alignment = taLeftJustify
       Caption = 'Output line numbers above 9999 using 5 digits'
       TabOrder = 5
     end
     object cboOutputRemTokensAsCharacterCodes: TCheckBox
-      Left = 8
-      Top = 24
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 26
+      Width = 280
+      Height = 19
       Alignment = taLeftJustify
       Caption = 'Output tokens in REMs as character codes'
       TabOrder = 0
     end
     object cboOutputNonAsciiAsCharacterCodes: TCheckBox
-      Left = 8
-      Top = 72
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 79
+      Width = 280
+      Height = 18
       Alignment = taLeftJustify
       Caption = 'Output non-ASCII symbols as character codes'
       TabOrder = 2
     end
     object cboOutputStringTokensAsCharacterCodes: TCheckBox
-      Left = 8
-      Top = 48
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 52
+      Width = 280
+      Height = 19
       Alignment = taLeftJustify
       Caption = 'Output tokens in strings as character codes'
       TabOrder = 1
     end
     object cboLimitLineLengths: TCheckBox
-      Left = 8
-      Top = 96
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 105
+      Width = 280
+      Height = 18
       Alignment = taLeftJustify
       Caption = 'Output continuation markers to split long lines'
       TabOrder = 3
     end
     object cboOutputVariableNamesInLowercase: TCheckBox
-      Left = 8
-      Top = 120
-      Width = 244
-      Height = 17
+      Left = 9
+      Top = 131
+      Width = 280
+      Height = 18
       Alignment = taLeftJustify
       Caption = 'Output the names of variables in lowercase'
       TabOrder = 4
     end
   end
   object GroupBoxDisplayOptions: TGroupBox
-    Left = 8
-    Top = 184
-    Width = 264
-    Height = 49
+    Left = 9
+    Top = 201
+    Width = 298
+    Height = 53
     Caption = 'Display Options'
     TabOrder = 2
     object LabelTextScaling: TLabel
-      Left = 8
-      Top = 24
-      Width = 87
-      Height = 13
+      Left = 9
+      Top = 26
+      Width = 95
+      Height = 15
       Caption = 'BASIC text scaling'
     end
     object cboTextScaling: TComboBox
-      Left = 196
-      Top = 18
-      Width = 57
-      Height = 21
+      Left = 224
+      Top = 20
+      Width = 62
+      Height = 23
       DropDownCount = 2
-      ItemHeight = 13
+      ItemHeight = 15
       TabOrder = 0
       Text = '100%'
       Items.Strings = (

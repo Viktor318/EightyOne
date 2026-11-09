@@ -4,12 +4,12 @@ object LoadBasicListingOptionsForm: TLoadBasicListingOptionsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Load BASIC Listing Options'
-  ClientHeight = 218
-  ClientWidth = 239
+  ClientHeight = 238
+  ClientWidth = 314
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -52,55 +52,55 @@ object LoadBasicListingOptionsForm: TLoadBasicListingOptionsForm
   Position = poScreenCenter
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
-    Left = 8
-    Top = 8
-    Width = 222
-    Height = 13
+    Left = 9
+    Top = 9
+    Width = 296
+    Height = 15
     Caption = 'Configure how a BASIC listing file is interpreted:'
     WordWrap = True
   end
   object Label6: TLabel
-    Left = 8
-    Top = 155
-    Width = 167
-    Height = 13
+    Left = 9
+    Top = 169
+    Width = 230
+    Height = 15
     Caption = 'Automatic line numbering increment'
   end
   object cboTokeniseRemContents: TCheckBox
-    Left = 8
-    Top = 32
-    Width = 217
-    Height = 17
+    Left = 9
+    Top = 35
+    Width = 296
+    Height = 18
     Alignment = taLeftJustify
     Caption = 'Attempt to tokenise REM contents'
     TabOrder = 1
   end
   object cboTokeniseStringContents: TCheckBox
-    Left = 8
-    Top = 56
-    Width = 217
-    Height = 17
+    Left = 9
+    Top = 61
+    Width = 296
+    Height = 19
     Alignment = taLeftJustify
     Caption = 'Attempt to tokenise string contents'
     TabOrder = 2
   end
   object btnOK: TButton
-    Left = 84
-    Top = 184
-    Width = 68
-    Height = 25
+    Left = 120
+    Top = 201
+    Width = 74
+    Height = 27
     Caption = 'OK'
     Default = True
     ModalResult = 1
     TabOrder = 0
   end
   object cboDiscardSurplusSpaces: TCheckBox
-    Left = 8
-    Top = 80
-    Width = 217
-    Height = 17
+    Left = 9
+    Top = 87
+    Width = 296
+    Height = 19
     Alignment = taLeftJustify
     Caption = 'Discard surplus spaces'
     Checked = True
@@ -108,10 +108,10 @@ object LoadBasicListingOptionsForm: TLoadBasicListingOptionsForm
     TabOrder = 3
   end
   object cboAcceptAlternateKeywordSpelling: TCheckBox
-    Left = 8
-    Top = 104
-    Width = 217
-    Height = 17
+    Left = 9
+    Top = 113
+    Width = 296
+    Height = 19
     Alignment = taLeftJustify
     Caption = 'Accept alternate keyword spellings'
     Checked = True
@@ -119,11 +119,11 @@ object LoadBasicListingOptionsForm: TLoadBasicListingOptionsForm
     TabOrder = 4
   end
   object cboLineNumberIncrement: TComboBox
-    Left = 189
-    Top = 152
-    Width = 36
-    Height = 21
-    ItemHeight = 13
+    Left = 266
+    Top = 166
+    Width = 39
+    Height = 23
+    ItemHeight = 15
     TabOrder = 6
     Text = 'cboLineNumberIncrement'
     Items.Strings = (
@@ -133,10 +133,10 @@ object LoadBasicListingOptionsForm: TLoadBasicListingOptionsForm
       '10')
   end
   object cboAcceptZxTokenFormatExtensions: TCheckBox
-    Left = 8
-    Top = 128
-    Width = 217
-    Height = 17
+    Left = 9
+    Top = 140
+    Width = 296
+    Height = 18
     Alignment = taLeftJustify
     Caption = 'Accept ZxToken format extensions'
     TabOrder = 5

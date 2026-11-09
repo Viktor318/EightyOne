@@ -1,16 +1,16 @@
 object Profiler: TProfiler
   Left = 230
   Top = 227
-  Width = 492
-  Height = 189
+  Width = 632
+  Height = 204
   BorderStyle = bsSizeToolWin
   Caption = 'Profiler'
   Color = clBtnFace
-  Constraints.MinHeight = 189
-  Constraints.MinWidth = 492
+  Constraints.MinHeight = 204
+  Constraints.MinWidth = 536
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -19,22 +19,22 @@ object Profiler: TProfiler
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object ButtonNew: TButton
-    Left = 8
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 9
+    Top = 133
+    Width = 78
+    Height = 27
     Anchors = [akLeft, akBottom]
     Caption = 'New'
     TabOrder = 1
     OnClick = ButtonNewClick
   end
   object ButtonDelete: TButton
-    Left = 136
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 173
+    Top = 133
+    Width = 78
+    Height = 27
     Anchors = [akLeft, akBottom]
     Caption = 'Delete'
     Enabled = False
@@ -42,35 +42,35 @@ object Profiler: TProfiler
     OnClick = ButtonDeleteClick
   end
   object ListViewProfileSamples: TListView
-    Left = 8
-    Top = 8
-    Width = 466
-    Height = 107
+    Left = 9
+    Top = 9
+    Width = 604
+    Height = 116
     Anchors = [akLeft, akTop, akRight, akBottom]
     Columns = <
       item
         Caption = 'Tag'
-        Width = 132
+        Width = 144
       end
       item
         Caption = 'Start Addr'
-        Width = 60
+        Width = 80
       end
       item
         Caption = 'End Addr'
-        Width = 60
+        Width = 80
       end
       item
         Caption = 'Min T'
-        Width = 70
+        Width = 76
       end
       item
         Caption = 'Max T'
-        Width = 70
+        Width = 76
       end
       item
         Caption = 'Samples'
-        Width = 70
+        Width = 76
       end>
     ColumnClick = False
     GridLines = True
@@ -82,10 +82,10 @@ object Profiler: TProfiler
     OnSelectItem = ListViewProfileSamplesSelectItem
   end
   object ButtonEdit: TButton
-    Left = 72
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 91
+    Top = 133
+    Width = 78
+    Height = 27
     Anchors = [akLeft, akBottom]
     Caption = 'Edit'
     Enabled = False
@@ -93,10 +93,10 @@ object Profiler: TProfiler
     OnClick = ButtonEditClick
   end
   object ButtonReset: TButton
-    Left = 200
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 255
+    Top = 133
+    Width = 78
+    Height = 27
     Anchors = [akLeft, akBottom]
     Caption = 'Reset'
     Enabled = False
@@ -104,10 +104,10 @@ object Profiler: TProfiler
     OnClick = ButtonResetClick
   end
   object ButtonRefresh: TButton
-    Left = 358
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 485
+    Top = 133
+    Width = 57
+    Height = 27
     Anchors = [akRight, akBottom]
     Caption = 'Refresh'
     Enabled = False
@@ -115,10 +115,10 @@ object Profiler: TProfiler
     OnClick = ButtonRefreshClick
   end
   object ButtonPlot: TButton
-    Left = 422
-    Top = 122
-    Width = 53
-    Height = 25
+    Left = 554
+    Top = 133
+    Width = 60
+    Height = 27
     Anchors = [akRight, akBottom]
     Caption = 'Plot'
     Enabled = False
@@ -126,10 +126,10 @@ object Profiler: TProfiler
     OnClick = ButtonPlotClick
   end
   object AutoRefresh: TCheckBox
-    Left = 265
-    Top = 126
-    Width = 89
-    Height = 17
+    Left = 346
+    Top = 137
+    Width = 134
+    Height = 19
     Anchors = [akRight, akBottom]
     Caption = 'Auto Refresh'
     Enabled = False
@@ -139,7 +139,7 @@ object Profiler: TProfiler
   object Timer: TTimer
     Enabled = False
     OnTimer = TimerTimer
-    Left = 184
-    Top = 120
+    Left = 201
+    Top = 131
   end
 end

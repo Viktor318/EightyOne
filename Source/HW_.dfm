@@ -1537,7 +1537,7 @@ object HW: THW
       object KMouse: TCheckBox
         Left = 219
         Top = 83
-        Width = 114
+        Width = 118
         Height = 18
         Caption = 'Kempston Mouse'
         TabOrder = 21
@@ -1910,6 +1910,7 @@ object HW: THW
           Top = 61
           Width = 62
           Height = 15
+          Alignment = taRightJustify
           Caption = 'Microdrives:'
         end
         object FDCBox: TComboBox

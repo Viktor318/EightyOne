@@ -11,7 +11,7 @@ object Keypad128: TKeypad128
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -22,7 +22,7 @@ object Keypad128: TKeypad128
   OnKeyUp = FormKeyUp
   Scaled = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object KeypadSpanish: TImage
     Left = 0
     Top = 0
