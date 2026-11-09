@@ -228,10 +228,12 @@ __fastcall TAbout::TAbout(TComponent* Owner)
                 if (versionNumberPart3 != 0)
                 {
                         version = version + "." + AnsiString(versionNumberPart3);
-                        if (versionNumberPart4 != 0)
-                        {
-                                version = version + "." + AnsiString(versionNumberPart4);
-                        }
+                }
+                // The fourth number is the release of this fork, the
+                // Hungarian Windows edition: 1.41.0.1 is shown as 1.41-hu.1
+                if (versionNumberPart4 != 0)
+                {
+                        version = version + "-hu." + AnsiString(versionNumberPart4);
                 }
                 VersionNumber = version;
         }

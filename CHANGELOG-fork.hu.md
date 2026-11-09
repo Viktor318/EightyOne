@@ -1,12 +1,14 @@
-# A fork változásai
+# A magyar Windows-kiadás változásai
 
-[English](CHANGELOG-fork.md)
+[English](CHANGELOG-fork.md) | **Magyar**
 
-A `hungarian-windows` ág változásai a
+Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 [charlierobson/EightyOne](https://github.com/charlierobson/EightyOne)
-eredetihez képest.
+2025. április 1-jei forrásához, amely kicsivel az 1.41-es kiadás után
+készült. Magának az EightyOne-nak a változásai a
+`Release Files/Release history.txt` fájlban vannak (angolul).
 
-## Kiadatlan
+## v1.41-hu.1 – 2026-11-09
 
 ### Hang
 
@@ -172,6 +174,8 @@ lehet, vagy üzenet jelzi, hogy nem sikerült betölteni.
   képhez vagy a programhoz méretezett ablakok (billentyűzetkép, numerikus
   billentyűzet, billentyűfunkciók) megtartják a méretüket; a kazettalista
   sorai magasabbak.
+- A **Névjegy** ablak ennek a kiadásnak a verzióját mutatja (1.41-hu.1);
+  az `EightyOne.exe` fájlverziója 1.41.0.1.
 - A **BASIC lista** ablak legalább olyan széles, mint az eszköztára, így
   minden gombja látszik. A *BASIC lista mentése szövegként* ablak
   bekezdései egymás alá kerülnek, így nem csúsznak egymásba, és az ablak

@@ -1,11 +1,13 @@
-# Changes in this fork
+# Changes of the Hungarian Windows edition
 
-[Magyarul](CHANGELOG-fork.hu.md)
+**English** | [Magyar](CHANGELOG-fork.hu.md)
 
-The changes of the `hungarian-windows` branch, compared with
-[charlierobson/EightyOne](https://github.com/charlierobson/EightyOne).
+Changes of this fork on top of EightyOne 1.41: the source of
+[charlierobson/EightyOne](https://github.com/charlierobson/EightyOne) as
+of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
+itself are in `Release Files/Release history.txt`.
 
-## Unreleased
+## v1.41-hu.1 – 2026-11-09
 
 ### Sound
 
@@ -161,6 +163,8 @@ could not be loaded.
   *Advanced Settings*, and others) are shown whole. The windows sized by a
   picture or by the program (keyboard picture, keypad, keyboard
   functions) keep their size; the rows of the tape list are taller.
+- The **About** window shows the version of this edition (1.41-hu.1);
+  the file version of `EightyOne.exe` is 1.41.0.1.
 - The **BASIC Listing** window is at least as wide as its tool bar, so all
   of its buttons are shown. The paragraphs of *Saving a BASIC Listing as
   Text* are put one under the other, so they no longer run into each

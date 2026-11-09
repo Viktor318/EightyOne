@@ -134,6 +134,8 @@ xcopy /e "%ReleaseFilesFolder%\*.*"           "%OutputReleaseFolder%\" > nul 2>&
 xcopy /e "%SourceFolder%\ROMs\*.*"            "%OutputReleaseFolder%\ROMs\" > nul 2>&1
 xcopy /e "%SourceFolder%\ROM Cartridges\*.*"  "%OutputReleaseFolder%\ROM Cartridges\" > nul 2>&1
 xcopy /y "%SourceBackupFolder%\EightyOne.exe" "%OutputReleaseFolder%\" > nul 2>&1
+xcopy /y "%cd%\README*.md"                   "%OutputReleaseFolder%\" > nul 2>&1
+xcopy /y "%cd%\CHANGELOG-fork*.md"           "%OutputReleaseFolder%\" > nul 2>&1
 
 rem ---- Unzip the FatTest.vhd zip file
 
@@ -222,37 +224,27 @@ echo.
 echo Creation of distributable zip files aborted.
 goto :end
 
+rem ---- Zip and unzip with .NET (through PowerShell), which keeps file names
+rem ---- in Unicode. The Windows compressed folders used before cannot store
+rem ---- names with a micro sign (the Currah uSource and uSpeech documents)
+rem ---- with some code pages (e.g. Hungarian), and needed a fixed wait.
+rem ---- The paths go through environment variables, so any character works.
+
 :zip
-set zipScriptFile="%OutputFolder%\_zipIt.vbs"
+set "ZipSourceFolder=%~1"
+set "ZipFileName=%~2"
 
-echo Set objArgs = WScript.Arguments > %zipScriptFile%
-echo InputFolder = objArgs(0) >> %zipScriptFile%
-echo ZipFile = objArgs(1) >> %zipScriptFile%
-echo CreateObject("Scripting.FileSystemObject").CreateTextFile(ZipFile, True).Write "PK" ^& Chr(5) ^& Chr(6) ^& String(18, vbNullChar) >> %zipScriptFile%
-echo Set objShell = CreateObject("Shell.Application") >> %zipScriptFile%
-echo Set source = objShell.NameSpace(InputFolder).Items >> %zipScriptFile%
-echo objShell.NameSpace(ZipFile).CopyHere(source) >> %zipScriptFile%
-echo WScript.Sleep 20000 >> %zipScriptFile%
-echo Set objShell = Nothing >> %zipScriptFile%
-
-CScript //nologo %zipScriptFile% %1 %2 > nul 2>&1
-
-del /q %zipScriptFile% > nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; if (Test-Path -LiteralPath $env:ZipFileName) { Remove-Item -LiteralPath $env:ZipFileName }; [System.IO.Compression.ZipFile]::CreateFromDirectory($env:ZipSourceFolder, $env:ZipFileName)"
+if errorlevel 1 echo ** Could not create %~2 **
 
 goto :eof
 
 :unzip
-set unzipScriptFile="%OutputFolder%\_unzipIt.vbs"
+set "UnzipFolder=%~1"
+set "UnzipFileName=%~2"
 
-echo set objShell = CreateObject("Shell.Application") > %unzipScriptFile%
-echo set FilesInZip=objShell.NameSpace(%2).items >> %unzipScriptFile%
-echo objShell.NameSpace(%1).CopyHere(FilesInZip) >> %unzipScriptFile%
-echo WScript.Sleep 5000 >> %unzipScriptFile%
-echo Set objShell = Nothing >> %unzipScriptFile%
-
-cscript //nologo %unzipScriptFile% > nul 2>&1
-
-del /q %unzipScriptFile% > nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory($env:UnzipFileName, $env:UnzipFolder)"
+if errorlevel 1 echo ** Could not unzip %~2 **
 
 goto :eof
     
