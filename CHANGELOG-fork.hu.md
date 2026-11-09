@@ -8,7 +8,7 @@ Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 készült. Magának az EightyOne-nak a változásai a
 `Release Files/Release history.txt` fájlban vannak (angolul).
 
-## Még nincs kiadva – az EightyOne 1.42 fejlesztői változata beolvasztva
+## v1.41-hu.2 – 2026-11-10
 
 A következő EightyOne (1.42, John Stroebel és Paul Farrow) fejlesztői
 változata be van olvasztva: a

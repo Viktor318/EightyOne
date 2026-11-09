@@ -3,26 +3,41 @@
 **English** | [Magyar](README.hu.md)
 
 This is a fork of [EightyOne](https://github.com/charlierobson/EightyOne)
-(version 1.41), the Windows emulator of the Sinclair ZX80, ZX81 and ZX
+(version 1.41 with the development version of 1.42), the Windows emulator of the Sinclair ZX80, ZX81 and ZX
 Spectrum, their clones and the Jupiter Ace, by Michael D Wynne, Charlie
 Robson and Paul Farrow. It adds a Hungarian user interface, typing with the
 Windows keyboard layout, cleaner sound through WASAPI with a redesigned
 Sound Settings window, 9 point text in every window, a 300% zoom, safer
 loading of damaged files and several smaller fixes.
 
-The emulation itself is the original EightyOne. The changes of this fork
-are listed in [CHANGELOG-fork.md](CHANGELOG-fork.md), those of EightyOne
-itself in `Release Files/Release history.txt`.
+The emulation itself is the original EightyOne. The development version
+of its next release, 1.42, by John Stroebel and Paul Farrow, comes from
+[stroebeljc/EightyOne](https://github.com/stroebeljc/EightyOne). The
+changes of this fork are listed in [CHANGELOG-fork.md](CHANGELOG-fork.md),
+those of EightyOne itself (1.42 included) in
+`Release Files/Release history.txt`.
 
 ## Download
 
-Download `EightyOne-1.41-hu.1-windows.zip` from the
+Download `EightyOne-1.41-hu.2-windows.zip` from the
 [Releases](https://github.com/Viktor318/EightyOne/releases) page, unpack it
 into a folder of your choice and start `EightyOne.exe`. Nothing has to be
 installed. The `ROMs` and `ROM Cartridges` folders must stay next to the
 program.
 
 ## What this edition adds
+
+### From the EightyOne 1.42 development version
+
+- The emulation runs on its own thread, still clocked by the sound: the
+  sound and the machine **go on while a menu or a dialog is open**.
+- The AY of the Spectrum 128 is decoded as on the real machine, so music
+  silent in many programs plays; a more exact Z80 and frame timing.
+- **Speed** from 0.25x to 8x, slower than real time too; **RZX playback**
+  on the Spectrum; Beta Disk (TR-DOS) fixes, **ZX1541** with D64 disk
+  images, Larken; BASIC listings of the Lambda 8300, the Timex machines
+  and the Spectrum 128; Memotech and Quicksilva hi-res, Lambda colour,
+  ZX Printer momentum and scroll bar, joystick POV hats.
 
 ### Hungarian or English user interface
 

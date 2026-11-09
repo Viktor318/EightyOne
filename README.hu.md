@@ -3,7 +3,7 @@
 [English](README.md) | **Magyar**
 
 Ez az [EightyOne](https://github.com/charlierobson/EightyOne) (1.41-es
-verzió) egy változata. Az EightyOne Michael D Wynne, Charlie Robson és Paul
+verzió, az 1.42-es fejlesztői változatával) egy változata. Az EightyOne Michael D Wynne, Charlie Robson és Paul
 Farrow Windowsos emulátora a Sinclair ZX80, ZX81 és ZX Spectrum gépekhez, a
 klónjaikhoz és a Jupiter Ace-hez. Ez a kiadás magyar felülettel, a Windows
 billentyűkiosztása szerinti gépeléssel, tisztább, WASAPI-n szóló hanggal és
@@ -11,19 +11,36 @@ megújult Hangbeállítások ablakkal, minden ablakban 9 pontos betűvel, 300%-o
 nagyítással, a sérült fájlok biztonságos betöltésével és több kisebb
 javítással egészíti ki az eredetit.
 
-Maga az emuláció az eredeti EightyOne. Ennek a változatnak a módosításai a
+Maga az emuláció az eredeti EightyOne. A következő kiadásának, az
+1.42-nek a fejlesztői változata John Stroebel és Paul Farrow munkája, a
+[stroebeljc/EightyOne](https://github.com/stroebeljc/EightyOne) tárolóból.
+Ennek a változatnak a módosításai a
 [CHANGELOG-fork.hu.md](CHANGELOG-fork.hu.md) fájlban, az EightyOne saját
-változásai a `Release Files/Release history.txt` fájlban vannak (angolul).
+változásai (az 1.42-éi is) a `Release Files/Release history.txt` fájlban
+vannak (angolul).
 
 ## Letöltés
 
 A [Releases](https://github.com/Viktor318/EightyOne/releases) oldalról
-töltsd le az `EightyOne-1.41-hu.1-windows.zip` fájlt, csomagold ki egy
+töltsd le az `EightyOne-1.41-hu.2-windows.zip` fájlt, csomagold ki egy
 tetszőleges mappába, és indítsd el az `EightyOne.exe`-t. Telepíteni nem kell
 semmit. A `ROMs` és a `ROM Cartridges` mappának a program mellett kell
 maradnia.
 
 ## Mit ad hozzá ez a kiadás
+
+### Az EightyOne 1.42 fejlesztői változatából
+
+- Az emuláció saját szálon fut, továbbra is a hang ütemére: **menü vagy
+  párbeszédablak alatt is szól a hang és fut a gép**.
+- A Spectrum 128 AY-ja úgy dekódolódik, mint az igazi gépen, így sok
+  programban megszólal a korábban néma zene; pontosabb Z80 és
+  képkocka-időzítés.
+- **Sebesség** 0,25x és 8x között, a valós időnél lassabban is;
+  **RZX-lejátszás** Spectrumon; Beta Disk (TR-DOS) javítások, **ZX1541**
+  D64 lemezképekkel, Larken; a Lambda 8300, a Timex gépek és a Spectrum
+  128 BASIC listája; Memotech és Quicksilva nagy felbontás, Lambda szín,
+  a ZX Printer lendülete és görgetősávja, a joystick POV-kalapja.
 
 ### Magyar vagy angol felület
 

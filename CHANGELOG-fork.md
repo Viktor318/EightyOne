@@ -7,7 +7,7 @@ Changes of this fork on top of EightyOne 1.41: the source of
 of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
 itself are in `Release Files/Release history.txt`.
 
-## Not released yet – the EightyOne 1.42 development version merged
+## v1.41-hu.2 – 2026-11-10
 
 The development version of the next EightyOne (1.42, by John Stroebel and
 Paul Farrow) is merged: the `develop` branch of
