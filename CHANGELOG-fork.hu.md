@@ -32,10 +32,29 @@ készült. Magának az EightyOne-nak a változásai a
 - A +2A-n és a +3-on a menüpont szürke: a ROM-juk nem kérdezi le a keypadet
   (csak a 128-nak és a +2-nek van KEYPAD aljzata).
 - Csatlakoztatott keypad mellett a jobb Shift lenyomva tartása közben
-  felengedett billentyűk lenyomva maradtak az emulált billentyűzeten.
+  felengedett billentyűk az emulált billentyűzeten is felengednek; eddig
+  lenyomva maradtak.
+
+### Legutóbbi fájlok
+
+- **Legutóbbi fájlok** (*Fájl > Legutóbbi fájlok*), ahogy a
+  Fuse-kiadásban: az utoljára megnyitott 10 fájl, a legújabb elöl, 1–9,
+  10 számozással, a hosszú útvonalak közepe rövidítve; alattuk *Lista
+  törlése*. A *Fájl > Kazetta megnyitása* és *Pillanatkép betöltése*, a
+  *Vezérlés > RZX > RZX fájl lejátszása*, a Meghajtók ablak, a
+  Kazettakezelő és a Hangfájl-betöltő ablakban megnyitott, az ablakra
+  húzott és a parancssorban megadott fájlok kerülnek rá (`.zip`-ből
+  megnyitott fájl helyett maga a `.zip`). Újra úgy nyílnak meg, mint a menüpontjukkal: a kazetta és
+  a `.wav` mint a *Kazetta megnyitása*, a pillanatkép mint a *Pillanatkép
+  betöltése*, a lemezkép az A meghajtóba, a microdrive-kazetta az első
+  microdrive-ba, a merevlemezkép az első merevlemezre. A már nem létező
+  fájl üzenettel lekerül a listáról. A lista a beállításfájlban van
+  (`[RECENTFILES]`), és minden változáskor kiíródik.
 
 ### Javítások
 
+- Az ablakra húzott hajlékonylemez-kép az A meghajtóba kerül; eddig
+  helyette az A meghajtó fájlválasztó ablaka jött fel.
 - Konfiguráció betöltésekor (Beállítások > Konfiguráció) az ablak a
   vele mentett méretre (nagyításra) áll; eddig mindig 100%-ra ugrott.
 

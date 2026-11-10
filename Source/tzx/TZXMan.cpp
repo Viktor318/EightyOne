@@ -312,6 +312,7 @@ void __fastcall TTZX::Open1Click(TObject *Sender)
                 {
                         AnsiString filename = OpenDialog->Files->Strings[i];
                         LoadFile(filename, insert);
+                        Form1->AddRecentFile(filename);
                         AnsiString Ext = GetExt(filename);
                         if (Ext==".TZX" || Ext==".TAP" || Ext==".T81"
                                   || Ext==".P" || Ext==".O" || Ext==".A83"

@@ -29,11 +29,28 @@ itself are in `Release Files/Release history.txt`.
   scan can't move the cursor instead of deleting.
 - The menu item is greyed out on the +2A and the +3, whose ROM does not
   poll the keypad (only the 128 and the +2 have the KEYPAD socket).
-- With the keypad connected, keys released while the right Shift was held
-  stayed pressed on the emulated keyboard.
+- With the keypad connected, keys released while the right Shift is held
+  are released on the emulated keyboard too; they stayed pressed.
+
+### Recent files
+
+- **Recent files** (*File > Recent Files*), as in the Fuse edition: the
+  last 10 files opened, newest first, numbered 1–9, 10, long paths
+  shortened in the middle; *Clear List* under them. The files opened with
+  *File > Open Tape* and *Load Snapshot*, *Control > RZX > Play RZX File*,
+  in the Drives window, the Tape Manager and the Wave Loader, by dragging
+  onto the window or on the command line are listed (for a file from a
+  `.zip`, the `.zip`). They are opened again as with their menu items: a tape or a
+  `.wav` as with *Open Tape*, a snapshot as with *Load Snapshot*, a disk
+  image into drive A, a microdrive cartridge into the first microdrive, a
+  hard disk image into the first hard disk. A file that is not there any
+  more is taken off the list with a message. The list is kept in the
+  settings file (`[RECENTFILES]`), written at each change.
 
 ### Fixes
 
+- A floppy disk image dragged onto the window goes into drive A; the file
+  dialog of drive A came up instead.
 - Loading a configuration (Options > Configuration) sets the window to
   the size saved with it (its zoom); it always went back to 100%.
 

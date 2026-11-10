@@ -307,11 +307,13 @@ void TForm1::SetStartUpSize(void)
 void TForm1::LoadCommandLineFiles(void)
 {
         AnsiString Filename, Ext;
+        bool opened;
         int i=0;
 
         while(CommandLine[i])
         {
                 Filename=CommandLine[i];
+                opened=true;
 
                 char escKey = VK_ESCAPE;
                 if (Filename.UpperCase()=="FULLSCREEN") FormKeyPress(NULL, escKey);
@@ -340,6 +342,9 @@ void TForm1::LoadCommandLineFiles(void)
                                 P3Drive->InsertFile(Filename);
                 else if (Ext==".RZX")
                         spec48_LoadRZX(Filename.c_str());
+                else opened=false;
+
+                if (opened) AddRecentFile(CommandLine[i]);
                 i++;
         }
 }
@@ -367,6 +372,7 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 
         LanguageSetSetting(ini->ReadInteger("MAIN", "Language", LANGUAGE_AUTOMATIC));
         BuildLanguageMenu();
+        BuildRecentFilesMenu();
 
         N3001 = new TMenuItem(this);
         N3001->Caption = "300%";
@@ -827,18 +833,16 @@ void __fastcall TForm1::InsertTape1Click(TObject *Sender)
         {
                 Filename=ZipFile->ExpandZIP(Filename, OpenTape1->Filter);
                 if (Filename=="") return;
-                Extension = FileNameGetExt(Filename);
         }
 
-        if (Extension == ".WAV" || Extension == ".CSW")
-        {
-                        WavLoad->LoadWavDialog->FileName = Filename;
-                        WavLoad->LoadFile(Filename);
-                        InWaveLoaderClick(NULL);
-                        OutWaveLoaderClick(NULL);
-        }
+        AddRecentFile(OpenTape1->FileName);
+        OpenTapeFile(Filename);
+}
 
-        if (Extension == ".TZX"
+// Tape files of the tape manager (and BASIC programs as text)
+static bool IsTapeFileExt(const AnsiString &Extension)
+{
+        return Extension == ".TZX"
                 || Extension == ".T81"
                 || Extension == ".TAP"
                 || Extension == ".P"
@@ -851,7 +855,24 @@ void __fastcall TForm1::InsertTape1Click(TObject *Sender)
                 || Extension == ".B81"
                 || Extension == ".B82"
                 || Extension == ".TXT"
-                || Extension == ".BAS")
+                || Extension == ".BAS";
+}
+
+// A tape file, or a .wav or .csw for the wave loader, as File > Open Tape
+// opens it (not a .zip)
+void TForm1::OpenTapeFile(AnsiString Filename)
+{
+        AnsiString Extension = FileNameGetExt(Filename);
+
+        if (Extension == ".WAV" || Extension == ".CSW")
+        {
+                        WavLoad->LoadWavDialog->FileName = Filename;
+                        WavLoad->LoadFile(Filename);
+                        InWaveLoaderClick(NULL);
+                        OutWaveLoaderClick(NULL);
+        }
+
+        if (IsTapeFileExt(Extension))
         {
                         TZX->StopBtnClick(NULL);
                         TZX->OpenDialog->FileName = Filename;
@@ -906,9 +927,7 @@ void __fastcall TForm1::SaveSnapshot1Click(TObject *Sender)
 
 void __fastcall TForm1::LoadSnapshot1Click(TObject *Sender)
 {
-        int stopped;
         AnsiString Path, Ext;
-        stopped=emulation_stop;
 
         if (emulator.machine==MACHINEACE)
         {
@@ -935,8 +954,17 @@ void __fastcall TForm1::LoadSnapshot1Click(TObject *Sender)
         {
                 Path=ZipFile->ExpandZIP(Path, LoadSnapDialog->Filter);
                 if (Path=="") return;
-                Ext = FileNameGetExt(Path);
         }
+
+        AddRecentFile(LoadSnapDialog->FileName);
+        OpenSnapshot(Path);
+}
+
+// A snapshot as File > Load Snapshot loads it (not a .zip)
+void TForm1::OpenSnapshot(AnsiString Path)
+{
+        int stopped = emulation_stop;
+        AnsiString Ext = FileNameGetExt(Path);
 
         emulation_stop=1;
         Sound.InitDevices();
@@ -1380,6 +1408,7 @@ void __fastcall TForm1::AppMessage(TMsg &Msg, bool &Handled)
         WORD FileIndex;
         WORD QtyDroppedFiles;
         char pDroppedFilename[255];
+        bool opened;
 
         if (Msg.message == WM_DROPFILES)
         {
@@ -1392,6 +1421,7 @@ void __fastcall TForm1::AppMessage(TMsg &Msg, bool &Handled)
 
                         Filename = pDroppedFilename;
                         Ext = GetExt(Filename);
+                        opened = true;
 
                         if (Ext == ".ZIP")
                         {
@@ -1432,7 +1462,9 @@ void __fastcall TForm1::AppMessage(TMsg &Msg, bool &Handled)
                                         P3Drive->InsertFile(Filename);
                         else if (Ext==".RZX")
                                 spec48_LoadRZX(Filename.c_str());
+                        else opened = false;
 
+                        if (opened) AddRecentFile(pDroppedFilename);
                 }
 
                 DragFinish((HDROP)Msg.wParam);
@@ -2606,6 +2638,7 @@ void __fastcall TForm1::Play1Click(TObject *Sender)
 {
         if (!OpenRZX->Execute()) return;
 
+        AddRecentFile(OpenRZX->FileName);
         spec48_LoadRZX(OpenRZX->FileName.c_str());
 }
 //---------------------------------------------------------------------------
@@ -3561,5 +3594,301 @@ void __fastcall TForm1::LanguageClick(TObject *Sender)
 
         // The menu bar may now take a different number of lines
         FixZoomHeight();
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+// File > Recent Files: the last 10 files opened, newest first, numbered
+// 1-9, 10. The files opened with File > Open Tape, Load Snapshot, Control >
+// RZX > Play, the Drives window, the tape manager, the wave loader, by
+// dragging onto the window or on the command line are listed (a .zip as
+// the .zip). They are opened again as by their menu items. The list is
+// kept in the settings file ([RECENTFILES]), written at each change
+
+static const char *RecentFilesSection = "RECENTFILES";
+
+// The files a .zip of the list may hold (no .zip in it: they are not
+// expanded)
+static const char *RecentFilesZipFilter =
+        "*.z81;*.ace;*.z80;*.sna;*.tzx;*.tap;*.t81;*.p;*.o;*.a83;*.81;*.80;"
+        "*.p81;*.b80;*.b81;*.b82;*.txt;*.bas;*.wav;*.csw;*.mdr;*.mdv;*.hdf;"
+        "*.vhd;*.dsk;*.mgt;*.img;*.opd;*.opu;*.trd;*.lar;*.rzx";
+
+// A path longer than this is shortened in the middle
+static const int RecentFilesShownLength = 60;
+
+// "C:\Spectrum\Games\Some folder\game.tzx" as "C:\Spectrum\...\game.tzx":
+// the root and the first folder, then as many of the last parts as fit
+// (the file name always), as in Fuse
+static AnsiString ShortenPath(const AnsiString &Path)
+{
+        const char *path = Path.c_str();
+        const char *p;
+        int length = Path.Length(), head = 0, tail, separators = 0;
+
+        if (length <= RecentFilesShownLength) return Path;
+
+        // The head: up to the second separator after the root (the root of
+        // a network path is \\server\share)
+        if (path[0] == '\\' && path[1] == '\\') separators = -2;
+        for (p = path; *p; p++)
+        {
+                if (*p == '\\' && ++separators == 2)
+                {
+                        head = p - path + 1;
+                        break;
+                }
+        }
+
+        // The tail: the last parts that fit, at least the file name
+        tail = length;
+        for (p = path + length - 1; p > path + head; p--)
+        {
+                if (*p != '\\') continue;
+                if (head + 4 + (path + length - p) > RecentFilesShownLength
+                        && tail != length) break;
+                tail = p - path;
+                if (head + 4 + (length - tail) > RecentFilesShownLength) break;
+        }
+
+        if (!head || tail <= head || tail == length) return Path;
+
+        return Path.SubString(1, head) + "..." + Path.SubString(tail + 1, length - tail);
+}
+
+// A menu text: "&" as "&&" (or it would be a hotkey)
+static AnsiString MenuText(const AnsiString &Text)
+{
+        AnsiString result;
+
+        for (int i = 1; i <= Text.Length(); i++)
+        {
+                if (Text[i] == '&') result += "&";
+                result += Text[i];
+        }
+
+        return result;
+}
+
+void TForm1::BuildRecentFilesMenu(void)
+{
+        TMenuItem *separator;
+        int i, position;
+
+        RecentFiles = new TStringList;
+
+        RecentFilesMenu = new TMenuItem(this);
+        // Its own hotkey: an automatic one would take the letter of Exit
+        // ("Kilépés") in Hungarian
+        RecentFilesMenu->Caption = Tr("Recent &Files");
+
+        // The texts of the files are paths: never translated
+        for (i = 0; i < RecentFilesMax; i++)
+        {
+                RecentFileItems[i] = new TMenuItem(this);
+                RecentFileItems[i]->Tag = i;
+                RecentFileItems[i]->Visible = false;
+                RecentFileItems[i]->OnClick = RecentFileClick;
+                LanguageKeepText(RecentFileItems[i]);
+                RecentFilesMenu->Add(RecentFileItems[i]);
+        }
+
+        RecentFilesEmpty = new TMenuItem(this);
+        RecentFilesEmpty->Caption = Tr("(Empty)");
+        RecentFilesEmpty->Enabled = false;
+        RecentFilesMenu->Add(RecentFilesEmpty);
+
+        separator = new TMenuItem(this);
+        separator->Caption = "-";
+        RecentFilesMenu->Add(separator);
+
+        RecentFilesClear = new TMenuItem(this);
+        RecentFilesClear->Caption = Tr("Clear List");
+        RecentFilesClear->OnClick = RecentFilesClearClick;
+        RecentFilesMenu->Add(RecentFilesClear);
+
+        // Above Exit, between separators
+        position = FileMenu1->IndexOf(N3);
+        separator = new TMenuItem(this);
+        separator->Caption = "-";
+        FileMenu1->Insert(position, separator);
+        FileMenu1->Insert(position + 1, RecentFilesMenu);
+
+        LoadRecentFiles();
+        UpdateRecentFilesMenu();
+}
+
+// The items are only shown and hidden, never deleted: one of them may be
+// the item clicked
+void TForm1::UpdateRecentFilesMenu(void)
+{
+        AnsiString number;
+        int i;
+
+        for (i = 0; i < RecentFilesMax; i++)
+        {
+                if (i < RecentFiles->Count)
+                {
+                        number = i < 9 ? "&" + IntToStr(i + 1) : AnsiString("1&0");
+                        RecentFileItems[i]->Caption = number + "  "
+                                + MenuText(ShortenPath(RecentFiles->Strings[i]));
+                        RecentFileItems[i]->Visible = true;
+                }
+                else
+                {
+                        RecentFileItems[i]->Visible = false;
+                }
+        }
+
+        RecentFilesEmpty->Visible = (RecentFiles->Count == 0);
+        RecentFilesClear->Enabled = (RecentFiles->Count > 0);
+}
+
+void TForm1::LoadRecentFiles(void)
+{
+        TIniFile *ini;
+        AnsiString Filename;
+        int i;
+
+        ini = new TIniFile(emulator.inipath);
+
+        RecentFiles->Clear();
+        for (i = 1; i <= RecentFilesMax; i++)
+        {
+                Filename = ini->ReadString(RecentFilesSection, "File" + IntToStr(i), "");
+                if (Filename != "") RecentFiles->Add(Filename);
+        }
+
+        delete ini;
+}
+
+// Only this section is written: the other settings are saved on exit
+void TForm1::SaveRecentFiles(void)
+{
+        TIniFile *ini;
+        int i;
+
+        ini = new TIniFile(emulator.inipath);
+
+        ini->EraseSection(RecentFilesSection);
+        for (i = 0; i < RecentFiles->Count; i++)
+        {
+                ini->WriteString(RecentFilesSection, "File" + IntToStr(i + 1), RecentFiles->Strings[i]);
+        }
+
+        delete ini;
+}
+
+// A file opened: to the top of the list
+void TForm1::AddRecentFile(AnsiString Filename)
+{
+        AnsiString TempPath = emulator.temppath;
+        int i;
+
+        if (!RecentFiles || Filename == "") return;
+
+        // A path relative to the current folder (the command line) is kept
+        // as a full one
+        Filename = ExpandFileName(Filename);
+        for (i = 1; i <= Filename.Length(); i++)
+        {
+                if (Filename[i] == '/') Filename[i] = '\\';
+        }
+
+        // Not the files taken out of a .zip into the temporary folder
+        if (TempPath != "" && Filename.Length() > TempPath.Length()
+                && AnsiCompareText(Filename.SubString(1, TempPath.Length()), TempPath) == 0)
+        {
+                return;
+        }
+
+        for (i = 0; i < RecentFiles->Count; i++)
+        {
+                if (AnsiCompareText(RecentFiles->Strings[i], Filename) == 0)
+                {
+                        RecentFiles->Delete(i);
+                        break;
+                }
+        }
+
+        RecentFiles->Insert(0, Filename);
+        while (RecentFiles->Count > RecentFilesMax)
+        {
+                RecentFiles->Delete(RecentFiles->Count - 1);
+        }
+
+        SaveRecentFiles();
+        UpdateRecentFilesMenu();
+}
+
+// A file of the list (a .zip already expanded), opened as by the menu item
+// it belongs to: false if it is of no known kind
+bool TForm1::OpenFileByType(AnsiString Filename)
+{
+        AnsiString Ext = FileNameGetExt(Filename);
+
+        if (Ext == ".Z81" || Ext == ".ACE" || Ext == ".Z80" || Ext == ".SNA")
+        {
+                OpenSnapshot(Filename);
+        }
+        else if (Ext == ".WAV" || Ext == ".CSW" || IsTapeFileExt(Ext))
+        {
+                OpenTapeFile(Filename);
+        }
+        else if (Ext == ".MDR" || Ext == ".MDV" || Ext == ".HDF" || Ext == ".VHD"
+                || Ext == ".DSK" || Ext == ".MGT" || Ext == ".IMG" || Ext == ".OPD"
+                || Ext == ".OPU" || Ext == ".TRD" || Ext == ".LAR")
+        {
+                P3Drive->InsertFile(Filename);
+        }
+        else if (Ext == ".RZX")
+        {
+                spec48_LoadRZX(Filename.c_str());
+        }
+        else
+        {
+                return false;
+        }
+
+        return true;
+}
+
+void __fastcall TForm1::RecentFileClick(TObject *Sender)
+{
+        TMenuItem *item = dynamic_cast<TMenuItem *>(Sender);
+        AnsiString Filename, Opened;
+
+        if (!item || item->Tag >= RecentFiles->Count) return;
+
+        Filename = RecentFiles->Strings[item->Tag];
+
+        if (!FileExists(Filename))
+        {
+                RecentFiles->Delete(item->Tag);
+                SaveRecentFiles();
+                UpdateRecentFilesMenu();
+
+                Application->MessageBox(TrF("This file no longer exists, so it was taken off the list:\n\n{0}", Filename).c_str(),
+                                        Tr("Recent Files").c_str(), MB_OK | MB_ICONWARNING);
+                return;
+        }
+
+        PCAllKeysUp();
+
+        Opened = Filename;
+        if (FileNameGetExt(Filename) == ".ZIP")
+        {
+                Opened = ZipFile->ExpandZIP(Filename, RecentFilesZipFilter);
+                if (Opened == "") return;
+        }
+
+        if (OpenFileByType(Opened)) AddRecentFile(Filename);
+}
+
+void __fastcall TForm1::RecentFilesClearClick(TObject *Sender)
+{
+        RecentFiles->Clear();
+        SaveRecentFiles();
+        UpdateRecentFilesMenu();
 }
 //---------------------------------------------------------------------------

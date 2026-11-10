@@ -808,3 +808,8 @@ code	main_.cpp; SoundForm.cpp	Automatic	Automatikus
 code	SoundForm.cpp	Output:	Kimenet:
 code	SoundForm.cpp	no sound device	nincs hangeszköz
 code	wavload_.cpp	The file could not be loaded.	A fájlt nem sikerült betölteni.
+code	main_.cpp	Recent &Files	Legutóbbi &fájlok
+code	main_.cpp	Recent Files	Legutóbbi fájlok
+code	main_.cpp	(Empty)	(üres)
+code	main_.cpp	Clear List	Lista törlése
+code	main_.cpp	This file no longer exists, so it was taken off the list:\n\n{0}	Ez a fájl már nem létezik, ezért lekerült a listáról:\n\n{0}

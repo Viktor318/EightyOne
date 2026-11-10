@@ -185,7 +185,11 @@ void TWavLoad::LoadFile(AnsiString FName)
             
 void __fastcall TWavLoad::LoadClick(TObject *Sender)
 {
-        if (LoadWavDialog->Execute()) LoadFile(LoadWavDialog->FileName);
+        if (LoadWavDialog->Execute())
+        {
+                LoadFile(LoadWavDialog->FileName);
+                Form1->AddRecentFile(LoadWavDialog->FileName);
+        }
         RecordBtn->Enabled=Wav.CanRecord();
 }
 
@@ -614,6 +618,7 @@ void __fastcall TWavLoad::OpenWav1Click(TObject *Sender)
         if (LoadWavDialog->Execute())
         {
                 LoadFile(LoadWavDialog->FileName);
+                Form1->AddRecentFile(LoadWavDialog->FileName);
 
                 if (AutoloadonInsert1->Down)
                 {

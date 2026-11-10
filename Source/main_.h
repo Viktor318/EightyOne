@@ -399,6 +399,26 @@ public:		// User declarations
         void StopFramesDisallow(void);
         void WaitFrameThread(bool running);
         void LoadSnapshotFile(AnsiString Filename, AnsiString Ext);
+
+        // File > Recent Files: the last files opened, newest first. A
+        // file opened from it is opened as by its menu item
+        static const int RecentFilesMax = 10;
+        TStringList *RecentFiles;
+        TMenuItem *RecentFilesMenu;
+        TMenuItem *RecentFileItems[RecentFilesMax];
+        TMenuItem *RecentFilesEmpty;
+        TMenuItem *RecentFilesClear;
+        void BuildRecentFilesMenu(void);
+        void UpdateRecentFilesMenu(void);
+        void LoadRecentFiles(void);
+        void SaveRecentFiles(void);
+        void AddRecentFile(AnsiString Filename);
+        void __fastcall RecentFileClick(TObject *Sender);
+        void __fastcall RecentFilesClearClick(TObject *Sender);
+        bool OpenFileByType(AnsiString Filename);
+        void OpenTapeFile(AnsiString Filename);
+        void OpenSnapshot(AnsiString Path);
+
         void LoadAtStartup(void);
         void LoadSettings(TIniFile *ini);
         void SaveSettings(TIniFile *ini);

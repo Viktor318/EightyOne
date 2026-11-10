@@ -217,6 +217,18 @@ void __fastcall TP3Drive::DriveAFSBtnClick(TObject *Sender)
         AnsiString Filename, Ext;
         int readonly = 0;
 
+        // A file dragged onto the main window, or of the recent files list
+        // (a .zip already expanded): into drive A without the dialog
+        if (DragFileName != "")
+        {
+                DriveAText->Text = DragFileName;
+                DriveAText->SelStart = DriveAText->Text.Length() - 1;
+                DriveAText->SelLength = 0;
+
+                OpenFloppyDriveImage(0, DriveAText->Text, 0);
+                return;
+        }
+
         ConfigureOpenFloppyDiskImageDialog();
 
         if (!OpenDialogFloppyDiskImage->Execute()) return;
@@ -232,6 +244,8 @@ void __fastcall TP3Drive::DriveAFSBtnClick(TObject *Sender)
                 Ext = FileNameGetExt(Filename);
                 readonly = 1;
         }
+
+        Form1->AddRecentFile(OpenDialogFloppyDiskImage->FileName);
 
         DriveAText->Text = Filename;
         DriveAText->SelStart = DriveAText->Text.Length() - 1;
@@ -260,6 +274,8 @@ void __fastcall TP3Drive::DriveBFSBtnClick(TObject *Sender)
                 Ext = FileNameGetExt(Filename);
                 readonly = 1;
         }
+
+        Form1->AddRecentFile(OpenDialogFloppyDiskImage->FileName);
 
         DriveBText->Text = Filename;
         DriveBText->SelStart = DriveBText->Text.Length() - 1;
@@ -480,6 +496,7 @@ void __fastcall TP3Drive::HD0FSBtnClick(TObject *Sender)
 
                         Filename = SelectHardDiskImage(0);
                         if (Filename == NULL) return;
+                        Form1->AddRecentFile(Filename);
                 }
         }
 
@@ -501,6 +518,7 @@ void __fastcall TP3Drive::HD1FSBtnClick(TObject *Sender)
 
                 Filename = SelectHardDiskImage(1);
                 if (Filename == NULL) return;
+                Form1->AddRecentFile(Filename);
         }
 
         CreateHardDiskImage(1, Filename, HD1Text, HD1ReadOnly, HD1List);
@@ -708,6 +726,7 @@ void __fastcall TP3Drive::MDVFSBtnClick(TObject *Sender)
                 FileName = OpenDialogFloppyDiskImage->FileName;
 
                 if (!CreateMicrodriveCartridge(FileName)) return;
+                Form1->AddRecentFile(FileName);
         }
         else
         {

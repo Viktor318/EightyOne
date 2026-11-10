@@ -1624,5 +1624,15 @@ const LanguageEntry LanguageHungarianTable[] =
           "nincs hangeszk\366z" },
         { "The file could not be loaded.",
           "A f\341jlt nem siker\374lt bet\366lteni." },
+        { "Recent &Files",
+          "Legut\363bbi &f\341jlok" },
+        { "Recent Files",
+          "Legut\363bbi f\341jlok" },
+        { "(Empty)",
+          "(\374res)" },
+        { "Clear List",
+          "Lista t\366rl\351se" },
+        { "This file no longer exists, so it was taken off the list:\n\n{0}",
+          "Ez a f\341jl m\341r nem l\351tezik, ez\351rt leker\374lt a list\341r\363l:\n\n{0}" },
         { 0, 0 }
 };
