@@ -97,7 +97,8 @@ maradnia.
   billentyűzete, a 128 numerikus billentyűzete, a ZX81 billentyűzete (a
   ZXpand-os, a TS1000 és a ZX97 változattal együtt) a ZX80 billentyűzete
   (a ZXpand-ossal együtt) a Timex TC2048, TS2068 és TS1500, valamint a
-  Jupiter Ace billentyűzete újra van rajzolva, minden méretben éles.
+  Jupiter Ace és a Lambda 8300 billentyűzete újra van rajzolva, minden
+  méretben éles.
 - **ZX Printer**: dupla kattintásra két- vagy háromszoros méret; a
   nyomat PNG-ben (vagy BMP-ben) menthető. A **Fájl > Képernyőkép mentése**
   is ment PNG-t.

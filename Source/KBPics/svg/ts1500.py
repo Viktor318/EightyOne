@@ -45,6 +45,46 @@ ARROWS = {20: 'left', 21: 'right', 31: 'down', 33: 'up'}
 ARROW = [(4 / 18, 0), (14 / 18, 0), (14 / 18, 2 / 7), (1, 2 / 7), (0.5, 1), (0, 2 / 7), (4 / 18, 2 / 7)]
 
 
+def keys(p, key, face, wide):
+    """The keys of the TS1500 and the Lambda: a light square and on it a
+    darker rounded top (the analysis found the tops as texts of their
+    colour). One pitch and width a row (the wide keys keep theirs); the tops
+    on them as on the original, moved with them. Returns the tops"""
+    S = p.S
+    faces = {}
+    for i, (x, y, w, h) in enumerate(p.keys):
+        fs = [o for o in p.words.values() if o['c'] == list(face) and x <= o['x'] and o['x2'] <= x + w
+              and y <= o['y'] and o['y2'] <= y + h]
+        f = max(fs, key=lambda o: (o['x2'] - o['x']) * (o['y2'] - o['y']))
+        faces[i] = f
+        p.used.add(f['id'])
+    p.regular_rows(wide=wide)
+    p.draw_keys(key, 0)
+    for i, f in faces.items():
+        k, nk = p.keys[i], p.newkeys[i]
+        x = f['x'] + nk[0] - k[0]
+        w = f['x2'] - f['x'] + nk[2] - k[2]
+        l, r = round(x * S), round((x + w) * S)
+        t, b = round(f['y'] * S), round(f['y2'] * S)
+        p.items.append('<rect x="%d" y="%d" width="%d" height="%d" rx="%g" fill="%s"/>'
+                       % (l, t, r - l, b - t, 2.5 * S, hexcol(face)))
+    return faces
+
+
+def star(p, X, Y, W, H, colour=(0, 0, 0)):
+    """A star as on the ZX81: a stroke up, a bar across, two legs down and a
+    thicker middle"""
+    S = p.S
+    cx = X + W / 2
+    for x1, y1, x2, y2 in ((cx, Y, cx, Y + 3 * S), (X, Y + 2.5 * S, X + W, Y + 2.5 * S),
+                           (cx - 0.5 * S, Y + 4 * S, X + 1.2 * S, Y + H - 0.2 * S),
+                           (cx + 0.5 * S, Y + 4 * S, X + W - 1.2 * S, Y + H - 0.2 * S)):
+        p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
+                       % (x1, y1, x2, y2, hexcol(colour), 1.1 * S))
+    p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s"/>'
+                   % (cx - 1.5 * S, Y + 3 * S, 3 * S, 2 * S, hexcol(colour)))
+
+
 def draw(name, own=None, small=None):
     """The picture <name> (<name>.json, orig/<name>.png): the TS1500's
     texts where they are found, and its own texts ({number: text}, as words;
@@ -69,25 +109,7 @@ def draw(name, own=None, small=None):
             return None
         return v[0] if len(v) == 1 else v
 
-    # Keys: one pitch and width a row (SHIFT and SPACE keep theirs); the
-    # faces on them as on the original, moved with them
-    faces = {}
-    for i, (x, y, w, h) in enumerate(p.keys):
-        fs = [o for o in p.words.values() if o['c'] == list(FACE) and x <= o['x'] and o['x2'] <= x + w
-              and y <= o['y'] and o['y2'] <= y + h]
-        f = max(fs, key=lambda o: (o['x2'] - o['x']) * (o['y2'] - o['y']))
-        faces[i] = f
-        p.used.add(f['id'])
-    p.regular_rows(wide=(30, 39))
-    p.draw_keys(KEY, 0)
-    for i, f in faces.items():
-        k, nk = p.keys[i], p.newkeys[i]
-        x = f['x'] + nk[0] - k[0]
-        w = f['x2'] - f['x'] + nk[2] - k[2]
-        l, r = round(x * S), round((x + w) * S)
-        t, b = round(f['y'] * S), round(f['y2'] * S)
-        p.items.append('<rect x="%d" y="%d" width="%d" height="%d" rx="%g" fill="%s"/>'
-                       % (l, t, r - l, b - t, 2.5 * S, hexcol(FACE)))
+    faces = keys(p, KEY, FACE, (30, 39))
 
     texts = {}
     for ids, t in TEXTS.items():
@@ -152,23 +174,13 @@ def draw(name, own=None, small=None):
                           round(Y + (dy + 1) * S) - round(Y + dy * S)))
 
     # The stars (** on H, * on B), as on the ZX81
-    def star(X, Y, W, H):
-        cx = X + W / 2
-        for x1, y1, x2, y2 in ((cx, Y, cx, Y + 3 * S), (X, Y + 2.5 * S, X + W, Y + 2.5 * S),
-                               (cx - 0.5 * S, Y + 4 * S, X + 1.2 * S, Y + H - 0.2 * S),
-                               (cx + 0.5 * S, Y + 4 * S, X + W - 1.2 * S, Y + H - 0.2 * S)):
-            p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#000000" stroke-width="%g"/>'
-                           % (x1, y1, x2, y2, 1.1 * S))
-        p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#000000"/>'
-                       % (cx - 1.5 * S, Y + 3 * S, 3 * S, 2 * S))
-
     b = p.box(V(138))
     X, Y, W, H = p.moved(b)
-    star(X, Y, 7 * S, H)
-    star(X + 8 * S, Y, 7 * S, H)
+    star(p, X, Y, 7 * S, H)
+    star(p, X + 8 * S, Y, 7 * S, H)
     b = p.box(V(189))
     X, Y, W, H = p.moved(b)
-    star(X, Y, W, H)
+    star(p, X, Y, W, H)
 
     # The arrows on 5 - 8: a shaft and a head
     for i, direction in ARROWS.items():

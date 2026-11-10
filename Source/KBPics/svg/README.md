@@ -25,6 +25,7 @@ are sharp at any size:
 | `ts1500.py` | `Keyboard_.dfm`, `ts1500kb` | `orig/ts1500.png` |
 | `ts1500zxpand.py` | `Keyboard_.dfm`, `ts1500zxpandkb` | `orig/ts1500zxpand.png` |
 | `ace.py` | `Keyboard_.dfm`, `acekb` | `orig/ace.png` |
+| `lambda8300.py` | `Keyboard_.dfm`, `lambdakb` | `orig/lambda8300.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -84,7 +85,11 @@ rounded top, in even rows; its words all 6 pixels high, as most of them,
 a little narrower on the tops where a block graphic is next to them. The
 Jupiter Ace has its words 5 pixels high in Heros Bold (wide, as in the
 original), those under the top row in the middle of their keys, SPACE
-larger; its letters bold and its signs thin, as there.
+larger; its letters bold and its signs thin, as there. The Lambda 8300 has
+the keys of the TS1500 (`ts1500.keys()`) in its own colours: its words 6
+pixels high, ENTER (7.5) and SPACE (10) larger and, with SHIFT, in the
+middle of their keys; the little figures on 1, 2, 3 and A of their pixels,
+the half squares on S - G with straight diagonals.
 
 ## Making them
 
@@ -117,6 +122,7 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm ts1500kb out/ts1500.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm ts1500zxpandkb out/ts1500zxpand.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm acekb out/ace.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm lambdakb out/lambda8300.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -131,3 +137,4 @@ again only if an original changes:
     python3 analyze.py orig/ts2068.png ts2068 166,166,164 2 210,210,214 small=8,8
     python3 analyze.py orig/<name>.png <name> 211,209,209 2 123,123,123 123,123,123/211,209,209/145,143,143/255,255,255/0,0,0    (the TS1500s)
     python3 analyze.py orig/ace.png ace 30,23,9 2 255,255,255
+    python3 analyze.py orig/lambda8300.png lambda8300 149,179,174 2 102,102,102 102,102,102/149,179,174/104,150,142/255,255,255/242,207,65/0,0,0
