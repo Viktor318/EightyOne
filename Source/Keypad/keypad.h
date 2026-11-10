@@ -46,6 +46,14 @@ public:
         void ClockTick(int ts);
         void Reset();
 
+        // Keys of the PC as keypad keys (Home, End, Page Up...): true if
+        // the key was taken by the keypad, so it must not act on the
+        // keyboard too
+        bool HostKey(unsigned short key, bool press);
+
+        // All the keys taken by the keypad up (e.g. on losing the focus)
+        void ReleaseHostKeys();
+
 private:
         static const int KeypadSocketOutLineLevelLow;
         static const int KeypadSocketOutLineLevelHigh;
@@ -62,9 +70,26 @@ private:
         int keyRowBits[5];
         int keyBitsToSend;
 
+        // The PC keys held as keypad keys, and the keypad keys they give:
+        // 4 bits a row, rows 5, 4, 1, 2, 3 from the lowest bits up (the
+        // order the rows are sent in)
+        static const int MaxHostKeys = 8;
+        struct HostKeyHeld
+        {
+                unsigned short key;
+                int keys;
+        } hostKeysHeld[MaxHostKeys];
+        int hostKeyCount;
+        volatile int hostKeys;
+        bool hostShiftSent;
+
+        void ResetProtocol();
         void HandleRowRead();
         int FetchRowKeys();
         int FetchRowKeys_Keyboard();
+        bool HostKeysActive();
+        int HostKeyKeypadKeys(unsigned short key);
+        void UpdateHostKeys();
 };
 
 extern CKeypad Keypad;

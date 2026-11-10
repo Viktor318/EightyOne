@@ -10,6 +10,30 @@ készült. Magának az EightyOne-nak a változásai a
 
 ## Még nincs kiadva
 
+### Spectrum 128 numerikus billentyűzet (keypad)
+
+- Csatlakoztatott keypad mellett (*Vezérlés > Spectrum 128 numerikus
+  billentyűzet csatlakoztatása*) a PC szerkesztőbillentyűi adják a 128
+  BASIC szerkesztő azon funkcióit, amelyek csak a keypaden voltak, ahogy a
+  Fuse-kiadásban: Home / End: a sor eleje / vége; Ctrl + Home / End: a
+  program első / utolsó sora; Ctrl + ← / →: előző / következő szó;
+  Page Up / Page Down: 10 sorral feljebb / lejjebb; Delete: a kurzor
+  alatti karakter törlése; Shift + Backspace / Delete: törlés a sor
+  elejéig / végéig; Ctrl + Backspace / Delete: törlés a szó elejéig /
+  végéig; Insert: az Options menü (CMND); Ctrl + Insert: TOGGLE (váltás a
+  felső és az alsó képernyő között). A többi billentyű (Backspace, a
+  kurzorbillentyűk) a régi módon működik, a numerikus billentyűzet továbbra
+  is számokat ír. A jobb Ctrl a keypad gombjainak helyén lévő
+  billentyűkkel is megmaradt.
+- A keypad a Fuse-hoz hasonlóan tovább vár az elküldött bitek között (a ROM
+  ott megszakítódhat), és nyugalmi vonalállapotból indul; a törlő
+  billentyűk előbb a keypad SHIFT-jét küldik el, így egy letapogatás
+  közepén lenyomva sem mozdítják el a kurzort törlés helyett.
+- A +2A-n és a +3-on a menüpont szürke: a ROM-juk nem kérdezi le a keypadet
+  (csak a 128-nak és a +2-nek van KEYPAD aljzata).
+- Csatlakoztatott keypad mellett a jobb Shift lenyomva tartása közben
+  felengedett billentyűk lenyomva maradtak az emulált billentyűzeten.
+
 ### Javítások
 
 - Konfiguráció betöltésekor (Beállítások > Konfiguráció) az ablak a

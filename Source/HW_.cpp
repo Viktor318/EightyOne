@@ -1355,7 +1355,10 @@ void THW::ConfigureHiRes()
 
 void THW::ConfigureKeypad()
 {
-        Form1->ConnectSpectrum128Keypad->Enabled = (NewMachine == MACHINESPECTRUM && NewSpec >= SPECCY128);
+        // Only the 128 and the +2 have the KEYPAD socket and a ROM which
+        // polls the keypad (the +2A and +3 do not)
+        Form1->ConnectSpectrum128Keypad->Enabled = (NewMachine == MACHINESPECTRUM
+                && (NewSpec == SPECCY128 || NewSpec == SPECCYPLUS2));
 
         if (!Form1->ConnectSpectrum128Keypad->Enabled)
         {
@@ -3149,7 +3152,7 @@ void __fastcall THW::SpecP2aBtnClick(TObject *Sender)
         Multiface->Caption = "Multiface 3";
 
         SoundCardBox->ItemIndex = SelectEntry(SoundCardBox, "Sinclair 128K");
-        Form1->ConnectSpectrum128Keypad->Enabled = true;
+        Form1->ConnectSpectrum128Keypad->Enabled = false;
 
         JoystickBox->ItemIndex = SelectEntry(JoystickBox, "Sinclair");
 
@@ -3180,7 +3183,7 @@ void __fastcall THW::SpecP3BtnClick(TObject *Sender)
         Multiface->Caption = "Multiface 3";
 
         SoundCardBox->ItemIndex = SelectEntry(SoundCardBox, "Sinclair 128K");
-        Form1->ConnectSpectrum128Keypad->Enabled = true;
+        Form1->ConnectSpectrum128Keypad->Enabled = false;
 
         JoystickBox->ItemIndex = SelectEntry(JoystickBox, "Sinclair");
 

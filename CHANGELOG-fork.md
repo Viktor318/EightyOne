@@ -9,6 +9,29 @@ itself are in `Release Files/Release history.txt`.
 
 ## Not released yet
 
+### Spectrum 128 keypad
+
+- With the keypad connected (*Control > Connect Spectrum 128 Keypad*), the
+  editing keys of the PC give the editing functions of the 128 BASIC
+  editor that only the keypad has, as in the Fuse edition: Home / End:
+  start / end of the line; Ctrl + Home / End: first / last line of the
+  program; Ctrl + Left / Right: previous / next word; Page Up / Page Down:
+  10 lines up / down; Delete: the character under the cursor; Shift +
+  Backspace / Delete: delete to the start / end of the line; Ctrl +
+  Backspace / Delete: delete to the start / end of the word; Insert: the
+  Options menu (CMND); Ctrl + Insert: TOGGLE (between the upper and lower
+  screen). The keys not listed (Backspace, the cursor keys) work as
+  before, and the numeric keypad keeps giving digits. The right Ctrl with
+  the keys at the places of the keypad's keys works too, as before.
+- The keypad waits longer between the bits it sends (the ROM may be
+  interrupted there) and starts with its line idle, as in Fuse; the
+  deleting keys send the keypad SHIFT first, so a press in the middle of a
+  scan can't move the cursor instead of deleting.
+- The menu item is greyed out on the +2A and the +3, whose ROM does not
+  poll the keypad (only the 128 and the +2 have the KEYPAD socket).
+- With the keypad connected, keys released while the right Shift was held
+  stayed pressed on the emulated keyboard.
+
 ### Fixes
 
 - Loading a configuration (Options > Configuration) sets the window to

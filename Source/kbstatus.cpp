@@ -26,6 +26,7 @@
 #include "kbstatus.h"
 #include "zx81.h"
 #include "zx81config.h"
+#include "keypad.h"
 
 #define kbD0 1
 #define kbD1 2
@@ -734,11 +735,6 @@ void PCKeyDown(WORD key)
 
 void PCKeyUp(WORD key)
 {
-        if (spectrum.spectrum128Keypad && IsKeyPressed(VK_RSHIFT))
-        {
-                return;
-        }
-
         int i = 0;
 
         if (key == VK_SHIFT) PCShift=1;
@@ -772,6 +768,7 @@ void PCAllKeysUp()
         int i;
         for(i=0; i<8; i++) ZXKeyboard[i]=0;
         ForgetCharKeys();
+        Keypad.ReleaseHostKeys();
 }
 
 void AdjustLocalKeyboard()
@@ -1545,6 +1542,9 @@ void PCKeyDownWin(WORD key)
         unsigned short c;
         int digit, i;
 
+        // The editing keys as keys of the Spectrum 128 keypad
+        if (Keypad.HostKey(key, true)) return;
+
         // The left Alt and a number key: SHIFT + number
         if (AltShift && IsKeyPressed(VK_LMENU) && !IsKeyPressed(VK_RMENU))
         {
@@ -1635,6 +1635,8 @@ void PCKeyDownWin(WORD key)
 void PCKeyUpWin(WORD key)
 {
         int i;
+
+        if (Keypad.HostKey(key, false)) return;
 
         i = FindCharKey(key);
         if (i != -1)
