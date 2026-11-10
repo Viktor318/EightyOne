@@ -365,13 +365,14 @@ def add_word_method():
     import sys
 
     def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False):
-        # over: a word above or under a key, in the middle of the key
+        # over: a word above or under a key, in the middle of the key (True:
+        # the nearest key; or the number of the key)
         S = self.S
         b = self.box(ids)
         X, Y, Wd, H = self.moved(b, follow)
         dollar = '$' in t and (b['y2'] - b['y']) > cap_px + 1
         base = Y + ((b['y2'] - (1 if dollar else 0)) - b['y']) * S
-        k = self.key_of(b)
+        k = over if type(over) is int else self.key_of(b)
         kx, ky, kw, kh = self.keys[k]
         nk = self.newkeys[k]
         inside = kx <= b['x'] and b['x2'] <= kx + kw and ky <= b['y'] and b['y2'] <= ky + kh

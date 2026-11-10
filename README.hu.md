@@ -96,8 +96,8 @@ maradnia.
   nagyítható (1,5x-től 2,5x-ig); a Spectrum 16K, 48K, 128, +2 és +3
   billentyűzete, a 128 numerikus billentyűzete, a ZX81 billentyűzete (a
   ZXpand-os, a TS1000 és a ZX97 változattal együtt) a ZX80 billentyűzete
-  (a ZXpand-ossal együtt) és a Timex TC2048, TS2068 és TS1500
-  billentyűzete újra van rajzolva, minden méretben éles.
+  (a ZXpand-ossal együtt) a Timex TC2048, TS2068 és TS1500, valamint a
+  Jupiter Ace billentyűzete újra van rajzolva, minden méretben éles.
 - **ZX Printer**: dupla kattintásra két- vagy háromszoros méret; a
   nyomat PNG-ben (vagy BMP-ben) menthető. A **Fájl > Képernyőkép mentése**
   is ment PNG-t.
