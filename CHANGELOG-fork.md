@@ -15,7 +15,7 @@ itself are in `Release Files/Release history.txt`.
   the 128 keypad and of the ZX81 keyboard (also with the ZXpand, the
   TS1000, with and without the ZXpand, and the ZX97), of the ZX80 keyboard
   (also with the ZXpand), and of the Timex TC2048, TS2068 and TS1500 (also
-  with the ZXpand) keyboards, and of the Jupiter Ace and Lambda 8300
+  with the ZXpand) keyboards, and of the Jupiter Ace, Lambda 8300 and TK85
   keyboards** are drawn again as vector graphics and held at 2.5x (1263 ×
   558, the keypad 375 × 558), so they are sharp: at 2.5x as they are, at
   the other sizes scaled down smoothly. Same layout and colours as before;

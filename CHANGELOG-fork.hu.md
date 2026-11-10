@@ -16,8 +16,8 @@ készült. Magának az EightyOne-nak a változásai a
   billentyűzetének és a ZX81 billentyűzetének (a ZXpand-os, a TS1000 –
   ZXpand-dal és anélkül – és a ZX97 változattal együtt), a ZX80
   billentyűzetének (a ZXpand-os változattal együtt), valamint a Timex
-  TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt), valamint a Jupiter Ace
-  és a Lambda 8300 billentyűzetének** képe újra van rajzolva
+  TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt), valamint a Jupiter
+  Ace, a Lambda 8300 és a TK85 billentyűzetének** képe újra van rajzolva
   vektorgrafikaként, és 2,5x-es méretben van a programban (1263 × 558, a
   keypad 375 × 558), így éles: 2,5x-en változatlanul, a többi méreten
   simítva kicsinyítve. Az elrendezés és a színek a régiek; egy képen belül

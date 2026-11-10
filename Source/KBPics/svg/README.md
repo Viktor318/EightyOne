@@ -26,6 +26,7 @@ are sharp at any size:
 | `ts1500zxpand.py` | `Keyboard_.dfm`, `ts1500zxpandkb` | `orig/ts1500zxpand.png` |
 | `ace.py` | `Keyboard_.dfm`, `acekb` | `orig/ace.png` |
 | `lambda8300.py` | `Keyboard_.dfm`, `lambdakb` | `orig/lambda8300.png` |
+| `tk85.py` | `Keyboard_.dfm`, `tk85kb` | `orig/tk85.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -89,7 +90,12 @@ larger; its letters bold and its signs thin, as there. The Lambda 8300 has
 the keys of the TS1500 (`ts1500.keys()`) in its own colours: its words 6
 pixels high, ENTER (7.5) and SPACE (10) larger and, with SHIFT, in the
 middle of their keys; the little figures on 1, 2, 3 and A of their pixels,
-the half squares on S - G with straight diagonals.
+the half squares on S - G with straight diagonals. The TK85 is the ZX81's
+picture coloured otherwise (dark keys, white letters, yellow and blue), a
+few of its letters a little other: `zx81.py` draws it in its colours,
+finding the ZX81's texts by their shapes (in any colour) and those that
+differ by a table; NEW LINE (8) and SPACE (9) larger, NEW LINE in the
+middle of its key.
 
 ## Making them
 
@@ -123,6 +129,7 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm ts1500zxpandkb out/ts1500zxpand.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm acekb out/ace.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm lambdakb out/lambda8300.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm tk85kb out/tk85.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -138,3 +145,4 @@ again only if an original changes:
     python3 analyze.py orig/<name>.png <name> 211,209,209 2 123,123,123 123,123,123/211,209,209/145,143,143/255,255,255/0,0,0    (the TS1500s)
     python3 analyze.py orig/ace.png ace 30,23,9 2 255,255,255
     python3 analyze.py orig/lambda8300.png lambda8300 149,179,174 2 102,102,102 102,102,102/149,179,174/104,150,142/255,255,255/242,207,65/0,0,0
+    python3 analyze.py orig/tk85.png tk85 68,68,68 2 0,0,0 0,0,0/68,68,68/255,255,255/236,252,234/57,114,197/239,252,0

@@ -273,10 +273,11 @@ class Picture:
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(solid)))
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(dots)))
 
-    def same_texts(self, analysis, picture, dx=2, dy=(-10, 2)):
+    def same_texts(self, analysis, picture, dx=2, dy=(-10, 2), colours=True):
         """The numbers of another picture's texts in this one: {its number:
         number here}, for the texts of the same pixels and colour, the
-        nearest (at most dx sideways and dy up or down)"""
+        nearest (at most dx sideways and dy up or down); colours=False: of
+        the same pixels in any colour (the same picture coloured otherwise)"""
         z = json.load(open(analysis))
         # picture: its file, or its pixels
         zi = np.array(Image.open(picture).convert('RGB')).astype(int) if isinstance(picture, str) else picture
@@ -285,10 +286,14 @@ class Picture:
             best = None
             for o in self.words.values():
                 ox, oy = o['x'] - w['x'], o['y'] - w['y']
-                if o['c'] != w['c'] or abs(ox) > dx or not dy[0] <= oy <= dy[1] \
+                if (colours and o['c'] != w['c']) or abs(ox) > dx or not dy[0] <= oy <= dy[1] \
                         or o['x2'] - o['x'] != w['x2'] - w['x'] or o['y2'] - o['y'] != w['y2'] - w['y']:
                     continue
-                if not (self.im[o['y']:o['y2'], o['x']:o['x2']] == zi[w['y']:w['y2'], w['x']:w['x2']]).all():
+                here = self.im[o['y']:o['y2'], o['x']:o['x2']]
+                there = zi[w['y']:w['y2'], w['x']:w['x2']]
+                if colours and not (here == there).all():
+                    continue
+                if not colours and not ((here == o['c']).all(-1) == (there == w['c']).all(-1)).all():
                     continue
                 d = abs(ox) + abs(oy)
                 if best is None or d < best[0]:

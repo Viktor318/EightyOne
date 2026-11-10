@@ -6,7 +6,8 @@
 # at most a few pixels away); what is not found is not drawn.
 import os
 import sys
-from kbdraw import Picture, hexcol, arrow_points
+import numpy as np
+from kbdraw import Picture, hexcol, arrow_points, font
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEY, RED, BLACK = (252, 252, 252), (252, 0, 0), (0, 0, 0)
@@ -45,7 +46,7 @@ BIG = set([10, 12, 14, 16, 18, 20, 22, 24, 26, 51, 52, 53, 54, 56, 57, 58, 59, 6
            96, 97, 98, 99, 100, 101, 102, 104, 105, 142, 144, 146, 147, 148, 149, 150])
 
 
-def draw(name, own=None, small=None, ignore=()):
+def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more=None, extra=None):
     """The picture <name> (<name>.json, orig/<name>.png): the ZX81's texts
     where they are found, and its own texts ({number: text}, as words; small:
     words in small letters, as in the original)"""
@@ -53,10 +54,21 @@ def draw(name, own=None, small=None, ignore=()):
                 float(sys.argv[2]) if len(sys.argv) > 2 else 2)
     S = p.S
     cap = float(os.environ.get('ZX81CAP', 7))
+    # colours: the picture coloured otherwise (the TK85): its key, label
+    # (the white words), red and black colours; palette: its colours (any
+    # other is taken as the nearest of them); more: texts of the ZX81 found
+    # here otherwise than by their pixels ({ZX81 number: number here})
+    col = dict(key=KEY, label=KEY, red=RED, black=BLACK)
+    col.update(colours or {})
+    if palette:
+        pure = np.array(palette)
+        p.im = pure[((p.im[:, :, None, :] - pure[None, None]) ** 2).sum(-1).argmin(-1)]
     if name == 'zx81':
         here = dict((i, i) for i in p.words)
     else:
-        here = p.same_texts(os.path.join(HERE, 'zx81.json'), os.path.join(HERE, 'orig/zx81.png'))
+        here = p.same_texts(os.path.join(HERE, 'zx81.json'), os.path.join(HERE, 'orig/zx81.png'),
+                            colours=not palette)
+    here.update(more or {})
 
     def V(*ids):
         """The numbers here of ZX81 texts (None if one is not found)"""
@@ -74,7 +86,7 @@ def draw(name, own=None, small=None, ignore=()):
     for k in p.newkeys:
         if k[1] > 170:
             k[1] = 176
-    p.draw_keys(KEY, 3)
+    p.draw_keys(col['key'], 3)
 
     texts = {}
     for ids, t in TEXTS.items():
@@ -96,7 +108,7 @@ def draw(name, own=None, small=None, ignore=()):
             p.words[V(i)]['y'] += 1
             p.words[V(i)]['y2'] -= 1
     for i, b in p.words.items():
-        if b['c'] == list(KEY) and b['y2'] - b['y'] == 6 and i != V(159):
+        if b['c'] == list(col['label']) and b['y2'] - b['y'] == 6 and i != V(159):
             k = p.keys[p.key_of(b)]
             if b['y'] >= k[1] + k[3]:
                 b['y2'] += 1
@@ -130,20 +142,20 @@ def draw(name, own=None, small=None, ignore=()):
     # 0 with its slash, from the bottom left to the top right
     b = p.box(V(27))
     X, Y, W, H = p.moved(b)
-    p.fit('0', X, Y, W, H, BLACK, fonts=('herosb',))
-    p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#000000" stroke-width="%g"/>'
-                   % (X + 0.6 * S, Y + H - 0.6 * S, X + W - 0.6 * S, Y + 0.6 * S, 1.3 * S))
+    p.fit('0', X, Y, W, H, col['black'], fonts=('herosb',))
+    p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
+                   % (X + 0.6 * S, Y + H - 0.6 * S, X + W - 0.6 * S, Y + 0.6 * S, hexcol(col['black']), 1.3 * S))
 
     # π: as high as the words around it, in their font
     b = p.box(V(159))
     X, Y, W, H = p.moved(b)
-    p.fit('π', X - 0.25 * S, Y, W + 0.5 * S, H + 1 * S, KEY, fonts=('cnb',))
+    p.fit('π', X - 0.25 * S, Y, W + 0.5 * S, H + 1 * S, col['label'], fonts=('cnb',))
 
     # / on V: a line, as thin as the strokes of the words
     b = p.box(V(135))
     X, Y, W, H = p.moved(b)
     p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
-                   % (X + 0.5 * S, Y + H - 0.2 * S, X + W - 0.5 * S, Y + 0.2 * S, hexcol(RED), 1.25 * S))
+                   % (X + 0.5 * S, Y + H - 0.2 * S, X + W - 0.5 * S, Y + 0.2 * S, hexcol(col['red']), 1.25 * S))
 
     # Block graphics and the straight signs (- + = :): made of squares
     for i in (11, 13, 15, 17, 19, 21, 23, 25, 62, 63, 64, 65, 66, 67,
@@ -157,11 +169,11 @@ def draw(name, own=None, small=None, ignore=()):
     # >= on Y: > and the two bars of = were found as one
     b = p.box(V(46))
     X, Y, W, H = p.moved(b)
-    p.fit('>', X, Y, 9 * S, 7 * S, RED, fonts=('herosb', 'cnb'))
+    p.fit('>', X, Y, 9 * S, 7 * S, col['red'], fonts=('herosb', 'cnb'))
     for dy in (1, 5):
         p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s"/>'
                        % (round(X + 11 * S), round(Y + dy * S), round(X + 19 * S) - round(X + 11 * S),
-                          round(Y + (dy + 1) * S) - round(Y + dy * S), hexcol(RED)))
+                          round(Y + (dy + 1) * S) - round(Y + dy * S), hexcol(col['red'])))
 
     # The stars (** on H, * on B): a stroke up, a bar across, two legs down
     # and a thicker middle
@@ -171,9 +183,9 @@ def draw(name, own=None, small=None, ignore=()):
                                (cx - 0.5 * S, Y + 4 * S, X + 1.2 * S, Y + H - 0.2 * S),
                                (cx + 0.5 * S, Y + 4 * S, X + W - 1.2 * S, Y + H - 0.2 * S)):
             p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
-                           % (x1, y1, x2, y2, hexcol(RED), 1.1 * S))
+                           % (x1, y1, x2, y2, hexcol(col['red']), 1.1 * S))
         p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s"/>'
-                       % (cx - 1.5 * S, Y + 3 * S, 3 * S, 2 * S, hexcol(RED)))
+                       % (cx - 1.5 * S, Y + 3 * S, 3 * S, 2 * S, hexcol(col['red'])))
 
     b = p.box(V(92))
     X, Y, W, H = p.moved(b)
@@ -190,8 +202,11 @@ def draw(name, own=None, small=None, ignore=()):
         X, Y, W, H = p.moved(b)
         pts = arrow_points(X, Y, W, H, direction, S, head=head, s0=s0, s1=s1)
         p.items.append('<polygon fill="none" stroke="%s" stroke-width="%g" points="%s"/>'
-                       % (hexcol(RED), S, ' '.join('%g,%g' % q for q in pts)))
+                       % (hexcol(col['red']), S, ' '.join('%g,%g' % q for q in pts)))
 
+    # extra: what else the picture draws itself (extra(p))
+    if extra:
+        extra(p)
     print('%s, not drawn: %s' % (name, p.unused()), file=sys.stderr)
     open(sys.argv[1], 'w').write(p.svg((0, 0, 0)))
 
