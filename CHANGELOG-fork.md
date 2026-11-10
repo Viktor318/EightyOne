@@ -30,6 +30,7 @@ From the `BASIC` branch of the EightyOne 1.42 development version
   not taken for a line of the program, so Step does not stop on it; the
   breakpoint dialog shows no lone colon for the BASIC line.
 - In Hungarian too, in Segoe UI 9 pt.
+
 ### Fixes
 
 - Loading a configuration (Options > Configuration) sets the window to

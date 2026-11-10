@@ -32,6 +32,7 @@ kiegészítve a Spectrummal:
   nem számít programsornak, így a Lépés nem áll meg rajta; a töréspont
   ablakában a BASIC-sornál nincs magányos kettőspont.
 - Magyarul is, Segoe UI 9 ponttal.
+
 ### Javítások
 
 - Konfiguráció betöltésekor (Beállítások > Konfiguráció) az ablak a
