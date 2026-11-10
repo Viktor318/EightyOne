@@ -8,6 +8,7 @@ are sharp at any size:
 | Drawing | Picture in the program | Original |
 |---|---|---|
 | `spectrum48.py` | `Keyboard_.dfm`, `spec48kb` | `orig/spectrum48.png` |
+| `spectrum16.py` | `Keyboard_.dfm`, `spec16kb` | `orig/spectrum16.png` |
 | `spectrum128.py` | `Keyboard_.dfm`, `spec128kb` | `orig/spectrum128.png` |
 | `keypad128.py` | `Keypad_.dfm`, `KeypadUk` | `orig/keypad128uk.png` |
 | `zx81.py` | `Keyboard_.dfm`, `zx81kb` | `orig/zx81.png` |
@@ -44,7 +45,12 @@ script of a picture says what each numbered text is (a table), and draws:
 The edges of the keys and squares fall on whole pixels at every scale
 (1.5x and 2.5x too), so they are sharp. The 48K picture has its key rows a
 little further apart than the original (2 pixels each, from the free
-space under the last row). On the ZX81 the white words, 6 pixels high in
+space under the last row). Its words above the keys reach over their keys'
+right edges as little as they can: CAPS LOCK and TRUE VIDEO with half a
+space between their two words and 1 pixel over, INV.VIDEO and GRAPHICS at
+93.5% of their width, RESTORE and MAGENTA at 98.2% (Viktor's choice). The
+16K picture is the 48K's with light grey keys (`spectrum48.py` draws both,
+with the places of `spectrum48.json`). On the ZX81 the white words, 6 pixels high in
 the original, are 7 like the others: those above a key row grow upwards,
 those under one downwards, so they stay 2 pixels from the keys. The
 relatives of the ZX81 (ZXpand, TS1000, ZX97) are drawn by `zx81.py` too:
@@ -70,6 +76,7 @@ colours (the colours of the surfaces exactly) for the forms. A picture goes
 into its form with
 
     python3 dfmpicture.py ../../Keyboard_.dfm spec48kb out/spectrum48.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm spec16kb out/spectrum16.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm spec128kb out/spectrum128.bmp
     python3 dfmpicture.py ../../Keypad_.dfm KeypadUk out/keypad128.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm zx81kb out/zx81.bmp

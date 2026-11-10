@@ -33,7 +33,8 @@ class Font:
         self.hmtx = self.f['hmtx']
         self.upm = self.f['head'].unitsPerEm
 
-    def outline(self, text, tracking=0.0):
+    def outline(self, text, tracking=0.0, space=1.0):
+        # space: the width of a space, as a part of its own
         pen = SVGPathPen(self.gs)
         bp = BoundsPen(self.gs)
         x = 0.0
@@ -43,7 +44,7 @@ class Font:
                 raise KeyError('%r not in font' % ch)
             self.gs[g].draw(TransformPen(pen, (1, 0, 0, 1, x, 0)))
             self.gs[g].draw(TransformPen(bp, (1, 0, 0, 1, x, 0)))
-            x += self.hmtx[g][0] + tracking
+            x += self.hmtx[g][0] * (space if ch == ' ' else 1) + tracking
         return pen.getCommands(), bp.bounds
 
 
