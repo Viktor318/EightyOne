@@ -1,7 +1,10 @@
-# analyze.py <picture> <prefix> <key colours r,g,b[/r,g,b]> [gap] [background r,g,b]:
+# analyze.py <picture> <prefix> <key colours r,g,b[/r,g,b]> [gap] [background r,g,b]
+#            [colours r,g,b/r,g,b/...]:
 # the keys and the texts of a keyboard picture (texts: pixels of one colour,
 # letters at most <gap> apart). Writes <prefix>.json and <prefix>_ids.png
-# (4x, with the numbers of the texts, for the tables of the drawings)
+# (4x, with the numbers of the texts, for the tables of the drawings).
+# Colours: the colours of the picture, for pictures with smoothed letters
+# (the ZX80): any other colour is taken as the nearest of them
 import sys, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -13,6 +16,10 @@ keycol = keycols[0]
 gap = int(sys.argv[4]) if len(sys.argv) > 4 else 2
 im = np.array(Image.open(src).convert('RGB')).astype(int)
 h, w, _ = im.shape
+if len(sys.argv) > 6:
+    pure = np.array([[int(v) for v in c.split(',')] for c in sys.argv[6].split('/')])
+    near = ((im[:, :, None, :] - pure[None, None]) ** 2).sum(-1).argmin(-1)
+    im = pure[near]
 key = np.zeros(im.shape[:2], bool)
 for kc in keycols: key |= (im == kc).all(-1)
 

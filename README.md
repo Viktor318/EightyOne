@@ -89,8 +89,8 @@ program.
   saved size once it is ready, and its status bar stays at the bottom.
 - **Help > Keyboard Map** can be enlarged in steps (1.5x to 2.5x) with a
   double click; the Spectrum 48K and 128 keyboards, the 128 keypad and the
-  ZX81 keyboard (with its ZXpand, TS1000 and ZX97 forms) are drawn again,
-  sharp at every size.
+  ZX81 keyboard (with its ZXpand, TS1000 and ZX97 forms) and the ZX80
+  keyboard (with the ZXpand) are drawn again, sharp at every size.
 - **ZX Printer**: double click for double or triple size; the printout is
   saved as PNG (or BMP). **File > Save Screenshot** saves PNG too.
 

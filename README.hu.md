@@ -94,9 +94,9 @@ maradnia.
   mindig az alján marad.
 - A **Súgó > Billentyűzetkiosztás** képe dupla kattintással lépésenként
   nagyítható (1,5x-től 2,5x-ig); a Spectrum 48K és 128 billentyűzete, a
-  128 numerikus billentyűzete és a ZX81 billentyűzete (a ZXpand-os, a
-  TS1000 és a ZX97 változattal együtt) újra van rajzolva, minden méretben
-  éles.
+  128 numerikus billentyűzete, a ZX81 billentyűzete (a ZXpand-os, a TS1000
+  és a ZX97 változattal együtt) és a ZX80 billentyűzete (a ZXpand-ossal
+  együtt) újra van rajzolva, minden méretben éles.
 - **ZX Printer**: dupla kattintásra két- vagy háromszoros méret; a
   nyomat PNG-ben (vagy BMP-ben) menthető. A **Fájl > Képernyőkép mentése**
   is ment PNG-t.

@@ -214,6 +214,85 @@ class Picture:
                     x += 1
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(c), ''.join(parts)))
 
+    def dotted(self, ids, colour=None, follow=True):
+        """A block graphic with dotted parts (the grey of the ZX80 and the
+        ZX81, a chequer of single pixels): the solid parts (the frame too)
+        on whole pixels, as pixels() draws them; the dots spread evenly over
+        the rows and columns they fill, so that they are of one size and
+        one spacing at every scale"""
+        S = self.S
+        b = self.box(ids)
+        col = tuple(b['c'])
+        X, Y, _, _ = self.moved(b, follow)
+        x0, x1 = b['x'], b['x2']
+        edge = lambda v, o: round(o + v * S)
+        solid, dots, band = [], [], []
+
+        def rect(l, t, r, bt, out):
+            out.append('M%g %gh%gv%gh%gz' % (l, t, r - l, bt - t, -(r - l)))
+
+        def ink(y):
+            return (self.im[y, x0:x1] == col).all(-1)
+
+        for y in list(range(b['y'], b['y2'])) + [None]:
+            row = None if y is None else ink(y)
+            inner = None if y is None else row[1:-1]
+            if y is not None and inner.any() and not (inner[:-1] & inner[1:]).any():
+                band.append(y)
+                continue
+            if band:
+                # a band of dotted rows: its pixels split evenly
+                l, r = edge(1, X), edge(x1 - x0 - 1, X)
+                t, bt = edge(band[0] - b['y'], Y), edge(band[-1] + 1 - b['y'], Y)
+                cw, ch = (r - l) / (x1 - x0 - 2), (bt - t) / len(band)
+                for n, yy in enumerate(band):
+                    for m, on in enumerate(ink(yy)[1:-1]):
+                        if on:
+                            rect(l + m * cw, t + n * ch, l + (m + 1) * cw, t + (n + 1) * ch, dots)
+                    ty, by = edge(yy - b['y'], Y), edge(yy + 1 - b['y'], Y)
+                    rect(edge(0, X), ty, l, by, solid)
+                    rect(r, ty, edge(x1 - x0, X), by, solid)
+                band = []
+            if y is None:
+                break
+            # a solid row: its runs of pixels
+            ty, by = edge(y - b['y'], Y), edge(y + 1 - b['y'], Y)
+            x = 0
+            while x < len(row):
+                if row[x]:
+                    e = x
+                    while e < len(row) and row[e]:
+                        e += 1
+                    rect(edge(x, X), ty, edge(e, X), by, solid)
+                    x = e
+                else:
+                    x += 1
+        self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(solid)))
+        self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(dots)))
+
+    def same_texts(self, analysis, picture, dx=2, dy=(-10, 2)):
+        """The numbers of another picture's texts in this one: {its number:
+        number here}, for the texts of the same pixels and colour, the
+        nearest (at most dx sideways and dy up or down)"""
+        z = json.load(open(analysis))
+        zi = np.array(Image.open(picture).convert('RGB')).astype(int)
+        found = {}
+        for w in z['words']:
+            best = None
+            for o in self.words.values():
+                ox, oy = o['x'] - w['x'], o['y'] - w['y']
+                if o['c'] != w['c'] or abs(ox) > dx or not dy[0] <= oy <= dy[1] \
+                        or o['x2'] - o['x'] != w['x2'] - w['x'] or o['y2'] - o['y'] != w['y2'] - w['y']:
+                    continue
+                if not (self.im[o['y']:o['y2'], o['x']:o['x2']] == zi[w['y']:w['y2'], w['x']:w['x2']]).all():
+                    continue
+                d = abs(ox) + abs(oy)
+                if best is None or d < best[0]:
+                    best = (d, o['id'])
+            if best:
+                found[w['id']] = best[1]
+        return found
+
     def svg(self, background):
         S = self.S
         # the size EightyOne gives its window at this zoom: (505 * quarters
@@ -281,7 +360,8 @@ def add_word_method():
     (left, right or centre); a little narrower only if there is no room"""
     import sys
 
-    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2):
+    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False):
+        # over: a word above or under a key, in the middle of the key
         S = self.S
         b = self.box(ids)
         X, Y, Wd, H = self.moved(b, follow)
@@ -318,6 +398,9 @@ def add_word_method():
                 room = b['x2'] - lo
             else:
                 room = hi - b['x']
+        elif over:
+            align = 'over'
+            room = kw + 8
         else:
             rights = [o['x'] - 6 for o in self.words.values() if same(o) and o['x'] >= b['x2']]
             room = min(rights + [self.w - 2]) - b['x']
@@ -325,6 +408,8 @@ def add_word_method():
         w *= sx
         if align == 'centre':
             left = X + Wd / 2 - w / 2
+        elif align == 'over':
+            left = (nk[0] + nk[2] / 2) * S - w / 2
         elif align == 'right':
             left = X + Wd - w
         else:

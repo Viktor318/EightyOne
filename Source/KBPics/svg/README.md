@@ -15,6 +15,8 @@ are sharp at any size:
 | `ts1000.py` | `Keyboard_.dfm`, `ts1000kb` | `orig/ts1000.png` |
 | `ts1000zxpand.py` | `Keyboard_.dfm`, `ts1000zxpandkb` | `orig/ts1000zxpand.png` |
 | `zx97.py` | `Keyboard_.dfm`, `zx97kb` | `orig/zx97.png` |
+| `zx80.py` | `Keyboard_.dfm`, `zx80kb` | `orig/zx80.png` |
+| `zx80zxpand.py` | `Keyboard_.dfm`, `zx80zxpandkb` | `orig/zx80zxpand.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -48,7 +50,11 @@ those under one downwards, so they stay 2 pixels from the keys. The
 relatives of the ZX81 (ZXpand, TS1000, ZX97) are drawn by `zx81.py` too:
 the texts they share with the ZX81 are found by their pixels, and each
 script gives only its own texts. On the ZXpand pictures LPRINT and LLIST
-stay small under ZXPAND and CONFIG (5 pixels high, they were 4).
+stay small under ZXPAND and CONFIG (5 pixels high, they were 4). The ZX80
+(and its ZXpand picture, by `zx80.py` too) has its words as the ZX81
+(7 pixels), those above the keys in the middle of their keys, and its
+letters, digits and signs thin (Heros), as in the original, whose letters
+are smoothed: `analyze.py` takes its colours as the nearest of its four.
 
 ## Making them
 
@@ -71,6 +77,8 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm ts1000kb out/ts1000.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm ts1000zxpandkb out/ts1000zxpand.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm zx97kb out/zx97.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm zx80kb out/zx80.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm zx80zxpandkb out/zx80zxpand.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -79,3 +87,4 @@ again only if an original changes:
     python3 analyze.py orig/spectrum128.png spectrum128 32,32,32/64,64,64 1 0,0,0
     python3 analyze.py orig/keypad128uk.png keypad128 32,32,32/64,64,64 2 0,0,0
     python3 analyze.py orig/<name>.png <name> 252,252,252 2 0,0,0    (the ZX81 and its relatives)
+    python3 analyze.py orig/<name>.png <name> 72,42,254 2 0,0,0 0,0,0/72,42,254/255,201,33/255,255,255    (the ZX80s)

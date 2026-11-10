@@ -4,11 +4,8 @@
 # picture with a few other texts: their scripts call draw() with their own.
 # The texts of the ZX81 are found in them by their pixels (the same text,
 # at most a few pixels away); what is not found is not drawn.
-import json
 import os
 import sys
-import numpy as np
-from PIL import Image
 from kbdraw import Picture, hexcol, arrow_points
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -48,29 +45,6 @@ BIG = set([10, 12, 14, 16, 18, 20, 22, 24, 26, 51, 52, 53, 54, 56, 57, 58, 59, 6
            96, 97, 98, 99, 100, 101, 102, 104, 105, 142, 144, 146, 147, 148, 149, 150])
 
 
-def same_texts(p):
-    """The numbers of the ZX81's texts in this picture: {ZX81 number:
-    number here}, for the texts of the same pixels, the nearest"""
-    z = json.load(open(os.path.join(HERE, 'zx81.json')))
-    zi = np.array(Image.open(os.path.join(HERE, 'orig/zx81.png')).convert('RGB')).astype(int)
-    found = {}
-    for w in z['words']:
-        best = None
-        for o in p.words.values():
-            dx, dy = o['x'] - w['x'], o['y'] - w['y']
-            if o['c'] != w['c'] or abs(dx) > 2 or not -10 <= dy <= 2 \
-                    or o['x2'] - o['x'] != w['x2'] - w['x'] or o['y2'] - o['y'] != w['y2'] - w['y']:
-                continue
-            if not (p.im[o['y']:o['y2'], o['x']:o['x2']] == zi[w['y']:w['y2'], w['x']:w['x2']]).all():
-                continue
-            d = abs(dx) + abs(dy)
-            if best is None or d < best[0]:
-                best = (d, o['id'])
-        if best:
-            found[w['id']] = best[1]
-    return found
-
-
 def draw(name, own=None, small=None, ignore=()):
     """The picture <name> (<name>.json, orig/<name>.png): the ZX81's texts
     where they are found, and its own texts ({number: text}, as words; small:
@@ -82,7 +56,7 @@ def draw(name, own=None, small=None, ignore=()):
     if name == 'zx81':
         here = dict((i, i) for i in p.words)
     else:
-        here = same_texts(p)
+        here = p.same_texts(os.path.join(HERE, 'zx81.json'), os.path.join(HERE, 'orig/zx81.png'))
 
     def V(*ids):
         """The numbers here of ZX81 texts (None if one is not found)"""
@@ -176,53 +150,9 @@ def draw(name, own=None, small=None, ignore=()):
               43, 55, 93, 94, 103, 106, 132, 143):
         p.pixels(V(i))
 
-    # The grey block graphics (A - H): the frame and the black parts on
-    # whole pixels, as the other block graphics; the dots (the grey of the
-    # ZX81, a chequer of single pixels) spread evenly over the rows and
-    # columns they fill, so that they are of one size and one spacing at
-    # every scale
-    def dotted_graphic(i):
-        b = p.box(i)
-        X, Y, _, _ = p.moved(b)
-        x0, x1 = b['x'], b['x2']
-        edge = lambda v, o: round(o + v * S)
-        solid, dots, band = [], [], []
-        rows = list(range(b['y'], b['y2']))
-
-        def rect(l, t, r, bt, out):
-            out.append('M%g %gh%gv%gh%gz' % (l, t, r - l, bt - t, -(r - l)))
-
-        for y in rows + [None]:
-            inner = None if y is None else (p.im[y, x0 + 1:x1 - 1] == 0).all(-1)
-            if y is not None and inner.any() and not inner.all():
-                band.append(y)
-                continue
-            if band:
-                # a band of dotted rows: its pixels split evenly
-                l, r = edge(1, X), edge(x1 - x0 - 1, X)
-                t, bt = edge(band[0] - b['y'], Y), edge(band[-1] + 1 - b['y'], Y)
-                cw, ch = (r - l) / (x1 - x0 - 2), (bt - t) / len(band)
-                for n, yy in enumerate(band):
-                    for m, x in enumerate(range(x0 + 1, x1 - 1)):
-                        if (p.im[yy, x] == 0).all():
-                            rect(l + m * cw, t + n * ch, l + (m + 1) * cw, t + (n + 1) * ch, dots)
-                    ty, by = edge(yy - b['y'], Y), edge(yy + 1 - b['y'], Y)
-                    rect(edge(0, X), ty, l, by, solid)
-                    rect(r, ty, edge(x1 - x0, X), by, solid)
-                band = []
-            if y is None:
-                break
-            ty, by = edge(y - b['y'], Y), edge(y + 1 - b['y'], Y)
-            if inner.all():
-                rect(edge(0, X), ty, edge(x1 - x0, X), by, solid)
-            else:
-                rect(edge(0, X), ty, edge(1, X), by, solid)
-                rect(edge(x1 - x0 - 1, X), ty, edge(x1 - x0, X), by, solid)
-        p.items.append('<path fill="#000000" d="%s"/>' % ''.join(solid))
-        p.items.append('<path fill="#000000" d="%s"/>' % ''.join(dots))
-
+    # The grey block graphics (A - H): dotted, as in the original
     for i in (107, 108, 109, 110, 111, 112):
-        dotted_graphic(V(i))
+        p.dotted(V(i))
 
     # >= on Y: > and the two bars of = were found as one
     b = p.box(V(46))
