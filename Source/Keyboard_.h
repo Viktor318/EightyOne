@@ -88,10 +88,14 @@ public:		// User declarations
         void SaveSettings(TIniFile *ini);
         void KbChange(void);
 
-        static const int FunctionsOffset = 20;
         static const int PictureWidth = 505;
         static const int PictureHeight = 223;
-        static const int KeypadOffset = 20;
+
+        // The windows beside the keyboard (the ZX80 functions, the keypad)
+        // are this far from it, as seen; SideOffset() gives the distance of
+        // their places (Left) for it
+        static const int SideGap = 6;
+        int SideOffset(TForm *side);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TKeyboard *Keyboard;

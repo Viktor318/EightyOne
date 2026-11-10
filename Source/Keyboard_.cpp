@@ -158,6 +158,48 @@ static void ScaleImage(TImage *image, int quarters)
         image->Height = height;
 }
 
+// The frame of a window as drawn: from Windows Vista, with the desktop
+// composition (DWM), windows have invisible borders (the parts of the
+// resizing borders outside the frame seen); false if not known
+typedef HRESULT (WINAPI *DwmGetWindowAttributeFunc)(HWND, DWORD, PVOID, DWORD);
+
+static bool VisibleFrame(HWND window, RECT &whole, RECT &seen)
+{
+        static DwmGetWindowAttributeFunc get = NULL;
+        static bool looked = false;
+        const DWORD DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+
+        if (!looked)
+        {
+                HMODULE dwm = LoadLibrary("dwmapi.dll");
+                if (dwm) get = (DwmGetWindowAttributeFunc)GetProcAddress(dwm, "DwmGetWindowAttribute");
+                looked = true;
+        }
+
+        if (!get || !GetWindowRect(window, &whole)) return false;
+        if (get(window, DWMWA_EXTENDED_FRAME_BOUNDS, &seen, sizeof(seen)) != S_OK) return false;
+
+        // In other units (the program is scaled by Windows at a larger
+        // text size): not usable
+        if (seen.left < whole.left || seen.right > whole.right
+                || seen.left - whole.left > 20 || whole.right - seen.right > 20)
+                return false;
+
+        return true;
+}
+
+// Where a window beside the keyboard goes: SideGap from it, as seen
+int TKeyboard::SideOffset(TForm *side)
+{
+        RECT whole, seen;
+        int offset = SideGap;
+
+        if (VisibleFrame(Handle, whole, seen)) offset -= whole.right - seen.right;
+        if (side && VisibleFrame(side->Handle, whole, seen)) offset -= seen.left - whole.left;
+
+        return offset;
+}
+
 // The largest size, not larger than this one, at which the window and the
 // one beside it (the ZX80 functions or the keypad) fit the work area of its
 // monitor; the smallest if none does
@@ -181,13 +223,13 @@ int TKeyboard::FittingSize(int size)
         {
                 side = KeyboardFunctions;
                 sideImage = KeyboardFunctions->zx80IntegralFunctions;
-                offset = FunctionsOffset;
+                offset = SideOffset(KeyboardFunctions);
         }
         else if (Keypad128 && Keypad128->Visible)
         {
                 side = Keypad128;
                 sideImage = Keypad128->KeypadUk->Visible ? Keypad128->KeypadUk : Keypad128->KeypadSpanish;
-                offset = KeypadOffset;
+                offset = SideOffset(Keypad128);
         }
 
         for (; size > 0; size--)
@@ -224,14 +266,14 @@ void TKeyboard::SetSize(int size)
         if (KeyboardFunctions)
         {
                 ScaleImage(KeyboardFunctions->zx80IntegralFunctions, Sizes[size]);
-                KeyboardFunctions->Left = Left + Width + FunctionsOffset;
+                KeyboardFunctions->Left = Left + Width + SideOffset(KeyboardFunctions);
                 KeyboardFunctions->Top = Top;
         }
         if (Keypad128)
         {
                 ScaleImage(Keypad128->KeypadUk, Sizes[size]);
                 ScaleImage(Keypad128->KeypadSpanish, Sizes[size]);
-                Keypad128->Left = Left + Width + KeypadOffset;
+                Keypad128->Left = Left + Width + SideOffset(Keypad128);
                 Keypad128->Top = Top;
         }
 }
@@ -523,10 +565,10 @@ void TKeyboard::KbChange(void)
                 }
         }
 
-        KeyboardFunctions->Left = Keyboard->Left + Keyboard->Width + Keyboard->FunctionsOffset;
+        KeyboardFunctions->Left = Keyboard->Left + Keyboard->Width + Keyboard->SideOffset(KeyboardFunctions);
         KeyboardFunctions->Top = Keyboard->Top;
 
-        Keypad128->Left = Keyboard->Left + Keyboard->Width + Keyboard->KeypadOffset;
+        Keypad128->Left = Keyboard->Left + Keyboard->Width + Keyboard->SideOffset(Keypad128);
         Keypad128->Top = Keyboard->Top;
 
         SetSize(Size);

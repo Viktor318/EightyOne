@@ -25,6 +25,9 @@ itself are in `Release Files/Release history.txt`.
   the ZX80 functions are scaled smoothly too. The size is kept in
   `[KBMAP] Zoom` (in quarters); a size saved before is taken over (1x and
   1.25x as 1.5x).
+- The keypad and the ZX80 functions are 6 pixels from the keyboard window
+  as seen (they were 20 pixels away, and on Windows 10 and 11 about 30, as
+  the invisible borders of the windows were counted in).
 - The drawings and the scripts that make them are in `Source/KBPics/svg`
   (see its README).
 

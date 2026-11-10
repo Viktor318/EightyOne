@@ -26,6 +26,9 @@ készült. Magának az EightyOne-nak a változásai a
   képernyőn, kihagyja. A keypad és a ZX80-funkciók képe is simítva
   méreteződik. A méret a `[KBMAP] Zoom` kulcsban van (negyedekben); a
   korábban mentett méretet átveszi (az 1x és az 1,25x 1,5x lesz).
+- A keypad és a ZX80-funkciók ablaka látszólag 6 pixelre van a
+  billentyűzetétől (eddig 20-ra, Windows 10-en és 11-en kb. 30-ra, mert az
+  ablakok láthatatlan keretét is beleszámolta).
 - A rajzok és az őket elkészítő szkriptek a `Source/KBPics/svg` mappában
   vannak (lásd a README-jét).
 

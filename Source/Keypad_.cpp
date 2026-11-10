@@ -50,17 +50,19 @@ void __fastcall TKeypad128::EnableTimer(bool enable)
 //---------------------------------------------------------------------------
 void __fastcall TKeypad128::TrackerTimer(TObject *Sender)
 {
-        if ((Keyboard->Left + Keyboard->Width + Keyboard->KeypadOffset != Keypad128->Left) ||
+        int offset = Keyboard->SideOffset(this);
+
+        if ((Keyboard->Left + Keyboard->Width + offset != Keypad128->Left) ||
             (Keyboard->Top != Keypad128->Top))
         {
                 if ((Keyboard->Left != keyboardLeft) ||(Keyboard->Top != keyboardTop))
                 {
-                        Keypad128->Left = Keyboard->Left + Keyboard->Width + Keyboard->KeypadOffset;
+                        Keypad128->Left = Keyboard->Left + Keyboard->Width + offset;
                         Keypad128->Top = Keyboard->Top;
                 }
                 else
                 {
-                        Keyboard->Left = Keypad128->Left - Keyboard->KeypadOffset - Keyboard->Width;
+                        Keyboard->Left = Keypad128->Left - offset - Keyboard->Width;
                         Keyboard->Top = Keypad128->Top;
                 }
 

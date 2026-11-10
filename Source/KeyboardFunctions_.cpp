@@ -51,17 +51,19 @@ void __fastcall TKeyboardFunctions::EnableTimer(bool enable)
 //---------------------------------------------------------------------------
 void __fastcall TKeyboardFunctions::TrackerTimer(TObject *Sender)
 {
-        if ((Keyboard->Left + Keyboard->Width + Keyboard->FunctionsOffset != KeyboardFunctions->Left) ||
+        int offset = Keyboard->SideOffset(this);
+
+        if ((Keyboard->Left + Keyboard->Width + offset != KeyboardFunctions->Left) ||
             (Keyboard->Top != KeyboardFunctions->Top))
         {
                 if ((Keyboard->Left != keyboardLeft) ||(Keyboard->Top != keyboardTop))
                 {
-                        KeyboardFunctions->Left = Keyboard->Left + Keyboard->Width + Keyboard->FunctionsOffset;
+                        KeyboardFunctions->Left = Keyboard->Left + Keyboard->Width + offset;
                         KeyboardFunctions->Top = Keyboard->Top;
                 }
                 else
                 {
-                        Keyboard->Left = KeyboardFunctions->Left - Keyboard->FunctionsOffset - Keyboard->Width;
+                        Keyboard->Left = KeyboardFunctions->Left - offset - Keyboard->Width;
                         Keyboard->Top = KeyboardFunctions->Top;
                 }
 
