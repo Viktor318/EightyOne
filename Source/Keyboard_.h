@@ -70,8 +70,10 @@ __published:	// IDE-managed Components
 private:	// User declarations
         // The picture shown: the one of the machine, scaled
         TImage *Display;
-        int Size;               // index into the sizes: 1.5x, 1.75x ... 2.5x
+        int Size;               // index into the sizes: 75%, 100% ... 200%
+        static const int DefaultSize;   // 100%, the first size shown
         void SetSize(int size);
+        void ShowSize(void);
         int PictureWidthAt(int size);
         int PictureHeightAt(int size);
         int FittingSize(int size);
@@ -87,6 +89,7 @@ public:		// User declarations
         void LoadSettings(TIniFile *ini);
         void SaveSettings(TIniFile *ini);
         void KbChange(void);
+        void LanguageChanged(void);
 
         static const int PictureWidth = 505;
         static const int PictureHeight = 223;

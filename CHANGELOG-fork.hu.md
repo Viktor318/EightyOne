@@ -18,33 +18,42 @@ készült. Magának az EightyOne-nak a változásai a
   billentyűzetének (a ZXpand-os változattal együtt), valamint a Timex
   TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt), valamint a Jupiter
   Ace, a Lambda 8300 és a TK85 billentyűzetének** képe újra van rajzolva
-  vektorgrafikaként, és 2,5x-es méretben van a programban (1263 × 558, a
-  keypad 375 × 558), így éles: 2,5x-en változatlanul, a többi méreten
-  simítva kicsinyítve. Az elrendezés és a színek a régiek; egy képen belül
-  minden szó egyforma méretű és a betűtípus saját betűközével áll (TeX
-  Gyre Heros), a 48K (és a 16K, amely ugyanez a kép világosszürke
-  billentyűkkel) billentyűsorai kicsit távolabb vannak egymástól, a
-  billentyűk feletti feliratai pedig a lehető legkevésbé lógnak túl
-  rajtuk. A ZX81 billentyűi egyenletes sorokban állnak, a szürke
-  blokkgrafikák pöttyösek maradtak, minden méretben egyforma pöttyökkel; a
-  ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a
-  CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a billentyűk
-  közepén állnak, a betűk vékonyak maradtak. A +2 és a +3 billentyűi
-  olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex képek
-  keretei és billentyűi pixelre az eredetiek (minden méretben élesek), a
-  feliratok újra vannak rajzolva. A többi billentyűzet képe nem változott.
-- A *Súgó > Billentyűzetkiosztás* méretei: **1,5x, 1,75x, 2x, 2,25x és
-  2,5x** (eddig 1x–2x); dupla kattintás a következőre lép, a keret
-  húzásakor ezek között ugrik. Azokat a méreteket, amelyeknél az ablak a
-  mellette lévő keypaddel vagy ZX80-funkciókkal együtt nem fér el a
-  képernyőn, kihagyja. A keypad és a ZX80-funkciók képe is simítva
-  méreteződik. A méret a `[KBMAP] Zoom` kulcsban van (negyedekben); a
-  korábban mentett méretet átveszi (az 1x és az 1,25x 1,5x lesz).
+  vektorgrafikaként, 100%-os méretre (lásd lent), és 200%-os méretben
+  (1768 × 780, a keypad 526 × 780) PNG-képként van a program erőforrásai
+  között, így éles: 100%-on minden képpont a kép négy képpontjának átlaga,
+  200%-on a kép változatlanul látszik, a többi méreten simítva
+  méreteződik. A program ettől kisebb lett (5,9 MB, eddig 18 MB), mert
+  ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek a
+  régiek; egy képen belül minden szó egyforma méretű és a betűtípus saját
+  betűközével áll (TeX Gyre Heros), a 48K (és a 16K, amely ugyanez a kép
+  világosszürke billentyűkkel) billentyűsorai kicsit távolabb vannak
+  egymástól, a billentyűk feletti feliratai pedig a lehető legkevésbé
+  lógnak túl rajtuk. A ZX81 billentyűi egyenletes sorokban állnak, a
+  szürke blokkgrafikák pöttyösek maradtak, minden méretben egyforma
+  pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
+  ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a
+  billentyűk közepén állnak, a betűk vékonyak maradtak. A +2 és a +3
+  billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex
+  képek keretei és billentyűi pixelre az eredetiek (minden méretben
+  élesek), a feliratok újra vannak rajzolva. A többi billentyűzet képe nem
+  változott.
+- A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
+  és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
+  1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában
+  látszik (*Billentyűzet – 100%*). Dupla kattintás a következő méretre lép
+  (a 200% után a 75%-ra), a keret húzásakor ezek között ugrik. Azokat a
+  méreteket, amelyeknél az ablak a mellette lévő keypaddel vagy
+  ZX80-funkciókkal együtt nem fér el a képernyőn, kihagyja. A keypad és a
+  ZX80-funkciók képe is simítva méreteződik. A méret a `[KBMAP] Percent`
+  kulcsban van; a korábban (más egységben) mentett méretet nem veszi át:
+  100%.
 - A keypad és a ZX80-funkciók ablaka látszólag 6 pixelre van a
   billentyűzetétől (eddig 20-ra, Windows 10-en és 11-en kb. 30-ra, mert az
   ablakok láthatatlan keretét is beleszámolta).
 - A rajzok és az őket elkészítő szkriptek a `Source/KBPics/svg` mappában
-  vannak (lásd a README-jét).
+  vannak (lásd a README-jét), a képek a `Source/KBPics/png` mappában; a
+  `KBPics1.rc`–`KBPics3.rc` teszi őket a programba (három fájlban, mert a
+  C++Builder 5 linkere 1 MB-os vagy nagyobb erőforrásfájlnál elszáll).
 
 ### Spectrum 128 numerikus billentyűzet (keypad)
 

@@ -1260,6 +1260,8 @@ const LanguageEntry LanguageHungarianTable[] =
           "Vide\363 han&g" },
         { "Total RAM: {0}K",
           "Teljes RAM: {0}K" },
+        { "Keyboard \226 {0}%",
+          "Billenty\373zet \226 {0}%" },
         { "The +3e ROM is required by this IDE device. Select an appropriate ROM from the Advanced Settings tab.",
           "Ehhez az IDE eszk\366zh\366z a +3e ROM sz\374ks\351ges. A megfelel\365 ROM-ot a Speci\341lis be\341ll\355t\341sok f\374l\366n v\341laszthatja ki." },
         { "The +3e ROM is supported by this IDE device. Select an appropriate ROM from the Advanced Settings tab. Disable the on-board ROM using the jumper.",

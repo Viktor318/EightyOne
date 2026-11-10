@@ -133,7 +133,7 @@ class Picture:
     def draw_keys(self, fill, rx, outline=None, inset=0, ow=2, orx=None):
         S = self.S
         for k in self.newkeys:
-            # edges on whole pixels (at 1.5x or 2.5x too)
+            # edges on whole pixels (at any scale: 1.75 for 100%)
             x, y = round(k[0] * S), round(k[1] * S)
             w, h = round((k[0] + k[2]) * S) - x, round((k[1] + k[3]) * S) - y
             self.items.append('<rect x="%g" y="%g" width="%g" height="%g" rx="%g" fill="%s"/>'
@@ -208,7 +208,7 @@ class Picture:
                     x2 = x
                     while x2 < b['x2'] and tuple(self.im[y, x2]) == col:
                         x2 += 1
-                    # edges on whole pixels (at 1.5x or 2.5x too)
+                    # edges on whole pixels (at any scale: 1.75 for 100%)
                     l, t = round(X + (x - b['x']) * S), round(Y + (y - b['y']) * S)
                     r, bt = round(X + (x2 - b['x']) * S), round(Y + (y + 1 - b['y']) * S)
                     parts.append('M%g %gh%gv%gh%gz' % (l, t, r - l, bt - t, -(r - l)))
@@ -304,8 +304,8 @@ class Picture:
 
     def svg(self, background):
         S = self.S
-        # the size EightyOne gives its window at this zoom: (505 * quarters
-        # + 2) / 4
+        # the size EightyOne gives the picture at this scale: at 1.75 (100%),
+        # (505 * 7 + 2) / 4
         W, H = int((self.w * S * 4 + 2) // 4), int((self.h * S * 4 + 2) // 4)
         out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
                % (W, H, W, H),

@@ -1,0 +1,11 @@
+// The keyboard pictures drawn again (Source/KBPics/svg; make.py writes
+// this file): PNG at 200%, named after the TImages they are shown for.
+// They are in 3 files, each less than 1 MB
+
+spec16kb RCDATA "KBPics\\png\\spectrum16.png"
+zx81kb RCDATA "KBPics\\png\\zx81.png"
+ts1000zxpandkb RCDATA "KBPics\\png\\ts1000zxpand.png"
+zx80zxpandkb RCDATA "KBPics\\png\\zx80zxpand.png"
+tc2048kb RCDATA "KBPics\\png\\tc2048.png"
+ts1500zxpandkb RCDATA "KBPics\\png\\ts1500zxpand.png"
+tk85kb RCDATA "KBPics\\png\\tk85.png"

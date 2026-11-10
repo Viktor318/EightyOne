@@ -21,13 +21,17 @@
 #include <vcl4.h>
 #include <string.h>
 #include <map>
+#include <vector>
+#include <string>
 #pragma hdrstop
 
 #include "Keyboard_.h"
 #include "KeyboardFunctions_.h"
 #include "Keypad_.h"
+#include "Language.h"
 #include "main_.h"
 #include "zx81config.h"
+#include "zlib.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -37,16 +41,16 @@ TKeyboard *Keyboard;
 __fastcall TKeyboard::TKeyboard(TComponent* Owner)
         : TForm(Owner)
 {
-        // The size of the picture is changed by double clicking it: 1.5x,
-        // 1.75x, 2x, 2.25x, 2.5x and again 1.5x (of the original pictures,
-        // 505 x 223); it is scaled smoothly. The window can be resized too,
-        // but only to these sizes, and only to those that fit the screen.
-        // The pictures of the machines stay as they are, under the one shown
-        Size = 0;
+        // The size of the picture is changed by double clicking it: 100%
+        // (the first size), 125%, 150%, 175%, 200%, 75% and again 100%; it
+        // is scaled smoothly. The window can be resized too, but only to
+        // these sizes, and only to those that fit the screen. The pictures
+        // of the machines stay as they are, under the one shown
+        Size = DefaultSize;
         AutoSize = false;
         BorderStyle = bsSizeToolWin;
-        ClientWidth = PictureWidthAt(0);
-        ClientHeight = PictureHeightAt(0);
+        ClientWidth = PictureWidthAt(DefaultSize);
+        ClientHeight = PictureHeightAt(DefaultSize);
 
         Display = new TImage(this);
         Display->Parent = this;
@@ -56,28 +60,261 @@ __fastcall TKeyboard::TKeyboard(TComponent* Owner)
 
         OnCanResize = CanResizeWindow;
         OnResize = ResizeWindow;
+
+        // The title shows the size: put together here, not translated with
+        // the form
+        LanguageKeepText(this);
+        ShowSize();
 }
 
-// The sizes, in quarters of the size of the original pictures (505 x 223).
-// The pictures drawn again (48K, 128, the keypad) are held at 2.5x, the
-// largest size; the others at 1x
-static const int Sizes[] = { 6, 7, 8, 9, 10 };
+// The sizes, in percent. 100% is 1.75 times the size of the original
+// pictures (505 x 223): 884 x 390, the first size. The pictures drawn again
+// are held at 200%, the largest size (100% is half of it, so it is scaled
+// down cleanly); the others at their original size
+static const int Sizes[] = { 75, 100, 125, 150, 175, 200 };
 #define SIZES (sizeof(Sizes) / sizeof(Sizes[0]))
+const int TKeyboard::DefaultSize = 1;
+
+// The width or height of a picture at a size, from its original one
+static int ScaledSize(int original, int size)
+{
+        int full = (original * 7 + 2) / 4;
+
+        return (full * Sizes[size] + 50) / 100;
+}
 
 int TKeyboard::PictureWidthAt(int size)
 {
-        return (PictureWidth * Sizes[size] + 2) / 4;
+        return ScaledSize(PictureWidth, size);
 }
 
 int TKeyboard::PictureHeightAt(int size)
 {
-        return (PictureHeight * Sizes[size] + 2) / 4;
+        return ScaledSize(PictureHeight, size);
 }
 
-// The picture of the machine, scaled to the window with halftone
-// stretching (much smoother than the stretching of TImage)
+void TKeyboard::ShowSize(void)
+{
+        Caption = TrF("Keyboard \226 {0}%", AnsiString(Sizes[Size]));
+}
+
+// After a change of language: the title is put together again
+void TKeyboard::LanguageChanged(void)
+{
+        ShowSize();
+}
+
+//---------------------------------------------------------------------------
+// The pictures drawn again are in the resources of the program (KBPics.rc,
+// made by Source/KBPics/svg/make.py), as PNG pictures named after the
+// TImages they are shown for. A PNG picture is read here: RGB or RGBA (the
+// alpha is left out) of 8 bits a sample, or palette colours of 1 - 8 bits,
+// not interlaced
+
+static unsigned long BigEndian(const unsigned char *p)
+{
+        return ((unsigned long)p[0] << 24) | ((unsigned long)p[1] << 16)
+                | ((unsigned long)p[2] << 8) | p[3];
+}
+
+static int Paeth(int a, int b, int c)
+{
+        int p = a + b - c;
+        int pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
+
+        if (pa <= pb && pa <= pc) return a;
+        return pb <= pc ? b : c;
+}
+
+// The picture of a PNG file in memory; NULL if it can't be read
+static Graphics::TBitmap *ReadPng(const unsigned char *data, unsigned long size)
+{
+        static const unsigned char signature[8] = { 137, 'P', 'N', 'G', 13, 10, 26, 10 };
+        unsigned char palette[256][3];
+        unsigned long width = 0, height = 0, length, pos = 8, stride, x, y;
+        int depth = 0, type = -1, interlace = 0, channels, step;
+        std::string compressed;
+        std::vector<unsigned char> raw;
+        uLongf rawSize;
+        Graphics::TBitmap *picture;
+
+        if (!data || size < 8 || memcmp(data, signature, 8)) return NULL;
+        memset(palette, 0, sizeof(palette));
+
+        // The chunks: the size and kind of the picture, its palette and its
+        // compressed data (in one or more parts)
+        while (pos + 12 <= size)
+        {
+                const unsigned char *kind = data + pos + 4, *chunk = data + pos + 8;
+
+                length = BigEndian(data + pos);
+                if (length > size - pos - 12) return NULL;
+
+                if (!memcmp(kind, "IHDR", 4) && length >= 13)
+                {
+                        width = BigEndian(chunk);
+                        height = BigEndian(chunk + 4);
+                        depth = chunk[8];
+                        type = chunk[9];
+                        interlace = chunk[12];
+                }
+                else if (!memcmp(kind, "PLTE", 4))
+                        memcpy(palette, chunk, length < sizeof(palette) ? length : sizeof(palette));
+                else if (!memcmp(kind, "IDAT", 4))
+                        compressed.append((const char *)chunk, length);
+                else if (!memcmp(kind, "IEND", 4))
+                        break;
+
+                pos += length + 12;
+        }
+
+        if (interlace || !width || !height || width > 16384 || height > 16384) return NULL;
+        if (type == 2 && depth == 8) channels = 3;
+        else if (type == 6 && depth == 8) channels = 4;
+        else if (type == 3 && (depth == 1 || depth == 2 || depth == 4 || depth == 8)) channels = 1;
+        else return NULL;
+
+        // The lines, each with the kind of its filter before it; the
+        // filters work on whole pixels, or on bytes when they are smaller
+        stride = (width * channels * depth + 7) / 8;
+        step = depth == 8 ? channels : 1;
+        rawSize = (stride + 1) * height;
+        raw.resize(rawSize);
+        if (uncompress(&raw[0], &rawSize, (const Bytef *)compressed.data(), compressed.size()) != Z_OK
+                || rawSize != (stride + 1) * height)
+                return NULL;
+
+        for (y=0; y<height; y++)
+        {
+                unsigned char *line = &raw[y * (stride + 1)] + 1;
+                unsigned char *above = y ? line - (stride + 1) : NULL;
+                int filter = line[-1];
+
+                for (x=0; x<stride; x++)
+                {
+                        int a = x >= (unsigned long)step ? line[x - step] : 0;
+                        int b = above ? above[x] : 0;
+                        int c = above && x >= (unsigned long)step ? above[x - step] : 0;
+
+                        switch (filter)
+                        {
+                        case 0: break;
+                        case 1: line[x] = (unsigned char)(line[x] + a); break;
+                        case 2: line[x] = (unsigned char)(line[x] + b); break;
+                        case 3: line[x] = (unsigned char)(line[x] + (a + b) / 2); break;
+                        case 4: line[x] = (unsigned char)(line[x] + Paeth(a, b, c)); break;
+                        default: return NULL;
+                        }
+                }
+        }
+
+        picture = new Graphics::TBitmap();
+        picture->PixelFormat = pf24bit;
+        picture->Width = width;
+        picture->Height = height;
+
+        for (y=0; y<height; y++)
+        {
+                const unsigned char *line = &raw[y * (stride + 1)] + 1;
+                unsigned char *out = (unsigned char *)picture->ScanLine[y];
+
+                for (x=0; x<width; x++, out+=3)
+                {
+                        const unsigned char *rgb;
+
+                        if (type == 3)
+                        {
+                                int bit = x * depth;
+                                int index = (line[bit / 8] >> (8 - depth - bit % 8)) & ((1 << depth) - 1);
+                                rgb = palette[index];
+                        }
+                        else
+                                rgb = line + x * channels;
+
+                        out[0] = rgb[2];
+                        out[1] = rgb[1];
+                        out[2] = rgb[0];
+                }
+        }
+
+        return picture;
+}
+
+// The picture drawn again of a TImage, from the resources; NULL if it has
+// none
+static Graphics::TBitmap *ResourcePicture(TImage *image)
+{
+        HRSRC found = FindResource(HInstance, image->Name.c_str(), RT_RCDATA);
+        HGLOBAL loaded;
+
+        if (!found || (loaded = LoadResource(HInstance, found)) == NULL) return NULL;
+
+        return ReadPng((const unsigned char *)LockResource(loaded), SizeofResource(HInstance, found));
+}
+
+// The picture held for a TImage: drawn again (at 200%), or its own picture
+// in the form (at the original size). A new bitmap, for the caller to free
+static Graphics::TBitmap *PictureOf(TImage *image)
+{
+        Graphics::TBitmap *picture = ResourcePicture(image);
+
+        if (!picture)
+        {
+                picture = new Graphics::TBitmap();
+                picture->Assign(image->Picture->Bitmap);
+        }
+
+        return picture;
+}
+
+// A picture scaled smoothly to a size: with halftone stretching (much
+// smoother than the stretching of TImage), or, to exactly half its size,
+// each pixel the average of four, done here: the pictures drawn again are
+// held at 200%, so 100% is as sharp as drawn, whatever the halftone
+// stretching of Windows does. A new bitmap, for the caller to free
+static Graphics::TBitmap *ScaledPicture(Graphics::TBitmap *source, int width, int height)
+{
+        Graphics::TBitmap *picture = new Graphics::TBitmap();
+        int x, y;
+
+        picture->PixelFormat = pf24bit;
+        picture->Width = width;
+        picture->Height = height;
+
+        if (source->PixelFormat == pf24bit && source->Width == width * 2 && source->Height == height * 2)
+        {
+                for (y=0; y<height; y++)
+                {
+                        const unsigned char *a = (const unsigned char *)source->ScanLine[2 * y];
+                        const unsigned char *b = (const unsigned char *)source->ScanLine[2 * y + 1];
+                        unsigned char *out = (unsigned char *)picture->ScanLine[y];
+
+                        for (x=0; x<width * 3; x++)
+                        {
+                                int i = x / 3 * 6 + x % 3;
+                                out[x] = (unsigned char)((a[i] + a[i + 3] + b[i] + b[i + 3] + 2) / 4);
+                        }
+                }
+        }
+        else
+        {
+                SetStretchBltMode(picture->Canvas->Handle, HALFTONE);
+                SetBrushOrgEx(picture->Canvas->Handle, 0, 0, NULL);
+                StretchBlt(picture->Canvas->Handle, 0, 0, width, height,
+                           source->Canvas->Handle, 0, 0, source->Width, source->Height, SRCCOPY);
+        }
+
+        return picture;
+}
+
+//---------------------------------------------------------------------------
+
+// The picture of the machine, scaled to the window. Only the picture shown
+// is held: it is read again when another machine's is shown
 void TKeyboard::UpdateDisplay(void)
 {
+        static TImage *shown = NULL;
+        static Graphics::TBitmap *held = NULL;
         TImage *source = NULL;
         Graphics::TBitmap *picture;
         int i;
@@ -96,18 +333,14 @@ void TKeyboard::UpdateDisplay(void)
 
         if (!source || ClientWidth <= 0 || ClientHeight <= 0) return;
 
-        picture = new Graphics::TBitmap();
-        picture->PixelFormat = pf24bit;
-        picture->Width = ClientWidth;
-        picture->Height = ClientHeight;
+        if (source != shown)
+        {
+                delete held;
+                held = PictureOf(source);
+                shown = source;
+        }
 
-        SetStretchBltMode(picture->Canvas->Handle, HALFTONE);
-        SetBrushOrgEx(picture->Canvas->Handle, 0, 0, NULL);
-        StretchBlt(picture->Canvas->Handle, 0, 0, ClientWidth, ClientHeight,
-                   source->Picture->Bitmap->Canvas->Handle, 0, 0,
-                   source->Picture->Bitmap->Width,
-                   source->Picture->Bitmap->Height, SRCCOPY);
-
+        picture = ScaledPicture(held, ClientWidth, ClientHeight);
         Display->Picture->Bitmap = picture;
         delete picture;
 
@@ -115,12 +348,12 @@ void TKeyboard::UpdateDisplay(void)
 }
 
 // A picture of the windows beside the keyboard at a size, scaled smoothly
-// from its own picture, which may be larger (the keypad is held at 2.5x).
-// Its normal size (as in the form, 1x) is kept in its Tag, its own
+// from its own picture, which may be larger (the keypad drawn again is held
+// at 200%). Its normal size (as in the form) is kept in its Tag, its own
 // picture in Originals
 static std::map<TImage *, Graphics::TBitmap *> Originals;
 
-static void ScaleImage(TImage *image, int quarters)
+static void ScaleImage(TImage *image, int size)
 {
         Graphics::TBitmap *original, *picture;
         int width, height;
@@ -130,25 +363,13 @@ static void ScaleImage(TImage *image, int quarters)
         if (!image->Tag) image->Tag = (image->Width << 16) | image->Height;
 
         if (Originals.find(image) == Originals.end())
-        {
-                original = new Graphics::TBitmap();
-                original->Assign(image->Picture->Bitmap);
-                Originals[image] = original;
-        }
+                Originals[image] = PictureOf(image);
         original = Originals[image];
 
-        width = ((image->Tag >> 16) * quarters + 2) / 4;
-        height = ((image->Tag & 0xffff) * quarters + 2) / 4;
+        width = ScaledSize(image->Tag >> 16, size);
+        height = ScaledSize(image->Tag & 0xffff, size);
 
-        picture = new Graphics::TBitmap();
-        picture->PixelFormat = pf24bit;
-        picture->Width = width;
-        picture->Height = height;
-
-        SetStretchBltMode(picture->Canvas->Handle, HALFTONE);
-        SetBrushOrgEx(picture->Canvas->Handle, 0, 0, NULL);
-        StretchBlt(picture->Canvas->Handle, 0, 0, width, height,
-                   original->Canvas->Handle, 0, 0, original->Width, original->Height, SRCCOPY);
+        picture = ScaledPicture(original, width, height);
 
         image->Stretch = false;
         image->Picture->Bitmap = picture;
@@ -240,8 +461,8 @@ int TKeyboard::FittingSize(int size)
                 if (side)
                 {
                         normal = sideImage->Tag ? sideImage->Tag : (sideImage->Width << 16) | sideImage->Height;
-                        width += offset + ((normal >> 16) * Sizes[size] + 2) / 4 + side->Width - side->ClientWidth;
-                        sideHeight = ((normal & 0xffff) * Sizes[size] + 2) / 4 + side->Height - side->ClientHeight;
+                        width += offset + ScaledSize(normal >> 16, size) + side->Width - side->ClientWidth;
+                        sideHeight = ScaledSize(normal & 0xffff, size) + side->Height - side->ClientHeight;
                         if (sideHeight > height) height = sideHeight;
                 }
 
@@ -253,26 +474,27 @@ int TKeyboard::FittingSize(int size)
 
 void TKeyboard::SetSize(int size)
 {
-        if (size < 0 || size >= (int)SIZES) size = 0;
+        if (size < 0 || size >= (int)SIZES) size = DefaultSize;
         size = FittingSize(size);
         Size = size;
 
         ClientWidth = PictureWidthAt(size);
         ClientHeight = PictureHeightAt(size);
         UpdateDisplay();
+        ShowSize();
 
         // The windows beside the keyboard (ZX80 functions, Spectrum 128
         // keypad) with it, following its right edge
         if (KeyboardFunctions)
         {
-                ScaleImage(KeyboardFunctions->zx80IntegralFunctions, Sizes[size]);
+                ScaleImage(KeyboardFunctions->zx80IntegralFunctions, size);
                 KeyboardFunctions->Left = Left + Width + SideOffset(KeyboardFunctions);
                 KeyboardFunctions->Top = Top;
         }
         if (Keypad128)
         {
-                ScaleImage(Keypad128->KeypadUk, Sizes[size]);
-                ScaleImage(Keypad128->KeypadSpanish, Sizes[size]);
+                ScaleImage(Keypad128->KeypadUk, size);
+                ScaleImage(Keypad128->KeypadSpanish, size);
                 Keypad128->Left = Left + Width + SideOffset(Keypad128);
                 Keypad128->Top = Top;
         }
@@ -292,30 +514,32 @@ void __fastcall TKeyboard::FormClose(TObject *Sender, TCloseAction &Action)
 
 void TKeyboard::LoadSettings(TIniFile *ini)
 {
-        int quarters, i;
+        int percent, i;
 
         Top = ini->ReadInteger("KBMAP","Top",Top);
         Left = ini->ReadInteger("KBMAP","Left",Left);
 
-        // The size, in quarters; before, the number of the size from 1x
-        // in Size. The side windows don't exist yet: their size follows in
-        // KbChange
-        quarters = ini->ReadInteger("KBMAP", "Zoom", 4 + ini->ReadInteger("KBMAP", "Size", 0));
-        Size = 0;
+        // The size, in percent; a size saved before in other units (Size,
+        // from 1x) is not taken over: 100%. The side windows don't exist
+        // yet: their size follows in KbChange
+        percent = ini->ReadInteger("KBMAP", "Percent", Sizes[DefaultSize]);
+        Size = DefaultSize;
         for (i=0; i<(int)SIZES; i++)
         {
-                if (Sizes[i] == quarters) Size = i;
+                if (Sizes[i] == percent) Size = i;
         }
-        if (quarters > Sizes[SIZES - 1]) Size = SIZES - 1;
         ClientWidth = PictureWidthAt(Size);
         ClientHeight = PictureHeightAt(Size);
+        ShowSize();
 }
 
 void TKeyboard::SaveSettings(TIniFile *ini)
 {
         ini->WriteInteger("KBMAP","Top",Top);
         ini->WriteInteger("KBMAP","Left",Left);
-        ini->WriteInteger("KBMAP","Zoom",Sizes[Size]);
+        ini->WriteInteger("KBMAP","Percent",Sizes[Size]);
+        ini->DeleteKey("KBMAP","Size");
+        ini->DeleteKey("KBMAP","Zoom");
 }
 
 void __fastcall TKeyboard::FormKeyDown(TObject *Sender, WORD &Key,

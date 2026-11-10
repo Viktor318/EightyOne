@@ -5,7 +5,7 @@ pixels at 505 × 223, and look blurred when the window is enlarged. The
 pictures here are the same pictures drawn again as vector graphics, so they
 are sharp at any size:
 
-| Drawing | Picture in the program | Original |
+| Drawing | Shown for (the TImage) | Original |
 |---|---|---|
 | `spectrum48.py` | `Keyboard_.dfm`, `spec48kb` | `orig/spectrum48.png` |
 | `spectrum16.py` | `Keyboard_.dfm`, `spec16kb` | `orig/spectrum16.png` |
@@ -28,8 +28,15 @@ are sharp at any size:
 | `lambda8300.py` | `Keyboard_.dfm`, `lambdakb` | `orig/lambda8300.png` |
 | `tk85.py` | `Keyboard_.dfm`, `tk85kb` | `orig/tk85.png` |
 
-The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
-largest size of the window; smaller sizes are scaled down from it smoothly.
+They are drawn at 100% of the window (1.75 times the originals: 884 × 390,
+the keypad 263 × 390), and the program holds them at 200%, its largest
+size (1768 × 780, the keypad 526 × 780), as PNG pictures in 256 colours
+(the colours of the surfaces exactly) in its resources, named after the
+TImages they are shown for (`../png/<name>.png`, put into the program by
+`../../KBPics1.rc`–`KBPics3.rc`: three files, as the linker of C++Builder
+5 fails on a resource file of 1 MB or more). At 100% the program makes
+each pixel the average of four, at 200% it shows the picture as it is,
+the other sizes are scaled smoothly by Windows.
 
 ## How they are made
 
@@ -51,8 +58,8 @@ script of a picture says what each numbered text is (a table), and draws:
   block graphics of the ZX81 (a chequer of single pixels) are spread
   evenly over their squares, so they are of one size at every scale.
 
-The edges of the keys and squares fall on whole pixels at every scale
-(1.5x and 2.5x too), so they are sharp. The 48K picture has its key rows a
+The edges of the keys and squares fall on whole pixels at 100%, and so
+on every second pixel at 200%: sharp at both. The 48K picture has its key rows a
 little further apart than the original (2 pixels each, from the free
 space under the last row). Its words above the keys reach over their keys'
 right edges as little as they can: CAPS LOCK and TRUE VIDEO with half a
@@ -103,36 +110,18 @@ Needs Python 3 with numpy, scipy, scikit-image, Pillow and fontTools, the
 TeX Gyre Heros fonts (TeX Live, or `fonts-texgyre`; another folder can be
 given in `TEXGYRE`) and `rsvg-convert` (librsvg).
 
-    python3 make.py [scale ...]
+    python3 make.py [percent ...]
 
-writes `<name>.svg` (2.5x, kept here) and `out/<name>_<scale>x.png` for the
-scales given (2.5 if none), and `out/<name>.bmp`: the 2.5x picture in 256
-colours (the colours of the surfaces exactly) for the forms. A picture goes
-into its form with
+writes `<name>.svg` (the drawing at 100%, kept here), `../png/<name>.png`
+(the 200% picture for the program) and `../../KBPics1.rc`–`KBPics3.rc`,
+and for the sizes given (in percent) `out/<name>_<percent>.png`: the
+picture as the program shows it (scaled down smoothly). Then Build in
+C++Builder (the resources changed). A new picture goes into the table of
+`make.py` (`PICTURES`), and its old picture out of its form, with
 
-    python3 dfmpicture.py ../../Keyboard_.dfm spec48kb out/spectrum48.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm spec16kb out/spectrum16.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm spec128kb out/spectrum128.bmp
-    python3 dfmpicture.py ../../Keypad_.dfm KeypadUk out/keypad128.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm zx81kb out/zx81.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm zx81zxpandkb out/zx81zxpand.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm ts1000kb out/ts1000.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm ts1000zxpandkb out/ts1000zxpand.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm zx97kb out/zx97.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm zx80kb out/zx80.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm zx80zxpandkb out/zx80zxpand.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm specPlus2kb out/spectrumplus2.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm specPlus3kb out/spectrumplus3.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm tc2048kb out/tc2048.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm ts2068kb out/ts2068.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm ts1500kb out/ts1500.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm ts1500zxpandkb out/ts1500zxpand.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm acekb out/ace.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm lambdakb out/lambda8300.bmp
-    python3 dfmpicture.py ../../Keyboard_.dfm tk85kb out/tk85.bmp
+    python3 dfmclear.py ../../Keyboard_.dfm <TImage>
 
-(then Build in C++Builder, as the forms changed). `analyze.py` needs to run
-again only if an original changes:
+`analyze.py` needs to run again only if an original changes:
 
     python3 analyze.py orig/spectrum48.png spectrum48 87,128,140 4
     python3 analyze.py orig/spectrum128.png spectrum128 32,32,32/64,64,64 1 0,0,0

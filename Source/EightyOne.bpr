@@ -40,7 +40,7 @@
       Digitalker\Digitalk.obj Digitalker\Digitalkdrv.obj Joystick\Joystick.obj 
       sound\midi.obj Keypad_.obj Keypad\keypad.obj Lambda\lambdaBasicLoader.obj 
       Lambda\lambdaBasicLister.obj ThreadPool.obj Spectrum\timexBasicLister.obj"/>
-    <RESFILES value="EightyOne.res WinXP.res"/>
+    <RESFILES value="EightyOne.res WinXP.res KBPics1.res KBPics2.res KBPics3.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>

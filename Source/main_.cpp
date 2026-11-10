@@ -3590,6 +3590,7 @@ void __fastcall TForm1::LanguageClick(TObject *Sender)
         ZXPrinter->LineRateChange(NULL);
         BasicLister->LanguageChanged();
         ProfilePlot->LanguageChanged();
+        Keyboard->LanguageChanged();
         BuildMenuJoystickSelection();
 
         // The menu bar may now take a different number of lines

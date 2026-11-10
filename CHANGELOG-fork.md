@@ -16,32 +16,40 @@ itself are in `Release Files/Release history.txt`.
   TS1000, with and without the ZXpand, and the ZX97), of the ZX80 keyboard
   (also with the ZXpand), and of the Timex TC2048, TS2068 and TS1500 (also
   with the ZXpand) keyboards, and of the Jupiter Ace, Lambda 8300 and TK85
-  keyboards** are drawn again as vector graphics and held at 2.5x (1263 ×
-  558, the keypad 375 × 558), so they are sharp: at 2.5x as they are, at
-  the other sizes scaled down smoothly. Same layout and colours as before;
-  the words of a picture are of one size and in the font's own spacing
-  (TeX Gyre Heros), the 48K (and the 16K, the same picture with light grey
-  keys) has its key rows a little further apart, and its words above the
-  keys reach over them as little as they can. On the ZX81 the keys are in
-  even rows, and the grey block graphics keep their dots, of one size at
-  every scale; on the ZXpand pictures LPRINT and LLIST stay small under
-  ZXPAND and CONFIG. On the ZX80 the words above the keys are in the
-  middle of them, and the letters stay thin. The +2 and +3 keep their keys
-  as in the original and their slanted letters. The Timex pictures keep
-  their frames and keys pixel for pixel (sharp at every size), their texts
-  are drawn again. The other keyboards keep their pictures.
-- *Help > Keyboard Map* sizes: **1.5x, 1.75x, 2x, 2.25x and 2.5x** (they
-  were 1x–2x); double click goes to the next, dragging the frame jumps
-  between them. Sizes at which the window, with the keypad or the ZX80
-  functions beside it, does not fit the screen are skipped. The keypad and
-  the ZX80 functions are scaled smoothly too. The size is kept in
-  `[KBMAP] Zoom` (in quarters); a size saved before is taken over (1x and
-  1.25x as 1.5x).
+  keyboards** are drawn again as vector graphics, at 100% (see below), and
+  held at 200% (1768 × 780, the keypad 526 × 780) as PNG pictures in the
+  resources of the program, so they are sharp: at 100% each pixel is the
+  average of four of the picture, at 200% the picture is shown as it is,
+  at the other sizes it is scaled smoothly. The program is smaller by this
+  (5.9 MB, it was 18 MB), as these pictures are no longer in the forms.
+  Same layout and colours as before; the words of a picture are of one
+  size and in the font's own spacing (TeX Gyre Heros), the 48K (and the
+  16K, the same picture with light grey keys) has its key rows a little
+  further apart, and its words above the keys reach over them as little as
+  they can. On the ZX81 the keys are in even rows, and the grey block
+  graphics keep their dots, of one size at every scale; on the ZXpand
+  pictures LPRINT and LLIST stay small under ZXPAND and CONFIG. On the
+  ZX80 the words above the keys are in the middle of them, and the letters
+  stay thin. The +2 and +3 keep their keys as in the original and their
+  slanted letters. The Timex pictures keep their frames and keys pixel for
+  pixel (sharp at every size), their texts are drawn again. The other
+  keyboards keep their pictures.
+- *Help > Keyboard Map* sizes: **75%, 100%, 125%, 150%, 175% and 200%**;
+  100%, the first, is 884 × 390, 1.75 times the original pictures (505 ×
+  223; the sizes were 1x–2x). The size is shown in the title of the window
+  (*Keyboard – 100%*). Double click goes to the next size (after 200% to
+  75%), dragging the frame jumps between them. Sizes at which the window,
+  with the keypad or the ZX80 functions beside it, does not fit the screen
+  are skipped. The keypad and the ZX80 functions are scaled smoothly too.
+  The size is kept in `[KBMAP] Percent`; a size saved before (in other
+  units) is not taken over: 100%.
 - The keypad and the ZX80 functions are 6 pixels from the keyboard window
   as seen (they were 20 pixels away, and on Windows 10 and 11 about 30, as
   the invisible borders of the windows were counted in).
 - The drawings and the scripts that make them are in `Source/KBPics/svg`
-  (see its README).
+  (see its README), the pictures in `Source/KBPics/png`;
+  `KBPics1.rc`–`KBPics3.rc` put them into the program (three files, as the
+  linker of C++Builder 5 fails on a resource file of 1 MB or more).
 
 ### Spectrum 128 keypad
 

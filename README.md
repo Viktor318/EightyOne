@@ -87,12 +87,13 @@ program.
 - **300% zoom** (View > Zoom, Ctrl+F3); with 100–400% chosen, resizing the
   main window jumps between these sizes. The main window appears at its
   saved size once it is ready, and its status bar stays at the bottom.
-- **Help > Keyboard Map** can be enlarged in steps (1.5x to 2.5x) with a
-  double click; the Spectrum 16K, 48K, 128, +2 and +3 keyboards, the 128
-  keypad and the ZX81 keyboard (with its ZXpand, TS1000 and ZX97 forms)
-  the ZX80 keyboard (with the ZXpand) the Timex TC2048, TS2068 and TS1500
-  keyboards and the Jupiter Ace, Lambda 8300 and TK85 keyboards are drawn
-  again, sharp at every size.
+- **Help > Keyboard Map** can be enlarged in steps (75% to 200%, 100% the
+  first; the size is shown in its title) with a double click; the Spectrum
+  16K, 48K, 128, +2 and +3 keyboards, the 128 keypad and the ZX81 keyboard
+  (with its ZXpand, TS1000 and ZX97 forms) the ZX80 keyboard (with the
+  ZXpand) the Timex TC2048, TS2068 and TS1500 keyboards and the Jupiter
+  Ace, Lambda 8300 and TK85 keyboards are drawn again, sharp at every
+  size.
 - **ZX Printer**: double click for double or triple size; the printout is
   saved as PNG (or BMP). **File > Save Screenshot** saves PNG too.
 

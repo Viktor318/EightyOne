@@ -626,6 +626,7 @@ code	HW_.cpp	DSERR_OUTOFMEMORY:\n\nThe DirectSound subsystem could not allocate 
 code	HW_.cpp	Standard 16K	Normál 16K
 code	HW_.cpp	Video So&und	Videó han&g
 code	HW_.cpp	Total RAM: {0}K	Teljes RAM: {0}K
+code	Keyboard_.cpp	Keyboard – {0}%	Billentyűzet – {0}%
 code	HW_.cpp	The +3e ROM is required by this IDE device. Select an appropriate ROM from the Advanced Settings tab.	Ehhez az IDE eszközhöz a +3e ROM szükséges. A megfelelő ROM-ot a Speciális beállítások fülön választhatja ki.
 code	HW_.cpp	The +3e ROM is supported by this IDE device. Select an appropriate ROM from the Advanced Settings tab. Disable the on-board ROM using the jumper.	Ez az IDE eszköz támogatja a +3e ROM-ot. A megfelelő ROM-ot a Speciális beállítások fülön választhatja ki. A beépített ROM-ot az átkötéssel (jumper) tiltsa le.
 code	HW_.cpp	Color:	Szín:
