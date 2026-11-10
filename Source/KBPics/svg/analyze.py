@@ -4,12 +4,19 @@
 # letters at most <gap> apart). Writes <prefix>.json and <prefix>_ids.png
 # (4x, with the numbers of the texts, for the tables of the drawings).
 # Colours: the colours of the picture, for pictures with smoothed letters
-# (the ZX80): any other colour is taken as the nearest of them
+# (the ZX80): any other colour is taken as the nearest of them.
+# small=w,h (anywhere after the picture): only parts at most w x h pixels
+# are letters; larger ones (lines, frames: the Timex pictures) are not texts
 import sys, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy import ndimage
 
+small = None
+for a in list(sys.argv):
+    if a.startswith('small='):
+        small = [int(v) for v in a[6:].split(',')]
+        sys.argv.remove(a)
 src, prefix = sys.argv[1], sys.argv[2]
 keycols = [tuple(int(v) for v in c.split(',')) for c in sys.argv[3].split('/')]
 keycol = keycols[0]
@@ -53,6 +60,8 @@ for col in cols:
     l, k = ndimage.label(m, structure=np.ones((3, 3)))
     for sl in ndimage.find_objects(l):
         ys, xs = sl
+        if small and (xs.stop - xs.start > small[0] or ys.stop - ys.start > small[1]):
+            continue
         blobs.append(dict(c=[int(v) for v in col], x=xs.start, y=ys.start, x2=xs.stop, y2=ys.stop))
 
 # group into words: same colour, overlapping rows, gap <= gap

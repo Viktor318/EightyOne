@@ -20,6 +20,8 @@ are sharp at any size:
 | `zx80zxpand.py` | `Keyboard_.dfm`, `zx80zxpandkb` | `orig/zx80zxpand.png` |
 | `spectrumplus2.py` | `Keyboard_.dfm`, `specPlus2kb` | `orig/spectrumplus2.png` |
 | `spectrumplus3.py` | `Keyboard_.dfm`, `specPlus3kb` | `orig/spectrumplus3.png` |
+| `tc2048.py` | `Keyboard_.dfm`, `tc2048kb` | `orig/tc2048.png` |
+| `ts2068.py` | `Keyboard_.dfm`, `ts2068kb` | `orig/ts2068.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -67,6 +69,13 @@ The +2 and the +3 (the same picture with dark keys, both by
 `spectrumplus2.py`) keep the keys of the original, a top framed by a line
 and lines from its corners to the corners of the key, and their slanted
 letters (Heros Bold Italic); the words all 5 pixels high, as most of them.
+The Timex TC2048 and TS2068 (one picture in two colourings, with five
+words of its own under the keys: `timex.py`) are made of lines of whole
+pixels: their frames, lines, keys and block graphics are drawn of their
+pixels, and only the texts are drawn again (found on and around each key,
+by a table of the legends of the keys): above and under the keys and on
+the large keys 5 pixels high, on the keys 4 (as in the original), the
+arrows as shapes, ~ and \ as thin lines.
 
 ## Making them
 
@@ -94,6 +103,8 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm zx80zxpandkb out/zx80zxpand.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm specPlus2kb out/spectrumplus2.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm specPlus3kb out/spectrumplus3.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm tc2048kb out/tc2048.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm ts2068kb out/ts2068.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -104,3 +115,5 @@ again only if an original changes:
     python3 analyze.py orig/<name>.png <name> 252,252,252 2 0,0,0    (the ZX81 and its relatives)
     python3 analyze.py orig/<name>.png <name> 72,42,254 2 0,0,0 0,0,0/72,42,254/255,201,33/255,255,255    (the ZX80s)
     python3 analyze.py orig/spectrumplus2.png spectrumplus2 146,150,158/64,64,64 2 0,0,0
+    python3 analyze.py orig/tc2048.png tc2048 166,166,164 2 0,0,0 small=8,8
+    python3 analyze.py orig/ts2068.png ts2068 166,166,164 2 210,210,214 small=8,8
