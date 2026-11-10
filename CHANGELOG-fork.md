@@ -7,6 +7,13 @@ Changes of this fork on top of EightyOne 1.41: the source of
 of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
 itself are in `Release Files/Release history.txt`.
 
+## Not released yet
+
+### Fixes
+
+- Loading a configuration (Options > Configuration) sets the window to
+  the size saved with it (its zoom); it always went back to 100%.
+
 ## v1.41-hu.2 – 2026-11-10
 
 The development version of the next EightyOne (1.42, by John Stroebel and

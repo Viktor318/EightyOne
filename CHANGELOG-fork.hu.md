@@ -8,6 +8,13 @@ Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 készült. Magának az EightyOne-nak a változásai a
 `Release Files/Release history.txt` fájlban vannak (angolul).
 
+## Még nincs kiadva
+
+### Javítások
+
+- Konfiguráció betöltésekor (Beállítások > Konfiguráció) az ablak a
+  vele mentett méretre (nagyításra) áll; eddig mindig 100%-ra ugrott.
+
 ## v1.41-hu.2 – 2026-11-10
 
 A következő EightyOne (1.42, John Stroebel és Paul Farrow) fejlesztői
