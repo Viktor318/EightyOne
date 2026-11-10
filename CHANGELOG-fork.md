@@ -12,14 +12,16 @@ itself are in `Release Files/Release history.txt`.
 ### Keyboard pictures
 
 - The pictures of the **Spectrum 48K and 128 keyboards, of the 128 keypad
-  and of the ZX81 keyboard** are drawn again as vector graphics and held at
-  2.5x (1263 × 558, the keypad 375 × 558), so they are sharp: at 2.5x as
-  they are, at the other sizes scaled down smoothly. Same layout and
-  colours as before; the words of a picture are of one size and in the
-  font's own spacing (TeX Gyre Heros), the 48K has its key rows a little
-  further apart. On the ZX81 the keys are in even rows, and the grey block
-  graphics keep their dots, of one size at every scale. The other keyboards
-  keep their pictures.
+  and of the ZX81 keyboard (also with the ZXpand, the TS1000, with and
+  without the ZXpand, and the ZX97)** are drawn again as vector graphics
+  and held at 2.5x (1263 × 558, the keypad 375 × 558), so they are sharp:
+  at 2.5x as they are, at the other sizes scaled down smoothly. Same
+  layout and colours as before; the words of a picture are of one size and
+  in the font's own spacing (TeX Gyre Heros), the 48K has its key rows a
+  little further apart. On the ZX81 the keys are in even rows, and the
+  grey block graphics keep their dots, of one size at every scale; on the
+  ZXpand pictures LPRINT and LLIST stay small under ZXPAND and CONFIG. The
+  other keyboards keep their pictures.
 - *Help > Keyboard Map* sizes: **1.5x, 1.75x, 2x, 2.25x and 2.5x** (they
   were 1x–2x); double click goes to the next, dragging the frame jumps
   between them. Sizes at which the window, with the keypad or the ZX80

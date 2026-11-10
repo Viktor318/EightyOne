@@ -11,6 +11,10 @@ are sharp at any size:
 | `spectrum128.py` | `Keyboard_.dfm`, `spec128kb` | `orig/spectrum128.png` |
 | `keypad128.py` | `Keypad_.dfm`, `KeypadUk` | `orig/keypad128uk.png` |
 | `zx81.py` | `Keyboard_.dfm`, `zx81kb` | `orig/zx81.png` |
+| `zx81zxpand.py` | `Keyboard_.dfm`, `zx81zxpandkb` | `orig/zx81zxpand.png` |
+| `ts1000.py` | `Keyboard_.dfm`, `ts1000kb` | `orig/ts1000.png` |
+| `ts1000zxpand.py` | `Keyboard_.dfm`, `ts1000zxpandkb` | `orig/ts1000zxpand.png` |
+| `zx97.py` | `Keyboard_.dfm`, `zx97kb` | `orig/zx97.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -40,7 +44,11 @@ The edges of the keys and squares fall on whole pixels at every scale
 little further apart than the original (2 pixels each, from the free
 space under the last row). On the ZX81 the white words, 6 pixels high in
 the original, are 7 like the others: those above a key row grow upwards,
-those under one downwards, so they stay 2 pixels from the keys.
+those under one downwards, so they stay 2 pixels from the keys. The
+relatives of the ZX81 (ZXpand, TS1000, ZX97) are drawn by `zx81.py` too:
+the texts they share with the ZX81 are found by their pixels, and each
+script gives only its own texts. On the ZXpand pictures LPRINT and LLIST
+stay small under ZXPAND and CONFIG (5 pixels high, they were 4).
 
 ## Making them
 
@@ -59,6 +67,10 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm spec128kb out/spectrum128.bmp
     python3 dfmpicture.py ../../Keypad_.dfm KeypadUk out/keypad128.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm zx81kb out/zx81.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm zx81zxpandkb out/zx81zxpand.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm ts1000kb out/ts1000.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm ts1000zxpandkb out/ts1000zxpand.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm zx97kb out/zx97.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -66,4 +78,4 @@ again only if an original changes:
     python3 analyze.py orig/spectrum48.png spectrum48 87,128,140 4
     python3 analyze.py orig/spectrum128.png spectrum128 32,32,32/64,64,64 1 0,0,0
     python3 analyze.py orig/keypad128uk.png keypad128 32,32,32/64,64,64 2 0,0,0
-    python3 analyze.py orig/zx81.png zx81 252,252,252 2 0,0,0
+    python3 analyze.py orig/<name>.png <name> 252,252,252 2 0,0,0    (the ZX81 and its relatives)
