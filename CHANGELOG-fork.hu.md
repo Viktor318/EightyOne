@@ -12,13 +12,16 @@ készült. Magának az EightyOne-nak a változásai a
 
 ### Billentyűzetképek
 
-- A **Spectrum 48K és 128 billentyűzetének és a 128 numerikus
-  billentyűzetének** képe újra van rajzolva vektorgrafikaként, és 2,5x-es
-  méretben van a programban (1263 × 558, a keypad 375 × 558), így éles:
-  2,5x-en változatlanul, a többi méreten simítva kicsinyítve. Az elrendezés
-  és a színek a régiek; egy képen belül minden szó egyforma méretű és a
-  betűtípus saját betűközével áll (TeX Gyre Heros), a 48K billentyűsorai
-  kicsit távolabb vannak egymástól. A többi billentyűzet képe nem változott.
+- A **Spectrum 48K és 128 billentyűzetének, a 128 numerikus
+  billentyűzetének és a ZX81 billentyűzetének** képe újra van rajzolva
+  vektorgrafikaként, és 2,5x-es méretben van a programban (1263 × 558, a
+  keypad 375 × 558), így éles: 2,5x-en változatlanul, a többi méreten
+  simítva kicsinyítve. Az elrendezés és a színek a régiek; egy képen belül
+  minden szó egyforma méretű és a betűtípus saját betűközével áll (TeX Gyre
+  Heros), a 48K billentyűsorai kicsit távolabb vannak egymástól. A ZX81
+  billentyűi egyenletes sorokban állnak, a szürke blokkgrafikák pöttyösek
+  maradtak, minden méretben egyforma pöttyökkel. A többi billentyűzet képe
+  nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **1,5x, 1,75x, 2x, 2,25x és
   2,5x** (eddig 1x–2x); dupla kattintás a következőre lép, a keret
   húzásakor ezek között ugrik. Azokat a méreteket, amelyeknél az ablak a

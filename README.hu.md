@@ -93,8 +93,9 @@ maradnia.
   főablak csak készen, a mentett méretében jelenik meg, és az állapotsora
   mindig az alján marad.
 - A **Súgó > Billentyűzetkiosztás** képe dupla kattintással lépésenként
-  nagyítható (1,5x-től 2,5x-ig); a Spectrum 48K és 128 billentyűzete és a
-  128 numerikus billentyűzete újra van rajzolva, minden méretben éles.
+  nagyítható (1,5x-től 2,5x-ig); a Spectrum 48K és 128 billentyűzete, a
+  128 numerikus billentyűzete és a ZX81 billentyűzete újra van rajzolva,
+  minden méretben éles.
 - **ZX Printer**: dupla kattintásra két- vagy háromszoros méret; a
   nyomat PNG-ben (vagy BMP-ben) menthető. A **Fájl > Képernyőkép mentése**
   is ment PNG-t.

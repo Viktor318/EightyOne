@@ -10,6 +10,7 @@ are sharp at any size:
 | `spectrum48.py` | `Keyboard_.dfm`, `spec48kb` | `orig/spectrum48.png` |
 | `spectrum128.py` | `Keyboard_.dfm`, `spec128kb` | `orig/spectrum128.png` |
 | `keypad128.py` | `Keypad_.dfm`, `KeypadUk` | `orig/keypad128uk.png` |
+| `zx81.py` | `Keyboard_.dfm`, `zx81kb` | `orig/zx81.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -25,16 +26,21 @@ script of a picture says what each numbered text is (a table), and draws:
   smooth lines through the middle of their pixels),
 - the texts in TeX Gyre Heros Bold and Heros Cn Bold (GUST Font License),
   as outlines, so the SVG needs no fonts. The words of a picture are of one
-  size and in the font's own spacing (the 48K: as high as EDIT; the 128 and
-  the keypad: as LOCK, BORDR and DEL), on the base lines of the original;
+  size and in the font's own spacing (the 48K and the ZX81: as high as
+  EDIT; the 128 and the keypad: as LOCK, BORDR and DEL), on the base lines
+  of the original;
   a word is made a little narrower only where it would touch something,
 - the block graphics and the straight signs (− + = _) of their pixels, the
-  arrows, the rainbow and a few signs as shapes.
+  arrows, the rainbow and a few signs as shapes. The dots of the grey
+  block graphics of the ZX81 (a chequer of single pixels) are spread
+  evenly over their squares, so they are of one size at every scale.
 
 The edges of the keys and squares fall on whole pixels at every scale
 (1.5x and 2.5x too), so they are sharp. The 48K picture has its key rows a
 little further apart than the original (2 pixels each, from the free
-space under the last row).
+space under the last row). On the ZX81 the white words, 6 pixels high in
+the original, are 7 like the others: those above a key row grow upwards,
+those under one downwards, so they stay 2 pixels from the keys.
 
 ## Making them
 
@@ -52,6 +58,7 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm spec48kb out/spectrum48.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm spec128kb out/spectrum128.bmp
     python3 dfmpicture.py ../../Keypad_.dfm KeypadUk out/keypad128.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm zx81kb out/zx81.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -59,3 +66,4 @@ again only if an original changes:
     python3 analyze.py orig/spectrum48.png spectrum48 87,128,140 4
     python3 analyze.py orig/spectrum128.png spectrum128 32,32,32/64,64,64 1 0,0,0
     python3 analyze.py orig/keypad128uk.png keypad128 32,32,32/64,64,64 2 0,0,0
+    python3 analyze.py orig/zx81.png zx81 252,252,252 2 0,0,0

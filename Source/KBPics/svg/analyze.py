@@ -17,24 +17,32 @@ key = np.zeros(im.shape[:2], bool)
 for kc in keycols: key |= (im == kc).all(-1)
 
 # keys: connected regions of the key colour (with what they hold: holes filled)
+# (smaller parts of the key colour are texts: the white words of the ZX81)
 lab, n = ndimage.label(ndimage.binary_fill_holes(key))
 keys = []
+inkey = np.zeros(key.shape, bool)
 for i, sl in enumerate(ndimage.find_objects(lab)):
     ys, xs = sl
-    if (ys.stop - ys.start) < 8 or (xs.stop - xs.start) < 8: continue
+    if (ys.stop - ys.start) < 16 or (xs.stop - xs.start) < 16: continue
     keys.append([xs.start, ys.start, xs.stop - xs.start, ys.stop - ys.start])
+    inkey |= lab == i + 1
 keys.sort(key=lambda k: (k[1] // 10, k[0]))
 
 # ink: everything that is not the background (most common) or a key colour
 flat = im.reshape(-1, 3)
 cols, counts = np.unique(flat, axis=0, return_counts=True)
 bg = tuple(cols[counts.argmax()]) if len(sys.argv) <= 5 else tuple(int(v) for v in sys.argv[5].split(','))
-ink = ~key & ~(im == bg).all(-1)
 blobs = []
 for col in cols:
     col = tuple(col)
-    if col == bg or col in keycols: continue
     m = (im == col).all(-1)
+    if col == bg:
+        # the background colour on a key is a text (the black letters of
+        # the ZX81)
+        m &= inkey
+    elif col in keycols:
+        m &= ~inkey
+    if not m.any(): continue
     l, k = ndimage.label(m, structure=np.ones((3, 3)))
     for sl in ndimage.find_objects(l):
         ys, xs = sl

@@ -15,7 +15,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'out')
-NAMES = ['spectrum48', 'spectrum128', 'keypad128']
+NAMES = ['spectrum48', 'spectrum128', 'keypad128', 'zx81']
 
 
 def draw(name, scale, svg):
