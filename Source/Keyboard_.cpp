@@ -20,6 +20,7 @@
 
 #include <vcl4.h>
 #include <string.h>
+#include <algorithm>
 #include <map>
 #include <vector>
 #include <string>
@@ -267,34 +268,74 @@ static Graphics::TBitmap *PictureOf(TImage *image)
         return picture;
 }
 
-// A picture scaled smoothly to a size: with halftone stretching (much
-// smoother than the stretching of TImage), or, to exactly half its size,
-// each pixel the average of four, done here: the pictures drawn again are
-// held at 200%, so 100% is as sharp as drawn, whatever the halftone
-// stretching of Windows does. A new bitmap, for the caller to free
+// A picture made smaller, done here: each pixel the average of the part of
+// the picture it covers, the pixels there counted by how much of them it
+// covers. To half the size (100% of the pictures held at 200%) that is the
+// average of four, so 100% is as sharp as drawn; at every size the same on
+// every Windows (its halftone stretching is much the same, but not said
+// exactly). The rows first: those under a row of the new picture are added
+// up, then the columns of the sum
+static void AreaAverage(Graphics::TBitmap *source, Graphics::TBitmap *picture)
+{
+        int sw = source->Width, sh = source->Height;
+        int w = picture->Width, h = picture->Height;
+        std::vector<unsigned long> sum(sw * 3);
+        unsigned long whole = (unsigned long)sw * sh;
+        int x, y, i, j, c;
+
+        // In units of 1/(sw * w) of a row of the source (1/(sh * h) of a
+        // column): a source pixel is w (h) long, a new one sw (sh)
+        for (y=0; y<h; y++)
+        {
+                int top = y * sh, bottom = top + sh;
+                unsigned char *out = (unsigned char *)picture->ScanLine[y];
+
+                std::fill(sum.begin(), sum.end(), 0UL);
+                for (j=top / h; j * h < bottom && j < sh; j++)
+                {
+                        int from = j * h > top ? j * h : top;
+                        int to = (j + 1) * h < bottom ? (j + 1) * h : bottom;
+                        unsigned long weight = to - from;
+                        const unsigned char *line = (const unsigned char *)source->ScanLine[j];
+
+                        for (i=0; i<sw * 3; i++) sum[i] += line[i] * weight;
+                }
+
+                for (x=0; x<w; x++)
+                {
+                        int left = x * sw, right = left + sw;
+                        unsigned long total[3] = { 0, 0, 0 };
+
+                        for (i=left / w; i * w < right && i < sw; i++)
+                        {
+                                int from = i * w > left ? i * w : left;
+                                int to = (i + 1) * w < right ? (i + 1) * w : right;
+                                unsigned long weight = to - from;
+
+                                for (c=0; c<3; c++) total[c] += sum[i * 3 + c] * weight;
+                        }
+
+                        for (c=0; c<3; c++)
+                                out[x * 3 + c] = (unsigned char)((total[c] + whole / 2) / whole);
+                }
+        }
+}
+
+// A picture scaled smoothly to a size: made smaller here (the pictures
+// drawn again, held at 200%), or with halftone stretching (much smoother
+// than the stretching of TImage) for the others, made larger. A new bitmap,
+// for the caller to free
 static Graphics::TBitmap *ScaledPicture(Graphics::TBitmap *source, int width, int height)
 {
         Graphics::TBitmap *picture = new Graphics::TBitmap();
-        int x, y;
 
         picture->PixelFormat = pf24bit;
         picture->Width = width;
         picture->Height = height;
 
-        if (source->PixelFormat == pf24bit && source->Width == width * 2 && source->Height == height * 2)
+        if (source->PixelFormat == pf24bit && width <= source->Width && height <= source->Height)
         {
-                for (y=0; y<height; y++)
-                {
-                        const unsigned char *a = (const unsigned char *)source->ScanLine[2 * y];
-                        const unsigned char *b = (const unsigned char *)source->ScanLine[2 * y + 1];
-                        unsigned char *out = (unsigned char *)picture->ScanLine[y];
-
-                        for (x=0; x<width * 3; x++)
-                        {
-                                int i = x / 3 * 6 + x % 3;
-                                out[x] = (unsigned char)((a[i] + a[i + 3] + b[i] + b[i + 3] + 2) / 4);
-                        }
-                }
+                AreaAverage(source, picture);
         }
         else
         {

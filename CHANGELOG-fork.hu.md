@@ -20,13 +20,14 @@ készült. Magának az EightyOne-nak a változásai a
   Ace, a Lambda 8300 és a TK85 billentyűzetének** képe újra van rajzolva
   vektorgrafikaként, 100%-os méretre (lásd lent), és 200%-os méretben
   (1768 × 780, a keypad 526 × 780) PNG-képként van a program erőforrásai
-  között, így éles: 100%-on minden képpont a kép négy képpontjának átlaga,
-  200%-on a kép változatlanul látszik, a többi méreten simítva
-  méreteződik. A program ettől kisebb lett (5,9 MB, eddig 18 MB), mert
-  ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek a
-  régiek; egy képen belül minden szó egyforma méretű és a betűtípus saját
-  betűközével áll (TeX Gyre Heros), a 48K (és a 16K, amely ugyanez a kép
-  világosszürke billentyűkkel) billentyűsorai kicsit távolabb vannak
+  között, így éles: 200%-on a kép változatlanul látszik, a többi méreten a
+  program maga kicsinyíti, minden képpont a kép általa lefedett részének
+  átlaga (100%-on négy képponté, így olyan éles, mint a rajz), minden
+  Windowson ugyanúgy. A program ettől kisebb lett (5,9 MB, eddig 18 MB),
+  mert ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek
+  a régiek; egy képen belül minden szó egyforma méretű és a betűtípus
+  saját betűközével áll (TeX Gyre Heros), a 48K (és a 16K, amely ugyanez a
+  kép világosszürke billentyűkkel) billentyűsorai kicsit távolabb vannak
   egymástól, a billentyűk feletti feliratai pedig a lehető legkevésbé
   lógnak túl rajtuk. A ZX81 billentyűi egyenletes sorokban állnak, a
   szürke blokkgrafikák pöttyösek maradtak, minden méretben egyforma

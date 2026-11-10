@@ -11,7 +11,8 @@
 #                           as the linker of C++Builder 5 fails on a .res
 #                           file of 1 MB or more
 #   out/<name>_<p>.png      the pictures at the sizes asked (in percent), as
-#                           the program shows them: scaled down smoothly
+#                           the program shows them: made smaller by
+#                           area_average(), as there
 #                           from the 200% picture (none if not asked)
 #
 # Needs Python 3 with numpy, scipy, scikit-image, Pillow and fontTools,
@@ -69,8 +70,30 @@ def main():
         im = im.convert('RGB')
         for p in percents:
             size = (scaled(im.width, p), scaled(im.height, p))
-            im.resize(size, Image.BOX).save(os.path.join(OUT, '%s_%d.png' % (name, p)))
+            area_average(im, size).save(os.path.join(OUT, '%s_%d.png' % (name, p)))
     write_rc()
+
+
+def area_average(im, size):
+    """The picture made smaller as the program does it (AreaAverage() in
+    Keyboard_.cpp): each pixel the average of the part of the picture it
+    covers, the pixels there counted by how much of them it covers (Pillow's
+    BOX counts a pixel wholly or not at all)"""
+    import numpy as np
+
+    def weights(old, new):
+        # in units of 1/(old * new): an old pixel is new long, a new one old
+        w = np.zeros((new, old), dtype=np.int64)
+        for y in range(new):
+            for j in range(y * old // new, min(old, ((y + 1) * old + new - 1) // new)):
+                w[y, j] = max(0, min((y + 1) * old, (j + 1) * new) - max(y * old, j * new))
+        return w
+
+    a = np.array(im.convert('RGB')).astype(np.int64)
+    V, H = weights(im.height, size[1]), weights(im.width, size[0])
+    t = np.stack([V @ a[:, :, c] @ H.T for c in range(3)], axis=-1)
+    whole = im.width * im.height
+    return Image.fromarray(((t + whole // 2) // whole).astype(np.uint8))
 
 
 def scaled(stored, percent):

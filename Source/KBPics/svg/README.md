@@ -34,9 +34,10 @@ size (1768 × 780, the keypad 526 × 780), as PNG pictures in 256 colours
 (the colours of the surfaces exactly) in its resources, named after the
 TImages they are shown for (`../png/<name>.png`, put into the program by
 `../../KBPics1.rc`–`KBPics3.rc`: three files, as the linker of C++Builder
-5 fails on a resource file of 1 MB or more). At 100% the program makes
-each pixel the average of four, at 200% it shows the picture as it is,
-the other sizes are scaled smoothly by Windows.
+5 fails on a resource file of 1 MB or more). At 200% the program shows
+the picture as it is; at the other sizes it makes it smaller itself, each
+pixel the average of the part of the picture it covers (at 100% of four
+pixels, so it is as sharp as drawn), the same on every Windows.
 
 ## How they are made
 
@@ -115,7 +116,7 @@ given in `TEXGYRE`) and `rsvg-convert` (librsvg).
 writes `<name>.svg` (the drawing at 100%, kept here), `../png/<name>.png`
 (the 200% picture for the program) and `../../KBPics1.rc`–`KBPics3.rc`,
 and for the sizes given (in percent) `out/<name>_<percent>.png`: the
-picture as the program shows it (scaled down smoothly). Then Build in
+picture as the program shows it (made smaller as there). Then Build in
 C++Builder (the resources changed). A new picture goes into the table of
 `make.py` (`PICTURES`), and its old picture out of its form, with
 
