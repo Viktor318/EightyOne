@@ -278,7 +278,8 @@ class Picture:
         number here}, for the texts of the same pixels and colour, the
         nearest (at most dx sideways and dy up or down)"""
         z = json.load(open(analysis))
-        zi = np.array(Image.open(picture).convert('RGB')).astype(int)
+        # picture: its file, or its pixels
+        zi = np.array(Image.open(picture).convert('RGB')).astype(int) if isinstance(picture, str) else picture
         found = {}
         for w in z['words']:
             best = None

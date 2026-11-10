@@ -22,6 +22,8 @@ are sharp at any size:
 | `spectrumplus3.py` | `Keyboard_.dfm`, `specPlus3kb` | `orig/spectrumplus3.png` |
 | `tc2048.py` | `Keyboard_.dfm`, `tc2048kb` | `orig/tc2048.png` |
 | `ts2068.py` | `Keyboard_.dfm`, `ts2068kb` | `orig/ts2068.png` |
+| `ts1500.py` | `Keyboard_.dfm`, `ts1500kb` | `orig/ts1500.png` |
+| `ts1500zxpand.py` | `Keyboard_.dfm`, `ts1500zxpandkb` | `orig/ts1500zxpand.png` |
 
 The program holds them at 2.5x (1263 × 558, the keypad 375 × 558), the
 largest size of the window; smaller sizes are scaled down from it smoothly.
@@ -75,7 +77,10 @@ pixels: their frames, lines, keys and block graphics are drawn of their
 pixels, and only the texts are drawn again (found on and around each key,
 by a table of the legends of the keys): above and under the keys and on
 the large keys 5 pixels high, on the keys 4 (as in the original), the
-arrows as shapes, ~ and \ as thin lines.
+arrows as shapes, ~ and \ as thin lines. The TS1500 (and its ZXpand
+picture, by `ts1500.py` too) keeps its keys, a light edge and a darker
+rounded top, in even rows; its words all 6 pixels high, as most of them,
+a little narrower on the tops where a block graphic is next to them.
 
 ## Making them
 
@@ -105,6 +110,8 @@ into its form with
     python3 dfmpicture.py ../../Keyboard_.dfm specPlus3kb out/spectrumplus3.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm tc2048kb out/tc2048.bmp
     python3 dfmpicture.py ../../Keyboard_.dfm ts2068kb out/ts2068.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm ts1500kb out/ts1500.bmp
+    python3 dfmpicture.py ../../Keyboard_.dfm ts1500zxpandkb out/ts1500zxpand.bmp
 
 (then Build in C++Builder, as the forms changed). `analyze.py` needs to run
 again only if an original changes:
@@ -117,3 +124,4 @@ again only if an original changes:
     python3 analyze.py orig/spectrumplus2.png spectrumplus2 146,150,158/64,64,64 2 0,0,0
     python3 analyze.py orig/tc2048.png tc2048 166,166,164 2 0,0,0 small=8,8
     python3 analyze.py orig/ts2068.png ts2068 166,166,164 2 210,210,214 small=8,8
+    python3 analyze.py orig/<name>.png <name> 211,209,209 2 123,123,123 123,123,123/211,209,209/145,143,143/255,255,255/0,0,0    (the TS1500s)

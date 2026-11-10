@@ -14,21 +14,22 @@ itself are in `Release Files/Release history.txt`.
 - The pictures of the **Spectrum 16K, 48K, 128, +2 and +3 keyboards, of
   the 128 keypad and of the ZX81 keyboard (also with the ZXpand, the
   TS1000, with and without the ZXpand, and the ZX97), of the ZX80 keyboard
-  (also with the ZXpand), and of the Timex TC2048 and TS2068 keyboards**
-  are drawn again as vector graphics and held at 2.5x (1263 × 558, the
-  keypad 375 × 558), so they are sharp: at 2.5x as they are, at the other
-  sizes scaled down smoothly. Same layout and colours as before; the words
-  of a picture are of one size and in the font's own spacing (TeX Gyre
-  Heros), the 48K (and the 16K, the same picture with light grey keys) has
-  its key rows a little further apart, and its words above the keys reach
-  over them as little as they can. On the ZX81 the keys are in even rows,
-  and the grey block graphics keep their dots, of one size at every scale;
-  on the ZXpand pictures LPRINT and LLIST stay small under ZXPAND and
-  CONFIG. On the ZX80 the words above the keys are in the middle of them,
-  and the letters stay thin. The +2 and +3 keep their keys as in the
-  original and their slanted letters. The Timex pictures keep their frames
-  and keys pixel for pixel (sharp at every size), their texts are drawn
-  again. The other keyboards keep their pictures.
+  (also with the ZXpand), and of the Timex TC2048, TS2068 and TS1500 (also
+  with the ZXpand) keyboards** are drawn again as vector graphics and held
+  at 2.5x (1263 × 558, the keypad 375 × 558), so they are sharp: at 2.5x
+  as they are, at the other sizes scaled down smoothly. Same layout and
+  colours as before; the words of a picture are of one size and in the
+  font's own spacing (TeX Gyre Heros), the 48K (and the 16K, the same
+  picture with light grey keys) has its key rows a little further apart,
+  and its words above the keys reach over them as little as they can. On
+  the ZX81 the keys are in even rows, and the grey block graphics keep
+  their dots, of one size at every scale; on the ZXpand pictures LPRINT
+  and LLIST stay small under ZXPAND and CONFIG. On the ZX80 the words
+  above the keys are in the middle of them, and the letters stay thin. The
+  +2 and +3 keep their keys as in the original and their slanted letters.
+  The Timex pictures keep their frames and keys pixel for pixel (sharp at
+  every size), their texts are drawn again. The other keyboards keep their
+  pictures.
 - *Help > Keyboard Map* sizes: **1.5x, 1.75x, 2x, 2.25x and 2.5x** (they
   were 1x–2x); double click goes to the next, dragging the frame jumps
   between them. Sizes at which the window, with the keypad or the ZX80
