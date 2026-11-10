@@ -12,7 +12,7 @@ készült. Magának az EightyOne-nak a változásai a
 
 ### Billentyűzetképek
 
-- A **Spectrum 16K, 48K és 128 billentyűzetének, a 128 numerikus
+- A **Spectrum 16K, 48K, 128, +2 és +3 billentyűzetének, a 128 numerikus
   billentyűzetének és a ZX81 billentyűzetének (a ZXpand-os, a TS1000 –
   ZXpand-dal és anélkül – és a ZX97 változattal együtt), valamint a ZX80
   billentyűzetének (a ZXpand-os változattal együtt)** képe újra van
@@ -27,8 +27,9 @@ készült. Magának az EightyOne-nak a változásai a
   blokkgrafikák pöttyösek maradtak, minden méretben egyforma pöttyökkel; a
   ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a
   CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a billentyűk
-  közepén állnak, a betűk vékonyak maradtak. A többi billentyűzet képe nem
-  változott.
+  közepén állnak, a betűk vékonyak maradtak. A +2 és a +3 billentyűi
+  olyanok, mint az eredetin, a betűk dőltek maradtak. A többi billentyűzet
+  képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **1,5x, 1,75x, 2x, 2,25x és
   2,5x** (eddig 1x–2x); dupla kattintás a következőre lép, a keret
   húzásakor ezek között ugrik. Azokat a méreteket, amelyeknél az ablak a

@@ -58,6 +58,8 @@ def font(name):
             'herosb': 'texgyreheros-bold.otf',
             'cn': 'texgyreheroscn-regular.otf',
             'cnb': 'texgyreheroscn-bold.otf',
+            'herosbi': 'texgyreheros-bolditalic.otf',
+            'cnbi': 'texgyreheroscn-bolditalic.otf',
         }[name])
     return FONTS[name]
 
