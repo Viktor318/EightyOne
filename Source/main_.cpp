@@ -2446,6 +2446,10 @@ void __fastcall TForm1::ConfigItem1Click(TObject *Sender)
         FileName = FileName + ".ini";
 
         LoadIniFile(FileName);
+
+        // The hardware set up again made the window 100%: the size saved
+        // with the configuration (its zoom), as at start-up
+        if (!FullScreen) SetStartUpSize();
 }
 //---------------------------------------------------------------------------
 
