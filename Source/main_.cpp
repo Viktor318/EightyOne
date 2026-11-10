@@ -73,6 +73,7 @@
 #include "ProfilePlot_.h"
 #include "Profiler.h"
 #include "BasicLister\BasicLister_.h"
+#include "BasicLister\BasicVariables_.h"
 #include "BasicLister\BasicListerOptions_.h"
 #include "BasicLoader\BasicLoaderOptions_.h"
 #include "ROMCartridge\IF2ROMCartridge.h"
@@ -1690,6 +1691,7 @@ void TForm1::SaveSettings(TIniFile *ini)
         ParallelPort->SaveSettings(ini);
         MidiForm->SaveSettings(ini);
         BasicLister->SaveSettings(ini);
+        BasicVariables->SaveSettings(ini);
         LoadBasicListingOptionsForm->SaveSettings(ini);
         SaveBasicListingOptionsForm->SaveSettings(ini);
 }
@@ -2494,6 +2496,7 @@ void TForm1::LoadIniFile(AnsiString FileName)
         LoadBasicListingOptionsForm->LoadSettings(ini);
         SaveBasicListingOptionsForm->LoadSettings(ini);
         BasicLister->LoadSettings(ini);
+        BasicVariables->LoadSettings(ini);
 
         delete ini;
 
@@ -2701,7 +2704,9 @@ void MoveWindows(int l = -1, int t = -1)
         MoveWindow(LiveMemoryWindow, l, t);
         MoveWindow(ProfilePlot, l, t);
         MoveWindow(Profiler, l, t);
-        MoveWindow(BasicLister, l, t);}
+        MoveWindow(BasicLister, l, t);
+        MoveWindow(BasicVariables, l, t);
+}
 
 void __fastcall TForm1::GatherWindows1Click(TObject *Sender)
 {
@@ -2747,7 +2752,7 @@ void __fastcall TForm1::BasicListerOptionClick(TObject *Sender)
         BasicListerOption->Checked = !BasicListerOption->Checked;
         if (BasicListerOption->Checked)
         {
-                BasicLister->Show();
+                BasicLister->CallShow();
         }
         else
         {

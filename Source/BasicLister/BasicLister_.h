@@ -31,6 +31,9 @@
 #include <ToolWin.hpp>
 #include <Dialogs.hpp>
 #include <IniFiles.hpp>
+#include <Menus.hpp>
+#include <ExtCtrls.hpp>
+#include <Graphics.hpp>
 #include <SyncObjs.hpp>
 
 #include <string>
@@ -40,6 +43,21 @@
 
 #define WM_STATUSBAR (WM_USER+1)
 #define WM_SCROLLBAR (WM_USER+2)
+
+enum LineMode
+{
+        HIGHLIGHT,
+        BREAKPOINT
+};
+
+enum PopUpMenuItems
+{
+        Add_Delete_BP,
+        RunTo_BP,
+        Enable_BP,
+        DisableAll_BP,
+        DeleteAll_BP
+};
 
 class TBasicLister : public TForm
 {
@@ -57,6 +75,22 @@ __published:	// IDE-managed Components
         TToolButton *ToolButtonLineEnds;
         TToolButton *ToolButton5;
         TToolButton *ToolButtonInfo;
+        TPopupMenu *PopupMenu1;
+        TMenuItem *AddBreakPoint;
+        TMenuItem *Enabled1;
+        TImage *BpEnabledImg;
+        TImage *BpDisabledImg;
+        TMenuItem *DisableAll1;
+        TToolBar *DebugControls;
+        TToolButton *ToolButton2;
+        TToolButton *ToolButton6;
+        TToolButton *ToolButtonRunStop;
+        TToolButton *ToolButton7;
+        TToolButton *StepBasic;
+        TToolButton *ToolButton8;
+        TToolButton *Variables;
+        TMenuItem *DeletAll1;
+        TMenuItem *RuntoLine1;
         void __fastcall FormPaint(TObject *Sender);
         void __fastcall FormShow(TObject *Sender);
         void __fastcall ScrollBarChange(TObject *Sender);
@@ -70,6 +104,15 @@ __published:	// IDE-managed Components
         void __fastcall ToolButtonLineEndsClick(TObject *Sender);
         void __fastcall ToolButtonSettingsClick(TObject *Sender);
         void __fastcall ToolButtonInfoClick(TObject *Sender);
+        void __fastcall PopupMenu1Popup(TObject *Sender);
+        void __fastcall AddBreakPointClick(TObject *Sender);
+        void __fastcall Enabled1Click(TObject *Sender);
+        void __fastcall DisableAll1Click(TObject *Sender);
+        void __fastcall ToolButtonRunStopClick(TObject *Sender);
+        void __fastcall StepBasicClick(TObject *Sender);
+        void __fastcall VariablesClick(TObject *Sender);
+        void __fastcall DeletAll1Click(TObject *Sender);
+        void __fastcall RuntoLine1Click(TObject *Sender);
 
 private:	// User declarations
         static const int DisplayableRows = 48;
@@ -80,6 +123,9 @@ private:	// User declarations
         int mLastHighlightedEntryIndex;
         int mIndex;
         int mLastFilterIndex;
+        int mLastRowIndex;
+        int mLastBreakPointIndex;
+        int mLastBreakPointMenuIndex;
         IBasicLister* mBasicLister;
         int mBMWidth;
         int mBMHeight;
@@ -93,6 +139,8 @@ private:	// User declarations
         bool mOutputFullWidthLineNumbers;
         int mScaling;
         int mRelativePos;
+        int mToolbarHeight;
+        bool mHasDebug;
         TCriticalSection *mRefreshLock;
 
         void ClearBitmap();
@@ -107,15 +155,21 @@ private:	// User declarations
         void HighlightLine(int lineNumber);
         void HighlightEntry(int index);
         void UnhighlightEntry(int index);
-        void ColourRows(int startRow, int endRow, bool highlight);
+        void ColourRows(int startRow, int endRow, LineMode mode, bool setornot);
+        void UnBreakPointRows(int startRow, int endRow);
+        void BreakPointRows(int startRow, int endRow);
+        void BreakPointLine(int lineNumber);
+        void BreakPointEntry(int index);
         void DisableButtons();
         void EnableButtons();
         void SaveListingToFile();
         int FindLineIndex(int lineNumber);
         int FindLineDisplayedOnRow(int row);
         COLORREF GetHighlightColour();
+        COLORREF GetBreakPointColour();
         void GetSaveOptions();
         void SizeWindow();
+        void ScrollToIndex(int index);
         static int HandleMouseDownThreadProc(void *param);
         void HandleMouseDown(void);
         static int HandleRefreshThreadProc(void *param);
@@ -137,13 +191,18 @@ public:		// User declarations
    MESSAGE_HANDLER(WM_SCROLLBAR, TMessage, WMUpdateScrollBar)
  END_MESSAGE_MAP(TForm)
 
-        void SetBasicLister(IBasicLister* basicLister);
+        void SetBasicLister(IBasicLister* basicLister, bool exiting = false);
         void LanguageChanged();
         void SaveSettings(TIniFile* ini);
         void LoadSettings(TIniFile* ini);
         bool ListerAvailable();
         void Refresh(bool keepScrollbarPosition);
         void Clear();
+        void BreakAtNextBasicLine();
+        void UnBreakPointLastEntry();
+        int BasicLineExecuteStartAddress();
+        int NextBasicLineNumberToExecute();
+        void CallShow();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TBasicLister *BasicLister;

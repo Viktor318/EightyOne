@@ -808,3 +808,12 @@ code	main_.cpp; SoundForm.cpp	Automatic	Automatikus
 code	SoundForm.cpp	Output:	Kimenet:
 code	SoundForm.cpp	no sound device	nincs hangeszköz
 code	wavload_.cpp	The file could not be loaded.	A fájlt nem sikerült betölteni.
+form	BasicLister_.dfm	Variables	Változók
+form	BasicLister_.dfm	Add Breakpoint	Töréspont hozzáadása
+form	BasicLister_.dfm	Run to Line	Futtatás eddig a sorig
+form	BasicLister_.dfm	Disable All	Összes letiltása
+code	BasicLister_.cpp	Delete Breakpoint	Töréspont törlése
+form	BasicVariables_.dfm	BASIC Variables	BASIC változók
+code	BasicVariables_.cpp	Variables {0}	{0} változó
+code	Debug.cpp	BASIC Line	BASIC-sor
+code	SetBreakpoint_.cpp	Line	Sor

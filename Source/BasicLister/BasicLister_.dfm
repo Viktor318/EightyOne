@@ -1,11 +1,12 @@
 object BasicLister: TBasicLister
   Left = 242
   Top = 124
+  Hint = 'S'
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'BASIC Listing'
   ClientHeight = 355
-  ClientWidth = 298
+  ClientWidth = 324
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -57,11 +58,82 @@ object BasicLister: TBasicLister
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 15
+  object BpEnabledImg: TImage
+    Left = 96
+    Top = 122
+    Width = 16
+    Height = 16
+    AutoSize = True
+    Picture.Data = {
+      07544269746D617036030000424D360300000000000036000000280000001000
+      000010000000010018000000000000030000C30E0000C30E0000000000000000
+      0000FCFCFCFFFFFFFFFFFFFCFCFCFCFCFCFFFFFFFFFFFFFCFCFCFFFFFFFCFCFC
+      FFFFFFFCFCFCFFFFFFFEFEFEFCFCFCFFFFFFFCFCFCB8B8CD19195E0000550000
+      530000530000540000520000520000520000520000520000541C1C60BEBED1FF
+      FFFFFCFCFC19196C2626C4504FEE4F4EEB4E4EEB4D4DE94D4DE94D4DE94D4DE9
+      4D4DE94D4DEA4D4DEC1F1FBB222270FFFFFFFCFCFC00006B4646E57071FD8082
+      FF8083FF8084FF8284FF8183FF8283FF8084FF8082FF7071FE3F3FDE08086BFF
+      FFFFFFFFFF0000693B3BDA5454EC5B5BED5757EB5656EB5757EB5757EB5757ED
+      5858EC5A5CEE5555EC3434D3000069FFFFFFFFFFFF00006C3333D13E3EDB3C3C
+      D73B3BD63B3BD63B3BD63B3BD63B3BD63B3BD63D3DD73F3FDB2D2DCB000069FF
+      FFFFFCFCFC01016C2C2CC63030C73030C73030C73030C73030C73030C73030C7
+      3030C73030C73131C82727C200006BFEFEFEFFFFFF01016E2727BC2828B82828
+      B82828B82828B82828B82929B82929B82929B82929B82A2AB82323B700006BFC
+      FCFCFCFCFC03036F2323B12121A92121A92121A92121A92121A92121A92121A9
+      2121A92121A92121A91F1FAE00006EFCFCFCFCFCFC0303712525AB23239E2222
+      9E22229E22229E22229E22229E22229E22229E22229E23239E1F1FA701016DFE
+      FEFEFFFFFF01016F3030A93D3D9F3B3B9F3B3B9F3B3B9F3B3B9F3B3B9F3B3B9F
+      3B3B9F3B3B9F3D3D9F2B2BA500006EFFFFFFFFFFFF02026F3C3CA95252A15050
+      A15050A15050A15050A15151A25151A25151A25151A25353A23737A400006FFF
+      FFFFFCFCFC01016F4A4AA96E6EA76B6BA76C6CA76C6CA76C6CA76C6CA76C6CA7
+      6C6CA76C6CA76F6FA84646A600006EFFFFFFFCFCFC2929813636B95151A84F4F
+      A85050A94E4EA74E4EA74F4FA84D4DA64D4DA64D4DA64F4FA62F2FB226267FFF
+      FFFFFFFFFFC3C3DB41419C3333A13232A03333A03131A02E2E9F2F2F9F2F2F9E
+      2F2F9E2F2F9E30309F40409BC2C2DBFFFFFFFCFCFCFFFFFFFCFCFCFCFCFCFEFE
+      FEFFFFFFFEFEFEFCFCFCFFFFFFFEFEFEFCFCFCFEFEFEFFFFFFFCFCFCFCFCFCFF
+      FFFF}
+    Visible = False
+  end
+  object BpDisabledImg: TImage
+    Left = 122
+    Top = 122
+    Width = 16
+    Height = 16
+    Picture.Data = {
+      07544269746D617036030000424D360300000000000036000000280000001000
+      000010000000010018000000000000030000C30E0000C30E0000000000000000
+      0000FCFCFCFFFFFFFFFFFFFCFCFCFCFCFCFFFFFFFFFFFFFCFCFCFFFFFFFCFCFC
+      FFFFFFFCFCFCFFFFFFFEFEFEFCFCFCFFFFFFFCFCFCC5C0B842311C3720053520
+      04342004331F04321D05331D03311D03301C03311C03301C0441321ECBC4BEFF
+      FFFFFCFCFC4F3A1BBC7D2AE8A343E6A345E4A143E3A043E2A043E19F41E09D42
+      E09E40DF9D41E29D40A3691E564124FFFFFFFCFCFC563306E39B3EF7B964F9C4
+      79F8C579F9C57BF9C57BF9C57BF9C67BF9C47AF8C478F9BA64D48F3552330AFF
+      FFFFFFFFFF553406D18C36E0A04BE3A455DFA14FDFA04EDFA14FDFA04EDFA04E
+      DFA14FE1A453DF9F4CC1802F512F05FFFFFFFFFFFF583406C1812FC68635C385
+      33C38432C38432C38432C28332C28332C28332C38433C68836B27627543104FF
+      FFFFFCFCFC583508B17628AE7428AE7428AE7428AE7428AE7428AD7328AD7328
+      AD7328AD7328AE7428A46C21543105FEFEFEFFFFFF5B3708A36C229A65209A65
+      209A65209A65209A652099652099652099652099652099652097611C553205FC
+      FCFCFCFCFC5B370997631E88581A88581A88581A88581A88581A88581A87581A
+      87581A87581A87581A8B5918563206FCFCFCFCFCFC5C38099161227C541F7D54
+      1E7D541E7D541E7D541E7D541E7D541E7D541E7D541E7D541F84561A573407FE
+      FEFEFFFFFF5B360690662F82633C82633A82633A82633A82633A81623A81623A
+      81623A81623A81623C825C28573305FFFFFFFFFFFF5B3607916C3C8770548770
+      52877052877052877052877052877052877052877052877154846235573305FF
+      FFFFFCFCFC613B0893744B92847293836F93836F93836F93836F93836F93836F
+      93836F93836F948572886B455A3505FFFFFFFCFCFC8A6437AB79359478539477
+      5293765091765192754F90744F8F74508E734E8D724F8C724F95672D835F30FF
+      FFFFFFFFFFDFD3C4AC7D42AC742EAB742DAB742DAA732DAA732EAA732CA9722C
+      A9722CA8712DA7712CA67B40DDD2C4FFFFFFFCFCFCFFFFFFFCFCFCFCFCFCFEFE
+      FEFFFFFFFEFEFEFCFCFCFFFFFFFEFEFEFCFCFCFEFEFEFFFFFFFCFCFCFCFCFCFF
+      FFFF}
+    Visible = False
+  end
   object ScrollBar: TScrollBar
-    Left = 279
-    Top = 33
+    Left = 305
+    Top = 65
     Width = 19
-    Height = 301
+    Height = 269
     Align = alRight
     Kind = sbVertical
     PageSize = 0
@@ -71,7 +143,7 @@ object BasicLister: TBasicLister
   object StatusBar: TStatusBar
     Left = 0
     Top = 334
-    Width = 298
+    Width = 324
     Height = 21
     Panels = <
       item
@@ -86,7 +158,7 @@ object BasicLister: TBasicLister
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 298
+    Width = 324
     Height = 33
     ButtonHeight = 23
     ButtonWidth = 59
@@ -95,16 +167,24 @@ object BasicLister: TBasicLister
     ShowCaptions = True
     TabOrder = 2
     Wrapable = False
-    object ToolButtonRefresh: TToolButton
+    object ToolButton2: TToolButton
       Left = 0
       Top = 2
+      Width = 9
+      Caption = 'ToolButton2'
+      ImageIndex = 9
+      Style = tbsSeparator
+    end
+    object ToolButtonRefresh: TToolButton
+      Left = 9
+      Top = 2
       AutoSize = True
-      Caption = ' Refresh '
+      Caption = 'Refresh'
       ImageIndex = 0
       OnClick = ToolButtonRefreshClick
     end
     object ToolButton1: TToolButton
-      Left = 59
+      Left = 64
       Top = 2
       Width = 9
       Caption = 'ToolButton1'
@@ -112,7 +192,7 @@ object BasicLister: TBasicLister
       Style = tbsDivider
     end
     object ToolButtonSettings: TToolButton
-      Left = 68
+      Left = 73
       Top = 2
       AutoSize = True
       Caption = 'Settings'
@@ -120,15 +200,15 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonSettingsClick
     end
     object ToolButton3: TToolButton
-      Left = 121
+      Left = 127
       Top = 2
-      Width = 9
+      Width = 8
       Caption = 'ToolButton3'
       ImageIndex = 3
       Style = tbsDivider
     end
     object ToolButtonSave: TToolButton
-      Left = 130
+      Left = 135
       Top = 2
       AutoSize = True
       Caption = 'Save'
@@ -136,15 +216,15 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonSaveClick
     end
     object ToolButton4: TToolButton
-      Left = 189
+      Left = 194
       Top = 2
-      Width = 8
+      Width = 9
       Caption = 'ToolButton4'
       ImageIndex = 5
       Style = tbsDivider
     end
     object ToolButtonLineEnds: TToolButton
-      Left = 197
+      Left = 203
       Top = 2
       AutoSize = True
       Caption = 'Line Ends'
@@ -153,15 +233,15 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonLineEndsClick
     end
     object ToolButton5: TToolButton
-      Left = 261
+      Left = 266
       Top = 2
-      Width = 6
+      Width = 7
       Caption = 'ToolButton5'
       ImageIndex = 7
       Style = tbsDivider
     end
     object ToolButtonInfo: TToolButton
-      Left = 267
+      Left = 273
       Top = 2
       AutoSize = True
       Caption = 'Info'
@@ -169,8 +249,99 @@ object BasicLister: TBasicLister
       OnClick = ToolButtonInfoClick
     end
   end
+  object DebugControls: TToolBar
+    Left = 0
+    Top = 33
+    Width = 324
+    Height = 32
+    ButtonHeight = 23
+    ButtonWidth = 60
+    Caption = 'DebugControls'
+    EdgeBorders = [ebBottom]
+    Enabled = False
+    List = True
+    ShowCaptions = True
+    TabOrder = 3
+    Visible = False
+    object ToolButton6: TToolButton
+      Left = 0
+      Top = 2
+      Width = 9
+      Caption = 'ToolButton6'
+      ImageIndex = 0
+      Style = tbsSeparator
+    end
+    object ToolButtonRunStop: TToolButton
+      Left = 9
+      Top = 2
+      AutoSize = True
+      Caption = 'Stop'
+      ImageIndex = 1
+      OnClick = ToolButtonRunStopClick
+    end
+    object ToolButton7: TToolButton
+      Left = 50
+      Top = 2
+      Width = 9
+      Caption = 'ToolButton7'
+      ImageIndex = 2
+      Style = tbsDivider
+    end
+    object StepBasic: TToolButton
+      Left = 59
+      Top = 2
+      AutoSize = True
+      Caption = 'Step'
+      ImageIndex = 3
+      OnClick = StepBasicClick
+    end
+    object ToolButton8: TToolButton
+      Left = 100
+      Top = 2
+      Width = 9
+      Caption = 'ToolButton8'
+      ImageIndex = 4
+      Style = tbsDivider
+    end
+    object Variables: TToolButton
+      Left = 109
+      Top = 2
+      AutoSize = True
+      Caption = 'Variables'
+      ImageIndex = 4
+      Style = tbsCheck
+      OnClick = VariablesClick
+    end
+  end
   object SaveDialog: TSaveDialog
     Left = 9
-    Top = 44
+    Top = 113
+  end
+  object PopupMenu1: TPopupMenu
+    AutoPopup = False
+    OnPopup = PopupMenu1Popup
+    Left = 52
+    Top = 113
+    object AddBreakPoint: TMenuItem
+      Caption = 'Add Breakpoint'
+      OnClick = AddBreakPointClick
+    end
+    object RuntoLine1: TMenuItem
+      Caption = 'Run to Line'
+      OnClick = RuntoLine1Click
+    end
+    object Enabled1: TMenuItem
+      Caption = 'Enabled'
+      Enabled = False
+      OnClick = Enabled1Click
+    end
+    object DisableAll1: TMenuItem
+      Caption = 'Disable All'
+      OnClick = DisableAll1Click
+    end
+    object DeletAll1: TMenuItem
+      Caption = 'Delete All'
+      OnClick = DeletAll1Click
+    end
   end
 end

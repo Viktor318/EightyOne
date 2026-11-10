@@ -34,10 +34,16 @@ private:
         static const unsigned char Space = 0;
         static const unsigned char Quote = 11;
         static const unsigned char Dollar = 13;
+        static const unsigned char OpenParen = 16;
+        static const unsigned char ClosedParen = 17;
         static const unsigned char GreaterThan = 18;
         static const unsigned char LessThan = 19;
         static const unsigned char Equal = 20;
+        static const unsigned char Plus = 21;
+        static const unsigned char Minus = 22;
         static const unsigned char Asterisk = 23;
+        static const unsigned char Comma = 26;
+        static const unsigned char Period = 27;
         static const unsigned char Number0 = 28;
         static const unsigned char LetterA = 38;
         static const unsigned char Newline = 118;
@@ -48,11 +54,21 @@ private:
 
         virtual int GetProgramStartAddress();
         virtual int GetProgramEndAddress();
+        virtual int GetBasicLineExecuteStartAddress();
+        virtual int GetNextBasicLineNumber();
+        virtual bool BasicDebugSupported();
+        virtual bool BasicVariablesSupported();
         virtual unsigned char ConvertToZXCode(unsigned char code);
+        virtual unsigned char ConvertVariableNameCode(unsigned char code, bool first);
         virtual inline unsigned char GetFloatingPointNumberCode();
         virtual inline unsigned char GetLineEndingCode();
         virtual std::string GetKeywords();
+        virtual int GetEmbeddedNumberSize();
         virtual bool RemContainsMachineCode(int address, int lengthRemaining, bool outputRemTokensAsCharacterCodes);
         virtual AnsiString TranslateToZxToken(AnsiString chr);
+        virtual int TranslateVariableType(unsigned char code);
+        virtual int GetForVariableLength();
+        virtual int GetVariablesStartAddress();
+        virtual double ConvertZXNumberToDouble(int* address);
 };
 

@@ -39,7 +39,8 @@
       SP0256\sp0256drv.obj SP0256\sp0256.obj SP0256\sp0256_012.obj 
       Digitalker\Digitalk.obj Digitalker\Digitalkdrv.obj Joystick\Joystick.obj 
       sound\midi.obj Keypad_.obj Keypad\keypad.obj Lambda\lambdaBasicLoader.obj 
-      Lambda\lambdaBasicLister.obj ThreadPool.obj Spectrum\timexBasicLister.obj"/>
+      Lambda\lambdaBasicLister.obj BasicLister\BasicVariables_.obj 
+      ThreadPool.obj Spectrum\timexBasicLister.obj"/>
     <RESFILES value="EightyOne.res WinXP.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -56,7 +57,8 @@
       tzx\tzxEditData.dfm tzx\tzxEditGeneral.dfm tzx\tzxEditHWInfo.dfm 
       tzx\tzxEditPause.dfm tzx\tzxEditText.dfm tzx\TZXMan.dfm 
       wavtape\wavload_.dfm zxprinter\zxprinter.dfm Plus3Drives.dfm MakeHDF.dfm 
-      Fullscreen.dfm Artifacts_.dfm sound\SoundForm.dfm Interface1.dfm Keypad_.dfm"/>
+      Fullscreen.dfm Artifacts_.dfm sound\SoundForm.dfm Interface1.dfm 
+      Keypad_.dfm BasicLister\BasicVariables_.dfm"/>
     <LIBFILES value="ddraw.lib libdsk.lib zlib.lib ..\components\directsound\dsound.lib"/>
     <LIBRARIES value="OfficeButton97.lib VCLX50.lib VCLDB50.lib THEMEMANAGERC5.lib 
       CPORTLIBCB5.lib Vcl50.lib"/>

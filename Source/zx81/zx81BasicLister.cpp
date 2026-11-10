@@ -148,6 +148,32 @@ int zx81BasicLister::GetProgramEndAddress()
         return ReadByte(vars) + (ReadByte(vars + 1) << 8);
 }
 
+int zx81BasicLister::GetBasicLineExecuteStartAddress()
+{
+        return 1651; // Call to LINE-RUN
+}
+
+int zx81BasicLister::GetNextBasicLineNumber()
+{
+        const int ppc = 16391;
+        return ReadByte(ppc) + (ReadByte(ppc + 1) << 8);
+}
+
+bool zx81BasicLister::BasicDebugSupported()
+{
+        return true;
+}
+
+bool zx81BasicLister::BasicVariablesSupported()
+{
+        return true;
+}
+
+int zx81BasicLister::GetEmbeddedNumberSize()
+{
+        return 5;
+}
+
 unsigned char zx81BasicLister::ConvertToZXCode(unsigned char code)
 {
         unsigned char c;
@@ -182,6 +208,30 @@ unsigned char zx81BasicLister::ConvertToZXCode(unsigned char code)
                         c = Dollar;
                         break;
 
+                case '(':
+                        c = OpenParen;
+                        break;
+
+                case ')':
+                        c = ClosedParen;
+                        break;
+
+                case ',':
+                        c = Comma;
+                        break;
+
+                case '.':
+                        c = Period;
+                        break;
+
+                case '-':
+                        c = Minus;
+                        break;
+
+                case '+':
+                        c = Plus;
+                        break;
+
                 default:
                         if (code >= '0' && code <= '9')
                         {
@@ -195,6 +245,13 @@ unsigned char zx81BasicLister::ConvertToZXCode(unsigned char code)
         }
 
         return c;
+}
+
+unsigned char zx81BasicLister::ConvertVariableNameCode(unsigned char code, bool first)
+{
+        unsigned char retVal = (unsigned char)(code & 0x3F);
+        if (first) retVal |= 0x20;
+        return retVal;
 }
 
 unsigned char zx81BasicLister::GetFloatingPointNumberCode()
@@ -221,6 +278,40 @@ bool zx81BasicLister::ZxTokenSupported()
 {
         return true;
 }
+
+int zx81BasicLister::TranslateVariableType(unsigned char code)
+{
+        code&=0xE0;
+        switch (code)
+        {
+        case 0x60:
+                return SingleNumber;
+        case 0xA0:
+                return MultiNumber;
+        case 0x80:
+                return NumberArray;
+        case 0xE0:
+                return ForNextControl;
+        case 0x40:
+                return SimpleString;
+        case 0xC0:
+                return CharacterArray;
+        default:
+                return UnsupportedType;
+        }
+}
+
+int zx81BasicLister::GetForVariableLength()
+{
+        return 17;
+}
+
+int zx81BasicLister::GetVariablesStartAddress()
+{
+        const int vars = 16400;
+        return ReadByte(vars) + (ReadByte(vars + 1) << 8);
+}
+
 
 bool zx81BasicLister::RemContainsMachineCode(int address, int lengthRemaining, bool outputRemTokensAsCharacterCodes)
 {
@@ -250,3 +341,17 @@ bool zx81BasicLister::RemContainsMachineCode(int address, int lengthRemaining, b
         return containsMachineCode;
 }
 
+double zx81BasicLister::ConvertZXNumberToDouble(int* address)
+{
+        unsigned char exponent = ReadByte((*address)++);
+        unsigned char mantissa0 = ReadByte((*address)++);
+        unsigned char mantissa1 = ReadByte((*address)++);
+        unsigned char mantissa2 = ReadByte((*address)++);
+        unsigned char mantissa3 = ReadByte((*address)++);
+        if (exponent + mantissa0 + mantissa1 + mantissa2 + mantissa3 == 0) return 0;
+        double signMultiplier = ((mantissa0 & 0x80) != 0) ? -1.0 : 1.0;
+        double mantissaSum = (mantissa0 | 0x80)/256.0 + mantissa1/65536.0 + mantissa2/16777216.0 + mantissa3/4294967296.0;
+        double absRawResult = pow(2.0,exponent-128) * mantissaSum;
+        int sigfigs = 8-(1+int(log10(absRawResult)));
+        return int(pow(10.0,sigfigs) * absRawResult + 0.5)/pow(10.0,sigfigs) * signMultiplier;
+}

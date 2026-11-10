@@ -144,6 +144,7 @@ USEFORM("Keypad_.cpp", Keypad128);
 USEUNIT("Keypad\keypad.cpp");
 USEUNIT("Lambda\lambdaBasicLoader.cpp");
 USEUNIT("Lambda\lambdaBasicLister.cpp");
+USEFORM("BasicLister\BasicVariables_.cpp", BasicVariables);
 USEUNIT("ThreadPool.cpp");
 USEUNIT("Spectrum\timexBasicLister.cpp");
 //---------------------------------------------------------------------------

@@ -317,6 +317,7 @@ __published:	// IDE-managed Components
         void __fastcall ResetHitCountClick(TObject *Sender);
         void __fastcall AutoUpdateMemoryClick(TObject *Sender);
 private:	// User declarations
+        void (*BPListChangeCB)(void);
         void EnableValues(bool enable);
         void EnableVals(void);
         void DisableVals(void);
@@ -338,6 +339,7 @@ private:	// User declarations
         int getRegisterValue(int registerIndex);
         AnsiString ConstructRegisterBreakpointText(breakpoint* const bp);
         AnsiString ConstructExeBreakpointText(breakpoint* const bp);
+        AnsiString ConstructBasicBreakpointText(breakpoint* const bp);
         AnsiString ConstructTStatesBreakpointText(breakpoint* const bp);
         AnsiString ConstructFlagBreakpointText(breakpoint* const bp);
         AnsiString ConstructLowIOBreakpointText(AnsiString type, breakpoint* const bp);
@@ -350,10 +352,12 @@ private:	// User declarations
         bool BPReadWriteHit(BreakpointType type, int addr, int value, breakpoint* const bp);
         bool BPFlagValueHit(breakpoint* const bp);
         bool BPMemoryValueHit(breakpoint* const bp);
+        bool BPBasicHit(int pc, breakpoint* const bp);
         bool BPRegisterValueHit(breakpoint* const bp);
         bool IsStepOverInstruction(int Addr);
         void EditBreakpoint();
         void UpdateBreakpointButtons();
+        void BPListChanged();
 
 public:		// User declarations
         __fastcall TDbg(TComponent* Owner);
@@ -369,6 +373,9 @@ public:		// User declarations
         void ResetBreakpointHits();
         void ClearSkipAddresses();
         void Reset();
+        bool BreakpointIsEnabled(int index);
+        void SetBreakpointEnabledState(int index, bool enable);
+        void SetEnabledStateAllOfType(BreakpointType type, bool enable);
 
         bool AddBreakPoint(struct breakpoint& bp);
         int FindBreakPointEntry(int index, struct breakpoint& bp, bool editing);
@@ -389,6 +396,9 @@ public:		// User declarations
 
         void ReloadHistoryWindow();
         void ClearHistoryWindow();
+        void SetBPListChangedCB(void (*callback)(void));
+        void BasicStartStop(bool addBP);
+        void RemoveAllBasicBPs();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TDbg *Dbg;

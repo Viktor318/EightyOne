@@ -38,6 +38,8 @@
 #include "SymBrowse.h"
 #include "Profiler.h"
 #include "DbgDissassem.cpp"
+#include "BasicLister\BasicLister_.h"
+#include "BasicLister\BasicVariables_.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -238,6 +240,11 @@ int TDbg::FindBreakPointEntry(int index, struct breakpoint& bp, bool editing)
                                                      (Breakpoint[i].ConditionValue == bp.ConditionValue) &&
                                                      (Breakpoint[i].Value == bp.Value);
                                 break;
+
+                        case BP_BASIC:
+                                existingBreakpoint = (Breakpoint[i].Type == bp.Type) &&
+                                                     (Breakpoint[i].Addr == bp.Addr);
+                                break;
                 }
 
                 if (existingBreakpoint && (!editing || (editing && (index != i))))
@@ -271,9 +278,61 @@ bool TDbg::AddBreakPoint(struct breakpoint& bp)
         if (BPList->RowCount > 1)
                 BPList->Row = BPList->RowCount - 2;
 
+        BPListChanged();
         UpdateBreakpointButtons();
 
         return true;
+}
+
+void TDbg::BPListChanged()
+{
+        BPList->Invalidate();
+        if (BPListChangeCB != NULL) BPListChangeCB();
+}
+
+void TDbg::SetBPListChangedCB(void (*callback)(void))
+{
+        BPListChangeCB = callback;
+}
+
+bool TDbg::BreakpointIsEnabled(int index)
+{
+        return Breakpoint[index].Enabled;
+}
+
+void TDbg::SetBreakpointEnabledState(int index, bool enable)
+{
+        Breakpoint[index].Enabled = enable;
+        BPListChanged();
+}
+
+void TDbg::SetEnabledStateAllOfType(BreakpointType type, bool enable)
+{
+        int j;
+        for(j=0; j<Breakpoints;j++)
+        {
+                if (Breakpoint[j].Type == type) Breakpoint[j].Enabled = enable;
+        }
+
+        BPListChanged();
+}
+
+void TDbg::BasicStartStop(bool addBP)
+{
+        BasicLister->UnBreakPointLastEntry();
+        breakpoint bp(-1, BP_BASIC);
+        if (addBP)
+        {
+                bp.Permanent = false;
+                AddBreakPoint(bp);
+        }
+        else
+        {
+                int bpIndex = FindBreakPointEntry(0, bp, false);
+                if (bpIndex >= 0)
+                        DelBreakPoint(bpIndex);
+        }
+        if (emulation_stop) RunStopClick(NULL);
 }
 
 AnsiString TDbg::GetBreakpointText(breakpoint* const bp)
@@ -332,6 +391,10 @@ AnsiString TDbg::GetBreakpointText(breakpoint* const bp)
 
                 case BP_FLAG:
                         str = ConstructFlagBreakpointText(bp);
+                        break;
+
+                case BP_BASIC:
+                        str = ConstructBasicBreakpointText(bp);
                         break;
         }
 
@@ -468,6 +531,13 @@ AnsiString TDbg::ConstructExeBreakpointText(breakpoint* const bp)
         return str;
 }
 
+AnsiString TDbg::ConstructBasicBreakpointText(breakpoint* const bp)
+{
+        AnsiString str = Tr("BASIC Line") + " = " + IntToStr(bp->Addr);
+
+        return str;
+}
+
 void TDbg::DelBreakPoint(int index)
 {
         int j;
@@ -483,6 +553,8 @@ void TDbg::DelBreakPoint(int index)
         {
                 BPList->Row--;
         }
+
+        BPListChanged();
 }
 
 bool TDbg::BreakPointHit()
@@ -529,6 +601,7 @@ bool TDbg::BreakPointHit()
                     Dbg->BPRegisterValueHit(bp) ||
                     Dbg->BPFlagValueHit(bp) ||
                     Dbg->BPMemoryValueHit(bp) ||
+                    Dbg->BPBasicHit(z80.pc.w, bp) ||
                     Dbg->BPTCyclesHit(z80.pc.w, bp))
 		{
                         if (!bp->Permanent)
@@ -727,6 +800,24 @@ bool TDbg::BPRegisterValueHit(breakpoint* const bp)
         return false;
 }
 
+bool TDbg::BPBasicHit(int pc, breakpoint* const bp)
+{
+        if (bp->Type != BP_BASIC || !bp->Enabled)
+        {
+                return false;
+        }
+
+        if (pc == BasicLister->BasicLineExecuteStartAddress() &&
+                (bp->Addr == BasicLister->NextBasicLineNumberToExecute() ||
+                 (!bp->Permanent && bp->Addr < 0)))
+        {
+                BasicLister->BreakAtNextBasicLine();
+                return true;
+        }
+
+        return false;
+}
+
 int TDbg::getRegisterValue(int registerIndex)
 {
         int value;
@@ -859,11 +950,34 @@ int TDbg::getRegisterValue(int registerIndex)
 
 void TDbg::DelTempBreakPoints(void)
 {
-        int i;
-        for(i=0; i<Breakpoints; i++)
+        int i = 0;
+        while (i<Breakpoints)
+        {
                 if (!Breakpoint[i].Permanent)
+                {
                         DelBreakPoint(i);
+                        i = 0;
+                }
+                else
+                        i++;
+        }
 }
+
+void TDbg::RemoveAllBasicBPs(void)
+{
+        int i = 0;
+        while (i<Breakpoints)
+        {
+                if (Breakpoint[i].Type == BP_BASIC)
+                {
+                        DelBreakPoint(i);
+                        i = 0;
+                }
+                else
+                        i++;
+        }
+}
+
 //---------------------------------------------------------------------------
 int TDbg::Hex2Dec(AnsiString num)
 {
@@ -1314,7 +1428,8 @@ void TDbg::EnableVals(void)
 }
 //---------------------------------------------------------------------------
 __fastcall TDbg::TDbg(TComponent* Owner)
-        : TForm(Owner)
+        : TForm(Owner),
+        BPListChangeCB(NULL)
 {
         DoNext=false;
         Breakpoints=0;
@@ -1337,6 +1452,7 @@ void __fastcall TDbg::RunStopClick(TObject *Sender)
         if(!emulation_stop)
         {
                 MemoryWindow->ClearChanges();
+                BasicLister->UnBreakPointLastEntry();
         }
         UpdateVals();
         StepOutRequested = 0;
@@ -1389,6 +1505,7 @@ void __fastcall TDbg::SingleStepClick(TObject *Sender)
 {
         StepOutRequested = 0;
         MemoryWindow->ClearChanges();
+        BasicLister->UnBreakPointLastEntry();
         emulation_stop=0;
         emulator.single_step=1;
         StackChange = 0;
@@ -1412,6 +1529,7 @@ void __fastcall TDbg::StepOverClick(TObject *Sender)
         StepOverInstructionSize = StepOverAddr - StepOverStartAddr;
 
         MemoryWindow->ClearChanges();
+        BasicLister->UnBreakPointLastEntry();
         breakpoint bp(StepOverAddr, BP_EXE);
         bp.Permanent = false;
         AddBreakPoint(bp);
@@ -2198,14 +2316,14 @@ void __fastcall TDbg::BPListDblClick(TObject *Sender)
 void __fastcall TDbg::DisableClick(TObject *Sender)
 {
         Breakpoint[BPList->Row].Enabled = false;
-        BPList->Invalidate();
+        BPListChanged();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TDbg::EnableClick(TObject *Sender)
 {
         Breakpoint[BPList->Row].Enabled = true;
-        BPList->Invalidate();
+        BPListChanged();
 }
 //---------------------------------------------------------------------------
 
