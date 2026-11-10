@@ -10,6 +10,25 @@ készült. Magának az EightyOne-nak a változásai a
 
 ## Még nincs kiadva
 
+### Billentyűzetképek
+
+- A **Spectrum 48K és 128 billentyűzetének és a 128 numerikus
+  billentyűzetének** képe újra van rajzolva vektorgrafikaként, és 2,5x-es
+  méretben van a programban (1263 × 558, a keypad 375 × 558), így éles:
+  2,5x-en változatlanul, a többi méreten simítva kicsinyítve. Az elrendezés
+  és a színek a régiek; egy képen belül minden szó egyforma méretű és a
+  betűtípus saját betűközével áll (TeX Gyre Heros), a 48K billentyűsorai
+  kicsit távolabb vannak egymástól. A többi billentyűzet képe nem változott.
+- A *Súgó > Billentyűzetkiosztás* méretei: **1,5x, 1,75x, 2x, 2,25x és
+  2,5x** (eddig 1x–2x); dupla kattintás a következőre lép, a keret
+  húzásakor ezek között ugrik. Azokat a méreteket, amelyeknél az ablak a
+  mellette lévő keypaddel vagy ZX80-funkciókkal együtt nem fér el a
+  képernyőn, kihagyja. A keypad és a ZX80-funkciók képe is simítva
+  méreteződik. A méret a `[KBMAP] Zoom` kulcsban van (negyedekben); a
+  korábban mentett méretet átveszi (az 1x és az 1,25x 1,5x lesz).
+- A rajzok és az őket elkészítő szkriptek a `Source/KBPics/svg` mappában
+  vannak (lásd a README-jét).
+
 ### Spectrum 128 numerikus billentyűzet (keypad)
 
 - Csatlakoztatott keypad mellett (*Vezérlés > Spectrum 128 numerikus

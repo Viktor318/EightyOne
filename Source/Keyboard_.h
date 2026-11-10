@@ -70,8 +70,11 @@ __published:	// IDE-managed Components
 private:	// User declarations
         // The picture shown: the one of the machine, scaled
         TImage *Display;
-        int Size;               // index into the sizes: 1x, 1.25x ... 2x
+        int Size;               // index into the sizes: 1.5x, 1.75x ... 2.5x
         void SetSize(int size);
+        int PictureWidthAt(int size);
+        int PictureHeightAt(int size);
+        int FittingSize(int size);
         void UpdateDisplay(void);
         void __fastcall ResizeWindow(TObject *Sender);
         void __fastcall CanResizeWindow(TObject *Sender, int &NewWidth,

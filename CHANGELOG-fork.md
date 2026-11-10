@@ -9,6 +9,25 @@ itself are in `Release Files/Release history.txt`.
 
 ## Not released yet
 
+### Keyboard pictures
+
+- The pictures of the **Spectrum 48K and 128 keyboards and of the 128
+  keypad** are drawn again as vector graphics and held at 2.5x (1263 × 558,
+  the keypad 375 × 558), so they are sharp: at 2.5x as they are, at the
+  other sizes scaled down smoothly. Same layout and colours as before; the
+  words of a picture are of one size and in the font's own spacing (TeX
+  Gyre Heros), the 48K has its key rows a little further apart. The other
+  keyboards keep their pictures.
+- *Help > Keyboard Map* sizes: **1.5x, 1.75x, 2x, 2.25x and 2.5x** (they
+  were 1x–2x); double click goes to the next, dragging the frame jumps
+  between them. Sizes at which the window, with the keypad or the ZX80
+  functions beside it, does not fit the screen are skipped. The keypad and
+  the ZX80 functions are scaled smoothly too. The size is kept in
+  `[KBMAP] Zoom` (in quarters); a size saved before is taken over (1x and
+  1.25x as 1.5x).
+- The drawings and the scripts that make them are in `Source/KBPics/svg`
+  (see its README).
+
 ### Spectrum 128 keypad
 
 - With the keypad connected (*Control > Connect Spectrum 128 Keypad*), the
