@@ -60,6 +60,7 @@ __fastcall TBasicLister::TBasicLister(TComponent* Owner)
 {
         mRefreshLock = new TCriticalSection();
         mLines = new std::vector<LineInfo>();
+        mProgramDisplayRows = 0;
         Dbg->SetBPListChangedCB(RefreshCallback);
         mToolbarHeight = ToolBar->Height;
 }
@@ -462,6 +463,16 @@ COLORREF TBasicLister::GetBreakPointColour()
 
 //---------------------------------------------------------------------------
 
+// The first row of the listing shown. A listing that fits the window is
+// shown from its start whatever the scroll bar says: its position can be
+// read while it is being reset (Refresh() is also called from the
+// emulation's thread), and then it moved a short listing up by a row,
+// under the tool bar.
+int TBasicLister::ListingTopRow()
+{
+        return (mProgramDisplayRows > DisplayableRows) ? ScrollBar->Position : 0;
+}
+
 void __fastcall TBasicLister::FormPaint(TObject *Sender)
 {
         HDC hdc = (HDC)Canvas->Handle;
@@ -474,7 +485,7 @@ void __fastcall TBasicLister::FormPaint(TObject *Sender)
                 int programDisplayPixels = programDisplayRows * PixelsPerCharacterHeight * mScaling;
                 int copyHeight = (programDisplayPixels > mBMHeight) ? programDisplayPixels : mBMHeight;
 
-                ::BitBlt(hdc, 0, mToolbarHeight - ScrollBar->Position * PixelsPerCharacterHeight * mScaling, mBMWidth, copyHeight, chdc, 0, 0, SRCCOPY);
+                ::BitBlt(hdc, 0, mToolbarHeight - ListingTopRow() * PixelsPerCharacterHeight * mScaling, mBMWidth, copyHeight, chdc, 0, 0, SRCCOPY);
         }
         else
         {
@@ -493,6 +504,10 @@ void __fastcall TBasicLister::FormPaint(TObject *Sender)
 void TBasicLister::CallShow()
 {
         Show();
+
+        // Opened from the menu: the listing of the program in memory at
+        // once, not only after the next line is entered
+        Refresh(false);
         if (Form1->BasicListerOption->Checked && Variables->Down) BasicVariables->ShowScale(mScaling);
 }
 
@@ -753,7 +768,7 @@ void __fastcall TBasicLister::FormMouseDown(TObject *Sender,
       TMouseButton Button, TShiftState Shift, int X, int Y)
 {
         int rowWithinClientArea = (Y - mToolbarHeight) / (PixelsPerCharacterHeight * mScaling);
-        int row = rowWithinClientArea + ScrollBar->Position;
+        int row = rowWithinClientArea + ListingTopRow();
 
         mLastRowIndex = FindLineDisplayedOnRow(row);
 
@@ -912,6 +927,11 @@ void TBasicLister::LoadSettings(TIniFile *ini)
 int TBasicLister::BasicLineExecuteStartAddress()
 {
         return mBasicLister != NULL ? mBasicLister->GetBasicLineExecuteStartAddress() : 65535;
+}
+
+bool TBasicLister::BasicLineExecuteStart(int pc)
+{
+        return mBasicLister != NULL && mBasicLister->IsBasicLineExecuteStart(pc);
 }
 
 int TBasicLister::NextBasicLineNumberToExecute()

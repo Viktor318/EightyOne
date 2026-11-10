@@ -140,6 +140,7 @@ private:	// User declarations
         int mScaling;
         int mRelativePos;
         int mToolbarHeight;
+        int ListingTopRow();
         bool mHasDebug;
         TCriticalSection *mRefreshLock;
 
@@ -201,6 +202,7 @@ public:		// User declarations
         void BreakAtNextBasicLine();
         void UnBreakPointLastEntry();
         int BasicLineExecuteStartAddress();
+        bool BasicLineExecuteStart(int pc);
         int NextBasicLineNumberToExecute();
         void CallShow();
 };

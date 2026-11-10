@@ -18,6 +18,10 @@
 
 #include "spec48BasicLister.h"
 #include "zx81config.h"
+#include "spec48.h"
+#include <string.h>
+
+extern int SPECBlk[4];
 
 // The following embedded codes are not supported:
 // AT
@@ -28,6 +32,9 @@
 
 spec48BasicLister::spec48BasicLister()
 {
+        mLineStartsFound = false;
+        mLineStarts = 0;
+
         InitialiseColours();
         
         mColours[0] = RGB(0, 0, 0);
@@ -264,4 +271,85 @@ double spec48BasicLister::ConvertZXNumberToDouble(int* address)
                 (*address)++;
                 return sign * word;
         }
+}
+
+// BASIC debugging. The interpreter starts running a line at NEXT-LINE,
+// where PPC already holds its number. Each ROM with a BASIC interpreter
+// (48 BASIC, and the 128 BASIC of the 128, +2 and +3 editors) has it right
+// after LINE-USE, so it is found by this code in the ROM banks: every
+// version and language of the ROMs works. The bank and the address of each
+// are kept, as the same address in another ROM is other code.
+
+bool spec48BasicLister::BasicDebugSupported()
+{
+        return true;
+}
+
+int spec48BasicLister::GetNextBasicLineNumber()
+{
+        const int ppc = 0x5C45;
+        return ReadByte(ppc) + (ReadByte(ppc + 1) << 8);
+}
+
+// The ROM banks with the code of the machine (the 48K has one)
+int spec48BasicLister::GetRomBanks()
+{
+        return 1;
+}
+
+void spec48BasicLister::FindLineStarts()
+{
+        static const unsigned char code[] =
+        {
+                0xFE, 0x01, 0xCE, 0x00,         // LINE-USE: CP 1, ADC A,0
+                0x56, 0x23, 0x5E,               // LD D,(HL), INC HL, LD E,(HL)
+                0xED, 0x53, 0x45, 0x5C,         // LD (PPC),DE
+                0x23, 0x5E, 0x23, 0x56,         // INC HL, LD E,(HL), INC HL, LD D,(HL)
+                0xEB, 0x19, 0x23,               // EX DE,HL, ADD HL,DE, INC HL
+                0x22, 0x55, 0x5C,               // NEXT-LINE: LD (NXTLIN),HL
+                0xEB, 0x22, 0x5D, 0x5C          // EX DE,HL, LD (CH_ADD),HL
+        };
+        const int nextLine = 18;
+        int bank, address;
+
+        mLineStarts = 0;
+
+        for (bank = 0; bank < GetRomBanks() && mLineStarts < MaxLineStarts; bank++)
+        {
+                const unsigned char *rom = SpectrumMem + (bank << 14);
+
+                for (address = 0; address + (int)sizeof(code) <= 16384; address++)
+                {
+                        if (!memcmp(rom + address, code, sizeof(code)))
+                        {
+                                mLineStartBank[mLineStarts] = bank;
+                                mLineStartAddress[mLineStarts] = address + nextLine;
+                                mLineStarts++;
+                                break;
+                        }
+                }
+        }
+
+        mLineStartsFound = true;
+}
+
+bool spec48BasicLister::IsBasicLineExecuteStart(int pc)
+{
+        int i;
+
+        if (pc >= 0x4000) return false;
+        if (!mLineStartsFound) FindLineStarts();
+
+        for (i = 0; i < mLineStarts; i++)
+        {
+                if (pc == mLineStartAddress[i] && SPECBlk[0] == mLineStartBank[i]) return true;
+        }
+
+        return false;
+}
+
+int spec48BasicLister::GetBasicLineExecuteStartAddress()
+{
+        if (!mLineStartsFound) FindLineStarts();
+        return mLineStarts ? mLineStartAddress[0] : 65535;
 }

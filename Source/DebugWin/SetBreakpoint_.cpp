@@ -494,8 +494,9 @@ void TSetBreakpoint::BreakTypeChangeBasic()
 
 void TSetBreakpoint::SetEditBoxLabels(AnsiString breakAddressLabel, AnsiString breakValueLabel)
 {
-        LabelBreakAddress->Caption = Tr(breakAddressLabel) + ":";
-        LabelBreakValue->Caption = Tr(breakValueLabel) + ":";
+        // (no label, no colon: the BASIC line has no value)
+        LabelBreakAddress->Caption = breakAddressLabel.IsEmpty() ? AnsiString("") : Tr(breakAddressLabel) + ":";
+        LabelBreakValue->Caption = breakValueLabel.IsEmpty() ? AnsiString("") : Tr(breakValueLabel) + ":";
 }
 
 //---------------------------------------------------------------------------

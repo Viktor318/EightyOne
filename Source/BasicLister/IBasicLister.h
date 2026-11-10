@@ -168,6 +168,9 @@ public:
         virtual int GetProgramStartAddress() { return 65535; }
         virtual int GetProgramEndAddress() { return 65535; }
         virtual int GetBasicLineExecuteStartAddress() { return 65535; }
+        // The interpreter is about to run a line (by default: the PC is at
+        // GetBasicLineExecuteStartAddress())
+        virtual bool IsBasicLineExecuteStart(int pc) { return pc == GetBasicLineExecuteStartAddress(); }
         virtual int GetNextBasicLineNumber() { return 65535; }
         virtual bool BasicDebugSupported() { return false; }
         virtual bool BasicVariablesSupported() { return false; }

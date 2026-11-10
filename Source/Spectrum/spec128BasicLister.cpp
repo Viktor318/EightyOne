@@ -64,3 +64,8 @@ unsigned char spec128BasicLister::ReadByte(int address)
         return RAMRead(bank,address&0x3FFF);
 }
 
+// The 128 and the +2 have two ROMs, the +2A and the +3 four
+int spec128BasicLister::GetRomBanks()
+{
+        return spectrum.model >= SPECCYPLUS2A ? 4 : 2;
+}

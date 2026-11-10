@@ -7,6 +7,30 @@ Changes of this fork on top of EightyOne 1.41: the source of
 of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
 itself are in `Release Files/Release history.txt`.
 
+## Not released yet
+
+### BASIC debugger
+
+From the `BASIC` branch of the EightyOne 1.42 development version
+(John Stroebel), with the Spectrum added:
+
+- The **BASIC Listing** (Tools menu) can debug the program: a
+  **breakpoint on a BASIC line** (right click on a line: Add Breakpoint,
+  Run to Line, Enabled, Disable All, Delete All; or in the Debug window,
+  type BASIC), **Stop/Run** and **Step** a line at a time, with the line
+  about to run marked; the **Variables** window shows the program's
+  variables while it runs (numbers, strings, arrays, FOR loops).
+- It works on the ZX80 and the ZX81, and in this edition on the
+  **Spectrum** too: 16K, 48K, 128, +2, +2A and +3, in 48 BASIC and in 128
+  BASIC. The start of a line is found in the ROMs by its code, so every
+  ROM version and language works.
+- Fixes: the listing shows the program as soon as it is opened (it stayed
+  empty until a line was entered); a short listing is no longer moved up
+  by a row under the tool bar after a break; a command typed in (RUN) is
+  not taken for a line of the program, so Step does not stop on it; the
+  breakpoint dialog shows no lone colon for the BASIC line.
+- In Hungarian too, in Segoe UI 9 pt.
+
 ## v1.41-hu.2 – 2026-11-10
 
 The development version of the next EightyOne (1.42, by John Stroebel and

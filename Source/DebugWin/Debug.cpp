@@ -807,9 +807,20 @@ bool TDbg::BPBasicHit(int pc, breakpoint* const bp)
                 return false;
         }
 
-        if (pc == BasicLister->BasicLineExecuteStartAddress() &&
-                (bp->Addr == BasicLister->NextBasicLineNumberToExecute() ||
-                 (!bp->Permanent && bp->Addr < 0)))
+        if (!BasicLister->BasicLineExecuteStart(pc))
+        {
+                return false;
+        }
+
+        // Not a line of the program but a command typed in (its "line" is
+        // -2): no break there, not even when stepping
+        int line = BasicLister->NextBasicLineNumberToExecute();
+        if (line > 9999)
+        {
+                return false;
+        }
+
+        if (bp->Addr == line || (!bp->Permanent && bp->Addr < 0))
         {
                 BasicLister->BreakAtNextBasicLine();
                 return true;

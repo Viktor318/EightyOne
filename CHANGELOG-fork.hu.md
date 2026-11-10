@@ -8,6 +8,31 @@ Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 készült. Magának az EightyOne-nak a változásai a
 `Release Files/Release history.txt` fájlban vannak (angolul).
 
+## Még nincs kiadva
+
+### BASIC-hibakereső
+
+Az EightyOne 1.42 fejlesztői változatának `BASIC` ágából (John Stroebel),
+kiegészítve a Spectrummal:
+
+- A **BASIC lista** (Eszközök menü) a program hibakeresésére is
+  használható: **töréspont BASIC-sorra** (jobb kattintás a soron:
+  Töréspont hozzáadása, Futtatás eddig a sorig, Bekapcsolva, Összes
+  letiltása, Összes törlése; vagy a Hibakereső ablakban, BASIC típussal),
+  **Megállítás/Futtatás** és **Lépés** soronként, a következő sor
+  kijelölve; a **Változók** ablak futás közben mutatja a program
+  változóit (számok, szövegek, tömbök, FOR-ciklusok).
+- A ZX80-on és a ZX81-en működik, ebben a kiadásban a **Spectrumon** is:
+  16K, 48K, 128, +2, +2A és +3, 48 BASIC-ben és 128 BASIC-ben. A sor
+  kezdetét a program a ROM-okban a kódja alapján keresi meg, így minden
+  ROM-változattal és nyelvvel működik.
+- Javítások: a lista megnyitáskor rögtön mutatja a programot (eddig
+  üres maradt, amíg nem írtak be egy sort); a rövid lista megálláskor nem
+  csúszik egy sorral feljebb az eszköztár alá; a begépelt parancs (RUN)
+  nem számít programsornak, így a Lépés nem áll meg rajta; a töréspont
+  ablakában a BASIC-sornál nincs magányos kettőspont.
+- Magyarul is, Segoe UI 9 ponttal.
+
 ## v1.41-hu.2 – 2026-11-10
 
 A következő EightyOne (1.42, John Stroebel és Paul Farrow) fejlesztői

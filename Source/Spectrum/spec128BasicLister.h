@@ -29,5 +29,6 @@ public:
 private:
         virtual std::string GetKeywords();
         virtual unsigned char ReadByte(int address);
+        virtual int GetRomBanks();
 };
 

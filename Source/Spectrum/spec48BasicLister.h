@@ -68,5 +68,20 @@ protected:
         virtual int TranslateVariableType(unsigned char code);
         virtual unsigned char ConvertVariableNameCode(unsigned char code, bool first);
         virtual double ConvertZXNumberToDouble(int* address);
+
+        // BASIC debugging
+        virtual bool BasicDebugSupported();
+        virtual int GetNextBasicLineNumber();
+        virtual int GetBasicLineExecuteStartAddress();
+        virtual bool IsBasicLineExecuteStart(int pc);
+        virtual int GetRomBanks();
+
+private:
+        static const int MaxLineStarts = 4;
+        bool mLineStartsFound;
+        int mLineStarts;
+        int mLineStartBank[MaxLineStarts];
+        int mLineStartAddress[MaxLineStarts];
+        void FindLineStarts();
 };
 
