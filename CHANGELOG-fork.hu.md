@@ -23,7 +23,7 @@ készült. Magának az EightyOne-nak a változásai a
   erőforrásai között, így éles: 200%-on a kép változatlanul látszik, a
   többi méreten a program maga kicsinyíti, minden képpont a kép általa
   lefedett részének átlaga (100%-on négy képponté, így olyan éles, mint a
-  rajz), minden Windowson ugyanúgy. A program ettől kisebb lett (5,9 MB,
+  rajz), minden Windowson ugyanúgy. A program ettől kisebb lett (5,8 MB,
   eddig 18 MB), mert ezek a képek már nincsenek az űrlapokban. Az
   elrendezés és a színek a régiek; egy képen belül minden szó egyforma
   méretű és a betűtípus saját betűközével áll (TeX Gyre Heros), a 48K (a
