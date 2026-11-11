@@ -62,10 +62,18 @@ script of a picture says what each numbered text is (a table), and draws:
 The edges of the keys and squares fall on whole pixels at 100%, and so
 on every second pixel at 200%: sharp at both. The 48K picture has its key rows a
 little further apart than the original (2 pixels each, from the free
-space under the last row). Its words above the keys reach over their keys'
-right edges as little as they can: CAPS LOCK and TRUE VIDEO with half a
-space between their two words and 1 pixel over, INV.VIDEO and GRAPHICS at
-93.5% of their width, RESTORE and MAGENTA at 98.2% (Viktor's choice). The
+space under the last row). Its words and signs are placed as on the
+keyboard of the Spectrum (Viktor's choice, after a photo of it): the
+keywords at the bottom right of the keys 3 pixels from the bottom and the
+right edge, the red words and signs at the top right 3 pixels from the
+right edge and on the line of the tops of the big letters (the signs of
+their own sizes; the red signs of the number keys under their block
+graphics, on the line of the keywords), the words and signs above and
+under the keys 1 pixel from the left edge of their keys; the bars of
+− + = _ | all a pixel thick. The words above the keys reach over their
+keys' right edges as little as they can: CAPS LOCK and TRUE VIDEO with
+half a space between their two words and 1 pixel over (85% and 82% of
+their width), INV.VIDEO and GRAPHICS at 93.5%, MAGENTA at 96%. The
 16K shows the 48K picture (Viktor's choice; its own was the 48K's with
 light grey keys, pixel for pixel). On the ZX81 the white words, 6 pixels high in
 the original, are 7 like the others: those above a key row grow upwards,

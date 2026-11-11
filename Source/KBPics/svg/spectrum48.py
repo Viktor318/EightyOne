@@ -88,6 +88,27 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # CAPS LOCK and TRUE VIDEO: the space between their two words half as
     # wide, and as narrow as to reach 1 pixel over the edge of the key
     HALFSPACE = ('CAPS LOCK', 'TRUE VIDEO')
+    # Placed as on the keyboard of the Spectrum (Viktor's choice, after a
+    # photo of it): the keywords at the bottom right of the keys, and the
+    # red words and signs at the top right of them, MARGIN pixels from the
+    # right edge, the keywords as far from the bottom, the red words and
+    # signs on the line of the tops of the big letters (TOP pixels under the
+    # edge); the words and signs above and under the keys LEFT pixels from
+    # the left edge of their keys
+    MARGIN, TOP, LEFT = 3, 5, 1
+    KEYWORDS = set(range(89, 99)) | set(range(141, 150)) | set(range(188, 195))
+    TOPWORDS = {78, 80, 82, 121, 123, 125, 127, 129}
+    # the signs at the top right of the keys (of their own sizes, as in the
+    # original), the bars among them of their pixels; the signs under the
+    # block graphics of the number keys
+    TOPSIGNS = [68, 70, 72, 74, 76, (84, 88), 86, 131, 133, 135, (137, 138), (171, 185), 173, 175,
+                177, 179, 181, 183]
+    NUMBERSIGNS = [36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
+    BARS = (45, 133, 135, 137, 138, 155)
+
+    def left_of(b, X):
+        """Where a word or sign above or under a key begins"""
+        return (p.newkeys[p.key_of(b)][0] + LEFT) * S
 
     def keep_over_key(b, X, w, k):
         nk = p.newkeys[k]
@@ -106,6 +127,8 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         k = p.key_of(b)
         kx, ky, kw, kh = p.keys[k]
         inside = kx <= b['x'] and b['x2'] <= kx + kw and ky <= b['y'] and b['y2'] <= ky + kh
+        if not inside:
+            X = left_of(b, X)
         d, (x0, y0, x1, y1) = CN.outline(t, space=0.5 if t in HALFSPACE else 1.0)
         sc = 7 * S / CAP
         w = (x1 - x0) * sc
@@ -131,7 +154,11 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
             nk = p.newkeys[k]
             sx = ((nk[0] + nk[2] + 1) * S - X) / w
         w *= sx
-        if inside:
+        if ids in KEYWORDS or ids in TOPWORDS:
+            nk = p.newkeys[k]
+            left = (nk[0] + nk[2] - MARGIN) * S - w
+            base = (nk[1] + nk[3] - MARGIN) * S if ids in KEYWORDS else (nk[1] + TOP + 7) * S
+        elif inside:
             lm, rm = b['x'] - kx, kx + kw - b['x2']
             if rm <= 4:
                 left = X + Wd - w
@@ -156,7 +183,10 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # The two lines above the number keys were drawn on common lines, not with
     # their keys (which are 1 pixel off): only sideways with the keys
     top = set(range(0, 18))
+    signs = set(TOPSIGNS) | set(NUMBERSIGNS)
     for ids, t in texts.items():
+        if ids in signs:
+            continue
         if ids in WORDS:
             word(ids, t)
         elif ids in top and ids not in (0, 1, 2, 3, 4, 5, 6):
@@ -166,27 +196,87 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
             # 6), the font's own spacing, on the same line at the bottom
             b = p.box(ids)
             X, Y, Wd, H = p.moved(b, 'x')
+            X = left_of(b, X)
             d, (x0, y0, x1, y1) = CN.outline(t)
-            sc = 7 * S / (y1 - y0)
+            sc = 7 * S / CAP
             sx = keep_over_key(b, X, sc * (x1 - x0), p.key_of(b))
             p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
-                           % (hexcol(b['c']), sc * sx, -sc, X - sc * sx * x0, Y + H - 7 * S + sc * y1, d))
+                           % (hexcol(b['c']), sc * sx, -sc, X - sc * sx * x0, Y + H, d))
             if sx < 1:
                 print('narrower: %s %.2f' % (t, sx), file=sys.stderr)
-        elif t == '~':
-            p.text(ids, t, fonts=('cn',))
         elif ids in big:
             p.text(ids, t, fonts=('herosb',))
         else:
-            p.text(ids, t)
+            # the signs under the keys, from LEFT
+            b = p.box(ids)
+            X, Y, Wd, H = p.moved(b)
+            p.fit(t, left_of(b, X), Y, Wd, H, b['c'], fonts=('cn',) if t == '~' else ('cnb', 'herosb'))
 
-    # The block graphics, and the bars: made of squares
-    for i in (19, 21, 23, 25, 27, 29, 31, 33, 45, 133, 135, 137, 138, 155):
+    # The signs on the keys: of their sizes, at their places (above). Each
+    # row of top right signs moved down or up together, so that its tall
+    # signs begin TOP pixels under the edge (the small ones stay where they
+    # were among them)
+    def row_shift(k):
+        tall = [p.box(i, False) for i in TOPSIGNS
+                if abs(p.keys[p.key_of(p.box(i, False))][1] - p.keys[k][1]) < 5
+                and p.box(i, False)['y2'] - p.box(i, False)['y'] >= 7]
+        return TOP - min(b['y'] - p.keys[p.key_of(b)][1] for b in tall)
+
+    def place(ids, t, X, Y, Wd, H, colour):
+        if ids in BARS or (isinstance(ids, tuple) and ids[0] in BARS):
+            # of their pixels, every line of them as thick (the two lines of
+            # = were not, rounded at other places): each run of pixels of a
+            # row as long as it is, a pixel high, from its rounded place
+            b = p.box(ids)
+            col = tuple(b['c'])
+            T = max(1, round(S))
+            parts = []
+            for y in range(b['y'], b['y2']):
+                x = b['x']
+                while x < b['x2']:
+                    if tuple(p.im[y, x]) != col:
+                        x += 1
+                        continue
+                    x2 = x
+                    while x2 < b['x2'] and tuple(p.im[y, x2]) == col:
+                        x2 += 1
+                    l, t = round(X + (x - b['x']) * S), round(Y + (y - b['y']) * S)
+                    parts.append('M%d %dh%dv%dh%dz' % (l, t, round((x2 - x) * S), T, -round((x2 - x) * S)))
+                    x = x2
+            p.items.append('<path fill="%s" d="%s"/>' % (hexcol(col), ''.join(parts)))
+        else:
+            p.fit(t, X, Y, Wd, H, colour, fonts=('cnb', 'herosb'))
+
+    for ids in TOPSIGNS:
+        if ids == 179:
+            continue
+        b = p.box(ids)
+        X, Y, Wd, H = p.moved(b)
+        k = p.key_of(b)
+        nk = p.newkeys[k]
+        place(ids, texts.get(ids, ''), (nk[0] + nk[2] - MARGIN) * S - Wd, Y + row_shift(k) * S, Wd, H, b['c'])
+    for ids in NUMBERSIGNS:
+        b = p.box(ids)
+        X, Y, Wd, H = p.moved(b)
+        nk = p.newkeys[p.key_of(b)]
+        # the bottoms on the line of the keywords (the apostrophe, high, as
+        # it was)
+        if ids != 44:
+            Y = (nk[1] + nk[3] - MARGIN) * S - H
+        place(ids, texts.get(ids, ''), X, Y, Wd, H, b['c'])
+
+    # The block graphics: made of squares
+    for i in (19, 21, 23, 25, 27, 29, 31, 33):
         p.pixels(i)
+    # the bar under S: of its pixels, from LEFT
+    b = p.box(155)
+    X, Y, Wd, H = p.moved(b)
+    place(155, '', left_of(b, X), Y, Wd, H, b['c'])
 
     # BLACK: black letters on white
     b = p.box(7)
     X, Y, Wd, H = p.moved(b, 'x')
+    X = left_of(b, X)
     # the box one pixel higher, for letters as high as the other colours
     p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#ffffff"/>' % (X, Y - S, Wd, H + S))
     p.fit('BLACK', X, Y, Wd, 7 * S, (0, 0, 0), fonts=('cnb',), natural='centre')
@@ -195,6 +285,7 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     def arrow(i, direction):
         b = p.box(i)
         X, Y, Wd, H = p.moved(b, 'x')
+        X = left_of(b, X)
         sw = S
         # the arrow pointing left in a unit box, then turned
         pts = [(0, 0.5), (0.42, 0.0), (0.42, 0.28), (1, 0.28), (1, 0.72), (0.42, 0.72), (0.42, 1.0)]
@@ -215,6 +306,9 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # * on B: the star of the keyboard
     b = p.box(179)
     X, Y, Wd, H = p.moved(b)
+    k = p.key_of(b)
+    nk = p.newkeys[k]
+    X, Y = (nk[0] + nk[2] - MARGIN) * S - Wd, Y + row_shift(k) * S
     cx, cy = X + Wd / 2, Y + H / 2
     lines = [(cx, Y, cx, Y + H), (X, Y + 0.1 * H, X + Wd, Y + 0.9 * H), (X, Y + 0.9 * H, X + Wd, Y + 0.1 * H)]
     for x1, y1, x2, y2 in lines:
