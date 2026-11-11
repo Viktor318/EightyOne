@@ -1,4 +1,5 @@
 # spectrum48.py <out.svg> [scale]: the ZX Spectrum 48K keyboard picture, drawn again at a scale (2 if not given)
+import math
 import os
 import re
 import sys
@@ -100,6 +101,54 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # choice: not larger than the other signs), in pixels: the width of the
     # dots, the heights of the star and of "
     DOT, STAR, QUOTE = 2.5, 8, 5
+    # / and \: at 45 degrees, as in the original (Viktor's choice), as
+    # thick as the / of Heros Bold of the size of the signs; / SLASH pixels
+    # high, \ as high as its box; ~ a line as thick
+    SLASH = 7
+
+    def thin():
+        """The thickness of the thin signs: that of the / of Heros Bold of
+        the size of the signs, across its stroke (it is a parallelogram)"""
+        hb = font('herosb')
+        d, (x0, y0, x1, y1) = hb.outline('/')
+        top = 97.0                      # its top edge, in font units
+        run = (x1 - x0) - top
+        return top * (y1 - y0) / math.hypot(run, y1 - y0) * 9 * S / hb.outline('H')[1][3]
+
+    def slant_width():
+        """The width of the stroke of / and \\ along a row"""
+        return thin() * math.sqrt(2)
+
+    def tilde(X, Y, Wd, H, colour):
+        """~ as the letter of Heros Cn in its box was (Viktor's choice), as a
+        line as thick as the thin signs: the line in the middle of the
+        letter, the curves of its upper and lower edges averaged (the letter
+        is its two edges, four curves each, and its two cut ends)"""
+        f = font('cn')
+        d, (x0, y0, x1, y1) = f.outline('~')
+        nums = [float(v) for v in re.findall(r'-?\d+(?:\.\d+)?', d)]
+        pts = list(zip(nums[0::2], nums[1::2]))
+        # M a, L b, 4 x C (upper edge, b to c), L d, 4 x C (lower edge, d to a)
+        assert len(pts) == 2 + 12 + 1 + 12, 'the ~ of the font is not as expected'
+        upper = pts[1:14]
+        lower = pts[14:27]
+        lower = lower[::-1]
+        mid = [((u[0] + l[0]) / 2, (u[1] + l[1]) / 2) for u, l in zip(upper, lower)]
+        a, dd = Wd / (x1 - x0), H / (y1 - y0)
+        q = ['%.2f %.2f' % (X + a * (x - x0), Y + dd * (y1 - y)) for x, y in mid]
+        p.items.append('<path fill="none" stroke="%s" stroke-width="%.2f" stroke-linecap="round" '
+                       'd="M%s C%s %s %s C%s %s %s C%s %s %s C%s %s %s"/>'
+                       % ((hexcol(colour), thin()) + tuple(q)))
+
+    def slant(X, Y, h, colour, down=False):
+        """/ (or \\, down) at 45 degrees: h high, from X (left), Y (top)"""
+        t = slant_width()
+        if down:
+            pts = [(X, Y), (X + t, Y), (X + t + h, Y + h), (X + h, Y + h)]
+        else:
+            pts = [(X, Y + h), (X + t, Y + h), (X + t + h, Y), (X + h, Y)]
+        p.items.append('<polygon fill="%s" points="%s"/>'
+                       % (hexcol(colour), ' '.join('%.2f,%.2f' % q for q in pts)))
     KEYWORDS = set(range(89, 99)) | set(range(141, 150)) | set(range(188, 195))
     TOPWORDS = {78, 80, 82, 121, 123, 125, 127, 129}
     # the signs at the top right of the keys (of their own sizes, as in the
@@ -133,8 +182,15 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         inside = kx <= b['x'] and b['x2'] <= kx + kw and ky <= b['y'] and b['y2'] <= ky + kh
         if not inside:
             X = left_of(b, X)
-        d, (x0, y0, x1, y1) = CN.outline(t, space=0.5 if t in HALFSPACE else 1.0)
-        sc = 7 * S / CAP
+        if ids in (169, 187):
+            # CAPS SHIFT: wider letters, as on the Spectrum (Viktor's
+            # choice): of Heros Bold, as high as the others
+            hb = font('herosb')
+            d, (x0, y0, x1, y1) = hb.outline(t)
+            sc = 7 * S / hb.outline('H')[1][3]
+        else:
+            d, (x0, y0, x1, y1) = CN.outline(t, space=0.5 if t in HALFSPACE else 1.0)
+            sc = 7 * S / CAP
         w = (x1 - x0) * sc
         # Room: up to what is next to it (in the original), so that nothing
         # touches; where there is less, a little narrower
@@ -162,6 +218,11 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
             nk = p.newkeys[k]
             left = (nk[0] + nk[2] - MARGIN) * S - w
             base = (nk[1] + nk[3] - MARGIN) * S if ids in KEYWORDS else (nk[1] + TOP + 7) * S
+        elif ids == 139:
+            # ENTER: in the middle of its key (Viktor's choice)
+            nk = p.newkeys[k]
+            left = (nk[0] + nk[2] / 2) * S - w / 2
+            base = (nk[1] + (nk[3] + 7) / 2) * S
         elif inside:
             lm, rm = b['x'] - kx, kx + kw - b['x2']
             if rm <= 4:
@@ -211,18 +272,16 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         elif ids in big:
             p.text(ids, t, fonts=('herosb',))
         else:
-            # the signs under the keys, from LEFT; \ in Heros Bold as high as
-            # its box, not stretched (it was twice as wide)
+            # the signs under the keys, from LEFT; \ and ~ thin lines (they
+            # were letters stretched to their boxes)
             b = p.box(ids)
             X, Y, Wd, H = p.moved(b)
             if t == '\\':
-                hb = font('herosb')
-                d, (x0, y0, x1, y1) = hb.outline(t)
-                sc = H / (y1 - y0)
-                p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
-                               % (hexcol(b['c']), sc, -sc, left_of(b, X) - sc * x0, Y + sc * y1, d))
+                slant(left_of(b, X), Y, H, b['c'], down=True)
+            elif t == '~':
+                tilde(left_of(b, X), Y, Wd, H, b['c'])
             else:
-                p.fit(t, left_of(b, X), Y, Wd, H, b['c'], fonts=('cn',) if t == '~' else ('cnb', 'herosb'))
+                p.fit(t, left_of(b, X), Y, Wd, H, b['c'], fonts=('cnb', 'herosb'))
 
     # The signs on the keys: of their sizes, at their places (above). Each
     # row of top right signs moved down or up together, so that its tall
@@ -243,7 +302,10 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
             col = tuple(b['c'])
             T = max(1, round(S))
             parts = []
-            for y in range(b['y'], b['y2']):
+            # _ (two pixels high): one line, as thick as the others
+            # (Viktor's choice), its bottom where it was
+            rows = [b['y2'] - 1] if ids == 45 else range(b['y'], b['y2'])
+            for y in rows:
                 x = b['x']
                 while x < b['x2']:
                     if tuple(p.im[y, x]) != col:
@@ -253,6 +315,8 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
                     while x2 < b['x2'] and tuple(p.im[y, x2]) == col:
                         x2 += 1
                     l, t = round(X + (x - b['x']) * S), round(Y + (y - b['y']) * S)
+                    if ids == 45:
+                        t = round(Y + (b['y2'] - b['y']) * S) - T
                     parts.append('M%d %dh%dv%dh%dz' % (l, t, round((x2 - x) * S), T, -round((x2 - x) * S)))
                     x = x2
             p.items.append('<path fill="%s" d="%s"/>' % (hexcol(col), ''.join(parts)))
@@ -299,11 +363,9 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         if texts.get(ids) == '/':
             # in Heros Bold of the size of the signs (the capitals 9 pixels
             # high), not stretched (it was 7 pixels high, twice as wide)
-            d, (x0, y0, x1, y1) = HB.outline('/')
-            sc = 9 * S / HB.outline('H')[1][3]
+            h = SLASH * S
             right = (nk[0] + nk[2] - MARGIN) * S
-            p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
-                           % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))
+            slant(right - h - slant_width(), Y, h, b['c'])
             continue
         if ids in PUNCTUATION:
             right = (nk[0] + nk[2] - MARGIN) * S

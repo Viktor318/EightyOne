@@ -33,16 +33,17 @@ itself are in `Release Files/Release history.txt`.
   at their top right, all as far from the right edge, the words above and
   under the keys from the left edge of their keys; its punctuation (; : ,
   .) is of one size, and so are the signs of the number keys; the star on
-  B is of the font too, and no sign is larger than the others. On the ZX81
-  the keys are in even rows, and the grey block graphics keep their dots,
-  of one size at every scale; on the ZXpand pictures LPRINT and LLIST stay
-  small under ZXPAND and CONFIG. On the ZX80 the words above the keys are
-  in the middle of them, and the letters stay thin. The +2 and +3 keep
-  their keys as in the original and their slanted letters. The Timex
-  pictures keep their frames and keys pixel for pixel (sharp at every
-  size), their texts are drawn again. The R470 keeps its blue L-shaped
-  FUNC and ENTER keys and its cyan GRAPHICS key. The other keyboards keep
-  their pictures.
+  B is of the font too, and no sign is larger than the others; ENTER is in
+  the middle of its key, and CAPS SHIFT has wider letters, as on the
+  Spectrum. On the ZX81 the keys are in even rows, and the grey block
+  graphics keep their dots, of one size at every scale; on the ZXpand
+  pictures LPRINT and LLIST stay small under ZXPAND and CONFIG. On the
+  ZX80 the words above the keys are in the middle of them, and the letters
+  stay thin. The +2 and +3 keep their keys as in the original and their
+  slanted letters. The Timex pictures keep their frames and keys pixel for
+  pixel (sharp at every size), their texts are drawn again. The R470 keeps
+  its blue L-shaped FUNC and ENTER keys and its cyan GRAPHICS key. The
+  other keyboards keep their pictures.
 - *Help > Keyboard Map* sizes: **75%, 100%, 125%, 150%, 175% and 200%**;
   100%, the first, is 884 × 390, 1.75 times the original pictures (505 ×
   223; the sizes were 1x–2x). The size is shown in the title of the window

@@ -75,8 +75,11 @@ keys; the bars of − + = _ | all a pixel thick; the punctuation ; : , .
 of one size, in Heros Bold with dots 2.5 pixels wide (; a full stop and
 a comma halfway between it and the top of the keyword under it), " in
 Heros Cn Bold 5 pixels high, * on B the star of Heros Bold 8 pixels
-high, / on V and \ under D not stretched (they were twice as wide), the
-tops of all the signs at the top right on the line of the big letters.
+high, / on V and \ under D lines at 45 degrees, 7 pixels high, ~ under A
+the line in the middle of the letter it was, all three as thick as the /
+of the font, _ on 0 one line as − and =, the tops of all the signs at the
+top right on the line of the big letters; ENTER in the middle of its key,
+CAPS SHIFT in Heros Bold (wider letters, as on the Spectrum).
 The words above the keys reach over their keys' right edges as little as
 they can: CAPS LOCK and TRUE VIDEO with
 half a space between their two words and 1 pixel over (85% and 82% of

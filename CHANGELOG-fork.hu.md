@@ -35,13 +35,14 @@ készült. Magának az EightyOne-nak a változásai a
   távolságra a jobb széltől, a billentyűk feletti és alatti szavak a
   billentyűjük bal szélétől; az írásjelei (; : , .) egy méretűek, ahogy a
   számbillentyűk jelei is; a B csillaga is a betűtípusé, és egyik jel sem
-  nagyobb a többinél. A ZX81 billentyűi egyenletes sorokban állnak, a
-  szürke blokkgrafikák pöttyösek maradtak, minden méretben egyforma
-  pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
-  ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a
-  billentyűk közepén állnak, a betűk vékonyak maradtak. A +2 és a +3
-  billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex
-  képek keretei és billentyűi pixelre az eredetiek (minden méretben
+  nagyobb a többinél; az ENTER a billentyű közepén áll, a CAPS SHIFT betűi
+  szélesebbek, mint a Spectrumon. A ZX81 billentyűi egyenletes sorokban
+  állnak, a szürke blokkgrafikák pöttyösek maradtak, minden méretben
+  egyforma pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST kicsi
+  maradt a ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk feletti
+  feliratok a billentyűk közepén állnak, a betűk vékonyak maradtak. A +2
+  és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
+  Timex képek keretei és billentyűi pixelre az eredetiek (minden méretben
   élesek), a feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és
   ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A többi
   billentyűzet képe nem változott.
