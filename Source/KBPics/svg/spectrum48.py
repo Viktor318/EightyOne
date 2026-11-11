@@ -285,15 +285,22 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
                 punctuation(PUNCTUATION[ids], right, Y, b['c'])
             continue
         place(ids, texts.get(ids, ''), (nk[0] + nk[2] - MARGIN) * S - Wd, Y, Wd, H, b['c'])
+    # The signs of the number keys: in Heros Bold, of one size (Viktor's
+    # choice: as high as % and &, 9 pixels to the top of the capitals), not
+    # stretched, on one base line 4 pixels above the bottom of the keys, in
+    # the middle under their block graphics; _ of its pixels (a bar)
+    NSC = 9 * S / HB.outline('H')[1][3]
     for ids in NUMBERSIGNS:
         b = p.box(ids)
         X, Y, Wd, H = p.moved(b)
         nk = p.newkeys[p.key_of(b)]
-        # the bottoms on the line of the keywords (the apostrophe, high, as
-        # it was)
-        if ids != 44:
-            Y = (nk[1] + nk[3] - MARGIN) * S - H
-        place(ids, texts.get(ids, ''), X, Y, Wd, H, b['c'])
+        if ids == 45:
+            place(ids, '_', X, (nk[1] + nk[3] - MARGIN) * S - H, Wd, H, b['c'])
+            continue
+        d, (x0, y0, x1, y1) = HB.outline(texts[ids])
+        cx = X + Wd / 2
+        p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                       % (hexcol(b['c']), NSC, -NSC, cx - NSC * (x0 + x1) / 2, (nk[1] + nk[3] - 4) * S, d))
 
     # The block graphics: made of squares
     for i in (19, 21, 23, 25, 27, 29, 31, 33):

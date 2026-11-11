@@ -68,8 +68,10 @@ keywords at the bottom right of the keys 3 pixels from the bottom and the
 right edge, the red words and signs at the top right 3 pixels from the
 right edge and on the line of the tops of the big letters (the signs of
 their own sizes; the red signs of the number keys under their block
-graphics, on the line of the keywords), the words and signs above and
-under the keys 1 pixel from the left edge of their keys; the bars of
+graphics, in Heros Bold of one size, the capitals 9 pixels high as %
+and &, on one base line 4 pixels above the bottom of the keys), the words
+and signs above and under the keys 1 pixel from the left edge of their
+keys; the bars of
 − + = _ | all a pixel thick; the punctuation ; : , . of one size, in
 Heros Bold with dots 3 pixels wide (; a full stop and a comma halfway
 between it and the top of the keyword under it), " as it was. The words
