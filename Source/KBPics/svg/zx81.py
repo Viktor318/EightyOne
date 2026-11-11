@@ -239,8 +239,8 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     L = length(W)
     rect(round(X + W / 2 - L / 2), round(Y + H / 2 - T / 2), L, T, b['c'])
     b = p.box(V(93))                    # + on K: its two lines as long
-    X, Y, W, H = p.moved(b)             # as the shorter was (Viktor's
-    Lw = Lh = length(7 * S)             # choice; 9 and 7 pixels)
+    X, Y, W, H = p.moved(b)             # as the wider was (Viktor's choice;
+    Lw = Lh = length(9 * S)             # 9 and 7 pixels)
     l, t = round(X + W / 2 - Lw / 2), round(Y + H / 2 - Lh / 2)
     rect(l, t + (Lh - T) // 2, Lw, T, b['c'])
     rect(l + (Lw - T) // 2, t, T, Lh, b['c'])
