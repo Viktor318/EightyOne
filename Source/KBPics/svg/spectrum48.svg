@@ -239,8 +239,5 @@
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="444.25,35.875 434.625,30.73 440.015,30.73 440.015,23.625 448.485,23.625 448.485,30.73 453.875,30.73"/>
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="527.25,23.625 517.625,28.77 523.015,28.77 523.015,35.875 531.485,35.875 531.485,28.77 536.875,28.77"/>
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="621.625,29.75 612.805,23.625 612.805,27.055 600.625,27.055 600.625,32.445 612.805,32.445 612.805,35.875"/>
-<line x1="485.875" y1="323.75" x2="485.875" y2="341.25" stroke="#ff0000" stroke-width="1.75"/>
-<line x1="478" y1="325.5" x2="493.75" y2="339.5" stroke="#ff0000" stroke-width="1.75"/>
-<line x1="478" y1="339.5" x2="493.75" y2="325.5" stroke="#ff0000" stroke-width="1.75"/>
-<rect x="481.5" y="329" width="8.75" height="7" fill="#ff0000"/>
+<path fill="#ff0000" transform="matrix(0.05435 0 0 -0.05435 474.348 363.370)" d="M357.0 579 335.0 649 226.0 613V729H154.0V613L45.0 649L23.0 580L132.0 544L65.0 450L123.0 407L190.0 501L257.0 407L315.0 450L248.0 544Z"/>
 </svg>

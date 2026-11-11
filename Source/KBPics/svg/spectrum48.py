@@ -340,17 +340,18 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     arrow(14, 'up')
     arrow(15, 'right')
 
-    # * on B: the star of the keyboard
+    # * on B: the star of Heros Bold (Viktor's choice), as high as the star
+    # of the original (10 pixels), at the top right as the signs
     b = p.box(179)
     X, Y, Wd, H = p.moved(b)
     k = p.key_of(b)
     nk = p.newkeys[k]
-    X, Y = (nk[0] + nk[2] - MARGIN) * S - Wd, Y + row_shift(k) * S
-    cx, cy = X + Wd / 2, Y + H / 2
-    lines = [(cx, Y, cx, Y + H), (X, Y + 0.1 * H, X + Wd, Y + 0.9 * H), (X, Y + 0.9 * H, X + Wd, Y + 0.1 * H)]
-    for x1, y1, x2, y2 in lines:
-        p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#ff0000" stroke-width="%g"/>' % (x1, y1, x2, y2, S))
-    p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="#ff0000"/>' % (cx - 2.5 * S, cy - 2 * S, 5 * S, 4 * S))
+    Y += row_shift(k) * S
+    d, (x0, y0, x1, y1) = HB.outline('*')
+    sc = H / (y1 - y0)
+    right = (nk[0] + nk[2] - MARGIN) * S
+    p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                   % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))
 
     # words that come too near something else
     others = []

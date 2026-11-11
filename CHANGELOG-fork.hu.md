@@ -34,16 +34,16 @@ készült. Magának az EightyOne-nak a változásai a
   billentyűk jobb alsó szavai és jobb felső piros szavai és jelei egyforma
   távolságra a jobb széltől, a billentyűk feletti és alatti szavak a
   billentyűjük bal szélétől; az írásjelei (; : , .) egy méretűek, ahogy a
-  számbillentyűk jelei is. A ZX81 billentyűi egyenletes sorokban állnak, a
-  szürke blokkgrafikák pöttyösek maradtak, minden méretben egyforma
-  pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
-  ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a
-  billentyűk közepén állnak, a betűk vékonyak maradtak. A +2 és a +3
-  billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex
-  képek keretei és billentyűi pixelre az eredetiek (minden méretben
-  élesek), a feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és
-  ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A többi
-  billentyűzet képe nem változott.
+  számbillentyűk jelei is; a B csillaga is a betűtípusé. A ZX81 billentyűi
+  egyenletes sorokban állnak, a szürke blokkgrafikák pöttyösek maradtak,
+  minden méretben egyforma pöttyökkel; a ZXpand-os képeken az LPRINT és az
+  LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk
+  feletti feliratok a billentyűk közepén állnak, a betűk vékonyak
+  maradtak. A +2 és a +3 billentyűi olyanok, mint az eredetin, a betűk
+  dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
+  eredetiek (minden méretben élesek), a feliratok újra vannak rajzolva. Az
+  R470 kék, L alakú FUNC és ENTER billentyűje és türkiz GRAPHICS
+  billentyűje megmaradt. A többi billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában

@@ -74,7 +74,8 @@ and signs above and under the keys 1 pixel from the left edge of their
 keys; the bars of
 − + = _ | all a pixel thick; the punctuation ; : , . of one size, in
 Heros Bold with dots 3 pixels wide (; a full stop and a comma halfway
-between it and the top of the keyword under it), " as it was. The words
+between it and the top of the keyword under it), " as it was, * on B the
+star of Heros Bold, 10 pixels high. The words
 above the keys reach over their
 keys' right edges as little as they can: CAPS LOCK and TRUE VIDEO with
 half a space between their two words and 1 pixel over (85% and 82% of
