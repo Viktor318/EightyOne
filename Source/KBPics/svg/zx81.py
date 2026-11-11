@@ -113,21 +113,21 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
             k = p.keys[p.key_of(b)]
             if b['y'] >= k[1] + k[3]:
                 b['y2'] += 1
-    # The signs of the font (Viktor's choice): all of one size, Heros Bold,
-    # the capitals SIGN pixels high, not stretched; their tops (that of the
-    # capitals) on one line a row, SIGNTOP pixels under the tops of the keys
-    # (as most were); each in the middle of its box. < and > stay wide, as
-    # in the original and on the ZX81 (Viktor's choice); " and ; and ,
-    # below
+    # The signs of the font (Viktor's choice): all of one size, of Heros
+    # (thin, as on the ZX81), the capitals SIGN pixels high, not stretched;
+    # their tops (that of the capitals) on one line a row, SIGNTOP pixels
+    # under the tops of the keys (as most were); each in the middle of its
+    # box. < and > stay wide, as in the original and on the ZX81 (Viktor's
+    # choice); " (of Heros Bold) and ; and , below
     SIGN, SIGNTOP = 10, 4
     FONTSIGNS = '$()?£'
     HB = font('herosb')
-    HCAP = HB.outline('H')[1][3]
+    SF = font('heros')
 
     def font_sign(t, b, X, W):
         nk = p.newkeys[p.key_of(b)]
-        d, (x0, y0, x1, y1) = HB.outline(t)
-        sc = SIGN * S / HCAP
+        d, (x0, y0, x1, y1) = SF.outline(t)
+        sc = SIGN * S / SF.outline('H')[1][3]
         left = X + W / 2 - sc * (x1 - x0) / 2
         p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
                        % (hexcol(b['c']), sc, -sc, left - sc * x0, (nk[1] + SIGNTOP + SIGN) * S, d))
