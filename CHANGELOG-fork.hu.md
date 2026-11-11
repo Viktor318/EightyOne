@@ -17,27 +17,29 @@ készült. Magának az EightyOne-nak a változásai a
   ZXpand-dal és anélkül – és a ZX97 változattal együtt), a ZX80
   billentyűzetének (a ZXpand-os változattal együtt), valamint a Timex
   TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt), valamint a Jupiter
-  Ace, a Lambda 8300 és a TK85 billentyűzetének** képe újra van rajzolva
-  vektorgrafikaként, 100%-os méretre (lásd lent), és 200%-os méretben
-  (1768 × 780, a keypad 526 × 780) PNG-képként van a program erőforrásai
-  között, így éles: 200%-on a kép változatlanul látszik, a többi méreten a
-  program maga kicsinyíti, minden képpont a kép általa lefedett részének
-  átlaga (100%-on négy képponté, így olyan éles, mint a rajz), minden
-  Windowson ugyanúgy. A program ettől kisebb lett (5,9 MB, eddig 18 MB),
-  mert ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek
-  a régiek; egy képen belül minden szó egyforma méretű és a betűtípus
-  saját betűközével áll (TeX Gyre Heros), a 48K (a 16K is ezt mutatja: a
-  saját képe ugyanez volt világosszürke billentyűkkel) billentyűsorai
-  kicsit távolabb vannak egymástól, a billentyűk feletti feliratai pedig a
-  lehető legkevésbé lógnak túl rajtuk. A ZX81 billentyűi egyenletes
-  sorokban állnak, a szürke blokkgrafikák pöttyösek maradtak, minden
-  méretben egyforma pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST
-  kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk
-  feletti feliratok a billentyűk közepén állnak, a betűk vékonyak
-  maradtak. A +2 és a +3 billentyűi olyanok, mint az eredetin, a betűk
-  dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
-  eredetiek (minden méretben élesek), a feliratok újra vannak rajzolva. A
-  többi billentyűzet képe nem változott.
+  Ace, a Lambda 8300, a TK85 és a Ringo R470 billentyűzetének** képe újra
+  van rajzolva vektorgrafikaként, 100%-os méretre (lásd lent), és 200%-os
+  méretben (1768 × 780, a keypad 526 × 780) PNG-képként van a program
+  erőforrásai között, így éles: 200%-on a kép változatlanul látszik, a
+  többi méreten a program maga kicsinyíti, minden képpont a kép általa
+  lefedett részének átlaga (100%-on négy képponté, így olyan éles, mint a
+  rajz), minden Windowson ugyanúgy. A program ettől kisebb lett (5,9 MB,
+  eddig 18 MB), mert ezek a képek már nincsenek az űrlapokban. Az
+  elrendezés és a színek a régiek; egy képen belül minden szó egyforma
+  méretű és a betűtípus saját betűközével áll (TeX Gyre Heros), a 48K (a
+  16K is ezt mutatja: a saját képe ugyanez volt világosszürke
+  billentyűkkel) billentyűsorai kicsit távolabb vannak egymástól, a
+  billentyűk feletti feliratai pedig a lehető legkevésbé lógnak túl
+  rajtuk. A ZX81 billentyűi egyenletes sorokban állnak, a szürke
+  blokkgrafikák pöttyösek maradtak, minden méretben egyforma pöttyökkel; a
+  ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a
+  CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a billentyűk
+  közepén állnak, a betűk vékonyak maradtak. A +2 és a +3 billentyűi
+  olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex képek
+  keretei és billentyűi pixelre az eredetiek (minden méretben élesek), a
+  feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és ENTER
+  billentyűje és türkiz GRAPHICS billentyűje megmaradt. A többi
+  billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában

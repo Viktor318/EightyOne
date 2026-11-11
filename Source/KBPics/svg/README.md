@@ -26,6 +26,7 @@ are sharp at any size:
 | `ace.py` | `Keyboard_.dfm`, `acekb` | `orig/ace.png` |
 | `lambda8300.py` | `Keyboard_.dfm`, `lambdakb` | `orig/lambda8300.png` |
 | `tk85.py` | `Keyboard_.dfm`, `tk85kb` | `orig/tk85.png` |
+| `r470.py` | `Keyboard_.dfm`, `r470kb` | `orig/r470.png` |
 
 They are drawn at 100% of the window (1.75 times the originals: 884 × 390,
 the keypad 263 × 390), and the program holds them at 200%, its largest
@@ -102,7 +103,14 @@ picture coloured otherwise (dark keys, white letters, yellow and blue), a
 few of its letters a little other: `zx81.py` draws it in its colours,
 finding the ZX81's texts by their shapes (in any colour) and those that
 differ by a table; NEW LINE (8) and SPACE (9) larger, NEW LINE in the
-middle of its key.
+middle of its key. The Ringo R470 keeps its grey keys on light grey, the
+blue L-shaped FUNC and ENTER (by their corners, rounded) and the cyan
+GRAPHICS key, its keys in even rows; its words all 6 pixels high (black
+above the keys, blue under them, yellow on them), as close to the block
+graphics after them as in the original (`word(..., gap=2)`), the words of
+the large keys as in the original; its stars of three thin lines, as
+there. `analyze.py` finds its keys with `apart`, as its blue words touch
+its grey keys.
 
 ## Making them
 
@@ -135,3 +143,4 @@ C++Builder (the resources changed). A new picture goes into the table of
     python3 analyze.py orig/ace.png ace 30,23,9 2 255,255,255
     python3 analyze.py orig/lambda8300.png lambda8300 149,179,174 2 102,102,102 102,102,102/149,179,174/104,150,142/255,255,255/242,207,65/0,0,0
     python3 analyze.py orig/tk85.png tk85 68,68,68 2 0,0,0 0,0,0/68,68,68/255,255,255/236,252,234/57,114,197/239,252,0
+    python3 analyze.py orig/r470.png r470 127,127,127/57,114,197/139,246,253 2 207,207,207 207,207,207/127,127,127/57,114,197/240,240,240/53,53,53/255,255,0/139,246,253 apart

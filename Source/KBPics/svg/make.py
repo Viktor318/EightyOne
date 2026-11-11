@@ -43,7 +43,7 @@ PICTURES = [('spectrum48', 'spec48kb'), ('spectrum128', 'spec128kb'),
             ('zx80', 'zx80kb'), ('zx80zxpand', 'zx80zxpandkb'), ('spectrumplus2', 'specPlus2kb'),
             ('spectrumplus3', 'specPlus3kb'), ('tc2048', 'tc2048kb'), ('ts2068', 'ts2068kb'),
             ('ts1500', 'ts1500kb'), ('ts1500zxpand', 'ts1500zxpandkb'), ('ace', 'acekb'),
-            ('lambda8300', 'lambdakb'), ('tk85', 'tk85kb')]
+            ('lambda8300', 'lambdakb'), ('tk85', 'tk85kb'), ('r470', 'r470kb')]
 NAMES = [name for name, image in PICTURES]
 
 

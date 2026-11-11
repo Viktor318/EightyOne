@@ -369,9 +369,10 @@ def add_word_method():
     (left, right or centre); a little narrower only if there is no room"""
     import sys
 
-    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False):
+    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False, gap=6):
         # over: a word above or under a key, in the middle of the key (True:
-        # the nearest key; or the number of the key)
+        # the nearest key; or the number of the key); gap: the room kept
+        # before the next thing on its line, outside the keys
         S = self.S
         b = self.box(ids)
         X, Y, Wd, H = self.moved(b, follow)
@@ -412,7 +413,7 @@ def add_word_method():
             align = 'over'
             room = kw + 8
         else:
-            rights = [o['x'] - 6 for o in self.words.values() if same(o) and o['x'] >= b['x2']]
+            rights = [o['x'] - gap for o in self.words.values() if same(o) and o['x'] >= b['x2']]
             room = min(rights + [self.w - 2]) - b['x']
         sx = min(1.0, room * S / w)
         w *= sx

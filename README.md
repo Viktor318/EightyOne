@@ -92,8 +92,8 @@ program.
   16K, 48K, 128, +2 and +3 keyboards, the 128 keypad and the ZX81 keyboard
   (with its ZXpand, TS1000 and ZX97 forms) the ZX80 keyboard (with the
   ZXpand) the Timex TC2048, TS2068 and TS1500 keyboards and the Jupiter
-  Ace, Lambda 8300 and TK85 keyboards are drawn again, sharp at every
-  size.
+  Ace, Lambda 8300, TK85 and Ringo R470 keyboards are drawn again, sharp
+  at every size.
 - **ZX Printer**: double click for double or triple size; the printout is
   saved as PNG (or BMP). **File > Save Screenshot** saves PNG too.
 

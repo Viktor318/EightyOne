@@ -7,12 +7,17 @@
 # (the ZX80): any other colour is taken as the nearest of them.
 # small=w,h (anywhere after the picture): only parts at most w x h pixels
 # are letters; larger ones (lines, frames: the Timex pictures) are not texts
+# apart (anywhere after the picture): the keys of each key colour are found
+# apart (the R470: its blue words touch its grey keys, its blue keys are
+# keys too); else the key colours make one key (a key and its dish)
 import sys, json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy import ndimage
 
 small = None
+apart = 'apart' in sys.argv
+if apart: sys.argv.remove('apart')
 for a in list(sys.argv):
     if a.startswith('small='):
         small = [int(v) for v in a[6:].split(',')]
@@ -27,19 +32,21 @@ if len(sys.argv) > 6:
     pure = np.array([[int(v) for v in c.split(',')] for c in sys.argv[6].split('/')])
     near = ((im[:, :, None, :] - pure[None, None]) ** 2).sum(-1).argmin(-1)
     im = pure[near]
-key = np.zeros(im.shape[:2], bool)
-for kc in keycols: key |= (im == kc).all(-1)
+masks = [(im == kc).all(-1) for kc in keycols]
+if not apart:
+    masks = [np.any(masks, axis=0)]
 
 # keys: connected regions of the key colour (with what they hold: holes filled)
 # (smaller parts of the key colour are texts: the white words of the ZX81)
-lab, n = ndimage.label(ndimage.binary_fill_holes(key))
 keys = []
-inkey = np.zeros(key.shape, bool)
-for i, sl in enumerate(ndimage.find_objects(lab)):
-    ys, xs = sl
-    if (ys.stop - ys.start) < 16 or (xs.stop - xs.start) < 16: continue
-    keys.append([xs.start, ys.start, xs.stop - xs.start, ys.stop - ys.start])
-    inkey |= lab == i + 1
+inkey = np.zeros(im.shape[:2], bool)
+for key in masks:
+    lab, n = ndimage.label(ndimage.binary_fill_holes(key))
+    for i, sl in enumerate(ndimage.find_objects(lab)):
+        ys, xs = sl
+        if (ys.stop - ys.start) < 16 or (xs.stop - xs.start) < 16: continue
+        keys.append([xs.start, ys.start, xs.stop - xs.start, ys.stop - ys.start])
+        inkey |= lab == i + 1
 keys.sort(key=lambda k: (k[1] // 10, k[0]))
 
 # ink: everything that is not the background (most common) or a key colour
