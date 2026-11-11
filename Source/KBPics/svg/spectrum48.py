@@ -96,10 +96,14 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # edge); the words and signs above and under the keys LEFT pixels from
     # the left edge of their keys
     MARGIN, TOP, LEFT = 3, 5, 1
+    # the dots of the punctuation, the star on B and " on P (Viktor's
+    # choice: not larger than the other signs), in pixels: the width of the
+    # dots, the heights of the star and of "
+    DOT, STAR, QUOTE = 2.5, 8, 5
     KEYWORDS = set(range(89, 99)) | set(range(141, 150)) | set(range(188, 195))
     TOPWORDS = {78, 80, 82, 121, 123, 125, 127, 129}
     # the signs at the top right of the keys (of their own sizes, as in the
-    # original), the bars among them of their pixels; the signs under the
+    # original, unless said otherwise below), the bars among them of their pixels; the signs under the
     # block graphics of the number keys
     TOPSIGNS = [68, 70, 72, 74, 76, (84, 88), 86, 131, 133, 135, (137, 138), (171, 185), 173, 175,
                 177, 179, 181, 183]
@@ -207,10 +211,18 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         elif ids in big:
             p.text(ids, t, fonts=('herosb',))
         else:
-            # the signs under the keys, from LEFT
+            # the signs under the keys, from LEFT; \ in Heros Bold as high as
+            # its box, not stretched (it was twice as wide)
             b = p.box(ids)
             X, Y, Wd, H = p.moved(b)
-            p.fit(t, left_of(b, X), Y, Wd, H, b['c'], fonts=('cn',) if t == '~' else ('cnb', 'herosb'))
+            if t == '\\':
+                hb = font('herosb')
+                d, (x0, y0, x1, y1) = hb.outline(t)
+                sc = H / (y1 - y0)
+                p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                               % (hexcol(b['c']), sc, -sc, left_of(b, X) - sc * x0, Y + sc * y1, d))
+            else:
+                p.fit(t, left_of(b, X), Y, Wd, H, b['c'], fonts=('cn',) if t == '~' else ('cnb', 'herosb'))
 
     # The signs on the keys: of their sizes, at their places (above). Each
     # row of top right signs moved down or up together, so that its tall
@@ -248,14 +260,14 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
             p.fit(t, X, Y, Wd, H, colour, fonts=('cnb', 'herosb'))
 
     # The punctuation (; : , .): all of one size (Viktor's choice: the dot
-    # of ; was larger than the full stop), in Heros Bold, its dots 3 pixels
-    # wide, not stretched; their tops where the tops of their boxes were.
-    # ; is a full stop and a comma halfway between it and the top of the
-    # keyword under it (that of the font, its dot high, would reach the
-    # keyword). " stays as it was (in its box)
+    # of ; was larger than the full stop), in Heros Bold, its dots DOT
+    # pixels wide, not stretched; their tops on the line of the tops of the
+    # big letters. ; is a full stop and a comma halfway between it and the
+    # top of the keyword under it (that of the font, its dot high, would
+    # reach the keyword)
     PUNCTUATION = {(84, 88): ';', (171, 185): ':', 181: ',', 183: '.'}
     HB = font('herosb')
-    PSC = 3 * S / (HB.outline('.')[1][2] - HB.outline('.')[1][0])
+    PSC = DOT * S / (HB.outline('.')[1][2] - HB.outline('.')[1][0])
 
     def punctuation(t, right, top, colour):
         d, (x0, y0, x1, y1) = HB.outline(t)
@@ -270,7 +282,29 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         X, Y, Wd, H = p.moved(b)
         k = p.key_of(b)
         nk = p.newkeys[k]
-        Y += row_shift(k) * S
+        # the tops on the line of the tops of the big letters; the bars of
+        # - and = where they were among them (moved with their row)
+        if ids in (133, (137, 138)):
+            Y += row_shift(k) * S
+        else:
+            Y = (nk[1] + TOP) * S
+        if texts.get(ids) == '"':
+            # in Heros Cn Bold (its strokes thinner), not stretched
+            d, (x0, y0, x1, y1) = CN.outline('"')
+            sc = QUOTE * S / (y1 - y0)
+            right = (nk[0] + nk[2] - MARGIN) * S
+            p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                           % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))
+            continue
+        if texts.get(ids) == '/':
+            # in Heros Bold of the size of the signs (the capitals 9 pixels
+            # high), not stretched (it was 7 pixels high, twice as wide)
+            d, (x0, y0, x1, y1) = HB.outline('/')
+            sc = 9 * S / HB.outline('H')[1][3]
+            right = (nk[0] + nk[2] - MARGIN) * S
+            p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                           % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))
+            continue
         if ids in PUNCTUATION:
             right = (nk[0] + nk[2] - MARGIN) * S
             if PUNCTUATION[ids] == ';':
@@ -340,15 +374,15 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     arrow(14, 'up')
     arrow(15, 'right')
 
-    # * on B: the star of Heros Bold (Viktor's choice), as high as the star
-    # of the original (10 pixels), at the top right as the signs
+    # * on B: the star of Heros Bold (Viktor's choice), STAR pixels high, at
+    # the top right as the signs
     b = p.box(179)
     X, Y, Wd, H = p.moved(b)
     k = p.key_of(b)
     nk = p.newkeys[k]
-    Y += row_shift(k) * S
+    Y = (nk[1] + TOP) * S
     d, (x0, y0, x1, y1) = HB.outline('*')
-    sc = H / (y1 - y0)
+    sc = STAR * S / (y1 - y0)
     right = (nk[0] + nk[2] - MARGIN) * S
     p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
                    % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))

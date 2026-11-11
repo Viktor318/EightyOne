@@ -71,13 +71,14 @@ their own sizes; the red signs of the number keys under their block
 graphics, in Heros Bold of one size, the capitals 9 pixels high as %
 and &, on one base line 4 pixels above the bottom of the keys), the words
 and signs above and under the keys 1 pixel from the left edge of their
-keys; the bars of
-− + = _ | all a pixel thick; the punctuation ; : , . of one size, in
-Heros Bold with dots 3 pixels wide (; a full stop and a comma halfway
-between it and the top of the keyword under it), " as it was, * on B the
-star of Heros Bold, 10 pixels high. The words
-above the keys reach over their
-keys' right edges as little as they can: CAPS LOCK and TRUE VIDEO with
+keys; the bars of − + = _ | all a pixel thick; the punctuation ; : , .
+of one size, in Heros Bold with dots 2.5 pixels wide (; a full stop and
+a comma halfway between it and the top of the keyword under it), " in
+Heros Cn Bold 5 pixels high, * on B the star of Heros Bold 8 pixels
+high, / on V and \ under D not stretched (they were twice as wide), the
+tops of all the signs at the top right on the line of the big letters.
+The words above the keys reach over their keys' right edges as little as
+they can: CAPS LOCK and TRUE VIDEO with
 half a space between their two words and 1 pixel over (85% and 82% of
 their width), INV.VIDEO and GRAPHICS at 93.5%, MAGENTA at 96%. The
 16K shows the 48K picture (Viktor's choice; its own was the 48K's with
