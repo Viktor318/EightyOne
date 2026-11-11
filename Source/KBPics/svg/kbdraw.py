@@ -273,6 +273,50 @@ class Picture:
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(solid)))
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(colour or col), ''.join(dots)))
 
+    def block(self, ids, size, frame, cell, right, top=None, bottom=None):
+        """A block graphic of four quarters in a frame (those of the ZX80
+        and the ZX81), drawn again: size pixels square, its frame frame
+        pixels thick, its quarters of one size, each filled, empty or
+        dotted as in the original (the dots a chequer of cell pixel squares
+        over its inside, as the original's, cut at the edges of the
+        quarters); all on whole pixels; right pixels from the right edge of
+        its key, top from the top or bottom from the bottom"""
+        S = self.S
+        b = self.box(ids)
+        c = tuple(b['c'])
+        nk = self.newkeys[self.key_of(b)]
+        inner = (self.im[b['y'] + 1:b['y2'] - 1, b['x'] + 1:b['x2'] - 1] == c).all(-1)
+        ih, iw = inner.shape
+        r = round((nk[0] + nk[2]) * S) - right
+        t = round(nk[1] * S) + top if top is not None else round((nk[1] + nk[3]) * S) - bottom - size
+        l, F = r - size, frame
+        parts = []
+
+        def rect(x, y, w, h):
+            parts.append('M%g %gh%gv%gh%gz' % (x, y, w, h, -w))
+        rect(l, t, size, F)
+        rect(l, t + size - F, size, F)
+        rect(l, t + F, F, size - 2 * F)
+        rect(r - F, t + F, F, size - 2 * F)
+        h = (size - 2 * F) // 2
+        x0, y0 = l + F, t + F
+        for qy in (0, 1):
+            for qx in (0, 1):
+                oy, ox = math.ceil(qy * ih / 2), math.ceil(qx * iw / 2)
+                q = inner[oy:int((qy + 1) * ih / 2), ox:int((qx + 1) * iw / 2)]
+                ql, qt = x0 + qx * h, y0 + qy * h
+                if q.mean() > 0.75:
+                    rect(ql, qt, h, h)
+                elif q.mean() > 0.25:
+                    parity = (ox + oy + (0 if q[0, 0] else 1)) % 2
+                    for n in range((qt - y0) // cell, (qt + h - y0 + cell - 1) // cell):
+                        for m in range((ql - x0) // cell, (ql + h - x0 + cell - 1) // cell):
+                            if (m + n + parity) % 2 == 0:
+                                cl, ct = max(ql, x0 + m * cell), max(qt, y0 + n * cell)
+                                cr, cb = min(ql + h, x0 + (m + 1) * cell), min(qt + h, y0 + (n + 1) * cell)
+                                rect(cl, ct, cr - cl, cb - ct)
+        self.items.append('<path fill="%s" d="%s"/>' % (hexcol(c), ''.join(parts)))
+
     def same_texts(self, analysis, picture, dx=2, dy=(-10, 2), colours=True):
         """The numbers of another picture's texts in this one: {its number:
         number here}, for the texts of the same pixels and colour, the

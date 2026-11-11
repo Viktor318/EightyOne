@@ -4,10 +4,11 @@
 # picture with a few other texts: their scripts call draw() with their own.
 # The texts of the ZX81 are found in them by their pixels (the same text,
 # at most a few pixels away); what is not found is not drawn.
+import math
 import os
 import sys
 import numpy as np
-from kbdraw import Picture, hexcol, arrow_points, font
+from kbdraw import Picture, hexcol, arrow_points, font, comma
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEY, RED, BLACK = (252, 252, 252), (252, 0, 0), (0, 0, 0)
@@ -112,11 +113,36 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
             k = p.keys[p.key_of(b)]
             if b['y'] >= k[1] + k[3]:
                 b['y2'] += 1
+    # The signs of the font (Viktor's choice): all of one size, Heros Bold,
+    # the capitals SIGN pixels high, not stretched; their tops (that of the
+    # capitals) on one line a row, SIGNTOP pixels under the tops of the keys
+    # (as most were); each in the middle of its box. < and > stay wide, as
+    # in the original and on the ZX81 (Viktor's choice); " and ; and ,
+    # below
+    SIGN, SIGNTOP = 10, 4
+    FONTSIGNS = '$()?£'
+    HB = font('herosb')
+    HCAP = HB.outline('H')[1][3]
+
+    def font_sign(t, b, X, W):
+        nk = p.newkeys[p.key_of(b)]
+        d, (x0, y0, x1, y1) = HB.outline(t)
+        sc = SIGN * S / HCAP
+        left = X + W / 2 - sc * (x1 - x0) / 2
+        p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                       % (hexcol(b['c']), sc, -sc, left - sc * x0, (nk[1] + SIGNTOP + SIGN) * S, d))
+
     for ids, t in texts.items():
         if ids in big:
             p.text(ids, t, fonts=('herosb',))
         elif len(t) > 1 and any(c.isalpha() for c in t):
             p.word(ids, t, 'cnb', cap)
+        elif t in FONTSIGNS and len(t) == 1:
+            b = p.box(ids)
+            X, Y, W, H = p.moved(b)
+            font_sign(t, b, X, W)
+        elif t in '";,':
+            continue                    # below
         else:
             p.text(ids, t)
     # small words (under bigger ones): 5 pixels high (they were 4), and as
@@ -151,29 +177,130 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     X, Y, W, H = p.moved(b)
     p.fit('π', X - 0.25 * S, Y, W + 0.5 * S, H + 1 * S, col['label'], fonts=('cnb',))
 
-    # / on V: a line, as thin as the strokes of the words
+    # / on V: a line, as thin as the strokes of the words, at 60 degrees
+    # (Viktor's choice; it was steeper), as high as it was, in the middle of
+    # its place
     b = p.box(V(135))
     X, Y, W, H = p.moved(b)
-    p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
-                   % (X + 0.5 * S, Y + H - 0.2 * S, X + W - 0.5 * S, Y + 0.2 * S, hexcol(col['red']), 1.25 * S))
+    dy = H - 0.4 * S
+    dx = dy / math.tan(math.radians(60))
+    cx, cy = X + W / 2, Y + H / 2
+    p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%g"/>'
+                   % (cx - dx / 2, cy + dy / 2, cx + dx / 2, cy - dy / 2, hexcol(col['red']), 1.25 * S))
 
-    # Block graphics and the straight signs (- + = :): made of squares
-    for i in (11, 13, 15, 17, 19, 21, 23, 25, 62, 63, 64, 65, 66, 67,
-              43, 55, 93, 94, 103, 106, 132, 143):
-        p.pixels(V(i))
+    # The block graphics (Viktor's choice): all of one size (about 11.5
+    # pixels; they were 10 to 12 wide, 12 high), their frames thin (F, on
+    # whole pixels; they were 1 or 2 pixels as their rows fell), their four
+    # quarters of one size (some were a pixel narrower), each filled, empty
+    # or dotted (the grey, a chequer of the original's dots) as in the
+    # original; 3 and 4 pixels from the right and bottom edges of their keys
+    F = max(1, int(S))
+    NB = 2 * round((11.5 * S - 2 * F) / 2) + 2 * F
+    for i in (11, 13, 15, 17, 19, 21, 23, 25, 62, 63, 64, 65, 66, 67, 107, 108, 109, 110, 111, 112):
+        p.block(V(i), NB, F, max(1, round(S)), right=round(3 * S), bottom=round(4 * S))
 
-    # The grey block graphics (A - H): dotted, as in the original
-    for i in (107, 108, 109, 110, 111, 112):
-        p.dotted(V(i))
+    # The straight signs (Viktor's choice): the lines of - + = and of <= and
+    # >= as thick as each other (T, on whole pixels; they were 1 or 2
+    # pixels as their rows fell), + of two bars crossing in their middles
+    T = max(1, round(S))
 
-    # >= on Y: > and the two bars of = were found as one
+    def rect(l, t, w, h, colour=col['red']):
+        p.items.append('<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>' % (l, t, w, h, hexcol(colour)))
+
+    def length(v):
+        """A line's length, whole pixels, as many at both sides of a line
+        across it"""
+        n = round(v)
+        return n - (n - T) % 2
+
+    def equals(cx, w, y1, colour):
+        """= : its lines w long round cx, the first in the middle of the
+        row at y1, the other 4 pixels under it"""
+        L = length(w)
+        l, t = round(cx - L / 2), round(y1 + S / 2 - T / 2)
+        rect(l, t, L, T, colour)
+        rect(l, t + round(4 * S), L, T, colour)
+
+    b = p.box(V(103))                   # - on J
+    X, Y, W, H = p.moved(b)
+    L = length(W)
+    rect(round(X + W / 2 - L / 2), round(Y + H / 2 - T / 2), L, T, b['c'])
+    b = p.box(V(93))                    # + on K
+    X, Y, W, H = p.moved(b)
+    Lw, Lh = length(W), length(H)
+    l, t = round(X + W / 2 - Lw / 2), round(Y + H / 2 - Lh / 2)
+    rect(l, t + (Lh - T) // 2, Lw, T, b['c'])
+    rect(l + (Lw - T) // 2, t, T, Lh, b['c'])
+    b = p.box(V(94, 106))               # = on L
+    X, Y, W, H = p.moved(b)
+    equals(X + W / 2, W, Y, b['c'])
+    b = p.box(V(43, 55))                # = of <= on R
+    X, Y, W, H = p.moved(b)
+    equals(X + W / 2, W, Y, b['c'])
+    # >= on Y: > and the two lines of = were found as one
     b = p.box(V(46))
     X, Y, W, H = p.moved(b)
-    p.fit('>', X, Y, 9 * S, 7 * S, col['red'], fonts=('herosb', 'cnb'))
-    for dy in (1, 5):
-        p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s"/>'
-                       % (round(X + 11 * S), round(Y + dy * S), round(X + 19 * S) - round(X + 11 * S),
-                          round(Y + (dy + 1) * S) - round(Y + dy * S), hexcol(col['red'])))
+    p.fit('>', X, Y, 9 * S, 7 * S, b['c'], fonts=('herosb', 'cnb'))
+    equals(X + 15 * S, 8 * S, Y + S, b['c'])
+
+    # " on Q (twice) and P (Viktor's choice, after a photo of the ZX81): of
+    # Heros Bold (thick, as there), QUOTE pixels high and QWIDTH wide; their
+    # tops on the line of the signs; the two on Q QGAP pixels apart (more
+    # than the strokes of one, as there), at the right of their place, the
+    # one on P in the middle of its box
+    QUOTE, QWIDTH, QGAP = 3.5, 5, 3
+    qd, (q0, q1, q2, q3) = HB.outline('"')
+    qsc = QUOTE * S / (q3 - q1)
+    qsx = QWIDTH * S / (q2 - q0)
+
+    def quote(left, b):
+        nk = p.newkeys[p.key_of(b)]
+        p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                       % (hexcol(b['c']), qsx, -qsc, left - qsx * q0, (nk[1] + SIGNTOP) * S + qsc * q3, qd))
+
+    qw = qsx * (q2 - q0)
+    if V(38, 39) is not None:
+        b = p.box(V(38, 39))
+        X, Y, W, H = p.moved(b)
+        quote(X + W - qw, b)
+        quote(X + W - 2 * qw - QGAP * S, b)
+    if V(50) is not None:
+        b = p.box(V(50))
+        X, Y, W, H = p.moved(b)
+        quote(X + W / 2 - qw / 2, b)
+
+    # : on Z, ; on X and , on the full stop (Viktor's choice, as on the
+    # ZX80): the dots squares of one size (D, as large as the dots were, 3 x
+    # 2 pixels), the commas of Heros, their heads as large, their tails as
+    # long as the heads are high; the lower dot of : and the comma of ; as
+    # far from the upper dot as in the original (7 pixels)
+    b = p.box(V(132))
+    X, Y, W, H = p.moved(b)
+    D = round(math.sqrt(W * H))
+    cd, (c0, c1, c2, c3) = comma('heros', 1.0)
+    csc = D / (c2 - c0)
+
+    def dot(l, t, colour):
+        rect(l, t, D, D, colour)
+
+    def comma_at(l, t, colour):
+        p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                       % (hexcol(colour), csc, -csc, l - csc * c0, t + csc * c3, cd))
+
+    p.box(V(143))
+    l, t = round(X + W / 2 - D / 2), round(Y + H / 2 - D / 2)
+    dot(l, t, b['c'])
+    dot(l, t + round(7 * S), b['c'])
+    if V(133, 145) is not None:
+        b = p.box(V(133, 145))
+        X, Y, W, H = p.moved(b)
+        l, t = round(X + 1.5 * S - D / 2), round(Y + S - D / 2)
+        dot(l, t, b['c'])
+        comma_at(l, t + round(7 * S), b['c'])
+    if V(139) is not None:
+        b = p.box(V(139))
+        X, Y, W, H = p.moved(b)
+        comma_at(round(X + 1.5 * S - D / 2), round(Y + S - D / 2), b['c'])
 
     # The stars (** on H, * on B): a stroke up, a bar across, two legs down
     # and a thicker middle
@@ -195,11 +322,17 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     X, Y, W, H = p.moved(b)
     star(X, Y, W, H)
 
-    # The cursor arrows above 5 - 8: outlines, the heads long
-    for i, direction, head, s0, s1 in ((4, 'left', 0.625, 0.3, 0.7), (7, 'right', 0.66, 0.3, 0.7),
+    # The cursor arrows above 5 - 8: outlines, the heads long; that on 5 the
+    # one on 8 turned (Viktor's choice; it was a pixel longer), at the right
+    # of its place
+    W8 = p.moved(p.box(V(7)))[2]
+    for i, direction, head, s0, s1 in ((4, 'left', 0.66, 0.3, 0.7), (7, 'right', 0.66, 0.3, 0.7),
                                        (5, 'down', 0.8, 0.25, 0.75), (6, 'up', 0.8, 0.25, 0.75)):
         b = p.box(V(i))
         X, Y, W, H = p.moved(b)
+        if i in (4, 7):
+            # on whole pixels, so that they are mirror images pixel for pixel
+            X, W = round(X + (W - W8 if i == 4 else 0)), round(W8)
         pts = arrow_points(X, Y, W, H, direction, S, head=head, s0=s0, s1=s1)
         p.items.append('<polygon fill="none" stroke="%s" stroke-width="%g" points="%s"/>'
                        % (hexcol(col['red']), S, ' '.join('%g,%g' % q for q in pts)))

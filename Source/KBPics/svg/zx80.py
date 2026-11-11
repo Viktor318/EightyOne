@@ -3,6 +3,7 @@
 # The picture with the ZXpand (zx80zxpand.py) is the same picture with a
 # few other texts: its script calls draw() with its own. The texts of the
 # ZX80 are found in it by their pixels; what is not found is not drawn.
+import math
 import os
 import sys
 from kbdraw import Picture, hexcol, arrow_points, font, comma
@@ -84,7 +85,7 @@ def draw(name, own=None):
                   fonts=('heros',))
         elif ids in big:
             p.text(ids, t, fonts=('heros',))
-        elif t == ';':
+        elif t in ';,':
             continue                    # with : (below)
         elif t == '"':
             # as on the Spectrum (Viktor's choice): Heros Cn Bold, 5 pixels
@@ -100,12 +101,15 @@ def draw(name, own=None):
         else:
             p.text(ids, t, fonts=('heros', 'cn'))
 
-    # Block graphics: made of squares; the grey ones dotted, as in the
-    # original
-    for i in (29, 30, 31, 32, 59, 60, 61):
-        p.pixels(V(i))
-    for i in (33, 58, 62):
-        p.dotted(V(i))
+    # Block graphics (Viktor's choice): their frames 2 pixels thick (at
+    # 100%; they were 1 or 2 pixels as their rows fell), their four quarters
+    # of one size, the grey ones a chequer of whole pixel squares; as large
+    # as they were (10 pixels), 3 and 4 pixels from the right and top edges
+    # of their keys
+    F = max(1, round(S))
+    NB = 2 * round((10 * S - 2 * F) / 2) + 2 * F
+    for i in (29, 30, 31, 32, 33, 58, 59, 60, 61, 62):
+        p.block(V(i), NB, F, max(1, round(S)), right=round(3 * S), top=round(4 * S))
 
     # The straight signs (Viktor's choice): the lines of - + = as thick as
     # each other (T, on whole pixels; they were 1 or 2 pixels as their
@@ -156,12 +160,23 @@ def draw(name, own=None):
     sc = D / (x1 - x0)
     p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
                    % (hexcol(YELLOW), sc, -sc, l - sc * x0, t + round(6 * S) + sc * y1, d))
+    # , on the full stop (Viktor's choice): as that of ;, its head where the
+    # head was
+    b = p.box(V(91))
+    X, Y, W, H = p.moved(b)
+    l, t = round(X + S - D / 2), round(Y + S - D / 2)
+    p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                   % (hexcol(YELLOW), sc, -sc, l - sc * x0, t + sc * y1, d))
 
-    # / on V: a thin line
+    # / on V: a thin line, at 60 degrees (Viktor's choice; it was steeper),
+    # as high as it was, in the middle of its place
     b = p.box(V(87))
     X, Y, W, H = p.moved(b)
-    p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
-                   % (X + 0.5 * S, Y + H - 0.2 * S, X + W - 0.5 * S, Y + 0.2 * S, hexcol(YELLOW), 1.0 * S))
+    dy = H - 0.4 * S
+    dx = dy / math.tan(math.radians(60))
+    cx, cy = X + W / 2, Y + H / 2
+    p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%g"/>'
+                   % (cx - dx / 2, cy + dy / 2, cx + dx / 2, cy - dy / 2, hexcol(YELLOW), 1.0 * S))
 
     # The stars (* on P, ** on H): a bar across and two steep strokes
     def star(X, Y):

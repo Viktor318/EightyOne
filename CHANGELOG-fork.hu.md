@@ -38,17 +38,22 @@ készült. Magának az EightyOne-nak a változásai a
   számbillentyűk jelei is; a B csillaga a ZX80-é, olyan vékony, mint a /
   és a \, és egyik jel sem nagyobb a többinél; az ENTER a billentyű
   közepén áll, a CAPS SHIFT betűi szélesebbek, mint a Spectrumon. A ZX81
-  billentyűi egyenletes sorokban állnak, a szürke blokkgrafikák pöttyösek
-  maradtak, minden méretben egyforma pöttyökkel; a ZXpand-os képeken az
-  LPRINT és az LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén
-  a billentyűk feletti feliratok és a számok a billentyűk közepén állnak,
-  a betűk vékonyak maradtak; a − + = vonalai egyforma vastagok, a : két
-  pontja egyforma, a ; egy ilyen pont és egy vessző, a " olyan, mint a
-  Spectrumon. A +2 és a +3 billentyűi olyanok, mint az eredetin, a betűk
-  dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
-  eredetiek (minden méretben élesek), a feliratok újra vannak rajzolva. Az
-  R470 kék, L alakú FUNC és ENTER billentyűje és türkiz GRAPHICS
-  billentyűje megmaradt. A többi billentyűzet képe nem változott.
+  (és rokonai) billentyűi egyenletes sorokban állnak; a blokkgrafikák egy
+  méretűek, vékony kerettel és egyforma negyedekkel, a szürkék éles
+  pöttyökből álló sakktáblák; a $ ( ) ? £ jelek egy méretűek, a " vastag,
+  mint a ZX81-en, a − + = <= >= vonalai egyforma vastagok, a : ; és ,
+  olyan, mint a ZX80-on, a / 60 fokos, az 5-ös nyila a 8-asé tükrözve; a
+  ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a
+  CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok és a számok a
+  billentyűk közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák
+  kerete 2 képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
+  vastagok, a : két pontja egyforma, a ; egy ilyen pont és egy vessző, a .
+  gomb vesszője is ilyen, a " olyan, mint a Spectrumon, a / 60 fokos. A +2
+  és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
+  Timex képek keretei és billentyűi pixelre az eredetiek (minden méretben
+  élesek), a feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és
+  ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A többi
+  billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában
