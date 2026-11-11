@@ -316,17 +316,22 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
         X, Y, W, H = p.moved(b)
         comma_at(round(X + 1.5 * S - D / 2), round(Y + S - D / 2), b['c'])
 
-    # The stars (** on H, * on B): a stroke up, a bar across, two legs down
-    # and a thicker middle
+    # The stars (** on H, * on B): five pointed, as on the ZX81 (Viktor's
+    # choice, after a photo of it): five strokes from the middle with round
+    # ends, STARW thick, and a full middle (a circle STARC across); as high
+    # as the stars were, in the middle of their places
+    STARW, STARC = 1.4, 0.9
+
     def star(X, Y, W, H):
-        cx = X + W / 2
-        for x1, y1, x2, y2 in ((cx, Y, cx, Y + 3 * S), (X, Y + 2.5 * S, X + W, Y + 2.5 * S),
-                               (cx - 0.5 * S, Y + 4 * S, X + 1.2 * S, Y + H - 0.2 * S),
-                               (cx + 0.5 * S, Y + 4 * S, X + W - 1.2 * S, Y + H - 0.2 * S)):
-            p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
-                           % (x1, y1, x2, y2, hexcol(col['red']), 1.1 * S))
-        p.items.append('<rect x="%g" y="%g" width="%g" height="%g" fill="%s"/>'
-                       % (cx - 1.5 * S, Y + 3 * S, 3 * S, 2 * S, hexcol(col['red'])))
+        w = STARW * S
+        r = (H - w) / (1 + math.sin(math.radians(54)))
+        cx, cy = X + W / 2, Y + w / 2 + r
+        for k in range(5):
+            ang = math.radians(90 + 72 * k)
+            p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" '
+                           'stroke-width="%.2f" stroke-linecap="round"/>'
+                           % (cx, cy, cx + r * math.cos(ang), cy - r * math.sin(ang), hexcol(col['red']), w))
+        p.items.append('<circle cx="%.2f" cy="%.2f" r="%.2f" fill="%s"/>' % (cx, cy, STARC * S, hexcol(col['red'])))
 
     b = p.box(V(92))
     X, Y, W, H = p.moved(b)

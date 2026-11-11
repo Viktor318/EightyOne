@@ -199,21 +199,24 @@
 <rect x="243" y="316" width="4" height="4" fill="#fc0000"/>
 <path fill="#fc0000" transform="matrix(0.03810 0 0 -0.03810 239.686 329.962)" d="M192 -11.3197V104H87V0H147V-12.7347C147 -61.551 134 -75.7007 87 -77.1156V-104C157 -104 192 -72.1633 192 -11.3197Z"/>
 <path fill="#fc0000" transform="matrix(0.03810 0 0 -0.03810 726.686 321.962)" d="M192 -11.3197V104H87V0H147V-12.7347C147 -61.551 134 -75.7007 87 -77.1156V-104C157 -104 192 -72.1633 192 -11.3197Z"/>
-<line x1="521.125" y1="215.25" x2="521.125" y2="220.5" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="515" y1="219.625" x2="527.25" y2="219.625" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="520.25" y1="222.25" x2="517.1" y2="225.4" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="522" y1="222.25" x2="525.15" y2="225.4" stroke="#fc0000" stroke-width="1.925"/>
-<rect x="518.5" y="220.5" width="5.25" height="3.5" fill="#fc0000"/>
-<line x1="535.125" y1="215.25" x2="535.125" y2="220.5" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="529" y1="219.625" x2="541.25" y2="219.625" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="534.25" y1="222.25" x2="531.1" y2="225.4" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="536" y1="222.25" x2="539.15" y2="225.4" stroke="#fc0000" stroke-width="1.925"/>
-<rect x="532.5" y="220.5" width="5.25" height="3.5" fill="#fc0000"/>
-<line x1="490.625" y1="315" x2="490.625" y2="320.25" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="484.5" y1="319.375" x2="496.75" y2="319.375" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="489.75" y1="322" x2="486.6" y2="325.15" stroke="#fc0000" stroke-width="1.925"/>
-<line x1="491.5" y1="322" x2="494.65" y2="325.15" stroke="#fc0000" stroke-width="1.925"/>
-<rect x="488" y="320.25" width="5.25" height="3.5" fill="#fc0000"/>
+<line x1="521.12" y1="220.92" x2="521.12" y2="216.47" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="521.12" y1="220.92" x2="516.89" y2="219.55" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="521.12" y1="220.92" x2="518.51" y2="224.52" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="521.12" y1="220.92" x2="523.74" y2="224.52" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="521.12" y1="220.92" x2="525.36" y2="219.55" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<circle cx="521.12" cy="220.92" r="1.57" fill="#fc0000"/>
+<line x1="535.12" y1="220.92" x2="535.12" y2="216.47" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="535.12" y1="220.92" x2="530.89" y2="219.55" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="535.12" y1="220.92" x2="532.51" y2="224.52" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="535.12" y1="220.92" x2="537.74" y2="224.52" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="535.12" y1="220.92" x2="539.36" y2="219.55" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<circle cx="535.12" cy="220.92" r="1.57" fill="#fc0000"/>
+<line x1="490.63" y1="320.67" x2="490.63" y2="316.23" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="490.63" y1="320.67" x2="486.39" y2="319.30" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="490.63" y1="320.67" x2="488.01" y2="324.28" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="490.63" y1="320.67" x2="493.24" y2="324.28" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<line x1="490.63" y1="320.67" x2="494.86" y2="319.30" stroke="#fc0000" stroke-width="2.45" stroke-linecap="round"/>
+<circle cx="490.63" cy="320.67" r="1.57" fill="#fc0000"/>
 <polygon fill="none" stroke="#fc0000" stroke-width="1.75" points="366.875,42.875 384.2,34.125 384.2,39.375 393.125,39.375 393.125,46.375 384.2,46.375 384.2,51.625"/>
 <polygon fill="none" stroke="#fc0000" stroke-width="1.75" points="639.125,42.875 621.8,34.125 621.8,39.375 612.875,39.375 612.875,46.375 621.8,46.375 621.8,51.625"/>
 <polygon fill="none" stroke="#fc0000" stroke-width="1.75" points="461.625,51.625 447.625,37.625 454.625,37.625 454.625,34.125 468.625,34.125 468.625,37.625 475.625,37.625"/>
