@@ -105,7 +105,7 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     COLOURS = (0, 1, 2, 3, 4, 5, 6)
     # the dots of the punctuation, the star on B and " on P (Viktor's
     # choice: not larger than the other signs), in pixels: the width of the
-    # dots, the heights of the star and of "
+    # dots, the height (and width) of the star, the height of "
     DOT, STAR, QUOTE = 2.5, 8, 5
     # / and \: at 45 degrees, as in the original (Viktor's choice), as
     # thick as the / of Heros Bold of the size of the signs; / SLASH pixels
@@ -444,18 +444,21 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     arrow(14, 'up')
     arrow(15, 'right')
 
-    # * on B: the star of Heros Bold (Viktor's choice), STAR pixels high, at
-    # the top right as the signs
+    # * on B: the star of the ZX80 (Viktor's choice): a bar across and two
+    # steep strokes, STAR pixels high and wide, as thin as / and \, at the
+    # top right as the signs
     b = p.box(179)
     X, Y, Wd, H = p.moved(b)
     k = p.key_of(b)
     nk = p.newkeys[k]
     Y = (nk[1] + TOP) * S
-    d, (x0, y0, x1, y1) = HB.outline('*')
-    sc = STAR * S / (y1 - y0)
     right = (nk[0] + nk[2] - MARGIN) * S
-    p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
-                   % (hexcol(b['c']), sc, -sc, right - sc * x1, Y + sc * y1, d))
+    # as on the ZX80 (zx80.py), in a box of 5 units
+    u = STAR * S / 5
+    X = right - 5 * u
+    for x1, y1, x2, y2 in ((0, 2.5, 5, 2.5), (1.1, 0.1, 3.9, 4.9), (3.9, 0.1, 1.1, 4.9)):
+        p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%.2f"/>'
+                       % (X + x1 * u, Y + y1 * u, X + x2 * u, Y + y2 * u, hexcol(b['c']), thin()))
 
     # words that come too near something else
     others = []

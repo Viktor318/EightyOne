@@ -239,5 +239,7 @@
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="444.25,34.125 434.625,28.98 440.015,28.98 440.015,21.875 448.485,21.875 448.485,28.98 453.875,28.98"/>
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="527.25,21.875 517.625,27.02 523.015,27.02 523.015,34.125 531.485,34.125 531.485,27.02 536.875,27.02"/>
 <polygon fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="miter" points="621.625,28 612.805,21.875 612.805,25.305 600.625,25.305 600.625,30.695 612.805,30.695 612.805,34.125"/>
-<path fill="#ff0000" transform="matrix(0.04348 0 0 -0.04348 478.228 355.446)" d="M357.0 579 335.0 649 226.0 613V729H154.0V613L45.0 649L23.0 580L132.0 544L65.0 450L123.0 407L190.0 501L257.0 407L315.0 450L248.0 544Z"/>
+<line x1="479.75" y1="330.75" x2="493.75" y2="330.75" stroke="#ff0000" stroke-width="2.02"/>
+<line x1="482.83" y1="324.03" x2="490.67" y2="337.47" stroke="#ff0000" stroke-width="2.02"/>
+<line x1="490.67" y1="324.03" x2="482.83" y2="337.47" stroke="#ff0000" stroke-width="2.02"/>
 </svg>
