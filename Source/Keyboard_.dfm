@@ -25217,15 +25217,6 @@ object Keyboard: TKeyboard
     Visible = False
     OnDblClick = KeyboardDblClick
   end
-  object spec16kb: TImage
-    Left = 0
-    Top = 0
-    Width = 505
-    Height = 223
-    Stretch = True
-    Visible = False
-    OnDblClick = KeyboardDblClick
-  end
   object zx81zxpandkb: TImage
     Left = 0
     Top = 0

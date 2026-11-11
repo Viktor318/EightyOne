@@ -8,7 +8,6 @@ are sharp at any size:
 | Drawing | Shown for (the TImage) | Original |
 |---|---|---|
 | `spectrum48.py` | `Keyboard_.dfm`, `spec48kb` | `orig/spectrum48.png` |
-| `spectrum16.py` | `Keyboard_.dfm`, `spec16kb` | `orig/spectrum16.png` |
 | `spectrum128.py` | `Keyboard_.dfm`, `spec128kb` | `orig/spectrum128.png` |
 | `keypad128.py` | `Keypad_.dfm`, `KeypadUk` | `orig/keypad128uk.png` |
 | `zx81.py` | `Keyboard_.dfm`, `zx81kb` | `orig/zx81.png` |
@@ -66,8 +65,8 @@ space under the last row). Its words above the keys reach over their keys'
 right edges as little as they can: CAPS LOCK and TRUE VIDEO with half a
 space between their two words and 1 pixel over, INV.VIDEO and GRAPHICS at
 93.5% of their width, RESTORE and MAGENTA at 98.2% (Viktor's choice). The
-16K picture is the 48K's with light grey keys (`spectrum48.py` draws both,
-with the places of `spectrum48.json`). On the ZX81 the white words, 6 pixels high in
+16K shows the 48K picture (Viktor's choice; its own was the 48K's with
+light grey keys, pixel for pixel). On the ZX81 the white words, 6 pixels high in
 the original, are 7 like the others: those above a key row grow upwards,
 those under one downwards, so they stay 2 pixels from the keys. The
 relatives of the ZX81 (ZXpand, TS1000, ZX97) are drawn by `zx81.py` too:

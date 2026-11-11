@@ -37,7 +37,7 @@ STORED = 2
 
 # The pictures and the TImages they are shown for (in Keyboard_.dfm, the
 # keypad in Keypad_.dfm)
-PICTURES = [('spectrum48', 'spec48kb'), ('spectrum16', 'spec16kb'), ('spectrum128', 'spec128kb'),
+PICTURES = [('spectrum48', 'spec48kb'), ('spectrum128', 'spec128kb'),
             ('keypad128', 'KeypadUk'), ('zx81', 'zx81kb'), ('zx81zxpand', 'zx81zxpandkb'),
             ('ts1000', 'ts1000kb'), ('ts1000zxpand', 'ts1000zxpandkb'), ('zx97', 'zx97kb'),
             ('zx80', 'zx80kb'), ('zx80zxpand', 'zx80zxpandkb'), ('spectrumplus2', 'specPlus2kb'),

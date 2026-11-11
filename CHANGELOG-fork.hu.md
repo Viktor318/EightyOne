@@ -26,18 +26,18 @@ készült. Magának az EightyOne-nak a változásai a
   Windowson ugyanúgy. A program ettől kisebb lett (5,9 MB, eddig 18 MB),
   mert ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek
   a régiek; egy képen belül minden szó egyforma méretű és a betűtípus
-  saját betűközével áll (TeX Gyre Heros), a 48K (és a 16K, amely ugyanez a
-  kép világosszürke billentyűkkel) billentyűsorai kicsit távolabb vannak
-  egymástól, a billentyűk feletti feliratai pedig a lehető legkevésbé
-  lógnak túl rajtuk. A ZX81 billentyűi egyenletes sorokban állnak, a
-  szürke blokkgrafikák pöttyösek maradtak, minden méretben egyforma
-  pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
-  ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok a
-  billentyűk közepén állnak, a betűk vékonyak maradtak. A +2 és a +3
-  billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex
-  képek keretei és billentyűi pixelre az eredetiek (minden méretben
-  élesek), a feliratok újra vannak rajzolva. A többi billentyűzet képe nem
-  változott.
+  saját betűközével áll (TeX Gyre Heros), a 48K (a 16K is ezt mutatja: a
+  saját képe ugyanez volt világosszürke billentyűkkel) billentyűsorai
+  kicsit távolabb vannak egymástól, a billentyűk feletti feliratai pedig a
+  lehető legkevésbé lógnak túl rajtuk. A ZX81 billentyűi egyenletes
+  sorokban állnak, a szürke blokkgrafikák pöttyösek maradtak, minden
+  méretben egyforma pöttyökkel; a ZXpand-os képeken az LPRINT és az LLIST
+  kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén a billentyűk
+  feletti feliratok a billentyűk közepén állnak, a betűk vékonyak
+  maradtak. A +2 és a +3 billentyűi olyanok, mint az eredetin, a betűk
+  dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
+  eredetiek (minden méretben élesek), a feliratok újra vannak rajzolva. A
+  többi billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában

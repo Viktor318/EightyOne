@@ -46,7 +46,6 @@ __published:	// IDE-managed Components
         TImage *spec128kbSpanish;
         TImage *ts2068kb;
         TImage *tc2048kb;
-        TImage *spec16kb;
         TImage *zx81zxpandkb;
         TImage *zx80zxpandkb;
         TImage *specPlus2kb;

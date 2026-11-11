@@ -617,7 +617,6 @@ void TKeyboard::KbChange(void)
         Keyboard->tk85kb->Visible=false;
         Keyboard->acekb->Visible=false;
         Keyboard->zx97kb->Visible=false;
-        Keyboard->spec16kb->Visible=false;
         Keyboard->spec48kb->Visible=false;
         Keyboard->spec48kbNordic->Visible=false;
         Keyboard->spec128kb->Visible=false;
@@ -788,7 +787,9 @@ void TKeyboard::KbChange(void)
                                         Keyboard->spec48kb->Visible=true;
                                 break;
                         case SPECCY16:
-                                Keyboard->spec16kb->Visible=true;
+                                // As the 48K (its picture was the 48K's with
+                                // light grey keys)
+                                Keyboard->spec48kb->Visible=true;
                                 break;
                         case SPECCYPLUS2:
                                 if (emulator.romcrc == CRCARABIC48V1 || emulator.romcrc == CRCARABIC48V2 || emulator.romcrc == CRCARABIC48V31)

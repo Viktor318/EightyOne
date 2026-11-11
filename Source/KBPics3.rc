@@ -2,9 +2,9 @@
 // this file): PNG at 200%, named after the TImages they are shown for.
 // They are in 3 files, each less than 1 MB
 
-spec128kb RCDATA "KBPics\\png\\spectrum128.png"
-zx81zxpandkb RCDATA "KBPics\\png\\zx81zxpand.png"
-zx97kb RCDATA "KBPics\\png\\zx97.png"
-specPlus2kb RCDATA "KBPics\\png\\spectrumplus2.png"
-ts2068kb RCDATA "KBPics\\png\\ts2068.png"
-acekb RCDATA "KBPics\\png\\ace.png"
+KeypadUk RCDATA "KBPics\\png\\keypad128.png"
+ts1000kb RCDATA "KBPics\\png\\ts1000.png"
+zx80kb RCDATA "KBPics\\png\\zx80.png"
+specPlus3kb RCDATA "KBPics\\png\\spectrumplus3.png"
+ts1500kb RCDATA "KBPics\\png\\ts1500.png"
+lambdakb RCDATA "KBPics\\png\\lambda8300.png"
