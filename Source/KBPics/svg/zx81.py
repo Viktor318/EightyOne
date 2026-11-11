@@ -132,9 +132,22 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
         p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
                        % (hexcol(b['c']), sc, -sc, left - sc * x0, (nk[1] + SIGNTOP + SIGN) * S, d))
 
+    # The big letters and digits (Viktor's choice): all BIGW times as wide
+    # as in the font, narrow as on the ZX81 (they were made as wide as their
+    # boxes, 0.64 to 1 times as wide; of the font's own widths W would reach
+    # its graphic), as high as they were, in the middle of their boxes
+    BIGW = 0.8
+
+    def big_box(b, t):
+        X, Y, W, H = p.moved(b)
+        d, (x0, y0, x1, y1) = font('herosb').outline(t)
+        w = BIGW * (x1 - x0) * H / (y1 - y0)
+        return X + W / 2 - w / 2, Y, w, H
+
     for ids, t in texts.items():
         if ids in big:
-            p.text(ids, t, fonts=('herosb',))
+            b = p.box(ids)
+            p.fit(t, *big_box(b, t), colour=b['c'], fonts=('herosb',))
         elif len(t) > 1 and any(c.isalpha() for c in t):
             p.word(ids, t, 'cnb', cap)
         elif t in FONTSIGNS and len(t) == 1:
@@ -167,7 +180,7 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
 
     # 0 with its slash, from the bottom left to the top right
     b = p.box(V(27))
-    X, Y, W, H = p.moved(b)
+    X, Y, W, H = big_box(b, '0')
     p.fit('0', X, Y, W, H, col['black'], fonts=('herosb',))
     p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
                    % (X + 0.6 * S, Y + H - 0.6 * S, X + W - 0.6 * S, Y + 0.6 * S, hexcol(col['black']), 1.3 * S))
@@ -225,9 +238,9 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     X, Y, W, H = p.moved(b)
     L = length(W)
     rect(round(X + W / 2 - L / 2), round(Y + H / 2 - T / 2), L, T, b['c'])
-    b = p.box(V(93))                    # + on K
-    X, Y, W, H = p.moved(b)
-    Lw, Lh = length(W), length(H)
+    b = p.box(V(93))                    # + on K: its two lines as long
+    X, Y, W, H = p.moved(b)             # as the shorter was (Viktor's
+    Lw = Lh = length(7 * S)             # choice; 9 and 7 pixels)
     l, t = round(X + W / 2 - Lw / 2), round(Y + H / 2 - Lh / 2)
     rect(l, t + (Lh - T) // 2, Lw, T, b['c'])
     rect(l + (Lw - T) // 2, t, T, Lh, b['c'])
@@ -273,7 +286,8 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     # ZX80): the dots squares of one size (D, as large as the dots were, 3 x
     # 2 pixels), the commas of Heros, their heads as large, their tails as
     # long as the heads are high; the lower dot of : and the comma of ; as
-    # far from the upper dot as in the original (7 pixels)
+    # far from the upper dot as on the ZX80 (6 pixels, Viktor's choice; they
+    # were 7)
     b = p.box(V(132))
     X, Y, W, H = p.moved(b)
     D = round(math.sqrt(W * H))
@@ -290,13 +304,13 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     p.box(V(143))
     l, t = round(X + W / 2 - D / 2), round(Y + H / 2 - D / 2)
     dot(l, t, b['c'])
-    dot(l, t + round(7 * S), b['c'])
+    dot(l, t + round(6 * S), b['c'])
     if V(133, 145) is not None:
         b = p.box(V(133, 145))
         X, Y, W, H = p.moved(b)
         l, t = round(X + 1.5 * S - D / 2), round(Y + S - D / 2)
         dot(l, t, b['c'])
-        comma_at(l, t + round(7 * S), b['c'])
+        comma_at(l, t + round(6 * S), b['c'])
     if V(139) is not None:
         b = p.box(V(139))
         X, Y, W, H = p.moved(b)

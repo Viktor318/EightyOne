@@ -38,15 +38,17 @@ készült. Magának az EightyOne-nak a változásai a
   számbillentyűk jelei is; a B csillaga a ZX80-é, olyan vékony, mint a /
   és a \, és egyik jel sem nagyobb a többinél; az ENTER a billentyű
   közepén áll, a CAPS SHIFT betűi szélesebbek, mint a Spectrumon. A ZX81
-  (és rokonai) billentyűi egyenletes sorokban állnak; a blokkgrafikák egy
-  méretűek, vékony kerettel és egyforma negyedekkel, a szürkék éles
-  pöttyökből álló sakktáblák; a $ ( ) ? £ jelek egy méretűek, a " vastag,
-  mint a ZX81-en, a − + = <= >= vonalai egyforma vastagok, a : ; és ,
-  olyan, mint a ZX80-on, a / 60 fokos, az 5-ös nyila a 8-asé tükrözve; a
-  ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a
-  CONFIG alatt. A ZX80 képén a billentyűk feletti feliratok és a számok a
-  billentyűk közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák
-  kerete 2 képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
+  (és rokonai) billentyűi egyenletes sorokban állnak; a nagybetűk és a
+  számok egyformán keskenyek, a betűtípus szélességének 0,8-szeresei, mint
+  a ZX81-en; a blokkgrafikák egy méretűek, vékony kerettel és egyforma
+  negyedekkel, a szürkék éles pöttyökből álló sakktáblák; a $ ( ) ? £
+  jelek egy méretűek, a " vastag, mint a ZX81-en, a − + = <= >= vonalai
+  egyforma vastagok, a + két szára egyforma, a : ; és , olyan, mint a
+  ZX80-on, a / 60 fokos, az 5-ös nyila a 8-asé tükrözve; a ZXpand-os
+  képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A
+  ZX80 képén a billentyűk feletti feliratok és a számok a billentyűk
+  közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák kerete 2
+  képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
   vastagok, a : két pontja egyforma, a ; egy ilyen pont és egy vessző, a .
   gomb vesszője is ilyen, a " olyan, mint a Spectrumon, a / 60 fokos. A +2
   és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
