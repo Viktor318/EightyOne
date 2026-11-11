@@ -33,7 +33,7 @@ készült. Magának az EightyOne-nak a változásai a
   rajtuk; a szavak és jelek úgy állnak, mint a Spectrum billentyűzetén: a
   billentyűk jobb alsó szavai és jobb felső piros szavai és jelei egyforma
   távolságra a jobb széltől, a billentyűk feletti és alatti szavak a
-  billentyűjük bal szélétől; az írásjelei (; " : , .) egy méretűek. A ZX81
+  billentyűjük bal szélétől; az írásjelei (; : , .) egy méretűek. A ZX81
   billentyűi egyenletes sorokban állnak, a szürke blokkgrafikák pöttyösek
   maradtak, minden méretben egyforma pöttyökkel; a ZXpand-os képeken az
   LPRINT és az LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén

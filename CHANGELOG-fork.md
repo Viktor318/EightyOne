@@ -31,8 +31,8 @@ itself are in `Release Files/Release history.txt`.
   can; its words and signs are placed as on the keyboard of the Spectrum:
   the keywords at the bottom right of the keys and the red words and signs
   at their top right, all as far from the right edge, the words above and
-  under the keys from the left edge of their keys; its punctuation (; " :
-  , .) is of one size. On the ZX81 the keys are in even rows, and the grey
+  under the keys from the left edge of their keys; its punctuation (; : ,
+  .) is of one size. On the ZX81 the keys are in even rows, and the grey
   block graphics keep their dots, of one size at every scale; on the
   ZXpand pictures LPRINT and LLIST stay small under ZXPAND and CONFIG. On
   the ZX80 the words above the keys are in the middle of them, and the

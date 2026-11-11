@@ -70,9 +70,10 @@ right edge and on the line of the tops of the big letters (the signs of
 their own sizes; the red signs of the number keys under their block
 graphics, on the line of the keywords), the words and signs above and
 under the keys 1 pixel from the left edge of their keys; the bars of
-− + = _ | all a pixel thick; the punctuation ; " : , . of one size, in
-Heros Bold with dots 3 pixels wide (; a full stop and a comma 1 pixel
-under it, as in the original). The words above the keys reach over their
+− + = _ | all a pixel thick; the punctuation ; : , . of one size, in
+Heros Bold with dots 3 pixels wide (; a full stop and a comma halfway
+between it and the top of the keyword under it), " as it was. The words
+above the keys reach over their
 keys' right edges as little as they can: CAPS LOCK and TRUE VIDEO with
 half a space between their two words and 1 pixel over (85% and 82% of
 their width), INV.VIDEO and GRAPHICS at 93.5%, MAGENTA at 96%. The
