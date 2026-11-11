@@ -247,6 +247,21 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         else:
             p.fit(t, X, Y, Wd, H, colour, fonts=('cnb', 'herosb'))
 
+    # The punctuation (; " : , .): all of one size (Viktor's choice: the
+    # dot of ; was larger than the full stop, " wider), in Heros Bold, its
+    # dots 3 pixels wide, not stretched; their tops where the tops of their
+    # boxes were. ; is a full stop and a comma 1 pixel under it, as in the
+    # original (that of the font, its dot high, would reach the keyword)
+    PUNCTUATION = {(84, 88): ';', 86: '"', (171, 185): ':', 181: ',', 183: '.'}
+    HB = font('herosb')
+    PSC = 3 * S / (HB.outline('.')[1][2] - HB.outline('.')[1][0])
+
+    def punctuation(t, right, top, colour):
+        d, (x0, y0, x1, y1) = HB.outline(t)
+        p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                       % (hexcol(colour), PSC, -PSC, right - PSC * x1, top + PSC * y1, d))
+        return top + PSC * (y1 - y0)
+
     for ids in TOPSIGNS:
         if ids == 179:
             continue
@@ -254,7 +269,15 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         X, Y, Wd, H = p.moved(b)
         k = p.key_of(b)
         nk = p.newkeys[k]
-        place(ids, texts.get(ids, ''), (nk[0] + nk[2] - MARGIN) * S - Wd, Y + row_shift(k) * S, Wd, H, b['c'])
+        Y += row_shift(k) * S
+        if ids in PUNCTUATION:
+            right = (nk[0] + nk[2] - MARGIN) * S
+            if PUNCTUATION[ids] == ';':
+                punctuation(',', right, punctuation('.', right, Y, b['c']) + S, b['c'])
+            else:
+                punctuation(PUNCTUATION[ids], right, Y, b['c'])
+            continue
+        place(ids, texts.get(ids, ''), (nk[0] + nk[2] - MARGIN) * S - Wd, Y, Wd, H, b['c'])
     for ids in NUMBERSIGNS:
         b = p.box(ids)
         X, Y, Wd, H = p.moved(b)
