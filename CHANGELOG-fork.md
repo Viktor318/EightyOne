@@ -31,8 +31,9 @@ itself are in `Release Files/Release history.txt`.
   can; its words and signs are placed as on the keyboard of the Spectrum:
   the keywords at the bottom right of the keys and the red words and signs
   at their top right, all as far from the right edge, the words above and
-  under the keys from the left edge of their keys; its punctuation (; : ,
-  .) is of one size, and so are the signs of the number keys; the star on
+  under the keys from the left edge of their keys, 2 pixels from them (the
+  colours and BLACK stay where they were); its punctuation (; : , .) is of
+  one size, and so are the signs of the number keys; the star on
   B is of the font too, and no sign is larger than the others; ENTER is in
   the middle of its key, and CAPS SHIFT has wider letters, as on the
   Spectrum. On the ZX81 the keys are in even rows, and the grey block

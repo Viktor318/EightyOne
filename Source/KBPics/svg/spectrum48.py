@@ -97,6 +97,12 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
     # edge); the words and signs above and under the keys LEFT pixels from
     # the left edge of their keys
     MARGIN, TOP, LEFT = 3, 5, 1
+    # the words above and under the keys (not the colours and BLACK): GAP
+    # pixels from them (Viktor's choice), above to the base line, under from
+    # the tops of the letters (the tail of $ not counted); the arrows above 5
+    # - 8 on the line of the words there
+    GAP = 2
+    COLOURS = (0, 1, 2, 3, 4, 5, 6)
     # the dots of the punctuation, the star on B and " on P (Viktor's
     # choice: not larger than the other signs), in pixels: the width of the
     # dots, the heights of the star and of "
@@ -182,6 +188,12 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         inside = kx <= b['x'] and b['x2'] <= kx + kw and ky <= b['y'] and b['y2'] <= ky + kh
         if not inside:
             X = left_of(b, X)
+            if ids not in COLOURS:
+                nk = p.newkeys[k]
+                if b['y'] + b['y2'] < 2 * ky + kh:
+                    base = (nk[1] - GAP) * S
+                else:
+                    base = (nk[1] + nk[3] + GAP + 7) * S
         if ids in (169, 187):
             # CAPS SHIFT: wider letters, as on the Spectrum (Viktor's
             # choice): of Heros Bold, as high as the others
@@ -239,11 +251,6 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         if sx < 1:
             print('narrower: %s %.2f' % (t, sx), file=sys.stderr)
         drawn.append((ids, t, left, base - 7 * S, left + w, base, inside, k))
-
-    # GRAPHICS and DELETE on the line of EDIT (they were 1 pixel higher)
-    for i in (16, 17):
-        p.words[i]['y'] += 1
-        p.words[i]['y2'] += 1
 
     # The two lines above the number keys were drawn on common lines, not with
     # their keys (which are 1 pixel off): only sideways with the keys
@@ -419,6 +426,7 @@ def draw(picture='spectrum48', key=(87, 128, 140)):
         b = p.box(i)
         X, Y, Wd, H = p.moved(b, 'x')
         X = left_of(b, X)
+        Y = (p.newkeys[p.key_of(b)][1] - GAP) * S - H
         sw = S
         # the arrow pointing left in a unit box, then turned
         pts = [(0, 0.5), (0.42, 0.0), (0.42, 0.28), (1, 0.28), (1, 0.72), (0.42, 0.72), (0.42, 1.0)]

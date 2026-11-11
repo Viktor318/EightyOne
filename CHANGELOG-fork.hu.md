@@ -33,7 +33,8 @@ készült. Magának az EightyOne-nak a változásai a
   rajtuk; a szavak és jelek úgy állnak, mint a Spectrum billentyűzetén: a
   billentyűk jobb alsó szavai és jobb felső piros szavai és jelei egyforma
   távolságra a jobb széltől, a billentyűk feletti és alatti szavak a
-  billentyűjük bal szélétől; az írásjelei (; : , .) egy méretűek, ahogy a
+  billentyűjük bal szélétől, 2 képpontra a billentyűtől (a színek és a
+  BLACK a helyükön maradtak); az írásjelei (; : , .) egy méretűek, ahogy a
   számbillentyűk jelei is; a B csillaga is a betűtípusé, és egyik jel sem
   nagyobb a többinél; az ENTER a billentyű közepén áll, a CAPS SHIFT betűi
   szélesebbek, mint a Spectrumon. A ZX81 billentyűi egyenletes sorokban
