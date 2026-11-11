@@ -322,6 +322,36 @@ class Picture:
 
 
 # ---- shared helpers ---------------------------------------------------------
+def comma(name='heros', tail=1.0):
+    """The comma of a font, its tail (the part under the base line) made
+    shorter or longer: tail times as long as the head is high; as
+    Font.outline() gives it"""
+    import re
+    d, (x0, y0, x1, y1) = font(name).outline(',')
+    k = tail * y1 / -y0
+    args = {'M': 2, 'L': 2, 'H': 1, 'V': 1, 'C': 6, 'Q': 4, 'Z': 0}
+    out, cmd, nums = [], None, []
+
+    def flush():
+        if cmd is None:
+            return
+        vals = []
+        for i, v in enumerate(nums):
+            is_y = cmd == 'V' or (cmd not in 'HV' and i % 2 == 1)
+            vals.append(v * k if is_y and v < 0 else v)
+        out.append(cmd + ' '.join('%g' % v for v in vals))
+    for tok in re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', d):
+        if tok.isalpha():
+            flush()
+            cmd, nums = tok.upper(), []
+            if tok.upper() not in args:
+                raise ValueError('comma(): path command %s' % tok)
+        else:
+            nums.append(float(tok))
+    flush()
+    return ''.join(out), (x0, y0 * k, x1, y1)
+
+
 def arrow_points(X, Y, W, H, direction, sw, head=0.42, s0=0.28, s1=0.72):
     """An outline arrow in a box: the points of its centre line"""
     pts = [(0, 0.5), (head, 0.0), (head, s0), (1, s0), (1, s1), (head, s1), (head, 1.0)]

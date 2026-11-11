@@ -41,9 +41,11 @@ készült. Magának az EightyOne-nak a változásai a
   billentyűi egyenletes sorokban állnak, a szürke blokkgrafikák pöttyösek
   maradtak, minden méretben egyforma pöttyökkel; a ZXpand-os képeken az
   LPRINT és az LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A ZX80 képén
-  a billentyűk feletti feliratok a billentyűk közepén állnak, a betűk
-  vékonyak maradtak. A +2 és a +3 billentyűi olyanok, mint az eredetin, a
-  betűk dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
+  a billentyűk feletti feliratok és a számok a billentyűk közepén állnak,
+  a betűk vékonyak maradtak; a − + = vonalai egyforma vastagok, a : két
+  pontja egyforma, a ; egy ilyen pont és egy vessző, a " olyan, mint a
+  Spectrumon. A +2 és a +3 billentyűi olyanok, mint az eredetin, a betűk
+  dőltek maradtak. A Timex képek keretei és billentyűi pixelre az
   eredetiek (minden méretben élesek), a feliratok újra vannak rajzolva. Az
   R470 kék, L alakú FUNC és ENTER billentyűje és türkiz GRAPHICS
   billentyűje megmaradt. A többi billentyűzet képe nem változott.

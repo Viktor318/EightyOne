@@ -5,7 +5,7 @@
 # ZX80 are found in it by their pixels; what is not found is not drawn.
 import os
 import sys
-from kbdraw import Picture, hexcol, arrow_points
+from kbdraw import Picture, hexcol, arrow_points, font, comma
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEY, YELLOW, WHITE = (72, 42, 254), (255, 201, 33), (255, 255, 255)
@@ -67,25 +67,95 @@ def draw(name, own=None):
             texts[v] = t
     texts.update(own or {})
     big = set(V(i) for i in BIG) - set([None])
+    digits = set(V(i) for i in range(10, 20)) - set([None])
 
     # The words (white, yellow and blue): all of one size, as high as in
     # the original and on the ZX81 (7 pixels), in the font's own spacing;
     # those above the keys in the middle of their keys. The letters and the
     # signs thin, as in the original
     for ids, t in texts.items():
-        if ids in big:
+        if ids in digits:
+            # the digits in the middle of their keys (Viktor's choice), of
+            # their sizes
+            b = p.box(ids)
+            X, Y, W, H = p.moved(b)
+            k = p.newkeys[p.key_of(b)]
+            p.fit(t, (k[0] + k[2] / 2) * S - W / 2, (k[1] + k[3] / 2) * S - H / 2, W, H, b['c'],
+                  fonts=('heros',))
+        elif ids in big:
             p.text(ids, t, fonts=('heros',))
+        elif t == ';':
+            continue                    # with : (below)
+        elif t == '"':
+            # as on the Spectrum (Viktor's choice): Heros Cn Bold, 5 pixels
+            # high, not stretched; in the middle of its box, at its top
+            b = p.box(ids)
+            X, Y, W, H = p.moved(b)
+            d, (x0, y0, x1, y1) = font('cnb').outline('"')
+            sc = 5 * S / (y1 - y0)
+            p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                           % (hexcol(b['c']), sc, -sc, X + W / 2 - sc * (x0 + x1) / 2, Y + sc * y1, d))
         elif len(t) > 1 and any(c.isalpha() for c in t):
             p.word(ids, t, 'cnb', 7, over=True)
         else:
             p.text(ids, t, fonts=('heros', 'cn'))
 
-    # Block graphics and the straight signs (- + = :): made of squares; the
-    # grey ones dotted, as in the original
-    for i in (29, 30, 31, 32, 59, 60, 61, 64, 65, 66, 84, 94):
+    # Block graphics: made of squares; the grey ones dotted, as in the
+    # original
+    for i in (29, 30, 31, 32, 59, 60, 61):
         p.pixels(V(i))
     for i in (33, 58, 62):
         p.dotted(V(i))
+
+    # The straight signs (Viktor's choice): the lines of - + = as thick as
+    # each other (T, on whole pixels; they were 1 or 2 pixels as their
+    # rows fell), + of two bars as long, crossing in their middles; the two
+    # dots of : of one size
+    T = max(1, round(S))
+
+    def rect(l, t, w, h):
+        p.items.append('<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>' % (l, t, w, h, hexcol(YELLOW)))
+
+    def bars(i):
+        """The box of a sign, the length of its lines (whole pixels, as
+        many at both sides of a line across it) and their left edge"""
+        b = p.box(V(i))
+        X, Y, W, H = p.moved(b)
+        L = round(W)
+        L -= (L - T) % 2
+        return X, Y, W, H, L, round(X + W / 2 - L / 2)
+
+    X, Y, W, H, L, l = bars(65)                 # - on J
+    rect(l, round(Y + H / 2 - T / 2), L, T)
+    X, Y, W, H, L, l = bars(64)                 # + on K
+    t = round(Y + H / 2 - L / 2)
+    rect(l, t + (L - T) // 2, L, T)
+    rect(l + (L - T) // 2, t, T, L)
+    X, Y, W, H, L, l = bars(66)                 # = on L: its lines where they were
+    t = round(Y + S / 2 - T / 2)
+    rect(l, t, L, T)
+    rect(l, t + round(3 * S), L, T)
+    # : on Z: two squares, as wide as the dots were (2 pixels), as far
+    # apart (6 pixels)
+    b = p.box(V(84))
+    p.box(V(94))
+    X, Y, W, H = p.moved(b)
+    D = round(W)
+    l, t = round(X + W / 2 - D / 2), round(Y + H / 2 - D / 2)
+    rect(l, t, D, D)
+    rect(l, t + round(6 * S), D, D)
+    # ; on X (Viktor's choice): a dot as those of :, and under it, as far
+    # as the dots of : are, a comma of Heros, its head as large, its tail as
+    # long as the head is high (as in the original; that of the font is
+    # longer)
+    b = p.box(V(85, 95))
+    X, Y, W, H = p.moved(b)
+    l, t = round(X + S - D / 2), round(Y + S - D / 2)
+    rect(l, t, D, D)
+    d, (x0, y0, x1, y1) = comma('heros', 1.0)
+    sc = D / (x1 - x0)
+    p.items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
+                   % (hexcol(YELLOW), sc, -sc, l - sc * x0, t + round(6 * S) + sc * y1, d))
 
     # / on V: a thin line
     b = p.box(V(87))
