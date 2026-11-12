@@ -473,11 +473,13 @@ def add_word_method():
     import sys
 
     def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False, gap=6,
-             left=None, base=None):
+             left=None, base=None, width=None):
         # over: a word above or under a key, in the middle of the key (True:
         # the nearest key; or the number of the key); gap: the room kept
         # before the next thing on its line, outside the keys; left, base:
-        # where it begins and its base line, if not as in the original
+        # where it begins and its base line, if not as in the original;
+        # width: how wide it is at most (of the font's own width; narrower
+        # only if there is no room)
         given = (left, base)
         S = self.S
         b = self.box(ids)
@@ -521,7 +523,7 @@ def add_word_method():
         else:
             rights = [o['x'] - gap for o in self.words.values() if same(o) and o['x'] >= b['x2']]
             room = min(rights + [self.w - 2]) - b['x']
-        sx = min(1.0, room * S / w)
+        sx = min(1.0 if width is None else width, room * S / w)
         w *= sx
         if given[1] is not None:
             base = given[1]

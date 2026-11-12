@@ -102,6 +102,9 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     # beginning WLEFT (pixels of the picture) from the left edges of their
     # keys (Viktor's choice; they were where they were in the original)
     WGAP, WLEFT = 2, round(3 * S)
+    # the red words at most REDW of the font's own width, as the big letters
+    # (Viktor's choice; narrower where there is no room)
+    REDW = 0.8
 
     def red(ids):
         return list(p.words[ids if isinstance(ids, int) else ids[0]]['c']) == list(col['red'])
@@ -187,36 +190,50 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
                 else:
                     base = round((nk[1] + nk[3]) * S) + (WGAP + cap) * S
                 p.word(ids, t, 'cnb', cap, left=round(nk[0] * S) + WLEFT, base=base)
+            elif red(ids):
+                p.word(ids, t, 'heros', cap, width=REDW)
             else:
-                p.word(ids, t, 'heros' if red(ids) else 'cnb', cap)
+                p.word(ids, t, 'cnb', cap)
         elif t in FONTSIGNS and len(t) == 1:
             b = p.box(ids)
             X, Y, W, H = p.moved(b)
             font_sign(t, b, X, W)
-        elif t in '";,':
+        elif t in '";,<>':
             continue                    # below
         else:
             p.text(ids, t, fonts=('heros',) if red(ids) else ('cnb', 'herosb'))
         b = p.box(ids)
         if ids not in big and on_key(b) and (red(ids) or t in CENTRED):
             mark(b, start, t in CENTRED)
-    # small words (under bigger ones): 5 pixels high (they were 4), and as
-    # wide as the original's proportions allow, up to the big letter at
-    # their left (1 pixel from it) and the edge of the key (1 pixel); at
-    # the right, as in the original
+    # small words (under bigger ones): SMALLH pixels high (they were 4), the
+    # red ones at most as wide as the red words, the others as the original's
+    # proportions allow, but beginning SMALLGAP pixels (of the picture)
+    # after the big letter at their left (Viktor's choice); their right
+    # edges where those of the red texts are (see reds); as far from the
+    # word above them as from the graphic under them (Viktor's choice)
+    SMALLH, SMALLGAP = 5, 2
+    F = max(1, int(S))
+    NB = 2 * round((11.5 * S - 2 * F) / 2) + 2 * F
     for ids, t in (small or {}).items():
         b = p.box(ids)
         ki = p.key_of(b)
-        k, nk = p.keys[ki], p.newkeys[ki]
-        h = 5
-        lefts = [o['x2'] + 1 for o in p.words.values() if o is not b and p.key_of(o) == ki
-                 and o['x2'] <= b['x'] and o['y'] < b['y'] + h and b['y'] < o['y2']]
-        left = max(lefts + [k[0] + 2])
-        right = min(b['x2'], k[0] + k[2] - 1)
-        w = min((b['x2'] - b['x']) * h / (b['y2'] - b['y']), right - left)
-        dx = nk[0] - k[0]
+        nk = p.newkeys[ki]
+        h = SMALLH
+        right = round((nk[0] + nk[2]) * S) - round(3 * S)
+        lefts = [big_box(p.words[i], texts[i]) for i in big if p.key_of(p.words[i]) == ki]
+        left = max([x + w for x, y, w, hh in lefts] + [nk[0] * S + 2 * S]) + SMALLGAP
+        if red(ids):
+            # at most as wide as the red words (REDW of the font's own width)
+            d, (x0, y0, x1, y1) = SF.outline(t)
+            w = min(REDW * (x1 - x0) * h * S / (y1 - y0), right - left)
+        else:
+            w = min((b['x2'] - b['x']) * h / (b['y2'] - b['y']) * S, right - left)
+        above = max(o['y2'] for o in p.words.values() if o is not b and p.key_of(o) == ki
+                    and o['y2'] <= b['y'] and o['c'] == b['c'])
+        above = (above + nk[1] - p.keys[ki][1]) * S
+        graphic = round((nk[1] + nk[3]) * S) - round(4 * S) - NB
         start = len(p.items)
-        p.fit(t, (right - w + dx) * S, b['y'] * S, w * S, h * S, b['c'],
+        p.fit(t, right - w, (above + graphic - h * S) / 2, w, h * S, b['c'],
               fonts=('heros',) if red(ids) else ('cnb',), maxtrack=0.04)
         if red(ids):
             mark(b, start)
@@ -259,8 +276,6 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     # quarters of one size (some were a pixel narrower), each filled, empty
     # or dotted (the grey, a chequer of the original's dots) as in the
     # original; 3 and 4 pixels from the right and bottom edges of their keys
-    F = max(1, int(S))
-    NB = 2 * round((11.5 * S - 2 * F) / 2) + 2 * F
     for i in (11, 13, 15, 17, 19, 21, 23, 25, 62, 63, 64, 65, 66, 67, 107, 108, 109, 110, 111, 112):
         p.block(V(i), NB, F, max(1, round(S)), right=round(3 * S), bottom=round(4 * S))
 
@@ -305,18 +320,39 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     start = len(p.items)
     equals(X + W / 2, W, Y, b['c'])
     mark(b, start, whole=True)
-    b = p.box(V(43, 55))                # = of <= on R
-    X, Y, W, H = p.moved(b)
-    start = len(p.items)
-    equals(X + W / 2, W, Y, b['c'])
-    mark(b, start, whole=True)
-    # >= on Y: > and the two lines of = were found as one
-    b = p.box(V(46))
-    X, Y, W, H = p.moved(b)
-    start = len(p.items)
-    p.fit('>', X, Y, 9 * S, 7 * S, b['c'], fonts=('heros',))
-    equals(X + 15 * S, 8 * S, Y + S, b['c'])
-    mark(b, start, whole=True)
+
+    # < and > (Viktor's choice, as on the ZX81): wide, LTW pixels wide and
+    # LTH high (thin, of Heros, stretched; they were 8 or 9 wide), LTGAP
+    # pixels from the = or the other one next to them (they were 2 or 3); in
+    # the middle of the line of the = (as they were)
+    LTW, LTH, LTGAP = 11, 7, 2.5
+
+    def chevron(t, left, cy, colour):
+        p.fit(t, left, cy - LTH * S / 2, LTW * S, LTH * S, colour, fonts=('heros',))
+
+    def bars(left, cy, colour):
+        L = length(8 * S)
+        t = round(cy - 2 * S - T / 2)
+        rect(round(left), t, L, T, colour)
+        rect(round(left), t + round(4 * S), L, T, colour)
+
+    for first, second in ((42, '='), (44, 45), (46, '='), (137, None), (138, None)):
+        if V(first) is None:
+            continue
+        b = p.box(V(first))
+        X, Y, W, H = p.moved(b)
+        cy = Y + 3.5 * S
+        t = '>' if first in (45, 46, 138) else '<'
+        start = len(p.items)
+        chevron(t, X, cy, b['c'])
+        if second == '=':
+            if first == 42:
+                p.box(V(43, 55))
+            bars(X + (LTW + LTGAP) * S, cy, b['c'])
+        elif second is not None:
+            p.box(V(second))
+            chevron('>', X + (LTW + LTGAP) * S, cy, b['c'])
+        mark(b, start, whole=second == '=')
 
     # " on Q (twice) and P (Viktor's choice, after a photo of the ZX81): of
     # Heros, QUOTE pixels high and QWIDTH wide; their
@@ -392,8 +428,8 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
 
     # The stars (** on H, * on B): five pointed, as on the ZX81 (Viktor's
     # choice, after a photo of it): five strokes from the middle with round
-    # ends, STARW thick, and a full middle (a circle STARC across); as high
-    # as the stars were, in the middle of their places
+    # ends, STARW thick, and a full middle (a circle STARC across); in the
+    # middle of their places
     STARW, STARC = 1.4, 0.9
 
     def star(X, Y, W, H):
@@ -407,16 +443,20 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
                            % (cx, cy, cx + r * math.cos(ang), cy - r * math.sin(ang), hexcol(col['red']), w))
         p.items.append('<circle cx="%.2f" cy="%.2f" r="%.2f" fill="%s"/>' % (cx, cy, STARC * S, hexcol(col['red'])))
 
+    # (Viktor's choice: a pixel higher than they were, and so a pixel apart
+    # more on H)
+    SG = S
     b = p.box(V(92))
     X, Y, W, H = p.moved(b)
+    H += SG
     start = len(p.items)
-    star(X, Y, 7 * S, H)
-    star(X + 8 * S, Y, 7 * S, H)
+    star(X, Y, 7 * S + SG, H)
+    star(X + 8 * S + SG, Y, 7 * S + SG, H)
     mark(b, start)
     b = p.box(V(136))
     X, Y, W, H = p.moved(b)
     start = len(p.items)
-    star(X, Y, W, H)
+    star(X, Y, W + SG, H + SG)
     mark(b, start)
 
     # The cursor arrows above 5 - 8: outlines, the heads long; that on 5 the

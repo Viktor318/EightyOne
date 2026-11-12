@@ -40,21 +40,23 @@ készült. Magának az EightyOne-nak a változásai a
   közepén áll, a CAPS SHIFT betűi szélesebbek, mint a Spectrumon. A ZX81
   (és rokonai) billentyűi egyenletes sorokban állnak; a nagybetűk és a
   számok egyformán keskenyek, a betűtípus szélességének 0,8-szeresei, mint
-  a ZX81-en; a piros szavak és jelek vékonyak, mint ott, a jobb szélük 5
-  képpontra van (100%-on) a billentyű jobb szélétől, mint a grafikáké, a
-  GRAPHICS, a RUBOUT, a FUNCTION és a NEW LINE, a SPACE és a SHIFT
-  felirata a billentyű közepén áll; a billentyűk feletti és alatti fehér
-  szavak 2 képpontra vannak tőlük (az eredeti méretben), és 5 képpontra
-  kezdődnek a billentyű bal szélétől; a blokkgrafikák egy méretűek, vékony
-  kerettel és egyforma negyedekkel, a szürkék éles pöttyökből álló
-  sakktáblák; a $ ( ) ? £ jelek egy méretűek és vékonyak, mint a ZX81-en,
-  a " vastag, mint a ZX81-en, a − + = <= >= vonalai egyforma vastagok, a +
-  két szára egyforma, a : ; és , olyan, mint a ZX80-on, a / 60 fokos, a *
-  ötágú, mint a ZX81-en, az 5-ös nyila a 8-asé tükrözve; a ZXpand-os
-  képeken az LPRINT és az LLIST kicsi maradt a ZXPAND és a CONFIG alatt. A
-  ZX80 képén a billentyűk feletti feliratok és a számok a billentyűk
-  közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák kerete 2
-  képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
+  a ZX81-en; a piros szavak és jelek vékonyak, mint ott, a szavak
+  legfeljebb a betűtípus szélességének 0,8-szeresei (mint a nagybetűk), a
+  < és a > széles, a jobb szélük 5 képpontra van (100%-on) a billentyű
+  jobb szélétől, mint a grafikáké, a GRAPHICS, a RUBOUT, a FUNCTION és a
+  NEW LINE, a SPACE és a SHIFT felirata a billentyű közepén áll; a
+  billentyűk feletti és alatti fehér szavak 2 képpontra vannak tőlük (az
+  eredeti méretben), és 5 képpontra kezdődnek a billentyű bal szélétől; a
+  blokkgrafikák egy méretűek, vékony kerettel és egyforma negyedekkel, a
+  szürkék éles pöttyökből álló sakktáblák; a $ ( ) ? £ jelek egy méretűek
+  és vékonyak, mint a ZX81-en, a " vastag, mint a ZX81-en, a − + = <= >=
+  vonalai egyforma vastagok, a + két szára egyforma, a : ; és , olyan,
+  mint a ZX80-on, a / 60 fokos, a * ötágú, mint a ZX81-en, az 5-ös nyila a
+  8-asé tükrözve; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
+  ZXPAND és a CONFIG alatt, félúton köztük és a grafika között, nem érve a
+  nagy betűhöz. A ZX80 képén a billentyűk feletti feliratok és a számok a
+  billentyűk közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák
+  kerete 2 képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
   vastagok, a : két pontja egyforma, a ; egy ilyen pont és egy vessző, a .
   gomb vesszője is ilyen, a " olyan, mint a Spectrumon, a / 60 fokos. A +2
   és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
