@@ -27,10 +27,12 @@ are sharp at any size:
 | `lambda8300.py` | `Keyboard_.dfm`, `lambdakb` | `orig/lambda8300.png` |
 | `tk85.py` | `Keyboard_.dfm`, `tk85kb` | `orig/tk85.png` |
 | `r470.py` | `Keyboard_.dfm`, `r470kb` | `orig/r470.png` |
+| `zx80functions.py` | `KeyboardFunctions_.dfm`, `zx80IntegralFunctions` | `orig/zx80functions.png` |
 
 They are drawn at 100% of the window (1.75 times the originals: 884 × 390,
-the keypad 263 × 390), and the program holds them at 200%, its largest
-size (1768 × 780, the keypad 526 × 780), as PNG pictures in 256 colours
+the keypad 263 × 390, the ZX80 functions 228 × 95), and the program holds
+them at 200%, its largest size (1768 × 780, the keypad 526 × 780, the
+ZX80 functions 456 × 190), as PNG pictures in 256 colours
 (the colours of the surfaces exactly) in its resources, named after the
 TImages they are shown for (`../png/<name>.png`, put into the program by
 `../../KBPics1.rc`–`KBPics3.rc`: three files, as the linker of C++Builder
@@ -128,7 +130,10 @@ above the keys, blue under them, yellow on them), as close to the block
 graphics after them as in the original (`word(..., gap=2)`), the words of
 the large keys as in the original; its stars of three thin lines, as
 there. `analyze.py` finds its keys with `apart`, as its blue words touch
-its grey keys.
+its grey keys. The ZX80 functions (the window beside the ZX80 keyboard)
+has no keys: `zx80functions.py` gives the places of its words itself (as
+in the original), of Heros Bold (wide, as the letters there), 7 pixels
+high as the words of the ZX80.
 
 ## Making them
 
@@ -146,6 +151,8 @@ C++Builder (the resources changed). A new picture goes into the table of
 `make.py` (`PICTURES`), and its old picture out of its form, with
 
     python3 dfmclear.py ../../Keyboard_.dfm <TImage>
+
+(the ZX80 functions: `../../KeyboardFunctions_.dfm zx80IntegralFunctions`).
 
 `analyze.py` needs to run again only if an original changes:
 

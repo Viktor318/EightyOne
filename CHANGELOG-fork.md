@@ -14,23 +14,24 @@ itself are in `Release Files/Release history.txt`.
 - The pictures of the **Spectrum 16K, 48K, 128, +2 and +3 keyboards, of
   the 128 keypad and of the ZX81 keyboard (also with the ZXpand, the
   TS1000, with and without the ZXpand, and the ZX97), of the ZX80 keyboard
-  (also with the ZXpand), and of the Timex TC2048, TS2068 and TS1500 (also
-  with the ZXpand) keyboards, and of the Jupiter Ace, Lambda 8300, TK85
-  and Ringo R470 keyboards** are drawn again as vector graphics, at 100%
-  (see below), and held at 200% (1768 × 780, the keypad 526 × 780) as PNG
-  pictures in the resources of the program, so they are sharp: at 200% the
-  picture is shown as it is, at the other sizes the program makes it
-  smaller itself, each pixel the average of the part of the picture it
-  covers (at 100% of four pixels, so it is as sharp as drawn), the same on
-  every Windows. The program is smaller by this (5.8 MB, it was 18 MB), as
-  these pictures are no longer in the forms. Same layout and colours as
-  before; the words of a picture are of one size and in the font's own
-  spacing (TeX Gyre Heros), the 48K (the 16K shows it too: its own picture
-  was the same with light grey keys) has its key rows a little further
-  apart, and its words above the keys reach over them as little as they
-  can; its words and signs are placed as on the keyboard of the Spectrum:
-  the keywords at the bottom right of the keys and the red words and signs
-  at their top right, all as far from the right edge, the words above and
+  (also with the ZXpand) and of its functions window, and of the Timex
+  TC2048, TS2068 and TS1500 (also with the ZXpand) keyboards, and of the
+  Jupiter Ace, Lambda 8300, TK85 and Ringo R470 keyboards** are drawn
+  again as vector graphics, at 100% (see below), and held at 200% (1768 ×
+  780, the keypad 526 × 780, the ZX80 functions 456 × 190) as PNG pictures
+  in the resources of the program, so they are sharp: at 200% the picture
+  is shown as it is, at the other sizes the program makes it smaller
+  itself, each pixel the average of the part of the picture it covers (at
+  100% of four pixels, so it is as sharp as drawn), the same on every
+  Windows. The program is smaller by this (5.8 MB, it was 18 MB), as these
+  pictures are no longer in the forms. Same layout and colours as before;
+  the words of a picture are of one size and in the font's own spacing
+  (TeX Gyre Heros), the 48K (the 16K shows it too: its own picture was the
+  same with light grey keys) has its key rows a little further apart, and
+  its words above the keys reach over them as little as they can; its
+  words and signs are placed as on the keyboard of the Spectrum: the
+  keywords at the bottom right of the keys and the red words and signs at
+  their top right, all as far from the right edge, the words above and
   under the keys from the left edge of their keys, 2 pixels from them (the
   colours and BLACK stay where they were); its punctuation (; : , .) is of
   one size, and so are the signs of the number keys; the star on B is that
@@ -62,7 +63,9 @@ itself are in `Release Files/Release history.txt`.
   keys as in the original and their slanted letters. The Timex pictures
   keep their frames and keys pixel for pixel (sharp at every size), their
   texts are drawn again. The R470 keeps its blue L-shaped FUNC and ENTER
-  keys and its cyan GRAPHICS key. The other keyboards keep their pictures.
+  keys and its cyan GRAPHICS key. The words of the ZX80 functions are of
+  Heros Bold (wide, as in the original). The other keyboards keep their
+  pictures.
 - *Help > Keyboard Map* sizes: **75%, 100%, 125%, 150%, 175% and 200%**;
   100%, the first, is 884 × 390, 1.75 times the original pictures (505 ×
   223; the sizes were 1x–2x). The size is shown in the title of the window

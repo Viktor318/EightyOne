@@ -36,14 +36,15 @@ SCALE = 1.75
 STORED = 2
 
 # The pictures and the TImages they are shown for (in Keyboard_.dfm, the
-# keypad in Keypad_.dfm)
+# keypad in Keypad_.dfm, the ZX80 functions in KeyboardFunctions_.dfm)
 PICTURES = [('spectrum48', 'spec48kb'), ('spectrum128', 'spec128kb'),
             ('keypad128', 'KeypadUk'), ('zx81', 'zx81kb'), ('zx81zxpand', 'zx81zxpandkb'),
             ('ts1000', 'ts1000kb'), ('ts1000zxpand', 'ts1000zxpandkb'), ('zx97', 'zx97kb'),
             ('zx80', 'zx80kb'), ('zx80zxpand', 'zx80zxpandkb'), ('spectrumplus2', 'specPlus2kb'),
             ('spectrumplus3', 'specPlus3kb'), ('tc2048', 'tc2048kb'), ('ts2068', 'ts2068kb'),
             ('ts1500', 'ts1500kb'), ('ts1500zxpand', 'ts1500zxpandkb'), ('ace', 'acekb'),
-            ('lambda8300', 'lambdakb'), ('tk85', 'tk85kb'), ('r470', 'r470kb')]
+            ('lambda8300', 'lambdakb'), ('tk85', 'tk85kb'), ('r470', 'r470kb'),
+            ('zx80functions', 'zx80IntegralFunctions')]
 NAMES = [name for name, image in PICTURES]
 
 

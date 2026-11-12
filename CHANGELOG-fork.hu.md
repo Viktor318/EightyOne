@@ -15,44 +15,45 @@ készült. Magának az EightyOne-nak a változásai a
 - A **Spectrum 16K, 48K, 128, +2 és +3 billentyűzetének, a 128 numerikus
   billentyűzetének és a ZX81 billentyűzetének (a ZXpand-os, a TS1000 –
   ZXpand-dal és anélkül – és a ZX97 változattal együtt), a ZX80
-  billentyűzetének (a ZXpand-os változattal együtt), valamint a Timex
-  TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt), valamint a Jupiter
-  Ace, a Lambda 8300, a TK85 és a Ringo R470 billentyűzetének** képe újra
-  van rajzolva vektorgrafikaként, 100%-os méretre (lásd lent), és 200%-os
-  méretben (1768 × 780, a keypad 526 × 780) PNG-képként van a program
-  erőforrásai között, így éles: 200%-on a kép változatlanul látszik, a
-  többi méreten a program maga kicsinyíti, minden képpont a kép általa
-  lefedett részének átlaga (100%-on négy képponté, így olyan éles, mint a
-  rajz), minden Windowson ugyanúgy. A program ettől kisebb lett (5,8 MB,
-  eddig 18 MB), mert ezek a képek már nincsenek az űrlapokban. Az
-  elrendezés és a színek a régiek; egy képen belül minden szó egyforma
-  méretű és a betűtípus saját betűközével áll (TeX Gyre Heros), a 48K (a
-  16K is ezt mutatja: a saját képe ugyanez volt világosszürke
-  billentyűkkel) billentyűsorai kicsit távolabb vannak egymástól, a
-  billentyűk feletti feliratai pedig a lehető legkevésbé lógnak túl
-  rajtuk; a szavak és jelek úgy állnak, mint a Spectrum billentyűzetén: a
-  billentyűk jobb alsó szavai és jobb felső piros szavai és jelei egyforma
-  távolságra a jobb széltől, a billentyűk feletti és alatti szavak a
-  billentyűjük bal szélétől, 2 képpontra a billentyűtől (a színek és a
-  BLACK a helyükön maradtak); az írásjelei (; : , .) egy méretűek, ahogy a
-  számbillentyűk jelei is; a B csillaga a ZX80-é, olyan vékony, mint a /
-  és a \, és egyik jel sem nagyobb a többinél; az ENTER a billentyű
-  közepén áll, a CAPS SHIFT betűi szélesebbek, mint a Spectrumon. A ZX81
-  (és rokonai) billentyűi egyenletes sorokban állnak; a nagybetűk és a
-  számok egyformán keskenyek, a betűtípus szélességének 0,8-szeresei, mint
-  a ZX81-en; a piros szavak és jelek vékonyak, mint ott, a szavak
-  legfeljebb a betűtípus szélességének 0,8-szeresei (mint a nagybetűk), a
-  < és a > széles, a jobb szélük 5 képpontra van (100%-on) a billentyű
-  jobb szélétől, mint a grafikáké, a GRAPHICS, a RUBOUT, a FUNCTION és a
-  NEW LINE, a SPACE és a SHIFT felirata a billentyű közepén áll; a
-  billentyűk feletti és alatti fehér szavak 2 képpontra vannak tőlük (az
-  eredeti méretben), és 5 képpontra kezdődnek a billentyű bal szélétől; a
-  blokkgrafikák egy méretűek, vékony kerettel és egyforma negyedekkel, a
-  szürkék éles pöttyökből álló sakktáblák; a $ ( ) ? £ jelek egy méretűek
-  és vékonyak, mint a ZX81-en, a " vastag, mint a ZX81-en, a − + = <= >=
-  vonalai egyforma vastagok, a + két szára egyforma, a : ; és , olyan,
-  mint a ZX80-on, a / 60 fokos, a * ötágú, mint a ZX81-en, az 5-ös nyila a
-  8-asé tükrözve; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
+  billentyűzetének (a ZXpand-os változattal együtt) és funkcióablakának,
+  valamint a Timex TC2048, TS2068 és TS1500 (a ZXpand-ossal együtt),
+  valamint a Jupiter Ace, a Lambda 8300, a TK85 és a Ringo R470
+  billentyűzetének** képe újra van rajzolva vektorgrafikaként, 100%-os
+  méretre (lásd lent), és 200%-os méretben (1768 × 780, a keypad 526 ×
+  780, a ZX80-funkciók 456 × 190) PNG-képként van a program erőforrásai
+  között, így éles: 200%-on a kép változatlanul látszik, a többi méreten a
+  program maga kicsinyíti, minden képpont a kép általa lefedett részének
+  átlaga (100%-on négy képponté, így olyan éles, mint a rajz), minden
+  Windowson ugyanúgy. A program ettől kisebb lett (5,8 MB, eddig 18 MB),
+  mert ezek a képek már nincsenek az űrlapokban. Az elrendezés és a színek
+  a régiek; egy képen belül minden szó egyforma méretű és a betűtípus
+  saját betűközével áll (TeX Gyre Heros), a 48K (a 16K is ezt mutatja: a
+  saját képe ugyanez volt világosszürke billentyűkkel) billentyűsorai
+  kicsit távolabb vannak egymástól, a billentyűk feletti feliratai pedig a
+  lehető legkevésbé lógnak túl rajtuk; a szavak és jelek úgy állnak, mint
+  a Spectrum billentyűzetén: a billentyűk jobb alsó szavai és jobb felső
+  piros szavai és jelei egyforma távolságra a jobb széltől, a billentyűk
+  feletti és alatti szavak a billentyűjük bal szélétől, 2 képpontra a
+  billentyűtől (a színek és a BLACK a helyükön maradtak); az írásjelei (;
+  : , .) egy méretűek, ahogy a számbillentyűk jelei is; a B csillaga a
+  ZX80-é, olyan vékony, mint a / és a \, és egyik jel sem nagyobb a
+  többinél; az ENTER a billentyű közepén áll, a CAPS SHIFT betűi
+  szélesebbek, mint a Spectrumon. A ZX81 (és rokonai) billentyűi
+  egyenletes sorokban állnak; a nagybetűk és a számok egyformán keskenyek,
+  a betűtípus szélességének 0,8-szeresei, mint a ZX81-en; a piros szavak
+  és jelek vékonyak, mint ott, a szavak legfeljebb a betűtípus
+  szélességének 0,8-szeresei (mint a nagybetűk), a < és a > széles, a jobb
+  szélük 5 képpontra van (100%-on) a billentyű jobb szélétől, mint a
+  grafikáké, a GRAPHICS, a RUBOUT, a FUNCTION és a NEW LINE, a SPACE és a
+  SHIFT felirata a billentyű közepén áll; a billentyűk feletti és alatti
+  fehér szavak 2 képpontra vannak tőlük (az eredeti méretben), és 5
+  képpontra kezdődnek a billentyű bal szélétől; a blokkgrafikák egy
+  méretűek, vékony kerettel és egyforma negyedekkel, a szürkék éles
+  pöttyökből álló sakktáblák; a $ ( ) ? £ jelek egy méretűek és vékonyak,
+  mint a ZX81-en, a " vastag, mint a ZX81-en, a − + = <= >= vonalai
+  egyforma vastagok, a + két szára egyforma, a : ; és , olyan, mint a
+  ZX80-on, a / 60 fokos, a * ötágú, mint a ZX81-en, az 5-ös nyila a 8-asé
+  tükrözve; a ZXpand-os képeken az LPRINT és az LLIST kicsi maradt a
   ZXPAND és a CONFIG alatt, félúton köztük és a grafika között, nem érve a
   nagy betűhöz. A ZX80 képén a billentyűk feletti feliratok és a számok a
   billentyűk közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák
@@ -62,8 +63,9 @@ készült. Magának az EightyOne-nak a változásai a
   és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
   Timex képek keretei és billentyűi pixelre az eredetiek (minden méretben
   élesek), a feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és
-  ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A többi
-  billentyűzet képe nem változott.
+  ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A
+  ZX80-funkciók szavai Heros Bold betűsek (szélesek, mint az eredetin). A
+  többi billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában
