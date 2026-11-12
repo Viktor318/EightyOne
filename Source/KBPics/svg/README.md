@@ -30,9 +30,9 @@ are sharp at any size:
 | `zx80functions.py` | `KeyboardFunctions_.dfm`, `zx80IntegralFunctions` | `orig/zx80functions.png` |
 
 They are drawn at 100% of the window (1.75 times the originals: 884 × 390,
-the keypad 263 × 390, the ZX80 functions 228 × 95), and the program holds
+the keypad 263 × 390, the ZX80 functions 177 × 95), and the program holds
 them at 200%, its largest size (1768 × 780, the keypad 526 × 780, the
-ZX80 functions 456 × 190), as PNG pictures in 256 colours
+ZX80 functions 354 × 190), as PNG pictures in 256 colours
 (the colours of the surfaces exactly) in its resources, named after the
 TImages they are shown for (`../png/<name>.png`, put into the program by
 `../../KBPics1.rc`–`KBPics3.rc`: three files, as the linker of C++Builder
@@ -131,9 +131,11 @@ graphics after them as in the original (`word(..., gap=2)`), the words of
 the large keys as in the original; its stars of three thin lines, as
 there. `analyze.py` finds its keys with `apart`, as its blue words touch
 its grey keys. The ZX80 functions (the window beside the ZX80 keyboard)
-has no keys: `zx80functions.py` gives the places of its words itself (as
-in the original), of Heros Bold (wide, as the letters there), 7 pixels
-high as the words of the ZX80.
+has no keys: `zx80functions.py` gives the places of its words itself, as
+the words of the ZX80 (Heros Cn Bold, 7 pixels high), the functions in
+three columns over the width of the title, the picture as wide as the
+title and its margins (101 pixels; the window in `KeyboardFunctions_.dfm`
+as wide).
 
 ## Making them
 

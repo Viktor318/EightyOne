@@ -3,39 +3,52 @@
 # it), drawn again at a scale (2 if not given)
 #
 # The original (orig/zx80functions.png, 130 x 54) has no keys; the places of
-# its words are written here: their left edges and base lines, in pixels of
-# the original. The words are of Heros Bold (Viktor's choice: wide, as the
-# letters of the original), as high as the words of the ZX80 (7 pixels),
-# in the font's own spacing.
+# its words are written here, in pixels of the original. The words are of
+# Heros Cn Bold, as those of the ZX80 (7 pixels high), in the font's own
+# spacing; the functions in three columns over the width of the title
+# (Viktor's choice): the first at its left, the last ending at its right,
+# the middle one halfway between; the picture as wide as the title and the
+# margins at its sides (6 pixels, as in the original), 101 pixels (it was
+# 130: KeyboardFunctions_.dfm, the TImage and the window, as wide)
 import sys
 from kbdraw import font, hexcol
 
 WHITE, YELLOW, BLACK = (255, 255, 255), (255, 201, 33), (0, 0, 0)
-SIZE = (130, 54)
+SIZE = (101, 54)
+MARGIN = 6
 
-# The title, and the functions in three columns (as in the original)
-TITLE = ('INTEGRAL FUNCTIONS', 6, 13)
-COLUMNS = (6, 56, 103)
+# The title (its base line), and the functions (the base lines of the
+# three lines of them), as in the original
+TITLE = ('INTEGRAL FUNCTIONS', 13)
 LINES = (28, 38, 48)
 FUNCTIONS = (('CHR$', 'STR$', 'TL$'), ('PEEK', 'CODE', 'RND'), ('USR', 'ABS'))
 
 
 def main():
     S = float(sys.argv[2]) if len(sys.argv) > 2 else 2
-    f = font('herosb')
-    sc = 7 * S / f.outline('H')[1][3]
+    f = font('cnb')
+    sc = 7 / f.outline('H')[1][3]       # in pixels of the original
+
+    def width(t):
+        d, (x0, y0, x1, y1) = f.outline(t)
+        return (x1 - x0) * sc
+
     items = []
 
     def word(t, left, base, colour):
         d, (x0, y0, x1, y1) = f.outline(t)
         items.append('<path fill="%s" transform="matrix(%.5f 0 0 %.5f %.3f %.3f)" d="%s"/>'
-                     % (hexcol(colour), sc, -sc, left - sc * x0, base, d))
+                     % (hexcol(colour), sc * S, -sc * S, (left - sc * x0) * S, base * S, d))
 
-    t, left, base = TITLE
-    word(t, left * S, base * S, WHITE)
-    for x, words in zip(COLUMNS, FUNCTIONS):
-        for y, t in zip(LINES, words):
-            word(t, x * S, y * S, YELLOW)
+    t, base = TITLE
+    tw = width(t)
+    word(t, MARGIN, base, WHITE)
+    widths = [max(width(w) for w in c) for c in FUNCTIONS]
+    gap = (tw - sum(widths)) / 2
+    columns = (MARGIN, MARGIN + widths[0] + gap, MARGIN + tw - widths[2])
+    for x, words in zip(columns, FUNCTIONS):
+        for y, w in zip(LINES, words):
+            word(w, x, y, YELLOW)
 
     W, H = int((SIZE[0] * S * 4 + 2) // 4), int((SIZE[1] * S * 4 + 2) // 4)
     out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">' % (W, H, W, H),

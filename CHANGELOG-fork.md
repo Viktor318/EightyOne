@@ -18,7 +18,7 @@ itself are in `Release Files/Release history.txt`.
   TC2048, TS2068 and TS1500 (also with the ZXpand) keyboards, and of the
   Jupiter Ace, Lambda 8300, TK85 and Ringo R470 keyboards** are drawn
   again as vector graphics, at 100% (see below), and held at 200% (1768 ×
-  780, the keypad 526 × 780, the ZX80 functions 456 × 190) as PNG pictures
+  780, the keypad 526 × 780, the ZX80 functions 354 × 190) as PNG pictures
   in the resources of the program, so they are sharp: at 200% the picture
   is shown as it is, at the other sizes the program makes it smaller
   itself, each pixel the average of the part of the picture it covers (at
@@ -63,9 +63,10 @@ itself are in `Release Files/Release history.txt`.
   keys as in the original and their slanted letters. The Timex pictures
   keep their frames and keys pixel for pixel (sharp at every size), their
   texts are drawn again. The R470 keeps its blue L-shaped FUNC and ENTER
-  keys and its cyan GRAPHICS key. The words of the ZX80 functions are of
-  Heros Bold (wide, as in the original). The other keyboards keep their
-  pictures.
+  keys and its cyan GRAPHICS key. The words of the ZX80 functions are as
+  those of the ZX80, the functions in three columns over the width of the
+  title, and the window is narrower by so much. The other keyboards keep
+  their pictures.
 - *Help > Keyboard Map* sizes: **75%, 100%, 125%, 150%, 175% and 200%**;
   100%, the first, is 884 × 390, 1.75 times the original pictures (505 ×
   223; the sizes were 1x–2x). The size is shown in the title of the window

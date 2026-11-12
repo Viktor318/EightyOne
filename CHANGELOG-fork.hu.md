@@ -20,7 +20,7 @@ készült. Magának az EightyOne-nak a változásai a
   valamint a Jupiter Ace, a Lambda 8300, a TK85 és a Ringo R470
   billentyűzetének** képe újra van rajzolva vektorgrafikaként, 100%-os
   méretre (lásd lent), és 200%-os méretben (1768 × 780, a keypad 526 ×
-  780, a ZX80-funkciók 456 × 190) PNG-képként van a program erőforrásai
+  780, a ZX80-funkciók 354 × 190) PNG-képként van a program erőforrásai
   között, így éles: 200%-on a kép változatlanul látszik, a többi méreten a
   program maga kicsinyíti, minden képpont a kép általa lefedett részének
   átlaga (100%-on négy képponté, így olyan éles, mint a rajz), minden
@@ -64,8 +64,9 @@ készült. Magának az EightyOne-nak a változásai a
   Timex képek keretei és billentyűi pixelre az eredetiek (minden méretben
   élesek), a feliratok újra vannak rajzolva. Az R470 kék, L alakú FUNC és
   ENTER billentyűje és türkiz GRAPHICS billentyűje megmaradt. A
-  ZX80-funkciók szavai Heros Bold betűsek (szélesek, mint az eredetin). A
-  többi billentyűzet képe nem változott.
+  ZX80-funkciók szavai olyanok, mint a ZX80 billentyűzetén, a függvények
+  három oszlopban a cím szélességében állnak, és az ablak ennyivel
+  keskenyebb. A többi billentyűzet képe nem változott.
 - A *Súgó > Billentyűzetkiosztás* méretei: **75%, 100%, 125%, 150%, 175%
   és 200%**; az első, a 100% 884 × 390, az eredeti képek (505 × 223)
   1,75-szöröse (eddig a méretek 1x–2x voltak). A méret az ablak címsorában

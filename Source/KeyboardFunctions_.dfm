@@ -7,7 +7,7 @@ object KeyboardFunctions: TKeyboardFunctions
   BorderStyle = bsToolWindow
   Caption = 'Functions'
   ClientHeight = 54
-  ClientWidth = 130
+  ClientWidth = 101
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,7 +25,7 @@ object KeyboardFunctions: TKeyboardFunctions
   object zx80IntegralFunctions: TImage
     Left = 0
     Top = 0
-    Width = 130
+    Width = 101
     Height = 54
     Stretch = True
     OnDblClick = zx80IntegralFunctionsDblClick
