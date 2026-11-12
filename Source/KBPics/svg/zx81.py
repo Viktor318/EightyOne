@@ -96,6 +96,34 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
             texts[v] = t
     texts.update(own or {})
     big = set(V(i) for i in BIG) - set([None])
+    # The red texts (not SHIFT): of Heros (thin, as on the ZX81; Viktor's
+    # choice). The white ones above and under the keys: WGAP pixels from
+    # them (above to the base line, under from the tops of the capitals),
+    # beginning WLEFT (pixels of the picture) from the left edges of their
+    # keys (Viktor's choice; they were where they were in the original)
+    WGAP, WLEFT = 2, round(3 * S)
+
+    def red(ids):
+        return list(p.words[ids if isinstance(ids, int) else ids[0]]['c']) == list(col['red'])
+
+    # The red texts and signs on the keys (Viktor's choice, as on the ZX81):
+    # their right edges as far from the right edges of their keys as those
+    # of the graphics; FUNCTION, GRAPHICS, RUBOUT and the words of the big
+    # keys (NEW LINE, SPACE, SHIFT) in the middle of their keys. Each is
+    # marked as drawn (reds: its items, its key, whether in the middle,
+    # whether on whole pixels), and moved at the end; those side by side on
+    # a key moved together
+    reds = []
+    CENTRED = ('GRAPHICS', 'RUBOUT', 'DELETE', 'FUNCTION', 'NEW', 'LINE', 'ENTER', 'SPACE', 'SHIFT')
+
+    def mark(b, start, centre=False, whole=False):
+        # whole: on whole pixels, to be moved by whole pixels
+        if len(p.items) > start:
+            reds.append((start, len(p.items), p.key_of(b), centre, whole))
+
+    def on_key(b):
+        kx, ky, kw, kh = p.keys[p.key_of(b)]
+        return kx <= b['x'] and b['x2'] <= kx + kw and ky <= b['y'] and b['y2'] <= ky + kh
 
     # The words (white, red and black): all of one size, as high as EDIT
     # (7 pixels; the white ones were 6), in the font's own spacing. A white
@@ -118,10 +146,9 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     # their tops (that of the capitals) on one line a row, SIGNTOP pixels
     # under the tops of the keys (as most were); each in the middle of its
     # box. < and > stay wide, as in the original and on the ZX81 (Viktor's
-    # choice); " (of Heros Bold) and ; and , below
+    # choice); " and ; and , below
     SIGN, SIGNTOP = 10, 4
     FONTSIGNS = '$()?£'
-    HB = font('herosb')
     SF = font('heros')
 
     def font_sign(t, b, X, W):
@@ -145,11 +172,23 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
         return X + W / 2 - w / 2, Y, w, H
 
     for ids, t in texts.items():
+        start = len(p.items)
         if ids in big:
             b = p.box(ids)
             p.fit(t, *big_box(b, t), colour=b['c'], fonts=('herosb',))
         elif len(t) > 1 and any(c.isalpha() for c in t):
-            p.word(ids, t, 'cnb', cap)
+            b = p.box(ids)
+            if list(b['c']) == list(col['label']) and not on_key(b):
+                k = p.key_of(b)
+                kx, ky, kw, kh = p.keys[k]
+                nk = p.newkeys[k]
+                if b['y'] + b['y2'] < 2 * ky + kh:
+                    base = round(nk[1] * S) - WGAP * S
+                else:
+                    base = round((nk[1] + nk[3]) * S) + (WGAP + cap) * S
+                p.word(ids, t, 'cnb', cap, left=round(nk[0] * S) + WLEFT, base=base)
+            else:
+                p.word(ids, t, 'heros' if red(ids) else 'cnb', cap)
         elif t in FONTSIGNS and len(t) == 1:
             b = p.box(ids)
             X, Y, W, H = p.moved(b)
@@ -157,7 +196,10 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
         elif t in '";,':
             continue                    # below
         else:
-            p.text(ids, t)
+            p.text(ids, t, fonts=('heros',) if red(ids) else ('cnb', 'herosb'))
+        b = p.box(ids)
+        if ids not in big and on_key(b) and (red(ids) or t in CENTRED):
+            mark(b, start, t in CENTRED)
     # small words (under bigger ones): 5 pixels high (they were 4), and as
     # wide as the original's proportions allow, up to the big letter at
     # their left (1 pixel from it) and the edge of the key (1 pixel); at
@@ -173,10 +215,16 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
         right = min(b['x2'], k[0] + k[2] - 1)
         w = min((b['x2'] - b['x']) * h / (b['y2'] - b['y']), right - left)
         dx = nk[0] - k[0]
-        p.fit(t, (right - w + dx) * S, b['y'] * S, w * S, h * S, b['c'], fonts=('cnb',), maxtrack=0.04)
+        start = len(p.items)
+        p.fit(t, (right - w + dx) * S, b['y'] * S, w * S, h * S, b['c'],
+              fonts=('heros',) if red(ids) else ('cnb',), maxtrack=0.04)
+        if red(ids):
+            mark(b, start)
 
     # SHIFT: big, as in the original
+    start = len(p.items)
     p.text(V(141), 'SHIFT', fonts=('herosb', 'cnb'))
+    mark(p.box(V(141)), start, True)
 
     # 0 with its slash, from the bottom left to the top right
     b = p.box(V(27))
@@ -185,21 +233,25 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="%s" stroke-width="%g"/>'
                    % (X + 0.6 * S, Y + H - 0.6 * S, X + W - 0.6 * S, Y + 0.6 * S, hexcol(col['black']), 1.3 * S))
 
-    # π: as high as the words around it, in their font
+    # π: as high as the words around it, in their font, where they are
     b = p.box(V(159))
     X, Y, W, H = p.moved(b)
-    p.fit('π', X - 0.25 * S, Y, W + 0.5 * S, H + 1 * S, col['label'], fonts=('cnb',))
+    nk = p.newkeys[p.key_of(b)]
+    p.fit('π', round(nk[0] * S) + WLEFT, round((nk[1] + nk[3]) * S) + WGAP * S, W + 0.5 * S, H + 1 * S,
+          col['label'], fonts=('cnb',))
 
     # / on V: a line, as thin as the strokes of the words, at 60 degrees
     # (Viktor's choice; it was steeper), as high as it was, in the middle of
     # its place
     b = p.box(V(135))
     X, Y, W, H = p.moved(b)
+    start = len(p.items)
     dy = H - 0.4 * S
     dx = dy / math.tan(math.radians(60))
     cx, cy = X + W / 2, Y + H / 2
     p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%g"/>'
                    % (cx - dx / 2, cy + dy / 2, cx + dx / 2, cy - dy / 2, hexcol(col['red']), 1.25 * S))
+    mark(b, start)
 
     # The block graphics (Viktor's choice): all of one size (about 11.5
     # pixels; they were 10 to 12 wide, 12 high), their frames thin (F, on
@@ -237,32 +289,42 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     b = p.box(V(103))                   # - on J
     X, Y, W, H = p.moved(b)
     L = length(W)
+    start = len(p.items)
     rect(round(X + W / 2 - L / 2), round(Y + H / 2 - T / 2), L, T, b['c'])
+    mark(b, start, whole=True)
     b = p.box(V(93))                    # + on K: its two lines as long
     X, Y, W, H = p.moved(b)             # as the wider was (Viktor's choice;
     Lw = Lh = length(9 * S)             # 9 and 7 pixels)
     l, t = round(X + W / 2 - Lw / 2), round(Y + H / 2 - Lh / 2)
+    start = len(p.items)
     rect(l, t + (Lh - T) // 2, Lw, T, b['c'])
     rect(l + (Lw - T) // 2, t, T, Lh, b['c'])
+    mark(b, start, whole=True)
     b = p.box(V(94, 106))               # = on L
     X, Y, W, H = p.moved(b)
+    start = len(p.items)
     equals(X + W / 2, W, Y, b['c'])
+    mark(b, start, whole=True)
     b = p.box(V(43, 55))                # = of <= on R
     X, Y, W, H = p.moved(b)
+    start = len(p.items)
     equals(X + W / 2, W, Y, b['c'])
+    mark(b, start, whole=True)
     # >= on Y: > and the two lines of = were found as one
     b = p.box(V(46))
     X, Y, W, H = p.moved(b)
-    p.fit('>', X, Y, 9 * S, 7 * S, b['c'], fonts=('herosb', 'cnb'))
+    start = len(p.items)
+    p.fit('>', X, Y, 9 * S, 7 * S, b['c'], fonts=('heros',))
     equals(X + 15 * S, 8 * S, Y + S, b['c'])
+    mark(b, start, whole=True)
 
     # " on Q (twice) and P (Viktor's choice, after a photo of the ZX81): of
-    # Heros Bold (thick, as there), QUOTE pixels high and QWIDTH wide; their
+    # Heros, QUOTE pixels high and QWIDTH wide; their
     # tops on the line of the signs; the two on Q QGAP pixels apart (more
     # than the strokes of one, as there), at the right of their place, the
     # one on P in the middle of its box
     QUOTE, QWIDTH, QGAP = 3.5, 5, 3
-    qd, (q0, q1, q2, q3) = HB.outline('"')
+    qd, (q0, q1, q2, q3) = SF.outline('"')
     qsc = QUOTE * S / (q3 - q1)
     qsx = QWIDTH * S / (q2 - q0)
 
@@ -275,12 +337,16 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
     if V(38, 39) is not None:
         b = p.box(V(38, 39))
         X, Y, W, H = p.moved(b)
+        start = len(p.items)
         quote(X + W - qw, b)
         quote(X + W - 2 * qw - QGAP * S, b)
+        mark(b, start)
     if V(50) is not None:
         b = p.box(V(50))
         X, Y, W, H = p.moved(b)
+        start = len(p.items)
         quote(X + W / 2 - qw / 2, b)
+        mark(b, start)
 
     # : on Z, ; on X and , on the full stop (Viktor's choice, as on the
     # ZX80): the dots squares of one size (D, as large as the dots were, 3 x
@@ -303,18 +369,26 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
 
     p.box(V(143))
     l, t = round(X + W / 2 - D / 2), round(Y + H / 2 - D / 2)
+    start = len(p.items)
     dot(l, t, b['c'])
     dot(l, t + round(6 * S), b['c'])
+    mark(b, start, whole=True)
     if V(133, 145) is not None:
         b = p.box(V(133, 145))
         X, Y, W, H = p.moved(b)
         l, t = round(X + 1.5 * S - D / 2), round(Y + S - D / 2)
+        start = len(p.items)
         dot(l, t, b['c'])
+        mark(b, start, whole=True)
+        start = len(p.items)
         comma_at(l, t + round(6 * S), b['c'])
+        mark(b, start)
     if V(139) is not None:
         b = p.box(V(139))
         X, Y, W, H = p.moved(b)
+        start = len(p.items)
         comma_at(round(X + 1.5 * S - D / 2), round(Y + S - D / 2), b['c'])
+        mark(b, start)
 
     # The stars (** on H, * on B): five pointed, as on the ZX81 (Viktor's
     # choice, after a photo of it): five strokes from the middle with round
@@ -335,11 +409,15 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
 
     b = p.box(V(92))
     X, Y, W, H = p.moved(b)
+    start = len(p.items)
     star(X, Y, 7 * S, H)
     star(X + 8 * S, Y, 7 * S, H)
+    mark(b, start)
     b = p.box(V(136))
     X, Y, W, H = p.moved(b)
+    start = len(p.items)
     star(X, Y, W, H)
+    mark(b, start)
 
     # The cursor arrows above 5 - 8: outlines, the heads long; that on 5 the
     # one on 8 turned (Viktor's choice; it was a pixel longer), at the right
@@ -353,8 +431,41 @@ def draw(name, own=None, small=None, ignore=(), colours=None, palette=None, more
             # on whole pixels, so that they are mirror images pixel for pixel
             X, W = round(X + (W - W8 if i == 4 else 0)), round(W8)
         pts = arrow_points(X, Y, W, H, direction, S, head=head, s0=s0, s1=s1)
+        start = len(p.items)
         p.items.append('<polygon fill="none" stroke="%s" stroke-width="%g" points="%s"/>'
                        % (hexcol(col['red']), S, ' '.join('%g,%g' % q for q in pts)))
+        mark(b, start, whole=i in (4, 7))
+
+    # The red texts and signs moved (see reds above): on each key those
+    # side by side (one over the other they are moved each)
+    GR = round(3 * S)
+    for k in sorted(set(r[2] for r in reds)):
+        nk = p.newkeys[k]
+        area = (nk[0] * S - 8, nk[1] * S - 8, (nk[0] + nk[2]) * S + 8, (nk[1] + nk[3]) * S + 8)
+        lines = []
+        for start, end, kk, centre, whole in reds:
+            if kk != k:
+                continue
+            ink = p.ink_box([(start, end)], area)
+            if ink is None:
+                continue
+            for ln in lines:
+                if ink[1] < ln['y1'] and ln['y0'] < ink[3]:
+                    ln['ranges'].append((start, end))
+                    ln['x0'], ln['x1'] = min(ln['x0'], ink[0]), max(ln['x1'], ink[2])
+                    ln['y0'], ln['y1'] = min(ln['y0'], ink[1]), max(ln['y1'], ink[3])
+                    ln['centre'] |= centre
+                    ln['whole'] |= whole
+                    break
+            else:
+                lines.append(dict(ranges=[(start, end)], x0=ink[0], y0=ink[1], x1=ink[2], y1=ink[3],
+                                  centre=centre, whole=whole))
+        for ln in lines:
+            if ln['centre']:
+                dx = (nk[0] + nk[2] / 2) * S - (ln['x0'] + ln['x1']) / 2
+            else:
+                dx = round((nk[0] + nk[2]) * S) - GR - ln['x1']
+            p.move(ln['ranges'], round(dx) if ln['whole'] else dx)
 
     # extra: what else the picture draws itself (extra(p))
     if extra:

@@ -317,6 +317,35 @@ class Picture:
                                 rect(cl, ct, cr - cl, cb - ct)
         self.items.append('<path fill="%s" d="%s"/>' % (hexcol(c), ''.join(parts)))
 
+    def ink_box(self, ranges, box, zoom=8):
+        """The edges (x0, y0, x1, y1) of the ink of the items in ranges
+        ([(start, end)] of self.items) drawn alone, in box (x0, y0, x1, y1,
+        pixels of the picture): measured on a picture of them zoom times as
+        large (rsvg-convert); None if there is none"""
+        import subprocess
+        import tempfile
+        x0, y0 = int(math.floor(box[0])), int(math.floor(box[1]))
+        w, h = int(math.ceil(box[2])) - x0, int(math.ceil(box[3])) - y0
+        body = '\n'.join(self.items[i] for a, b in ranges for i in range(a, b))
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="%d %d %d %d">%s</svg>'
+               % (w, h, x0, y0, w, h, body))
+        with tempfile.TemporaryDirectory() as d:
+            f = os.path.join(d, 'ink.svg')
+            open(f, 'w').write(svg)
+            subprocess.check_call(['rsvg-convert', '-z', str(zoom), f, '-o', os.path.join(d, 'ink.png')])
+            a = np.array(Image.open(os.path.join(d, 'ink.png')).convert('RGBA'))[:, :, 3] > 0
+        ys, xs = np.nonzero(a)
+        if not len(xs):
+            return None
+        return x0 + xs.min() / zoom, y0 + ys.min() / zoom, x0 + (xs.max() + 1) / zoom, y0 + (ys.max() + 1) / zoom
+
+    def move(self, ranges, dx):
+        """The items in ranges moved dx pixels sideways"""
+        for a, b in ranges:
+            if b > a:
+                self.items[a] = '<g transform="translate(%.3f 0)">' % dx + self.items[a]
+                self.items[b - 1] += '</g>'
+
     def same_texts(self, analysis, picture, dx=2, dy=(-10, 2), colours=True):
         """The numbers of another picture's texts in this one: {its number:
         number here}, for the texts of the same pixels and colour, the
@@ -443,10 +472,13 @@ def add_word_method():
     (left, right or centre); a little narrower only if there is no room"""
     import sys
 
-    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False, gap=6):
+    def word(self, ids, t, fontname, cap_px, colour=None, follow=True, margin=2, over=False, gap=6,
+             left=None, base=None):
         # over: a word above or under a key, in the middle of the key (True:
         # the nearest key; or the number of the key); gap: the room kept
-        # before the next thing on its line, outside the keys
+        # before the next thing on its line, outside the keys; left, base:
+        # where it begins and its base line, if not as in the original
+        given = (left, base)
         S = self.S
         b = self.box(ids)
         X, Y, Wd, H = self.moved(b, follow)
@@ -491,7 +523,11 @@ def add_word_method():
             room = min(rights + [self.w - 2]) - b['x']
         sx = min(1.0, room * S / w)
         w *= sx
-        if align == 'centre':
+        if given[1] is not None:
+            base = given[1]
+        if given[0] is not None:
+            left = given[0]
+        elif align == 'centre':
             left = X + Wd / 2 - w / 2
         elif align == 'over':
             left = (nk[0] + nk[2] / 2) * S - w / 2

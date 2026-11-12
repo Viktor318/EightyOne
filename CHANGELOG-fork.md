@@ -38,24 +38,29 @@ itself are in `Release Files/Release history.txt`.
   ENTER is in the middle of its key, and CAPS SHIFT has wider letters, as
   on the Spectrum. On the ZX81 (and its relatives) the keys are in even
   rows; the big letters and digits are all 0.8 times as wide as in the
-  font, narrow as on the ZX81; the block graphics are of one size, their
-  frames thin and their quarters of one size, the grey ones a chequer of
-  sharp dots; the signs $ ( ) ? £ are of one size and thin, as on the
-  ZX81, " is thick, as on the ZX81, the lines of − + = <= >= are as thick
-  as each other, the two lines of + as long, : ; and , are as on the ZX80,
-  / is at 60 degrees, * is five pointed, as on the ZX81, and the arrow on
-  5 is that on 8 turned; on the ZXpand pictures LPRINT and LLIST stay
-  small under ZXPAND and CONFIG. On the ZX80 the words above the keys are
-  in the middle of them, and so are the digits on their keys, and the
-  letters stay thin; the frames of the block graphics are 2 pixels thick
-  and their quarters of one size, the lines of − + = are as thick as each
-  other, the two dots of : are of one size, ; is such a dot and a comma,
-  so is the comma on the full stop, " is as on the Spectrum, and / is at
-  60 degrees. The +2 and +3 keep their keys as in the original and their
-  slanted letters. The Timex pictures keep their frames and keys pixel for
-  pixel (sharp at every size), their texts are drawn again. The R470 keeps
-  its blue L-shaped FUNC and ENTER keys and its cyan GRAPHICS key. The
-  other keyboards keep their pictures.
+  font, narrow as on the ZX81; the red words and signs are thin, as there,
+  their right edges 5 pixels (at 100%) from the right edges of the keys,
+  as those of the graphics, GRAPHICS, RUBOUT, FUNCTION and the words of
+  NEW LINE, SPACE and SHIFT in the middle of their keys; the white words
+  above and under the keys are 2 pixels from them (at the original size)
+  and begin 5 pixels from the left edges of their keys; the block graphics
+  are of one size, their frames thin and their quarters of one size, the
+  grey ones a chequer of sharp dots; the signs $ ( ) ? £ are of one size
+  and thin, as on the ZX81, " is thick, as on the ZX81, the lines of − + =
+  <= >= are as thick as each other, the two lines of + as long, : ; and ,
+  are as on the ZX80, / is at 60 degrees, * is five pointed, as on the
+  ZX81, and the arrow on 5 is that on 8 turned; on the ZXpand pictures
+  LPRINT and LLIST stay small under ZXPAND and CONFIG. On the ZX80 the
+  words above the keys are in the middle of them, and so are the digits on
+  their keys, and the letters stay thin; the frames of the block graphics
+  are 2 pixels thick and their quarters of one size, the lines of − + =
+  are as thick as each other, the two dots of : are of one size, ; is such
+  a dot and a comma, so is the comma on the full stop, " is as on the
+  Spectrum, and / is at 60 degrees. The +2 and +3 keep their keys as in
+  the original and their slanted letters. The Timex pictures keep their
+  frames and keys pixel for pixel (sharp at every size), their texts are
+  drawn again. The R470 keeps its blue L-shaped FUNC and ENTER keys and
+  its cyan GRAPHICS key. The other keyboards keep their pictures.
 - *Help > Keyboard Map* sizes: **75%, 100%, 125%, 150%, 175% and 200%**;
   100%, the first, is 884 × 390, 1.75 times the original pictures (505 ×
   223; the sizes were 1x–2x). The size is shown in the title of the window
