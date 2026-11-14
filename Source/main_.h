@@ -384,7 +384,7 @@ public:		// User declarations
         bool NoZoomSnap;        // while leaving full screen
         void __fastcall N3001Click(TObject *Sender);
         void SetZoom(int factor);
-        void SetWindowFrame(bool minimizeMaximize);
+        void SetWindowFrame(bool maximize);
         int ZoomChecked(void);
         bool ZoomSnapping(void);
         void SnapZoomSize(int &width, int &height, bool byHeight);

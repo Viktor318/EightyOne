@@ -122,6 +122,12 @@ itself are in `Release Files/Release history.txt`.
   more is taken off the list with a message. The list is kept in the
   settings file (`[RECENTFILES]`), written at each change.
 
+### Main window
+
+- The main window has its minimize button with the zoom sizes (100%,
+  200%, 300%, 400%) too; until now only *User Defined* had it, as in
+  EightyOne. The maximize button stays with *User Defined* only.
+
 ### Fixes
 
 - A floppy disk image dragged onto the window goes into drive A; the file

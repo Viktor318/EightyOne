@@ -126,6 +126,13 @@ készült. Magának az EightyOne-nak a változásai a
   fájl üzenettel lekerül a listáról. A lista a beállításfájlban van
   (`[RECENTFILES]`), és minden változáskor kiíródik.
 
+### Főablak
+
+- A főablaknak a nagyításoknál (100%, 200%, 300%, 400%) is van kis méret
+  (minimalizáló) gombja; eddig, mint az EightyOne-ban, csak a *User
+  Defined* méretnél volt. A teljes méret gomb továbbra is csak a *User
+  Defined* méretnél van.
+
 ### Javítások
 
 - Az ablakra húzott hajlékonylemez-kép az A meghajtóba kerül; eddig

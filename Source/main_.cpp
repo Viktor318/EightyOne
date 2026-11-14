@@ -620,29 +620,31 @@ void TForm1::SetZoom(int factor)
 }
 //---------------------------------------------------------------------------
 
-// A resizable frame, with or without the minimize and maximize buttons.
-// Once the window exists, the style is changed directly: changing
+// A resizable frame with the minimize button, with or without the maximize
+// button (not with the zoom sizes: a maximized window would not have one
+// of them). Once the window exists, the style is changed directly: changing
 // BorderStyle or BorderIcons would make the VCL create the window again,
 // and the sound output and the display would have to be set up again
-void TForm1::SetWindowFrame(bool minimizeMaximize)
+void TForm1::SetWindowFrame(bool maximize)
 {
         StatusBar1->SizeGrip = true;
 
         if (!HandleAllocated())
         {
                 TBorderIcons icons = BorderIcons;
-                if (minimizeMaximize) icons << biMinimize << biMaximize;
-                else icons >> biMinimize >> biMaximize;
+                icons << biMinimize;
+                if (maximize) icons << biMaximize;
+                else icons >> biMaximize;
                 BorderIcons = icons;
                 BorderStyle = bsSizeable;
                 return;
         }
 
         LONG style = GetWindowLong(Handle, GWL_STYLE);
-        LONG newStyle = style | WS_THICKFRAME;
+        LONG newStyle = style | WS_THICKFRAME | WS_MINIMIZEBOX;
 
-        if (minimizeMaximize) newStyle |= WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-        else newStyle &= ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+        if (maximize) newStyle |= WS_MAXIMIZEBOX;
+        else newStyle &= ~WS_MAXIMIZEBOX;
 
         if (newStyle != style)
         {
@@ -659,7 +661,8 @@ void TForm1::SetWindowFrame(bool minimizeMaximize)
 void __fastcall TForm1::FormCanResize(TObject *Sender, int &NewWidth,
                                       int &NewHeight, bool &Resize)
 {
-        if (!ZoomSnapping()) return;
+        // not while minimized (or minimizing): the size is not dragged then
+        if (!ZoomSnapping() || IsIconic(Handle)) return;
 
         SnapZoomSize(NewWidth, NewHeight, NewWidth == Width && NewHeight != Height);
 }
