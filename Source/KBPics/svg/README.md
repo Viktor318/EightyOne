@@ -21,6 +21,7 @@ are sharp at any size:
 | `spectrumplus3.py` | `Keyboard_.dfm`, `specPlus3kb` | `orig/spectrumplus3.png` |
 | `tc2048.py` | `Keyboard_.dfm`, `tc2048kb` | `orig/tc2048.png` |
 | `ts2068.py` | `Keyboard_.dfm`, `ts2068kb` | `orig/ts2068.png` |
+| `tc2068timeword.py` | `Keyboard_.dfm`, `tc2068kbTimeWord` | `orig/tc2068timeword.png` |
 | `ts1500.py` | `Keyboard_.dfm`, `ts1500kb` | `orig/ts1500.png` |
 | `ts1500zxpand.py` | `Keyboard_.dfm`, `ts1500zxpandkb` | `orig/ts1500zxpand.png` |
 | `ace.py` | `Keyboard_.dfm`, `acekb` | `orig/ace.png` |
@@ -104,11 +105,18 @@ and lines from its corners to the corners of the key, and their slanted
 letters (Heros Bold Italic); the words all 5 pixels high, as most of them.
 The Timex TC2048 and TS2068 (one picture in two colourings, with five
 words of its own under the keys: `timex.py`) are made of lines of whole
-pixels: their frames, lines, keys and block graphics are drawn of their
-pixels, and only the texts are drawn again (found on and around each key,
-by a table of the legends of the keys): above and under the keys and on
-the large keys 5 pixels high, on the keys 4 (as in the original), the
-arrows as shapes, ~ and \ as thin lines. The TS1500 (and its ZXpand
+pixels: their frames, lines and keys are drawn of their pixels, and the
+texts are drawn again (found on and around each key, by a table of the
+legends of the keys): above and under the keys and on the large keys 5
+pixels high, on the keys 4 (as in the original), the arrows as shapes,
+~ and \ as thin lines, the ' on 7 a thin slanting line. Their block
+graphics are drawn again (Viktor's choice): of one size, their frames thin
+(a pixel at 100%), their quarters of one size. The TC2068 with the
+TimeWord cartridge (`tc2068timeword.py`, by `timex.py` too) is the TS2068
+picture with the words of TimeWord above and under the keys (the
+Portuguese letters among them in Heros Cn Bold, of the size of the other
+words) and no colour strip or frames; TIMEWORD V 1.2 thin (Heros, 7
+pixels), PROCESSADOR DE TEXTO as the other words. The TS1500 (and its ZXpand
 picture, by `ts1500.py` too) keeps its keys, a light edge and a darker
 rounded top, in even rows; its words all 6 pixels high, as most of them,
 a little narrower on the tops where a block graphic is next to them. The
@@ -166,6 +174,7 @@ C++Builder (the resources changed). A new picture goes into the table of
     python3 analyze.py orig/spectrumplus2.png spectrumplus2 146,150,158/64,64,64 2 0,0,0
     python3 analyze.py orig/tc2048.png tc2048 166,166,164 2 0,0,0 small=8,8
     python3 analyze.py orig/ts2068.png ts2068 166,166,164 2 210,210,214 small=8,8
+    python3 analyze.py orig/tc2068timeword.png tc2068timeword 166,166,164 2 210,210,214 small=8,8
     python3 analyze.py orig/<name>.png <name> 211,209,209 2 123,123,123 123,123,123/211,209,209/145,143,143/255,255,255/0,0,0    (the TS1500s)
     python3 analyze.py orig/ace.png ace 30,23,9 2 255,255,255
     python3 analyze.py orig/lambda8300.png lambda8300 149,179,174 2 102,102,102 102,102,102/149,179,174/104,150,142/255,255,255/242,207,65/0,0,0

@@ -1,11 +1,15 @@
-# timex.py: the Timex TC2048 and TS2068 keyboard pictures, drawn again
-# (tc2048.py and ts2068.py call draw())
+# timex.py: the Timex TC2048 and TS2068 keyboard pictures, and the TC2068
+# one with the TimeWord cartridge, drawn again (tc2048.py, ts2068.py and
+# tc2068timeword.py call draw())
 #
-# The two pictures are the same, but for their colours (the TC2048 white
-# on black, the TS2068 black on light grey) and five words under the keys.
-# The frames, lines, keys and block graphics are lines of whole pixels, so
-# they are drawn as they are, of their pixels (their edges on whole pixels
-# at every scale, so sharp); the texts are found on and around each key
+# The pictures are the same, but for their colours (the TC2048 white on
+# black, the TS2068 black on light grey) and five words under the keys; the
+# TimeWord one has the TS2068's colours, the words of TimeWord above and
+# under the keys, and no colour strip or frames.
+# The frames, lines and keys are lines of whole pixels, so they are drawn
+# as they are, of their pixels (their edges on whole pixels at every
+# scale, so sharp); the block graphics are drawn again, of one size with
+# thin frames (Viktor's choice); the texts are found on and around each key
 # and drawn again in TeX Gyre Heros: the words above and under the keys
 # and on the large keys 5 pixels high, those on the keys 4 (as in the
 # original: there is no room for more), all in the font's own spacing.
@@ -48,10 +52,17 @@ ARROWS = [
 ]
 
 
-def draw(name, label, background, under=None):
+def draw(name, label, background, under=None, labels=None, names=NAMES,
+         bottom=((0, 195, 110, 223, 'PERSONAL COLOR COMPUTER', 'cnb', 5),), arrows=0, room=None):
     """The picture <name> (<name>.json, orig/<name>.png): its words above
     and under the keys of the colour label, on background; under: other
-    words under keys ({key: word})"""
+    words under keys ({key: word}); labels: all the words above and under
+    the keys, if not those of the Timex ({key: (above, under)}); names:
+    the colour names of the top strip; bottom: the texts at the bottom
+    left (their part of the picture, the text, its font and cap height in
+    pixels; and True if all the pixels there are the text); arrows: how far right the arrows are of those of the Timex;
+    room: how wide words above or under keys may be ({key: pixels})"""
+    arrow_pts = [[(a + arrows, b) for a, b in pts] for pts in ARROWS]
     p = Picture(os.path.join(HERE, name + '.json'), os.path.join(HERE, 'orig/%s.png' % name),
                 float(sys.argv[2]) if len(sys.argv) > 2 else 2)
     S = p.S
@@ -71,10 +82,15 @@ def draw(name, label, background, under=None):
             legends[first + i] = dict(letter=l, keyword=k, symbol=s, above=a, below=u)
     for k, w in (under or {}).items():
         legends[k]['below'] = w
+    if labels is not None:
+        for k in legends:
+            legends[k]['above'], legends[k]['below'] = labels.get(k, (None, None))
 
     texts = []      # (kind, ids, text)
+    wide = {}       # ids: the room of a word over a key
     new_id = [10000]
     erase = []      # (box, colour): pixels of a text, to take out of the frames
+    graphics = []   # the block graphics, to draw again
 
     def blobs(colour, x0, y0, x1, y1):
         return [w for w in p.words.values() if w['c'] == list(colour)
@@ -134,20 +150,38 @@ def draw(name, label, background, under=None):
             # the digit (next to the block graphic: not one text with it)
             w = region((0, 0, 0), fx + 3, fy, fx + 9, fy + 7)
             add('letter', [w] if w else [], lg['letter'])
+            if k < 8:
+                w = region((0, 0, 0), fx + 8, fy + 5, fx + 17, fy + 11)
+                graphics.append(w)
+                erase.append(((w['x'], w['y'], w['x2'], w['y2']), (0, 0, 0)))
         else:
             add('letter', [w for w in blobs((0, 0, 0), fx, fy, fx + 10, fy + 7) if w['x2'] - w['x'] <= 6],
                 lg['letter'])
             add('keyword', blobs((0, 0, 0), fx, fy + 6, fx + fw, fy + 12), lg['keyword'])
         add('symbol', blobs(BAR, fx, fy, fx + fw, fy + fh), lg['symbol'])
-        add('label', blobs(label, fx - 9, fy - 16, fx + fw + 9, fy - 3), lg['above'])
+        ws = blobs(label, fx - 9, fy - 16, fx + fw + 9, fy - 3)
+        if not ws and lg['above']:
+            # a letter touching the key (the cedilla of the TimeWord's c)
+            w = region(label, fx - 9, fy - 16, fx + fw + 9, fy - 3)
+            ws = [w] if w else []
+        add('label', ws, lg['above'])
+        if ws and k in (room or {}):
+            wide[texts[-1][1]] = room[k]
         add('label', blobs(label, fx - 9, fy + fh + 3, fx + fw + 9, fy + fh + 17), lg['below'])
     # the colour names
     strip = sorted([w for w in p.words.values() if w['y2'] <= 12 and w['c'] != list(background)],
                    key=lambda w: w['x'])
-    for w, t in zip(strip, NAMES):
+    for w, t in zip(strip, names):
         add('label', [w], t)
-    # PERSONAL COLOR COMPUTER
-    add('bottom', blobs(label, 0, 195, 110, 223), 'PERSONAL COLOR COMPUTER')
+    # PERSONAL COLOR COMPUTER (the TimeWord: its name)
+    # (whole: all the pixels of their part, as the thin W of TIMEWORD is
+    # larger than a letter of the analysis)
+    for x0, y0, x1, y1, t, fn, cap, *whole in bottom:
+        if whole:
+            w = region(label, x0, y0, x1, y1)
+            add(('bottom', fn, cap), [w] if w else [], t)
+        else:
+            add(('bottom', fn, cap), blobs(label, x0, y0, x1, y1), t)
 
     # The frames, lines, keys and block graphics: the picture without its
     # texts and arrows, of its pixels
@@ -162,7 +196,7 @@ def draw(name, label, background, under=None):
         inner[0, :] = inner[-1, :] = False
         inner[:, 0] = inner[:, -1] = False
         part[inner] = fill
-    for pts in ARROWS:
+    for pts in arrow_pts:
         xs = [a for a, b in pts]
         ys = [b for a, b in pts]
         part = clean[int(min(ys)):int(np.ceil(max(ys))), int(min(xs)):int(np.ceil(max(xs)))]
@@ -197,9 +231,28 @@ def draw(name, label, background, under=None):
             prev = runs
         p.items.append('<path fill="%s" d="%s"/>' % (hexcol(c), ''.join(
             'M%d %dH%dV%dH%dz' % (E(a), E(b), E(c2), E(d), E(a)) for a, b, c2, d in rects)))
-    for pts in ARROWS:
+    for pts in arrow_pts:
         p.items.append('<polygon fill="%s" points="%s"/>'
                        % (hexcol(label), ' '.join('%g,%g' % (a * S, b * S) for a, b in pts)))
+
+    # The block graphics (Viktor's choice): all of one size (6 pixels of the
+    # original), their frames thin (a pixel at 100%: they were 1 or 2 as
+    # their rows fell), their four quarters of one size, each filled or
+    # empty as in the original, where they were in their keys
+    for w in graphics:
+        fx, fy, fw, fh = p.keys[p.key_of(w)]
+        p.block(w['id'], round(6 * S), max(1, round(S / 1.75)), 1,
+                right=round((fx + fw - w['x2']) * S), top=round((w['y'] - fy) * S))
+
+    def apostrophe(ids):
+        # the apostrophe on 7 (Viktor's choice): a thin slanting line with
+        # round ends, as the original's 2 pixels slanted, 2.4 pixels high
+        # from the top of its box, in its middle
+        X, Y, W, H = p.moved(p.box(ids))
+        cx = X + W / 2
+        p.items.append('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%g" '
+                       'stroke-linecap="round"/>' % (cx + 0.6 * S, Y - 0.2 * S, cx - 0.6 * S, Y + 2.2 * S,
+                                                   hexcol(p.box(ids)['c']), 0.9 * S))
 
     # The texts
     for kind, ids, t in texts:
@@ -210,6 +263,8 @@ def draw(name, label, background, under=None):
                 X, Y, W, H = p.moved(p.box(ids))
                 p.items.append('<line x1="%g" y1="%g" x2="%g" y2="%g" stroke="#000000" stroke-width="%g"/>'
                                % (X + W - 0.4 * S, Y + 0.4 * S, X + 0.4 * S, Y + H - 0.4 * S, 0.9 * S))
+        elif kind == 'symbol' and t == "'":
+            apostrophe(ids)
         elif kind in ('keyword', 'symbol') and (len(t) > 1 and t.isalpha()):
             p.word(ids, t, 'cnb', 4)
         elif kind in ('keyword', 'symbol'):
@@ -229,10 +284,10 @@ def draw(name, label, background, under=None):
                            % (X + 0.4 * S, Y + 0.3 * S, X + W - 0.4 * S, Y + H - 0.3 * S, hexcol(label), 0.9 * S))
         elif kind == 'large':
             p.word(ids, t, 'cnb', 5)
-        elif kind == 'bottom':
-            p.word(ids, t, 'cnb', 5)
-        elif len(t) > 1 and any(ch.isalpha() for ch in t):
-            p.word(ids, t, 'cnb', 5, over=True)
+        elif kind[0] == 'bottom':
+            p.word(ids, t, kind[1], kind[2])
+        elif any(ch.isalpha() for ch in t):
+            p.word(ids, t, 'cnb', 5, over=True, room=wide.get(ids))
         else:
             p.text(ids, t, fonts=('herosb', 'cnb'))
 
