@@ -59,9 +59,11 @@ készült. Magának az EightyOne-nak a változásai a
   billentyűk közepén állnak, a betűk vékonyak maradtak; a blokkgrafikák
   kerete 2 képpont vastag, a negyedeik egyformák, a − + = vonalai egyforma
   vastagok, a : két pontja egyforma, a ; egy ilyen pont és egy vessző, a .
-  gomb vesszője is ilyen, a " olyan, mint a Spectrumon, a / 60 fokos. A +2
-  és a +3 billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A
-  Timex képek keretei és billentyűi pixelre az eredetiek (minden méretben
+  gomb vesszője is ilyen, a " olyan, mint a Spectrumon, a / 60 fokos. A
+  128 képén az 1-es ! jele kicsit vastagabb, a 7-es ' jele kicsit
+  vékonyabb, a @ és a # a betűtípus saját arányaival áll. A +2 és a +3
+  billentyűi olyanok, mint az eredetin, a betűk dőltek maradtak. A Timex
+  képek keretei és billentyűi pixelre az eredetiek (minden méretben
   élesek), a feliratok újra vannak rajzolva; a blokkgrafikák egy méretűek,
   vékony kerettel és egyforma negyedekkel, a 7-es ' jele vékony ferde
   vonal; a TimeWord képén a billentyűk feletti portugál betűk akkorák,

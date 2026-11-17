@@ -60,11 +60,13 @@ itself are in `Release Files/Release history.txt`.
   are 2 pixels thick and their quarters of one size, the lines of − + =
   are as thick as each other, the two dots of : are of one size, ; is such
   a dot and a comma, so is the comma on the full stop, " is as on the
-  Spectrum, and / is at 60 degrees. The +2 and +3 keep their keys as in
-  the original and their slanted letters. The Timex pictures keep their
-  frames and keys pixel for pixel (sharp at every size), their texts are
-  drawn again; their block graphics are of one size, their frames thin and
-  their quarters of one size, and ' on 7 is a thin slanting line; on the
+  Spectrum, and / is at 60 degrees. On the 128 the ! on 1 is a little
+  thicker and the ' on 7 a little thinner, and @ and # are in the
+  proportions of the font. The +2 and +3 keep their keys as in the
+  original and their slanted letters. The Timex pictures keep their frames
+  and keys pixel for pixel (sharp at every size), their texts are drawn
+  again; their block graphics are of one size, their frames thin and their
+  quarters of one size, and ' on 7 is a thin slanting line; on the
   TimeWord picture the Portuguese letters above the keys are of the size
   of the other words. The R470 keeps its blue L-shaped FUNC and ENTER keys
   and its cyan GRAPHICS key. The words of the ZX80 functions are as those

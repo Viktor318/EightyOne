@@ -77,6 +77,13 @@ texts = {
 }
 big = set([44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 95, 96, 97, 98, 99, 100, 101, 102, 103,
            104, 145, 146, 147, 148, 149, 150, 151, 152, 153, 186, 187, 188, 189, 190, 191, 192])
+# The ! a little thicker and the ' a little thinner than their boxes in the
+# original (Viktor's choice): their boxes grown or made smaller at each side,
+# in pixels of the original
+SIGN_PAD = {'!': 0.5, "'": -0.75}
+# The @ and the # of 2 and 3 in the font's own proportions
+NATURAL = {'@': 'herosb', '#': 'herosb'}
+
 # The words: one size and spacing, those of LOCK and BORDR (Heros Bold,
 # capitals 5 pixels high, the font's own spacing); words on one line
 # together
@@ -98,6 +105,14 @@ for ids, t in texts.items():
         p.text(ids, t, fonts=('cn',))
     elif ids in big:
         p.text(ids, t, fonts=('herosb', 'cnb'))
+    elif t in NATURAL and isinstance(ids, int) and ids in (26, 28):
+        # in the font's own proportions, as high as its box, in the middle of it (Viktor's choice: they
+        # were squeezed or stretched to the boxes of the original)
+        p.text(ids, t, fonts=(NATURAL[t],), natural='centre')
+    elif t in SIGN_PAD:
+        # a little wider or narrower than its box in the original (Viktor's choice)
+        a = SIGN_PAD[t] * S
+        p.text(ids, t, pad=(a, 0, a, 0))
     else:
         p.text(ids, t)
 
