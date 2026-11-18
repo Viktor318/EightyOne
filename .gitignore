@@ -13,3 +13,6 @@ NV_MEMORY/
 Components/
 Output Files/
 Source/KBPics?.res
+
+# Claude munkamappa (segedfajlok, nem a projekt resze)
+/Claude outputs/
