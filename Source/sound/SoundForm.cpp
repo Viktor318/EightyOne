@@ -538,6 +538,10 @@ void TMidiForm::ShowOutput(void)
 
         if (OutputLabel->Caption != text) OutputLabel->Caption = text;
 
+        // The mute boxes as wide as their captions (their length depends on
+        // the language)
+        PlaceMutes(false);
+
         // The list just after the caption (its length depends on the
         // language), the text after it up to the OK button
         int left = OutputCaption->Left + OutputCaption->Width + 8;
@@ -619,6 +623,30 @@ void TMidiForm::PlaceAYChannels(void)
                 PlaceLabel[column]->Caption = mode == AY_STEREO_MONO ?
                         AnsiString("") : Tr(placeNames[column]);
         }
+        PlaceMutes(true);
+}
+
+// The mute boxes: as wide as their box and caption (at most a column), in
+// the middle of their columns, under their percents; again only if the
+// caption changed (the language), or if always
+void TMidiForm::PlaceMutes(bool always)
+{
+        Graphics::TBitmap *b;
+        bool all = true;
+        int i, w;
+
+        if (!Mute[0] || (!always && Mute[0]->Caption == MutesPlaced)) return;
+        b = new Graphics::TBitmap();
+        b->Canvas->Font = Mute[0]->Font;
+        w = 20 + b->Canvas->TextWidth(Mute[0]->Caption);
+        delete b;
+        if (w > COLUMN_W) w = COLUMN_W;
+        for (i=0; i<VOLUME_METERS; i++)
+                if (Mute[i] && Percent[i])
+                        Mute[i]->SetBounds(Percent[i]->Left + (COLUMN_W - w) / 2, ROW_MUTE, w, 18);
+                else
+                        all = false;
+        if (all) MutesPlaced = Mute[0]->Caption;
 }
 
 void TMidiForm::ShowPercent(int index)

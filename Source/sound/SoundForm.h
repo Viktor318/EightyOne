@@ -117,6 +117,7 @@ private:	// User declarations
         TFader *Fader[VOLUME_METERS];
         TLabel *Percent[VOLUME_METERS];
         TCheckBox *Mute[VOLUME_METERS];
+        AnsiString MutesPlaced;
         double Level[VOLUME_METERS];
 
         TGroupBox *MainGroup, *AYGroup, *BeeperGroup, *SpeechGroup, *SpecDrumGroup;
@@ -134,6 +135,7 @@ private:	// User declarations
         TGroupBox *CreateSection(int left, int columns, const char *caption);
         void CreateColumn(TGroupBox *section, int column, int index, bool scale);
         void PlaceAYChannels(void);
+        void PlaceMutes(bool always);
         void ShowPercent(int index);
         void ApplySettings(void);
         void ShowOutput(void);

@@ -1732,7 +1732,7 @@ object Dbg: TDbg
       Width = 88
       Height = 18
       Hint = 'Enable history capture'
-      Caption = 'Enable'
+      Caption = 'Enabled'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -12

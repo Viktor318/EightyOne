@@ -73,7 +73,7 @@ form	BasicLoaderOptions_.dfm	Attempt to tokenise string contents	Szövegek tarta
 form	BasicLoaderOptions_.dfm	Discard surplus spaces	Felesleges szóközök elhagyása
 form	BasicLoaderOptions_.dfm	Accept alternate keyword spellings	Kulcsszavak más írásmódjának elfogadása
 form	BasicLoaderOptions_.dfm	Accept ZxToken format extensions	ZxToken formátumbővítések elfogadása
-form	Debug.dfm	Debug Window	Hibakereső ablak
+form	Debug.dfm	Debug Window	Hibakereső
 form	Debug.dfm	Interrupts:	Megszakítások:
 form	Debug.dfm	Disabled	Kikapcsolva
 form	Debug.dfm	Halt:	HALT:
@@ -100,7 +100,7 @@ form	Debug.dfm	Jupiter Ace Forth Stack	Jupiter Ace Forth-verem
 form	Debug.dfm main_.dfm	Control	Vezérlés
 form	Debug.dfm	Step	Lépés
 form	Debug.dfm	Over	Átlépés
-form	Debug.dfm TZXMan.dfm wavload_.dfm	Stop	Megállítás
+form	Debug.dfm TZXMan.dfm wavload_.dfm	Stop	Leállítás
 form	Debug.dfm	Continuous	Folyamatos
 form	Debug.dfm	Skip NMI	NMI átugrása
 form	Debug.dfm	Skip INT	INT átugrása
@@ -316,7 +316,7 @@ form	SerialPort.dfm	Listen on port:	Figyelés a porton:
 form	SerialPort.dfm	All Files (*.*)	Minden fájl (*.*)
 form	Speed_.dfm	Speed	Sebesség
 form	Speed_.dfm	Speed:	Sebesség:
-form	Speed_.dfm	Enable Frame Skip	Képkockák kihagyása
+form	Speed_.dfm	Enable Frame Skip	Képkocka-kihagyás
 form	SymBrowse.dfm	Symbol Browser	Szimbólumböngésző
 form	ZipFile_.dfm	Please Select:	Válasszon:
 form	kb_.dfm	Cursor keys:	Kurzorbillentyűk:
@@ -422,7 +422,7 @@ form	main_.dfm	Speed...	Sebesség...
 form	main_.dfm	TV Emulation...	TV-emuláció...
 form	main_.dfm	Tools	Eszközök
 form	main_.dfm	Live Memory View...	Élő memórianézet...
-form	main_.dfm	Debug Window...	Hibakereső ablak...
+form	main_.dfm	Debug Window...	Hibakereső...
 form	main_.dfm	ZX Printer Output...	ZX Printer kimenete...
 form	main_.dfm	Sound Output...	Hangkimenet...
 form	main_.dfm	Tape Manager...	Kazettakezelő...
@@ -470,7 +470,7 @@ form	midifrm.dfm SoundForm.dfm	Sound Settings	Hangbeállítások
 form	midifrm.dfm SoundForm.dfm	Send MIDI Output to:	MIDI kimenet ide:
 form	midifrm.dfm	Volume	Hangerő
 form	midifrm.dfm SoundForm.dfm	AY Channel	AY csatorna
-form	midifrm.dfm SoundForm.cpp	Mute	Néma
+form	midifrm.dfm SoundForm.cpp	Mute	Némítás
 form	SoundForm.dfm	Mix	Keverés
 form	SoundForm.dfm	=   Mute	=   némítás
 form	SoundForm.dfm	Stereo Mode	Sztereó mód
@@ -490,7 +490,7 @@ form	TZXMan.dfm	Rewind to Previous Block	Visszatekerés az előző blokkra
 form	TZXMan.dfm wavload_.dfm	Play	Lejátszás
 form	TZXMan.dfm	Fast Forward to Next Block	Előretekerés a következő blokkra
 form	TZXMan.dfm wavload_.dfm	Fast Forward to End	Előretekerés a végére
-form	TZXMan.dfm wavload_.dfm	Auto Start/Stop	Automatikus indítás/megállítás
+form	TZXMan.dfm wavload_.dfm	Auto Start/Stop	Automatikus indítás/leállítás
 form	TZXMan.dfm wavload_.dfm	Auto LOAD on Insert	Automatikus LOAD behelyezéskor
 form	TZXMan.dfm	Flash Load	Gyorstöltés
 form	TZXMan.dfm	Open Tape File	Kazettafájl megnyitása
@@ -605,7 +605,7 @@ code	zx81BasicLoader.cpp	Invalid character: {0}	Érvénytelen karakter: {0}
 code	Debug.cpp	On	Be
 code	Debug.cpp	Off	Ki
 code	Debug.cpp	Black	Fekete
-code	Debug.cpp	Enabled	Bekapcsolva
+code	Debug.cpp Debug.dfm	Enabled	Bekapcsolva
 code	Debug.cpp	Run	Futtatás
 code	Debug.cpp	ZXC1 Cartridge	ZXC1 kártya
 code	ProfilePlot_.cpp	Profiler - {0}	Profilozó – {0}
@@ -700,7 +700,7 @@ code	memoryWindow.cpp	{0} Change	{0} változás
 code	SoundDX.cpp; SoundWASAPI.cpp	Message Sending Error	Üzenetküldési hiba
 code	SoundForm.cpp	Video	Videó
 code	TZXFILE.cpp	Code	Kód
-code	TZXFILE.cpp	--- Stop The Tape ---	--- Kazetta megállítása ---
+code	TZXFILE.cpp	--- Stop The Tape ---	--- Kazetta leállítása ---
 code	TZXMan.cpp	Description	Leírás
 code	TZXMan.cpp	Size	Méret
 code	TZXMan.cpp	{0} - Tape	{0} – Kazetta
@@ -714,7 +714,7 @@ code	tzxEditText.cpp	Edit Group Start Block	Csoportkezdő blokk szerkesztése
 code	tzxload.cpp	The start of the program data could not be found.	A programadatok eleje nem található.
 code	tzxload.cpp	File integrity error	Sérült fájl
 code	tzxload.cpp	File size warning	Fájlméret-figyelmeztetés
-code	wavload_.cpp	Stopped	Megállítva
+code	wavload_.cpp	Stopped	Leállítva
 code	wavload_.cpp	Wave Loader - {0}	Hangfájl-betöltő – {0}
 code	wavload_.cpp	Untitled - Wave	Névtelen – Hang
 code	wavload_.cpp	{0} - Wave	{0} – Hang
@@ -785,7 +785,7 @@ code	TZXFILE.cpp	CSW Recording	CSW felvétel
 code	TZXFILE.cpp	General Data	Általános adat
 code	TZXFILE.cpp	Jump to Block	Ugrás blokkra
 code	TZXFILE.cpp	Select Block	Blokkválasztás
-code	TZXFILE.cpp	Stop Tape	Kazetta megállítása
+code	TZXFILE.cpp	Stop Tape	Kazetta leállítása
 code	TZXFILE.cpp	Set Level	Jelszint beállítása
 code	TZXFILE.cpp	Archive info	Archív információ
 code	TZXFILE.cpp	Hardware Type	Hardvertípus

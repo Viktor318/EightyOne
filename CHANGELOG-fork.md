@@ -134,6 +134,17 @@ itself are in `Release Files/Release history.txt`.
   200%, 300%, 400%) too; until now only *User Defined* had it, as in
   EightyOne. The maximize button stays with *User Defined* only.
 
+### Hungarian translation
+
+- Words as in the glossary shared by the Hungarian forks (Fuse, ZEsarUX,
+  EightyOne, ZXTune): Stop is *Leállítás* (*Leállítva*, *Kazetta
+  leállítása*, *Automatikus indítás/leállítás*), the mute boxes of the
+  Sound window *Némítás*, Enable Frame Skip *Képkocka-kihagyás*, the Debug
+  Window *Hibakereső*. The history box of the Debug window says *Enabled*
+  (*Bekapcsolva*), a state; the *Enable* command of the breakpoint menu
+  stays *Bekapcsolás*. The mute boxes of the Sound window are as wide as
+  their captions, in the middle of their columns (*Némítás* was cut).
+
 ### Fixes
 
 - A floppy disk image dragged onto the window goes into drive A; the file

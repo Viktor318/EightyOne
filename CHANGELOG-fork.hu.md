@@ -138,6 +138,17 @@ készült. Magának az EightyOne-nak a változásai a
   Defined* méretnél volt. A teljes méret gomb továbbra is csak a *User
   Defined* méretnél van.
 
+### Magyar fordítás
+
+- A szavak a magyar forkok (Fuse, ZEsarUX, EightyOne, ZXTune) közös
+  szójegyzéke szerint: a Stop *Leállítás* (*Leállítva*, *Kazetta
+  leállítása*, *Automatikus indítás/leállítás*), a Hangbeállítások
+  némítómezői *Némítás*, az Enable Frame Skip *Képkocka-kihagyás*, a
+  Debug Window *Hibakereső*. A Hibakereső Előzmények mezője angolul
+  *Enabled* (*Bekapcsolva*), mert állapot; a töréspontmenü *Enable*
+  parancsa *Bekapcsolás* maradt. A Hangbeállítások némítómezői olyan
+  szélesek, mint a feliratuk, az oszlopuk közepén (a *Némítás* levágódott).
+
 ### Javítások
 
 - Az ablakra húzott hajlékonylemez-kép az A meghajtóba kerül; eddig
