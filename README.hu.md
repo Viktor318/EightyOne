@@ -22,7 +22,7 @@ vannak (angolul).
 ## Letöltés
 
 A [Releases](https://github.com/Viktor318/EightyOne/releases) oldalról
-töltsd le az `EightyOne-1.41-hu.2-windows.zip` fájlt, csomagold ki egy
+töltsd le az `EightyOne-1.41-hu.3-windows.zip` fájlt, csomagold ki egy
 tetszőleges mappába, és indítsd el az `EightyOne.exe`-t. Telepíteni nem kell
 semmit. A `ROMs` és a `ROM Cartridges` mappának a program mellett kell
 maradnia.
@@ -67,6 +67,11 @@ maradnia.
 - **Billentyűismétlés ZX80/81-en** (alapból kikapcsolva): a 0,7 másodpercig
   nyomva tartott billentyű másodpercenként kb. 8-szor ismétlődik, amit a
   ZX80 és a ZX81 ROM-ja nem tud.
+- **A Spectrum 128 numerikus billentyűzete a PC szerkesztőbillentyűivel**
+  (csatlakoztatott keypad mellett), ahogy a Fuse-kiadásban: Home / End,
+  Ctrl + Home / End, Ctrl + nyilak (szavak), Page Up / Down, Delete, és
+  törlés a sor vagy a szó elejéig, végéig Shift vagy Ctrl + Backspace /
+  Delete billentyűvel.
 
 ### Hang
 
@@ -96,10 +101,14 @@ maradnia.
   nagyítható (75%-tól 200%-ig, először 100%; a méret a címsorában
   látszik); a Spectrum 16K, 48K, 128, +2 és +3 billentyűzete, a 128
   numerikus billentyűzete, a ZX81 billentyűzete (a ZXpand-os, a TS1000 és
-  a ZX97 változattal együtt) a ZX80 billentyűzete (a ZXpand-ossal együtt)
-  a Timex TC2048, TS2068 és TS1500, valamint a Jupiter Ace, a Lambda 8300,
-  a TK85 és a Ringo R470 billentyűzete újra van rajzolva, minden méretben
-  éles.
+  a ZX97 változattal együtt), a ZX80 billentyűzete (a ZXpand-ossal együtt)
+  és funkcióablaka, a Timex TC2048, TS2068 (a TimeWord kazettás TC2068-cal
+  együtt) és TS1500, valamint a Jupiter Ace, a Lambda 8300, a TK85 és a
+  Ringo R470 billentyűzete újra van rajzolva, minden méretben éles; a
+  program kisebb lett (5,8 MB, eddig 18 MB).
+- **Fájl > Legutóbbi fájlok**: az utoljára megnyitott 10 fájl, ahogy a
+  Fuse-kiadásban.
+- A főablaknak a nagyításoknál is van kis méret (minimalizáló) gombja.
 - **ZX Printer**: dupla kattintásra két- vagy háromszoros méret; a
   nyomat PNG-ben (vagy BMP-ben) menthető. A **Fájl > Képernyőkép mentése**
   is ment PNG-t.

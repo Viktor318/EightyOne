@@ -7,7 +7,7 @@ Changes of this fork on top of EightyOne 1.41: the source of
 of 1 April 2025, a little after the 1.41 release. The changes of EightyOne
 itself are in `Release Files/Release history.txt`.
 
-## Not released yet
+## v1.41-hu.3 – 2026-11-18
 
 ### Keyboard pictures
 

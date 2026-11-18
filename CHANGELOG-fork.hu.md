@@ -8,7 +8,7 @@ Ennek a változatnak a módosításai az EightyOne 1.41-hez képest: a
 készült. Magának az EightyOne-nak a változásai a
 `Release Files/Release history.txt` fájlban vannak (angolul).
 
-## Még nincs kiadva
+## v1.41-hu.3 – 2026-11-18
 
 ### Billentyűzetképek
 

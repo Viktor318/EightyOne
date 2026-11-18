@@ -19,7 +19,7 @@ those of EightyOne itself (1.42 included) in
 
 ## Download
 
-Download `EightyOne-1.41-hu.2-windows.zip` from the
+Download `EightyOne-1.41-hu.3-windows.zip` from the
 [Releases](https://github.com/Viktor318/EightyOne/releases) page, unpack it
 into a folder of your choice and start `EightyOne.exe`. Nothing has to be
 installed. The `ROMs` and `ROM Cartridges` folders must stay next to the
@@ -64,6 +64,10 @@ program.
   DELETE...).
 - **Key repeat on ZX80/81** (off by default): a key held for 0.7 s repeats
   about 8 times a second, which the ZX80 and ZX81 ROMs don't do.
+- **Spectrum 128 keypad with the PC editing keys** (with the keypad
+  connected), as in the Fuse edition: Home / End, Ctrl + Home / End,
+  Ctrl + arrows (words), Page Up / Down, Delete, and deleting to the start
+  or end of the line or word with Shift or Ctrl + Backspace / Delete.
 
 ### Sound
 
@@ -90,10 +94,14 @@ program.
 - **Help > Keyboard Map** can be enlarged in steps (75% to 200%, 100% the
   first; the size is shown in its title) with a double click; the Spectrum
   16K, 48K, 128, +2 and +3 keyboards, the 128 keypad and the ZX81 keyboard
-  (with its ZXpand, TS1000 and ZX97 forms) the ZX80 keyboard (with the
-  ZXpand) the Timex TC2048, TS2068 and TS1500 keyboards and the Jupiter
-  Ace, Lambda 8300, TK85 and Ringo R470 keyboards are drawn again, sharp
-  at every size.
+  (with its ZXpand, TS1000 and ZX97 forms), the ZX80 keyboard (with the
+  ZXpand) and its functions window, the Timex TC2048, TS2068 (also the
+  TC2068 with TimeWord) and TS1500 keyboards and the Jupiter Ace, Lambda
+  8300, TK85 and Ringo R470 keyboards are drawn again, sharp at every
+  size; the program is smaller (5.8 MB, it was 18 MB).
+- **File > Recent Files**: the last 10 files opened, as in the Fuse
+  edition.
+- The main window has its minimize button with the zoom sizes too.
 - **ZX Printer**: double click for double or triple size; the printout is
   saved as PNG (or BMP). **File > Save Screenshot** saves PNG too.
 
